@@ -1,0 +1,1001 @@
+{
+  "schema_version": "company-memo-pilot-result-v1",
+  "company": {
+    "name": "Coherent",
+    "ticker": "COHR"
+  },
+  "memo": {
+    "business_and_economics": {
+      "summary": "The business is a vertically integrated photonics manufacturer spanning engineered materials, semiconductor devices, lasers, optical components, transceivers, subsystems, instruments, and complete systems. Beginning in fiscal 2026, it reports two segments: Datacenter and Communications and Industrial. Economics depend on customer qualifications and design wins, optical-speed transitions, manufacturing yield and utilization, product mix, and cyclical capital spending. For the quarter ended March 31, 2026, management attributed growth to strong datacenter and communications demand and continued expanding capacity.",
+      "revenue_engines": [
+        {
+          "engine": "AI-datacenter optical interconnects and switching",
+          "who_pays": "Cloud and hyperscale operators, accelerator and networking platform providers, switch and system OEMs, and transceiver customers, either directly or through equipment supply chains.",
+          "economic_logic": "Revenue is driven by optical link count, port speed, module and component content, and architecture. Accelerator-cluster growth and transitions from 800G toward 1.6T, 3.2T, co-packaged optics, and optical circuit switching can raise shipment volume and product content, subject to qualification timing and price erosion.",
+          "sources": [
+            {
+              "url": "https://www.coherent.com/content/dam/coherent/site/en/documents/investors/annual-filings/2025/coherent-annual-report-2025.pdf",
+              "claim_date": "2025-08-15"
+            },
+            {
+              "url": "https://www.coherent.com/news/press-releases/2025-analyst-investor-day",
+              "claim_date": "2025-05-28"
+            },
+            {
+              "url": "https://www.coherent.com/news/press-releases/coherent-ai-scale-optical-innovations-ofc-2026",
+              "claim_date": "2026-03-17"
+            }
+          ]
+        },
+        {
+          "engine": "Telecom and datacenter-interconnect transport",
+          "who_pays": "Telecommunications carriers, cloud operators, network equipment manufacturers, and optical transport system vendors.",
+          "economic_logic": "Sales of coherent optics, lasers, components, modules, and transport subsystems depend on carrier and cloud network investment, bandwidth upgrades, replacement cycles, customer inventory, and the company's share of each equipment platform.",
+          "sources": [
+            {
+              "url": "https://www.coherent.com/content/dam/coherent/site/en/documents/investors/annual-filings/2025/coherent-annual-report-2025.pdf",
+              "claim_date": "2025-08-15"
+            },
+            {
+              "url": "https://www.coherent.com/news/press-releases/2025-analyst-investor-day",
+              "claim_date": "2025-05-28"
+            }
+          ]
+        },
+        {
+          "engine": "Industrial photonics, materials, and instrumentation",
+          "who_pays": "Semiconductor and display equipment manufacturers, precision-manufacturing customers, instrumentation and health-science OEMs, and automotive and energy customers.",
+          "economic_logic": "Revenue follows equipment production, factory investment, replacement and service requirements, and photonics content per tool. Industrial cycles diversify the business but can offset or amplify datacenter growth depending on end-market conditions.",
+          "sources": [
+            {
+              "url": "https://www.coherent.com/content/dam/coherent/site/en/documents/investors/annual-filings/2025/coherent-annual-report-2025.pdf",
+              "claim_date": "2025-08-15"
+            },
+            {
+              "url": "https://www.coherent.com/news/press-releases/2025-analyst-investor-day",
+              "claim_date": "2025-05-28"
+            }
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "url": "https://www.coherent.com/content/dam/coherent/site/en/documents/investors/annual-filings/2025/coherent-annual-report-2025.pdf",
+          "claim_date": "2025-08-15"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/820318/000082031826000013/iivi-20260331.htm",
+          "claim_date": "2026-05-06"
+        },
+        {
+          "url": "https://www.coherent.com/news/press-releases/third-quarter-fiscal-year-2026-results",
+          "claim_date": "2026-05-06"
+        }
+      ]
+    },
+    "operating_and_financial_drivers": [
+      {
+        "driver": "Optical link count and data-rate transitions",
+        "why_it_matters": "Larger AI clusters and faster switch ASICs can increase the number and speed of optical connections. Timely transitions among 800G, 1.6T, 3.2T, and later platforms determine unit volume, average selling price, and whether new products replace or add to legacy revenue.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "pricing",
+          "product_mix",
+          "gross_margin"
+        ],
+        "sources": [
+          {
+            "url": "https://www.coherent.com/news/press-releases/2025-analyst-investor-day",
+            "claim_date": "2025-05-28"
+          },
+          {
+            "url": "https://www.coherent.com/news/press-releases/coherent-ai-scale-optical-innovations-ofc-2026",
+            "claim_date": "2026-03-17"
+          },
+          {
+            "url": "https://www.coherent.com/news/press-releases/third-quarter-fiscal-year-2026-results",
+            "claim_date": "2026-05-06"
+          }
+        ]
+      },
+      {
+        "driver": "Architecture and product-content mix",
+        "why_it_matters": "Pluggable modules, co-packaged optics, optical circuit switches, and scale-across transport allocate value differently among lasers, photonic integrated circuits, packaging, modules, and complete systems. Aggregate bandwidth growth does not guarantee stable supplier content or margins.",
+        "financial_lines": [
+          "revenue",
+          "pricing",
+          "product_mix",
+          "gross_margin",
+          "operating_cost",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.coherent.com/news/press-releases/coherent-ai-scale-optical-innovations-ofc-2026",
+            "claim_date": "2026-03-17"
+          },
+          {
+            "url": "https://www.coherent.com/news/press-releases/optical-circuit-switch-for-data-centers-live-demo-at-ofc-2024-based-on-ultrareliable-dlx-technology",
+            "claim_date": "2024-03-25"
+          },
+          {
+            "url": "https://www.coherent.com/news/press-releases/nvidia-and-coherent-announce-strategic-partnership",
+            "claim_date": "2026-03-02"
+          }
+        ]
+      },
+      {
+        "driver": "Photonics capacity, manufacturing yield, and utilization",
+        "why_it_matters": "InP wafers, laser devices, silicon photonics, and module assembly require specialized capacity and qualification. Larger wafers and higher yields can reduce unit cost, while late ramps, low yields, or underutilized capacity can pressure gross margin, inventory, and cash flow.",
+        "financial_lines": [
+          "volume",
+          "gross_margin",
+          "operating_cost",
+          "capital_expenditure",
+          "working_capital",
+          "cash_flow",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.coherent.com/news/press-releases/worlds-first-6-inch-inp-scalable-wafer-fabs-paving-the-way-for-the-next-generation-of-lasers-for-ai-transceivers-and-6g-wireless-networks",
+            "claim_date": "2024-03-25"
+          },
+          {
+            "url": "https://www.coherent.com/news/press-releases/a-chip-letter-of-intent-for-50m-to-expand-world-leading-manufacturing-facility-for-ai-infrastructure",
+            "claim_date": "2026-06-16"
+          },
+          {
+            "url": "https://www.coherent.com/news/press-releases/third-quarter-fiscal-year-2026-results",
+            "claim_date": "2026-05-06"
+          }
+        ]
+      },
+      {
+        "driver": "Customer commitments, qualifications, and concentration",
+        "why_it_matters": "Long-term agreements and platform qualifications can improve demand visibility and capacity utilization, but large-customer exposure increases sensitivity to roadmap changes, order rescheduling, bargaining power, and customer internalization. The NVIDIA agreement is nonexclusive despite its purchase commitment and capacity rights.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "pricing",
+          "working_capital",
+          "cash_flow",
+          "balance_sheet",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.coherent.com/news/press-releases/nvidia-and-coherent-announce-strategic-partnership",
+            "claim_date": "2026-03-02"
+          },
+          {
+            "url": "https://nvidianews.nvidia.com/news/nvidia-and-coherent-announce-strategic-partnership-to-develop-optics-technology-to-scale-next-generation-data-center-architecture",
+            "claim_date": "2026-03-02"
+          },
+          {
+            "url": "https://www.coherent.com/content/dam/coherent/site/en/documents/investors/annual-filings/2025/coherent-annual-report-2025.pdf",
+            "claim_date": "2025-08-15"
+          }
+        ]
+      },
+      {
+        "driver": "Industrial and telecom cycles plus portfolio mix",
+        "why_it_matters": "Datacenter growth can be diluted by weaker carrier, industrial-laser, instrumentation, or electronics demand. Divesting lower-priority businesses changes comparisons and can improve focus, margins, and leverage, but also removes diversification and revenue.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "product_mix",
+          "gross_margin",
+          "operating_cost",
+          "cash_flow",
+          "balance_sheet",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.coherent.com/content/dam/coherent/site/en/documents/investors/annual-filings/2025/coherent-annual-report-2025.pdf",
+            "claim_date": "2025-08-15"
+          },
+          {
+            "url": "https://www.coherent.com/news/press-releases/coherent-announces-agreement-to-sell-aerospace-and-defense-business-to-advent",
+            "claim_date": "2025-08-13"
+          },
+          {
+            "url": "https://www.coherent.com/news/press-releases/coherent-announces-agreement-to-sell-mMaterials-processing-tools-product-division-to-bystronic",
+            "claim_date": "2025-10-31"
+          }
+        ]
+      }
+    ],
+    "ecosystem": [
+      {
+        "relationship": "customer_or_end_market",
+        "entities_or_group": "Hyperscale and cloud operators, networking and optical-transport OEMs, telecommunications carriers, semiconductor-equipment manufacturers, and other industrial OEMs",
+        "why_it_matters": "Their capital spending, architecture choices, qualification schedules, and inventory policies determine shipment volume and product mix. Demand can be strong in AI datacenters while telecom or industrial markets remain cyclical.",
+        "sources": [
+          {
+            "url": "https://www.coherent.com/content/dam/coherent/site/en/documents/investors/annual-filings/2025/coherent-annual-report-2025.pdf",
+            "claim_date": "2025-08-15"
+          },
+          {
+            "url": "https://www.coherent.com/news/press-releases/2025-analyst-investor-day",
+            "claim_date": "2025-05-28"
+          }
+        ]
+      },
+      {
+        "relationship": "partner",
+        "entities_or_group": "NVIDIA",
+        "why_it_matters": "A multiyear, nonexclusive agreement includes a multibillion-dollar purchase commitment, future capacity rights, broader product access, and a $2 billion investment supporting R&D, capacity, operations, and U.S. manufacturing. It strengthens demand visibility but increases roadmap and counterparty dependence.",
+        "sources": [
+          {
+            "url": "https://www.coherent.com/news/press-releases/nvidia-and-coherent-announce-strategic-partnership",
+            "claim_date": "2026-03-02"
+          },
+          {
+            "url": "https://nvidianews.nvidia.com/news/nvidia-and-coherent-announce-strategic-partnership-to-develop-optics-technology-to-scale-next-generation-data-center-architecture",
+            "claim_date": "2026-03-02"
+          }
+        ]
+      },
+      {
+        "relationship": "competitor",
+        "entities_or_group": "Merchant optical-component and transceiver vendors, vertically integrated network-equipment suppliers, and customer in-house photonics programs",
+        "why_it_matters": "Competition affects design-win share, pricing, technology selection, and whether value remains in merchant components and pluggable modules or shifts into integrated systems and customer-owned designs.",
+        "sources": [
+          {
+            "url": "https://www.coherent.com/content/dam/coherent/site/en/documents/investors/annual-filings/2025/coherent-annual-report-2025.pdf",
+            "claim_date": "2025-08-15"
+          }
+        ]
+      },
+      {
+        "relationship": "infrastructure_dependency",
+        "entities_or_group": "Switch-ASIC roadmaps, optical DSP and semiconductor partners, foundries and packaging ecosystems, fiber infrastructure, and Ethernet/OIF interoperability standards",
+        "why_it_matters": "New optical products must match electrical interfaces, packaging, thermal limits, and standards. Delays or incompatible roadmaps can defer revenue even when aggregate AI bandwidth demand is strong.",
+        "sources": [
+          {
+            "url": "https://www.coherent.com/news/press-releases/coherent-ai-scale-optical-innovations-ofc-2026",
+            "claim_date": "2026-03-17"
+          },
+          {
+            "url": "https://www.coherent.com/content/dam/coherent/site/en/documents/investors/annual-filings/2025/coherent-annual-report-2025.pdf",
+            "claim_date": "2025-08-15"
+          }
+        ]
+      },
+      {
+        "relationship": "regulatory_dependency",
+        "entities_or_group": "U.S. Department of Commerce CHIPS programs, state and local incentive authorities, and applicable trade and export-control regimes",
+        "why_it_matters": "Incentives can improve domestic-capacity economics, while export controls, tariffs, and trade restrictions can affect customers, supply chains, manufacturing locations, and compliance costs. The proposed Sherman award remains subject to definitive terms and project execution.",
+        "sources": [
+          {
+            "url": "https://www.coherent.com/news/press-releases/a-chip-letter-of-intent-for-50m-to-expand-world-leading-manufacturing-facility-for-ai-infrastructure",
+            "claim_date": "2026-06-16"
+          },
+          {
+            "url": "https://www.coherent.com/content/dam/coherent/site/en/documents/investors/annual-filings/2025/coherent-annual-report-2025.pdf",
+            "claim_date": "2025-08-15"
+          }
+        ]
+      }
+    ],
+    "strategy_and_committed_actions": [
+      {
+        "action": "Expand advanced-optics capacity, including the 6-inch InP platform and the Sherman, Texas manufacturing site, using internal capital, the NVIDIA investment, and proposed public incentives.",
+        "investment_relevance": "The Sherman plan would double production space and quadruple wafer capacity. Successful execution could unlock AI-optics revenue and lower unit costs; weak yields, late qualifications, or demand below committed capacity would turn the expansion into a margin and cash-flow risk.",
+        "sources": [
+          {
+            "url": "https://www.coherent.com/news/press-releases/nvidia-and-coherent-announce-strategic-partnership",
+            "claim_date": "2026-03-02"
+          },
+          {
+            "url": "https://www.coherent.com/news/press-releases/a-chip-letter-of-intent-for-50m-to-expand-world-leading-manufacturing-facility-for-ai-infrastructure",
+            "claim_date": "2026-06-16"
+          },
+          {
+            "url": "https://www.coherent.com/news/press-releases/worlds-first-6-inch-inp-scalable-wafer-fabs-paving-the-way-for-the-next-generation-of-lasers-for-ai-transceivers-and-6g-wireless-networks",
+            "claim_date": "2024-03-25"
+          }
+        ]
+      },
+      {
+        "action": "Maintain a multi-technology roadmap spanning pluggable transceivers, InP and silicon-photonics components, co-packaged optics, optical circuit switches, and scale-across transport.",
+        "investment_relevance": "Architecture flexibility reduces dependence on a single technical outcome, but requires sustained R&D and qualification spending. Value creation depends on converting demonstrations into production wins at attractive content and margins.",
+        "sources": [
+          {
+            "url": "https://www.coherent.com/news/press-releases/2025-analyst-investor-day",
+            "claim_date": "2025-05-28"
+          },
+          {
+            "url": "https://www.coherent.com/news/press-releases/coherent-ai-scale-optical-innovations-ofc-2026",
+            "claim_date": "2026-03-17"
+          },
+          {
+            "url": "https://www.coherent.com/news/press-releases/optical-circuit-switch-for-data-centers-live-demo-at-ofc-2024-based-on-ultrareliable-dlx-technology",
+            "claim_date": "2024-03-25"
+          }
+        ]
+      },
+      {
+        "action": "Concentrate capital on core growth markets and reduce debt through portfolio divestitures.",
+        "investment_relevance": "The announced sales of Aerospace and Defense and the materials-processing tools division simplify the portfolio and direct capital toward datacenter, communications, and selected industrial opportunities. Analysts must use pro forma comparisons and test whether improved focus outweighs lost diversification.",
+        "sources": [
+          {
+            "url": "https://www.coherent.com/news/press-releases/coherent-announces-agreement-to-sell-aerospace-and-defense-business-to-advent",
+            "claim_date": "2025-08-13"
+          },
+          {
+            "url": "https://www.coherent.com/news/press-releases/coherent-announces-agreement-to-sell-mMaterials-processing-tools-product-division-to-bystronic",
+            "claim_date": "2025-10-31"
+          }
+        ]
+      },
+      {
+        "action": "Prioritize profitable revenue growth, gross-margin expansion, disciplined investment, and segment accountability.",
+        "investment_relevance": "Management's financial strategy makes mix, yield, operating leverage, and capital productivity as important as headline datacenter revenue. Strong demand that requires disproportionate capex or fails to improve margin would weaken the quality of growth.",
+        "sources": [
+          {
+            "url": "https://www.coherent.com/news/press-releases/2025-analyst-investor-day",
+            "claim_date": "2025-05-28"
+          },
+          {
+            "url": "https://www.coherent.com/news/press-releases/third-quarter-fiscal-year-2026-results",
+            "claim_date": "2026-05-06"
+          },
+          {
+            "url": "https://www.coherent.com/content/dam/coherent/site/en/documents/investors/annual-filings/2025/coherent-annual-report-2025.pdf",
+            "claim_date": "2025-08-15"
+          }
+        ]
+      }
+    ],
+    "frontier_ai_transmission_paths": [
+      {
+        "development": "Frontier models, multimodal systems, and agentic workloads drive larger accelerator clusters and more east-west network traffic.",
+        "company_exposure": "The portfolio includes optical transceivers and underlying InP, silicon-photonics, VCSEL, detector, laser, and transport technologies used across scale-up, scale-out, and scale-across networks.",
+        "affected_driver": "Optical link count, port speed, 800G-to-1.6T-to-3.2T mix, and manufacturing utilization.",
+        "financial_consequence": "Higher shipments and richer product mix could increase revenue and gross profit, although capacity additions can raise capital expenditure and working capital before revenue is recognized.",
+        "direction": "upside",
+        "materiality_condition": "Cluster deployments must translate into optical-bandwidth and link growth faster than price erosion, and qualified capacity must ramp at commercially acceptable yields.",
+        "time_horizon": "near_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Datacenter and Communications revenue and orders",
+          "800G, 1.6T, and 3.2T production mix",
+          "Capacity utilization, lead times, and backlog conversion",
+          "Gross margin versus capital expenditure and inventory"
+        ],
+        "sources": [
+          {
+            "url": "https://www.coherent.com/news/press-releases/third-quarter-fiscal-year-2026-results",
+            "claim_date": "2026-05-06"
+          },
+          {
+            "url": "https://www.coherent.com/news/press-releases/coherent-ai-scale-optical-innovations-ofc-2026",
+            "claim_date": "2026-03-17"
+          },
+          {
+            "url": "https://www.coherent.com/news/press-releases/a-chip-letter-of-intent-for-50m-to-expand-world-leading-manufacturing-facility-for-ai-infrastructure",
+            "claim_date": "2026-06-16"
+          }
+        ]
+      },
+      {
+        "development": "Power, density, and latency constraints accelerate adoption of co-packaged optics and other integrated optical I/O architectures.",
+        "company_exposure": "The technology stack includes external lasers, InP devices, silicon photonics, VCSELs, optical engines, and advanced packaging capabilities, reinforced by the NVIDIA development and capacity relationship.",
+        "affected_driver": "Content per switch, architecture mix, customer qualifications, R&D expense, and the division of value between components and complete pluggable modules.",
+        "financial_consequence": "Production wins could create component and optical-engine revenue, while displacement of pluggable modules or unfavorable packaging responsibility could reduce module content or margins.",
+        "direction": "mixed",
+        "materiality_condition": "CPO must enter high-volume production and the company must retain economically meaningful laser, photonic-device, or optical-engine content after accounting for pluggable cannibalization.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Named CPO qualifications and production awards",
+          "Laser and photonic-engine shipments into integrated switches",
+          "Pluggable-module growth relative to CPO revenue",
+          "Power-per-bit claims validated in deployed systems",
+          "Gross margin by changing product mix"
+        ],
+        "sources": [
+          {
+            "url": "https://www.coherent.com/news/press-releases/nvidia-and-coherent-announce-strategic-partnership",
+            "claim_date": "2026-03-02"
+          },
+          {
+            "url": "https://nvidianews.nvidia.com/news/nvidia-and-coherent-announce-strategic-partnership-to-develop-optics-technology-to-scale-next-generation-data-center-architecture",
+            "claim_date": "2026-03-02"
+          },
+          {
+            "url": "https://www.coherent.com/news/press-releases/coherent-ai-scale-optical-innovations-ofc-2026",
+            "claim_date": "2026-03-17"
+          }
+        ]
+      },
+      {
+        "development": "AI-cluster operators adopt optical circuit switching to reconfigure fabrics and reduce electrical switching and optical-electrical-optical conversions.",
+        "company_exposure": "The company has demonstrated a 300-by-300-port optical circuit switch and transceiver technologies intended for OCS-based datacenter architectures.",
+        "affected_driver": "OCS system volume, transceiver attach rate, systems product mix, and customer qualification timing.",
+        "financial_consequence": "Scaled deployments could add systems and optimized-transceiver revenue, but architecture adoption may be slow and could redistribute content within the network.",
+        "direction": "mixed",
+        "materiality_condition": "At least one major operator must deploy OCS at meaningful cluster scale, with the company winning production volume rather than remaining at demonstration or pilot stage.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Named OCS production customers",
+          "Qualified port counts and deployment scale",
+          "OCS and optimized-transceiver revenue disclosure",
+          "Reliability data and standards progress",
+          "Changes in electrical-switch and transceiver content per cluster"
+        ],
+        "sources": [
+          {
+            "url": "https://www.coherent.com/news/press-releases/optical-circuit-switch-for-data-centers-live-demo-at-ofc-2024-based-on-ultrareliable-dlx-technology",
+            "claim_date": "2024-03-25"
+          },
+          {
+            "url": "https://www.coherent.com/news/press-releases/2025-analyst-investor-day",
+            "claim_date": "2025-05-28"
+          }
+        ]
+      },
+      {
+        "development": "More efficient models, lower communication intensity, short-reach electrical alternatives, or customer-owned photonics reduce merchant optical content per unit of AI compute.",
+        "company_exposure": "A growing share of demand and planned capacity is tied to datacenter and communications products, while customers retain architecture choice and bargaining power.",
+        "affected_driver": "Transceiver and component volume, average selling price, factory utilization, inventory, and return on new capacity.",
+        "financial_consequence": "Demand below planned capacity could reduce revenue and gross margin, increase inventory and underutilization costs, and weaken cash conversion.",
+        "direction": "downside",
+        "materiality_condition": "Optical link growth must fall materially below committed capacity additions, with purchase agreements and diversification insufficient to absorb the gap.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Cloud and accelerator-platform network roadmaps",
+          "Order lead times, cancellations, and customer inventory",
+          "Factory utilization and inventory growth",
+          "Price erosion versus cost reductions",
+          "Customer internalization or substitution announcements"
+        ],
+        "sources": [
+          {
+            "url": "https://www.coherent.com/content/dam/coherent/site/en/documents/investors/annual-filings/2025/coherent-annual-report-2025.pdf",
+            "claim_date": "2025-08-15"
+          },
+          {
+            "url": "https://www.coherent.com/news/press-releases/nvidia-and-coherent-announce-strategic-partnership",
+            "claim_date": "2026-03-02"
+          },
+          {
+            "url": "https://www.coherent.com/news/press-releases/third-quarter-fiscal-year-2026-results",
+            "claim_date": "2026-05-06"
+          }
+        ]
+      },
+      {
+        "development": "Frontier-AI investment increases demand for advanced semiconductor fabrication, packaging, test, and thermal-management equipment.",
+        "company_exposure": "The Industrial portfolio supplies lasers, engineered materials, and photonic technologies to semiconductor-capital-equipment and precision-manufacturing markets.",
+        "affected_driver": "Industrial OEM orders, photonics content per tool, service demand, and factory utilization.",
+        "financial_consequence": "AI-related semiconductor capacity could lift Industrial revenue and improve diversification, but benefits may be obscured by the broader semiconductor and industrial cycle.",
+        "direction": "upside",
+        "materiality_condition": "AI-driven fabrication and advanced-packaging investment must expand equipment categories containing meaningful company content and offset weakness in other industrial applications.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Industrial segment bookings and revenue",
+          "Semiconductor-capital-equipment customer commentary",
+          "New design wins and content per tool",
+          "Industrial utilization and gross margin",
+          "Service and recurring-revenue trends"
+        ],
+        "sources": [
+          {
+            "url": "https://www.coherent.com/content/dam/coherent/site/en/documents/investors/annual-filings/2025/coherent-annual-report-2025.pdf",
+            "claim_date": "2025-08-15"
+          },
+          {
+            "url": "https://www.coherent.com/news/press-releases/2025-analyst-investor-day",
+            "claim_date": "2025-05-28"
+          }
+        ]
+      }
+    ],
+    "investment_thesis_and_tests": {
+      "public_bit_view_status": "no_public_view",
+      "attributable_public_thesis": null,
+      "what_would_support_it": [
+        "A BIT Capital publication or interview explicitly naming the company and linking AI optical-interconnect growth, design wins, capacity, and margin expansion to an investment thesis.",
+        "Company-specific BIT commentary defining measurable conditions such as datacenter revenue growth, 1.6T or CPO adoption, yield improvement, and capital productivity.",
+        "An attributable update maintaining that view after considering customer concentration, price erosion, and architecture substitution."
+      ],
+      "what_would_challenge_it": [
+        "A company-specific BIT statement identifying optical overcapacity, weak returns on capital, pricing pressure, customer concentration, or architecture displacement as a negative thesis driver.",
+        "An attributable BIT countercase concluding that AI bandwidth growth accrues primarily to competitors, customers' internal programs, or different parts of the networking stack.",
+        "Portfolio ownership, fund weight, or generic commentary about AI infrastructure would not by itself support or challenge a company-specific thesis."
+      ],
+      "sources": [
+        {
+          "url": "https://bitcap.com/en/news",
+          "claim_date": "2026-07-28"
+        },
+        {
+          "url": "https://bitcap.com/fonds/bit-global-technology-leaders",
+          "claim_date": "2026-07-28"
+        }
+      ]
+    },
+    "uncertainties_and_research_triggers": [
+      {
+        "uncertainty": "The amount of revenue directly attributable to frontier-AI infrastructure is not separately disclosed from broader datacenter and communications activity.",
+        "why_it_matters": "Without product- and workload-level disclosure, analysts can over-attribute communications growth to frontier AI or miss weakness in telecom and legacy products.",
+        "next_research_trigger": "Inspect the fiscal 2026 annual report and subsequent investor materials for AI-specific revenue, backlog, product-speed mix, or pro forma segment disclosures.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/820318/000082031826000013/iivi-20260331.htm",
+            "claim_date": "2026-05-06"
+          },
+          {
+            "url": "https://www.coherent.com/news/press-releases/third-quarter-fiscal-year-2026-results",
+            "claim_date": "2026-05-06"
+          }
+        ]
+      },
+      {
+        "uncertainty": "The pricing, timing, minimum-purchase protections, product-family economics, and concentration implications of the NVIDIA agreement are not fully public.",
+        "why_it_matters": "A large commitment can improve visibility but may carry pricing concessions, reserved-capacity obligations, dependence on one architecture roadmap, or weaker economics than headline value implies.",
+        "next_research_trigger": "Review future 10-K and 10-Q disclosures, customer concentration data, capital-commitment notes, and counterparty statements for purchase timing, capacity obligations, and product scope.",
+        "sources": [
+          {
+            "url": "https://www.coherent.com/news/press-releases/nvidia-and-coherent-announce-strategic-partnership",
+            "claim_date": "2026-03-02"
+          },
+          {
+            "url": "https://nvidianews.nvidia.com/news/nvidia-and-coherent-announce-strategic-partnership-to-develop-optics-technology-to-scale-next-generation-data-center-architecture",
+            "claim_date": "2026-03-02"
+          }
+        ]
+      },
+      {
+        "uncertainty": "The timing, yields, and returns from the 6-inch InP and Sherman capacity ramps remain execution variables.",
+        "why_it_matters": "The expansion can lower cost and relieve bottlenecks only if tools, processes, customer qualifications, and assembly capacity ramp together. Otherwise, depreciation, inventory, and cash requirements rise before output.",
+        "next_research_trigger": "Track definitive CHIPS-award milestones, capital expenditure, wafer and laser capacity commentary, qualification progress, inventory, and gross-margin performance.",
+        "sources": [
+          {
+            "url": "https://www.coherent.com/news/press-releases/a-chip-letter-of-intent-for-50m-to-expand-world-leading-manufacturing-facility-for-ai-infrastructure",
+            "claim_date": "2026-06-16"
+          },
+          {
+            "url": "https://www.coherent.com/news/press-releases/worlds-first-6-inch-inp-scalable-wafer-fabs-paving-the-way-for-the-next-generation-of-lasers-for-ai-transceivers-and-6g-wireless-networks",
+            "claim_date": "2024-03-25"
+          }
+        ]
+      },
+      {
+        "uncertainty": "The eventual value split among pluggables, CPO, OCS, components, and complete systems is unsettled.",
+        "why_it_matters": "The company can participate in several architectures, but revenue and margin outcomes differ substantially depending on which layer it supplies and whether new products cannibalize existing modules.",
+        "next_research_trigger": "Look for named production qualifications, disclosed optical content per switch, CPO or OCS revenue, customer packaging responsibility, and changes in transceiver mix.",
+        "sources": [
+          {
+            "url": "https://www.coherent.com/news/press-releases/coherent-ai-scale-optical-innovations-ofc-2026",
+            "claim_date": "2026-03-17"
+          },
+          {
+            "url": "https://www.coherent.com/news/press-releases/optical-circuit-switch-for-data-centers-live-demo-at-ofc-2024-based-on-ultrareliable-dlx-technology",
+            "claim_date": "2024-03-25"
+          },
+          {
+            "url": "https://www.coherent.com/news/press-releases/2025-analyst-investor-day",
+            "claim_date": "2025-05-28"
+          }
+        ]
+      },
+      {
+        "uncertainty": "Segment comparability and diversification are changing after organizational realignment and divestitures.",
+        "why_it_matters": "Reported growth can reflect disposed businesses, recast segments, or mix changes rather than underlying demand. Reduced diversification also raises the relative importance of datacenter execution.",
+        "next_research_trigger": "Rebuild historical segment results using fiscal 2026 annual-report recasts and confirm completion, proceeds, stranded costs, and debt reduction from announced divestitures.",
+        "sources": [
+          {
+            "url": "https://www.coherent.com/news/press-releases/coherent-announces-agreement-to-sell-aerospace-and-defense-business-to-advent",
+            "claim_date": "2025-08-13"
+          },
+          {
+            "url": "https://www.coherent.com/news/press-releases/coherent-announces-agreement-to-sell-mMaterials-processing-tools-product-division-to-bystronic",
+            "claim_date": "2025-10-31"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/820318/000082031826000013/iivi-20260331.htm",
+            "claim_date": "2026-05-06"
+          }
+        ]
+      }
+    ],
+    "source_ledger": [
+      {
+        "url": "https://www.coherent.com/content/dam/coherent/site/en/documents/investors/annual-filings/2025/coherent-annual-report-2025.pdf",
+        "title": "FY2025 Annual Report",
+        "publisher": "Coherent",
+        "published_at": "2025-08-15",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/820318/000082031826000013/iivi-20260331.htm",
+        "title": "Form 10-Q for the quarter ended March 31, 2026",
+        "publisher": "U.S. Securities and Exchange Commission",
+        "published_at": "2026-05-06",
+        "source_type": "regulator_primary"
+      },
+      {
+        "url": "https://www.coherent.com/news/press-releases/third-quarter-fiscal-year-2026-results",
+        "title": "Third-quarter fiscal 2026 results",
+        "publisher": "Coherent",
+        "published_at": "2026-05-06",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.coherent.com/news/press-releases/nvidia-and-coherent-announce-strategic-partnership",
+        "title": "Strategic optics partnership announcement",
+        "publisher": "Coherent",
+        "published_at": "2026-03-02",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://nvidianews.nvidia.com/news/nvidia-and-coherent-announce-strategic-partnership-to-develop-optics-technology-to-scale-next-generation-data-center-architecture",
+        "title": "Strategic optics partnership and investment announcement",
+        "publisher": "NVIDIA",
+        "published_at": "2026-03-02",
+        "source_type": "counterparty_primary"
+      },
+      {
+        "url": "https://www.coherent.com/news/press-releases/a-chip-letter-of-intent-for-50m-to-expand-world-leading-manufacturing-facility-for-ai-infrastructure",
+        "title": "CHIPS letter of intent for Sherman manufacturing expansion",
+        "publisher": "Coherent",
+        "published_at": "2026-06-16",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.coherent.com/news/press-releases/worlds-first-6-inch-inp-scalable-wafer-fabs-paving-the-way-for-the-next-generation-of-lasers-for-ai-transceivers-and-6g-wireless-networks",
+        "title": "Six-inch InP wafer-fabrication announcement",
+        "publisher": "Coherent",
+        "published_at": "2024-03-25",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.coherent.com/news/press-releases/2025-analyst-investor-day",
+        "title": "2025 Analyst and Investor Day strategy recap",
+        "publisher": "Coherent",
+        "published_at": "2025-05-28",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.coherent.com/news/press-releases/coherent-ai-scale-optical-innovations-ofc-2026",
+        "title": "OFC 2026 AI-scale optical technology roadmap",
+        "publisher": "Coherent",
+        "published_at": "2026-03-17",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.coherent.com/news/press-releases/optical-circuit-switch-for-data-centers-live-demo-at-ofc-2024-based-on-ultrareliable-dlx-technology",
+        "title": "Optical circuit switch demonstration announcement",
+        "publisher": "Coherent",
+        "published_at": "2024-03-25",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.coherent.com/news/press-releases/coherent-announces-agreement-to-sell-aerospace-and-defense-business-to-advent",
+        "title": "Aerospace and Defense divestiture announcement",
+        "publisher": "Coherent",
+        "published_at": "2025-08-13",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.coherent.com/news/press-releases/coherent-announces-agreement-to-sell-mMaterials-processing-tools-product-division-to-bystronic",
+        "title": "Materials-processing tools divestiture announcement",
+        "publisher": "Coherent",
+        "published_at": "2025-10-31",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://bitcap.com/en/news",
+        "title": "News and publications archive",
+        "publisher": "BIT Capital",
+        "published_at": null,
+        "source_type": "bit_primary"
+      },
+      {
+        "url": "https://bitcap.com/fonds/bit-global-technology-leaders",
+        "title": "BIT Global Technology Leaders fund page",
+        "publisher": "BIT Capital",
+        "published_at": null,
+        "source_type": "bit_primary"
+      }
+    ]
+  },
+  "provenance": {
+    "research_date": "2026-07-28",
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "xhigh",
+    "prompt_version": "company-memo-pilot-v1",
+    "prompt_cache_key": "fli:company-memo:company-memo-pilot-v1",
+    "response_id": "resp_znp3edSPl6gXwFwEZBuzFGpaaO1jCzOTFpQxSMfvX2ci0_DrCddLJPu-rg6hP_4jtHCNbRhbIWWv4OGuQt_bB-WVxnrwQgg7P0TE87Ny6Eheax7NkzQjYu0yXRFTdYKHyi1FsRvV-ZDXxrnHYDdcOcXTAh_IAApPnXZtjXtQ5lylvWqasTSlaF5My44sJnzIB_8BdFGyjMClMVkupIQ9oZy06fySA-KHr7S_492tGdMrFMxw1DIEMwmcdYoIrEUEMUUht8BpmHks6vbe2jx0bktExbn0tBGhag9QWTvT5zcFPIZ8X8YNvvobt4H67tu3v8Lk7rEqC9VdDOc9AiDPK18VMJTfLaSuAOEeims1t1gfqSmxRnFg0KN-rjdZgrYwmReNsxjTDQRruc9Yy8eJ7f3sy2wfP1wxg786V1kKyLh-1C_FirUXN-9sR_hTzuMOjJMRGGaKsTsBJAQYEbJd3RM_",
+    "response_model": "gpt-5.6-sol",
+    "input_tokens": 115649,
+    "cached_tokens": 0,
+    "cache_write_tokens": 0,
+    "output_tokens": 73545,
+    "reasoning_tokens": 10795,
+    "reported_cost_usd": null,
+    "web_actions": [
+      {
+        "query": "site:coherent.com company investor relations 2025 annual report Coherent Corp 10-K PDF",
+        "type": "search",
+        "queries": [
+          "site:coherent.com company investor relations 2025 annual report Coherent Corp 10-K PDF",
+          "site:coherent.com/content/dam/coherent/site/en/documents/investors 2026 Coherent investor presentation May 6 2026 PDF",
+          "site:sec.gov/Archives/edgar/data Coherent Corp 2025 10-K COHR",
+          "site:bitcap.com Coherent COHR II-VI"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:coherent.com/news/press-releases Coherent third quarter fiscal 2026 results May 6 2026",
+        "type": "search",
+        "queries": [
+          "site:coherent.com/news/press-releases Coherent third quarter fiscal 2026 results May 6 2026",
+          "site:coherent.com NVIDIA Coherent strategic partnership optics technology March 2026 $2 billion",
+          "site:nvidianews.nvidia.com Coherent strategic partnership optics March 2026",
+          "site:coherent.com/content/dam/coherent/site/en/documents/investors investor day May 28 2025 Coherent PDF"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:coherent.com/news/press-releases Lumentum Coherent combine July 2026",
+        "type": "search",
+        "queries": [
+          "site:coherent.com/news/press-releases Lumentum Coherent combine July 2026",
+          "site:investor.lumentum.com Coherent combine July 2026",
+          "site:sec.gov Coherent Lumentum merger July 2026 8-K",
+          "Coherent Transaction Lumentum Coherent July 2026 official"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://bitcap.com/en/news"
+      },
+      {
+        "pattern": "Datacenter and Communications",
+        "type": "find_in_page",
+        "url": "https://www.coherent.com/content/dam/coherent/site/en/documents/investors/annual-filings/2025/coherent-annual-report-2025.pdf"
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.sec.gov/edgar/browse/?CIK=0000820318"
+      },
+      {
+        "query": "site:sec.gov/Archives/edgar/data/820318 2025 10-k Coherent 2025 annual report html",
+        "type": "search",
+        "queries": [
+          "site:sec.gov/Archives/edgar/data/820318 2025 10-k Coherent 2025 annual report html",
+          "site:sec.gov/Archives/edgar/data/820318 2026 10-q Coherent March 31 2026 html",
+          "site:sec.gov/Archives/edgar/data/820318 2026 NVIDIA Coherent 8-k March 2 2026",
+          "site:sec.gov/Archives/edgar/data/820318 2026 April 28 8-k Coherent"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.coherent.com/company/investor-relations/sec-filings"
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/820318/000119312526208972/"
+      },
+      {
+        "query": "\"cohr-20260331\"",
+        "type": "search",
+        "queries": [
+          "\"cohr-20260331\"",
+          "\"0000820318-26-000013\" Coherent",
+          "\"0001193125-26-084366\" Coherent",
+          "\"0001193125-26-208972\" Coherent"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/820318/0000820318-26-000013-index.html"
+      },
+      {
+        "query": "site:sec.gov/Archives/edgar/data/820318 \"Datacenter and Communications\" \"2025\" \"Coherent Corp.\"",
+        "type": "search",
+        "queries": [
+          "site:sec.gov/Archives/edgar/data/820318 \"Datacenter and Communications\" \"2025\" \"Coherent Corp.\"",
+          "site:sec.gov/Archives/edgar/data/820318 \"customer accounted for\" \"Coherent\" 2025",
+          "site:sec.gov/Archives/edgar/data/820318 \"vertically integrated manufacturing company\" \"Coherent\" 2025",
+          "site:sec.gov/Archives/edgar/data/820318 \"capital expenditures\" \"Coherent\" \"June 30, 2025\""
+        ],
+        "sources": null
+      },
+      {
+        "query": "\"Coherent Corp.\" \"Datacenter and Communications\" revenue 2025",
+        "type": "search",
+        "queries": [
+          "\"Coherent Corp.\" \"Datacenter and Communications\" revenue 2025",
+          "\"Coherent Corp.\" \"customer accounted for\" revenue 2025",
+          "\"Coherent Corp.\" \"vertically integrated\" 2025 annual report",
+          "\"Coherent Corp.\" \"capital expenditures\" fiscal 2025"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.coherent.com/content/dam/coherent/site/en/documents/investors/investor-presentations/2026/may-6/investor-presentation-20260506.pdf"
+      },
+      {
+        "query": "\"investor-presentation-20260506.pdf\"",
+        "type": "search",
+        "queries": [
+          "\"investor-presentation-20260506.pdf\"",
+          "site:coherent.com/content/dam/coherent/site/en/documents/investors/investor-presentations/2026/may-6 \"Q3\"",
+          "site:sec.gov/Archives/edgar/data/820318/000119312526208972 \"Datacenter and Communications\"",
+          "site:sec.gov/Archives/edgar/data/820318/000119312526208972 \"capital expenditure\""
+        ],
+        "sources": null
+      },
+      {
+        "query": "\"Third Quarter Fiscal 2026\" Coherent \"Datacenter and Communications\" revenue",
+        "type": "search",
+        "queries": [
+          "\"Third Quarter Fiscal 2026\" Coherent \"Datacenter and Communications\" revenue",
+          "\"Third Quarter Fiscal 2026\" Coherent \"Industrial\" \"gross margin\"",
+          "\"Third Quarter Fiscal 2026\" Coherent \"capital expenditures\"",
+          "\"Third Quarter Fiscal 2026\" Coherent \"1.6T\""
+        ],
+        "sources": null
+      },
+      {},
+      {
+        "type": "open_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/820318/000119312526208972/d57080dex992.htm"
+      },
+      {
+        "query": "site:sec.gov/Archives/edgar/data/820318/000119312526208972/d57080dex992.htm \"Datacenter and Communications\"",
+        "type": "search",
+        "queries": [
+          "site:sec.gov/Archives/edgar/data/820318/000119312526208972/d57080dex992.htm \"Datacenter and Communications\"",
+          "site:sec.gov/Archives/edgar/data/820318/000119312526208972/d57080dex992.htm \"Industrial\"",
+          "site:sec.gov/Archives/edgar/data/820318/000119312526208972/d57080dex992.htm \"Revenue by Segment\"",
+          "site:sec.gov/Archives/edgar/data/820318/000119312526208972/d57080dex992.htm \"Capital expenditures\""
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:coherent.com/news/press-releases Coherent sale Aerospace Defense business 2025",
+        "type": "search",
+        "queries": [
+          "site:coherent.com/news/press-releases Coherent sale Aerospace Defense business 2025",
+          "site:coherent.com/news/press-releases Coherent indium phosphide capacity 6 inch 2026",
+          "site:coherent.com/news/press-releases Coherent US manufacturing capacity AI data center optics 2026",
+          "site:coherent.com/news/press-releases Coherent optical circuit switch 2025 2026"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:commerce.gov Coherent June 16 2026 CHIPS $50 million indium phosphide",
+        "type": "search",
+        "queries": [
+          "site:commerce.gov Coherent June 16 2026 CHIPS $50 million indium phosphide",
+          "site:chips.gov Coherent 2026 Sherman Texas indium phosphide",
+          "site:bis.gov Coherent export controls optical transceivers China",
+          "site:coherent.com annual report export control China customer risk Coherent 2025"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.coherent.com/news/press-releases/coherent-demonstrates-next-gen-pluggable-transceiver-ofc-2026"
+      },
+      {
+        "query": "site:coherent.com/content/dam/coherent/site/en/images/photography/investor-relations/coherent-investor-day-full-deck-vf-v4.pdf \"gross margin\"",
+        "type": "search",
+        "queries": [
+          "site:coherent.com/content/dam/coherent/site/en/images/photography/investor-relations/coherent-investor-day-full-deck-vf-v4.pdf \"gross margin\"",
+          "\"Coherent\" \"long-term financial model\" \"gross margin\" 2025 investor day",
+          "\"Coherent\" \"target long-term financial model\" \"operating margin\"",
+          "\"Coherent Analyst Day 2025\" \"gross margin\""
+        ],
+        "sources": null
+      },
+      {},
+      {
+        "query": "\"Coherent\" \"accounted for approximately\" \"net sales\" 2025 customer",
+        "type": "search",
+        "queries": [
+          "\"Coherent\" \"accounted for approximately\" \"net sales\" 2025 customer",
+          "\"Coherent\" \"10% of consolidated revenues\" 2025",
+          "\"Coherent\" \"customer represented\" \"revenue\" fiscal 2025",
+          "\"Coherent Corp\" customer concentration 2026 10-Q"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:bitcap.com/en/news (Coherent OR COHR OR \"II-VI\")",
+        "type": "search",
+        "queries": [
+          "site:bitcap.com/en/news (Coherent OR COHR OR \"II-VI\")",
+          "site:bitcap.com/news (Coherent OR COHR OR \"II-VI\")",
+          "site:bitcap.com/wp-content/uploads Coherent COHR II-VI",
+          "site:bitcap.com Coherent photonics"
+        ],
+        "sources": null
+      }
+    ],
+    "consulted_sources": [
+      {
+        "url": "https://www.coherent.com/content/dam/coherent/site/en/documents/investors/annual-filings/2025/coherent-annual-report-2025.pdf",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/820318/000082031826000013/iivi-20260331.htm",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.coherent.com/news/press-releases/third-quarter-fiscal-year-2026-results",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.coherent.com/news/press-releases/nvidia-and-coherent-announce-strategic-partnership",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://nvidianews.nvidia.com/news/nvidia-and-coherent-announce-strategic-partnership-to-develop-optics-technology-to-scale-next-generation-data-center-architecture",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.coherent.com/news/press-releases/a-chip-letter-of-intent-for-50m-to-expand-world-leading-manufacturing-facility-for-ai-infrastructure",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.coherent.com/news/press-releases/worlds-first-6-inch-inp-scalable-wafer-fabs-paving-the-way-for-the-next-generation-of-lasers-for-ai-transceivers-and-6g-wireless-networks",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.coherent.com/news/press-releases/2025-analyst-investor-day",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.coherent.com/news/press-releases/coherent-ai-scale-optical-innovations-ofc-2026",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.coherent.com/news/press-releases/optical-circuit-switch-for-data-centers-live-demo-at-ofc-2024-based-on-ultrareliable-dlx-technology",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.coherent.com/news/press-releases/coherent-announces-agreement-to-sell-aerospace-and-defense-business-to-advent",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.coherent.com/news/press-releases/coherent-announces-agreement-to-sell-mMaterials-processing-tools-product-division-to-bystronic",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://bitcap.com/en/news",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://bitcap.com/fonds/bit-global-technology-leaders",
+        "type": "model_citation"
+      }
+    ],
+    "request_tags": [
+      "app:frontier-lab-intelligence",
+      "pipeline:investment-company-context",
+      "job:company-memo-pilot",
+      "scope:single-company",
+      "prompt:company-memo-pilot-v1",
+      "company:cohr",
+      "model:gpt-5.6-sol",
+      "reasoning:xhigh"
+    ]
+  }
+}

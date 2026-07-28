@@ -618,7 +618,36 @@ def research(
             f"{response_data.get('incomplete_details')!r}"
         )
     memo = json.loads(llm_responses.output_text(response_data))
-    _validate_urls(memo)
+    try:
+        _validate_urls(memo)
+    except ValueError as exc:
+        model_slug = model.replace("/", "-").replace(".", "-")
+        invalid_path = (
+            ROOT
+            / "tmp"
+            / (
+                f"company-memo-pilot-{profile['ticker']}-"
+                f"{model_slug}-{reasoning_effort}-invalid.json"
+            )
+        )
+        invalid_path.write_text(
+            json.dumps(
+                {
+                    "schema_version": "company-memo-pilot-invalid-v1",
+                    "company": {
+                        "name": profile["name"],
+                        "ticker": profile["ticker"],
+                    },
+                    "memo": memo,
+                    "validation_error": str(exc),
+                    "response_id": creation_response_id,
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+            + "\n"
+        )
+        raise ValueError(f"{exc}; raw memo saved to {invalid_path}") from exc
     actions, consulted_sources = llm_responses.web_evidence(
         response_data,
         cited_urls=[item["url"] for item in memo["source_ledger"]],

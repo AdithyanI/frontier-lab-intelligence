@@ -1,0 +1,997 @@
+{
+  "schema_version": "company-memo-pilot-result-v1",
+  "company": {
+    "name": "AMD",
+    "ticker": "AMD"
+  },
+  "memo": {
+    "business_and_economics": {
+      "summary": "Fabless supplier of CPUs, GPUs and AI accelerators, networking, adaptive compute and embedded products. Revenue is reported through Data Center, Client and Gaming, and Embedded segments, with an increasing shift from components toward integrated rack-scale AI platforms. Economics depend on design wins, unit shipments, average selling price and system content, product mix, software qualification, and access to advanced foundry, packaging and memory capacity.",
+      "revenue_engines": [
+        {
+          "engine": "Data-center compute and AI infrastructure",
+          "who_pays": "Cloud service providers, frontier-model developers, enterprises, OEMs, ODMs and system integrators.",
+          "economic_logic": "EPYC server CPUs, Instinct accelerators, Pensando networking and Helios rack-scale platforms generate hardware revenue. Deployment volume, processor content per rack, pricing and mix drive revenue and margin; ROCm qualification and supply determine conversion. Data Center revenue was $16.6 billion in fiscal 2025 and $5.8 billion in the first quarter of 2026.",
+          "sources": [
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/2488/000000248826000018/amd-20251227.htm",
+              "claim_date": "2026-02-04"
+            },
+            {
+              "url": "https://ir.amd.com/news-events/press-releases/detail/1284/amd-reports-first-quarter-2026-financial-results",
+              "claim_date": "2026-05-05"
+            },
+            {
+              "url": "https://ir.amd.com/news-events/press-releases/detail/1294/aai-2026-amd-delivers-full-stack-compute-for-the-agentic-ai-era",
+              "claim_date": "2026-07-23"
+            }
+          ]
+        },
+        {
+          "engine": "Client and gaming processors",
+          "who_pays": "PC OEMs, distributors, system builders, add-in-board partners and game-console customers.",
+          "economic_logic": "Ryzen processors, Radeon GPUs and semi-custom console SoCs monetize PC and console unit cycles. Revenue and margin move with processor shipments, average selling prices, commercial-versus-consumer mix and console generation cycles. Client and Gaming revenue was $14.6 billion in fiscal 2025.",
+          "sources": [
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/2488/000000248826000018/amd-20251227.htm",
+              "claim_date": "2026-02-04"
+            }
+          ]
+        },
+        {
+          "engine": "Embedded and adaptive computing",
+          "who_pays": "Industrial, communications, automotive, aerospace and defense, healthcare, broadcast and data-center equipment manufacturers.",
+          "economic_logic": "Embedded CPUs, APUs, FPGAs, system-on-modules and adaptive SoCs are won through long design cycles and can produce multi-year product revenue. Design-win conversion, customer inventory cycles and end-market mix govern volume and margin. Embedded revenue was $3.5 billion in fiscal 2025.",
+          "sources": [
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/2488/000000248826000018/amd-20251227.htm",
+              "claim_date": "2026-02-04"
+            }
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/2488/000000248826000018/amd-20251227.htm",
+          "claim_date": "2026-02-04"
+        },
+        {
+          "url": "https://ir.amd.com/news-events/press-releases/detail/1294/aai-2026-amd-delivers-full-stack-compute-for-the-agentic-ai-era",
+          "claim_date": "2026-07-23"
+        }
+      ]
+    },
+    "operating_and_financial_drivers": [
+      {
+        "driver": "EPYC, Instinct and Helios deployment volume",
+        "why_it_matters": "Data Center is the principal growth engine. Server share gains, accelerator qualifications and the timing and scale of rack deployments directly affect units, product mix, pricing and operating leverage.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "pricing",
+          "product_mix",
+          "gross_margin",
+          "cash_flow"
+        ],
+        "sources": [
+          {
+            "url": "https://ir.amd.com/news-events/press-releases/detail/1284/amd-reports-first-quarter-2026-financial-results",
+            "claim_date": "2026-05-05"
+          },
+          {
+            "url": "https://ir.amd.com/news-events/press-releases/detail/1260/amd-and-openai-announce-strategic-partnership-to-deploy-6-gigawatts-of-amd-gpus",
+            "claim_date": "2025-10-06"
+          },
+          {
+            "url": "https://ir.amd.com/news-events/press-releases/detail/1279/amd-and-meta-announce-expanded-strategic-partnership-to-deploy-6-gigawatts-of-amd-gpus",
+            "claim_date": "2026-02-24"
+          },
+          {
+            "url": "https://ir.amd.com/news-events/press-releases/detail/1292/amd-and-anthropic-announce-strategic-partnership-to-deploy-up-to-2-gigawatts-of-amd-instinct-mi450-series-gpus",
+            "claim_date": "2026-07-22"
+          }
+        ]
+      },
+      {
+        "driver": "Roadmap cadence, performance per dollar and ROCm qualification",
+        "why_it_matters": "Competitive model performance, system reliability and day-zero framework support determine customer qualification time, utilization and win rates. Roadmap delays or software gaps can defer revenue, weaken pricing and require additional engineering expense.",
+        "financial_lines": [
+          "revenue",
+          "pricing",
+          "product_mix",
+          "gross_margin",
+          "operating_cost",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://ir.amd.com/news-events/press-releases/detail/1294/aai-2026-amd-delivers-full-stack-compute-for-the-agentic-ai-era",
+            "claim_date": "2026-07-23"
+          },
+          {
+            "url": "https://ir.amd.com/news-events/press-releases/detail/1266/amd-unveils-strategy-to-lead-the-1-trillion-compute-market-and-accelerate-next-phase-of-growth",
+            "claim_date": "2025-11-11"
+          },
+          {
+            "url": "https://rocm.docs.amd.com/en/latest/compatibility/compatibility-matrix.html",
+            "claim_date": "2026-07-16"
+          }
+        ]
+      },
+      {
+        "driver": "Leading-node, HBM and advanced-packaging availability",
+        "why_it_matters": "The fabless model depends on external wafer fabrication, assembly, testing, advanced packaging and memory. Insufficient allocation, poor yields or higher component costs can cap shipments, delay customer acceptance, increase inventory commitments and compress gross margin.",
+        "financial_lines": [
+          "volume",
+          "gross_margin",
+          "working_capital",
+          "cash_flow",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/2488/000000248826000018/amd-20251227.htm",
+            "claim_date": "2026-02-04"
+          },
+          {
+            "url": "https://ir.amd.com/news-events/press-releases/detail/1286/amd-announces-more-than-10-billion-in-taiwan-ecosystem-investments-to-accelerate-ai-infrastructure",
+            "claim_date": "2026-05-21"
+          },
+          {
+            "url": "https://semiconductor.samsung.com/news-events/news/samsung-and-amd-expand-strategic-collaboration-on-next-generation-ai-memory-solutions/",
+            "claim_date": "2026-03-18"
+          }
+        ]
+      },
+      {
+        "driver": "Conversion and concentration of large-customer commitments",
+        "why_it_matters": "Multi-gigawatt agreements can improve demand visibility but do not by themselves establish recognized revenue. Shipments, customer acceptance, infrastructure readiness and milestone terms determine conversion. Strategic investments and warrants add balance-sheet, cash-flow and dilution-related risk.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "working_capital",
+          "cash_flow",
+          "balance_sheet",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://ir.amd.com/news-events/press-releases/detail/1260/amd-and-openai-announce-strategic-partnership-to-deploy-6-gigawatts-of-amd-gpus",
+            "claim_date": "2025-10-06"
+          },
+          {
+            "url": "https://ir.amd.com/news-events/press-releases/detail/1279/amd-and-meta-announce-expanded-strategic-partnership-to-deploy-6-gigawatts-of-amd-gpus",
+            "claim_date": "2026-02-24"
+          },
+          {
+            "url": "https://ir.amd.com/news-events/press-releases/detail/1292/amd-and-anthropic-announce-strategic-partnership-to-deploy-up-to-2-gigawatts-of-amd-instinct-mi450-series-gpus",
+            "claim_date": "2026-07-22"
+          }
+        ]
+      },
+      {
+        "driver": "Client, console and embedded design cycles",
+        "why_it_matters": "PC unit demand and processor ASPs, console generations, embedded customer inventories and long-lived design wins diversify revenue but can materially shift consolidated product mix and margin.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "pricing",
+          "product_mix",
+          "gross_margin",
+          "working_capital"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/2488/000000248826000018/amd-20251227.htm",
+            "claim_date": "2026-02-04"
+          },
+          {
+            "url": "https://ir.amd.com/news-events/press-releases/detail/1294/aai-2026-amd-delivers-full-stack-compute-for-the-agentic-ai-era",
+            "claim_date": "2026-07-23"
+          }
+        ]
+      }
+    ],
+    "ecosystem": [
+      {
+        "relationship": "customer_or_end_market",
+        "entities_or_group": "OpenAI, Meta, Anthropic, Microsoft, Oracle and other hyperscale, frontier-model and cloud customers",
+        "why_it_matters": "These customers provide the production workloads and capital spending needed to scale Instinct and Helios. Multi-generation and multi-gigawatt commitments improve visibility, but create concentration and execution exposure if deployment schedules, power availability or customer economics change.",
+        "sources": [
+          {
+            "url": "https://ir.amd.com/news-events/press-releases/detail/1294/aai-2026-amd-delivers-full-stack-compute-for-the-agentic-ai-era",
+            "claim_date": "2026-07-23"
+          },
+          {
+            "url": "https://ir.amd.com/news-events/press-releases/detail/1260/amd-and-openai-announce-strategic-partnership-to-deploy-6-gigawatts-of-amd-gpus",
+            "claim_date": "2025-10-06"
+          },
+          {
+            "url": "https://ir.amd.com/news-events/press-releases/detail/1279/amd-and-meta-announce-expanded-strategic-partnership-to-deploy-6-gigawatts-of-amd-gpus",
+            "claim_date": "2026-02-24"
+          },
+          {
+            "url": "https://ir.amd.com/news-events/press-releases/detail/1292/amd-and-anthropic-announce-strategic-partnership-to-deploy-up-to-2-gigawatts-of-amd-instinct-mi450-series-gpus",
+            "claim_date": "2026-07-22"
+          }
+        ]
+      },
+      {
+        "relationship": "supplier",
+        "entities_or_group": "TSMC, Asia-Pacific assembly and packaging partners, and memory suppliers including Samsung",
+        "why_it_matters": "Advanced-node wafers, 2.5D packaging and HBM determine accelerator output, cost and delivery timing. Helios and MI455X scaling therefore depends on coordinated capacity, yields and component qualification across several external suppliers.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/2488/000000248826000018/amd-20251227.htm",
+            "claim_date": "2026-02-04"
+          },
+          {
+            "url": "https://ir.amd.com/news-events/press-releases/detail/1286/amd-announces-more-than-10-billion-in-taiwan-ecosystem-investments-to-accelerate-ai-infrastructure",
+            "claim_date": "2026-05-21"
+          },
+          {
+            "url": "https://semiconductor.samsung.com/news-events/news/samsung-and-amd-expand-strategic-collaboration-on-next-generation-ai-memory-solutions/",
+            "claim_date": "2026-03-18"
+          }
+        ]
+      },
+      {
+        "relationship": "partner",
+        "entities_or_group": "HPE, Lenovo, Supermicro, Sanmina, Wiwynn and other OEM, ODM and manufacturing partners",
+        "why_it_matters": "Partners manufacture, integrate, distribute and support rack-scale systems. Their readiness affects qualification capacity, delivery lead times, deployment quality and access to enterprise and cloud customers.",
+        "sources": [
+          {
+            "url": "https://ir.amd.com/news-events/press-releases/detail/1294/aai-2026-amd-delivers-full-stack-compute-for-the-agentic-ai-era",
+            "claim_date": "2026-07-23"
+          },
+          {
+            "url": "https://ir.amd.com/news-events/press-releases/detail/1263/amd-completes-divestiture-of-zt-systems-data-center-infrastructuremanufacturing-business-to-sanmina",
+            "claim_date": "2025-10-27"
+          }
+        ]
+      },
+      {
+        "relationship": "competitor",
+        "entities_or_group": "NVIDIA and Intel, plus customer-designed accelerators and specialized inference architectures",
+        "why_it_matters": "Competition occurs at CPU, accelerator, networking, software and full-system levels. Incumbent software ecosystems or customer silicon can displace Instinct, while heterogeneous systems may preserve demand for EPYC CPUs and Pensando networking.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/2488/000000248826000018/amd-20251227.htm",
+            "claim_date": "2026-02-04"
+          },
+          {
+            "url": "https://ir.amd.com/news-events/press-releases/detail/1293/amd-and-cerebras-announce-industry-leading-ultra-low-latency-and-high-throughput-ai-inference-solution",
+            "claim_date": "2026-07-23"
+          }
+        ]
+      },
+      {
+        "relationship": "regulatory_dependency",
+        "entities_or_group": "U.S. export-control and licensing authorities",
+        "why_it_matters": "Capability-based export restrictions can limit addressable markets, delay shipments, force product redesign and create inventory charges or reserve reversals. The April 2025 license requirement for MI308 illustrates the direct revenue and margin mechanism.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/2488/000000248825000039/amd-20250415.htm",
+            "claim_date": "2025-04-15"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/2488/000000248826000018/amd-20251227.htm",
+            "claim_date": "2026-02-04"
+          }
+        ]
+      }
+    ],
+    "strategy_and_committed_actions": [
+      {
+        "action": "Execute a rapid AI-platform roadmap spanning MI400-series accelerators, sixth-generation EPYC, Helios rack-scale systems and a planned MI500-series follow-on.",
+        "investment_relevance": "Annual platform cadence and greater system content can expand revenue and pricing opportunity, but make execution, qualification and supply timing increasingly consequential.",
+        "sources": [
+          {
+            "url": "https://ir.amd.com/news-events/press-releases/detail/1266/amd-unveils-strategy-to-lead-the-1-trillion-compute-market-and-accelerate-next-phase-of-growth",
+            "claim_date": "2025-11-11"
+          },
+          {
+            "url": "https://ir.amd.com/news-events/press-releases/detail/1294/aai-2026-amd-delivers-full-stack-compute-for-the-agentic-ai-era",
+            "claim_date": "2026-07-23"
+          }
+        ]
+      },
+      {
+        "action": "Retain ZT Systems' rack-design and customer-enablement capabilities while transferring the manufacturing operation to Sanmina.",
+        "investment_relevance": "The structure adds system-level engineering and hyperscale deployment expertise without retaining the full manufacturing footprint. Deployment speed, quality and partner economics are the tests of whether the model improves competitiveness.",
+        "sources": [
+          {
+            "url": "https://ir.amd.com/news-events/press-releases/detail/1240/amd-completes-acquisition-of-zt-systems",
+            "claim_date": "2025-03-31"
+          },
+          {
+            "url": "https://ir.amd.com/news-events/press-releases/detail/1263/amd-completes-divestiture-of-zt-systems-data-center-infrastructuremanufacturing-business-to-sanmina",
+            "claim_date": "2025-10-27"
+          }
+        ]
+      },
+      {
+        "action": "Expand leading-edge and advanced-packaging capacity through more than $10 billion of announced Taiwan ecosystem investments and next-generation HBM and DRAM collaboration with Samsung.",
+        "investment_relevance": "These commitments address critical supply bottlenecks for Helios and MI455X, but introduce execution, cost, working-capital and concentration exposure if demand or yields disappoint.",
+        "sources": [
+          {
+            "url": "https://ir.amd.com/news-events/press-releases/detail/1286/amd-announces-more-than-10-billion-in-taiwan-ecosystem-investments-to-accelerate-ai-infrastructure",
+            "claim_date": "2026-05-21"
+          },
+          {
+            "url": "https://semiconductor.samsung.com/news-events/news/samsung-and-amd-expand-strategic-collaboration-on-next-generation-ai-memory-solutions/",
+            "claim_date": "2026-03-18"
+          }
+        ]
+      },
+      {
+        "action": "Deepen the open software ecosystem and customer co-development around ROCm, model optimization and workload-specific infrastructure.",
+        "investment_relevance": "Better framework coverage and joint optimization can reduce switching and qualification costs. Materiality should be judged by production workloads, deployment time and customer-reported performance rather than release counts alone.",
+        "sources": [
+          {
+            "url": "https://rocm.docs.amd.com/en/latest/compatibility/compatibility-matrix.html",
+            "claim_date": "2026-07-16"
+          },
+          {
+            "url": "https://ir.amd.com/news-events/press-releases/detail/1292/amd-and-anthropic-announce-strategic-partnership-to-deploy-up-to-2-gigawatts-of-amd-instinct-mi450-series-gpus",
+            "claim_date": "2026-07-22"
+          },
+          {
+            "url": "https://ir.amd.com/news-events/press-releases/detail/1279/amd-and-meta-announce-expanded-strategic-partnership-to-deploy-6-gigawatts-of-amd-gpus",
+            "claim_date": "2026-02-24"
+          }
+        ]
+      },
+      {
+        "action": "Use milestone-linked strategic capital to align major frontier-lab customers, including an OpenAI warrant tied to deployment milestones and an announced equity investment of up to $5 billion in Anthropic.",
+        "investment_relevance": "The arrangements may accelerate adoption and roadmap alignment, but headline deployment capacity must be evaluated against pricing, warrant dilution, investment funding and realized customer purchases.",
+        "sources": [
+          {
+            "url": "https://ir.amd.com/news-events/press-releases/detail/1260/amd-and-openai-announce-strategic-partnership-to-deploy-6-gigawatts-of-amd-gpus",
+            "claim_date": "2025-10-06"
+          },
+          {
+            "url": "https://ir.amd.com/news-events/press-releases/detail/1292/amd-and-anthropic-announce-strategic-partnership-to-deploy-up-to-2-gigawatts-of-amd-instinct-mi450-series-gpus",
+            "claim_date": "2026-07-22"
+          }
+        ]
+      }
+    ],
+    "frontier_ai_transmission_paths": [
+      {
+        "development": "Frontier inference and agentic workloads increase token generation, context processing and always-on compute demand.",
+        "company_exposure": "Helios combines Instinct GPUs, EPYC CPUs, Pensando networking and ROCm, with announced large-scale deployments by multiple frontier labs and hyperscalers.",
+        "affected_driver": "Instinct and Helios deployment volume, EPYC and networking content per rack, utilization and data-center product mix.",
+        "financial_consequence": "Higher Data Center revenue and potentially stronger gross margin and operating leverage if production deployments scale; support and ramp costs could offset early economics.",
+        "direction": "upside",
+        "materiality_condition": "Material if announced deployments progress into accepted, paid production capacity at gigawatt scale and customers expand beyond initial phases while realized tokens per dollar remains competitive. Pilot-only or materially delayed deployments would not qualify.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "MI450/MI455X and Helios shipment and commissioning milestones",
+          "Customer-reported installed capacity, utilization and expansion orders",
+          "Data Center revenue growth and accelerator-versus-CPU mix",
+          "Realized system pricing, support cost and gross-margin progression"
+        ],
+        "sources": [
+          {
+            "url": "https://ir.amd.com/news-events/press-releases/detail/1294/aai-2026-amd-delivers-full-stack-compute-for-the-agentic-ai-era",
+            "claim_date": "2026-07-23"
+          },
+          {
+            "url": "https://ir.amd.com/news-events/press-releases/detail/1284/amd-reports-first-quarter-2026-financial-results",
+            "claim_date": "2026-05-05"
+          },
+          {
+            "url": "https://ir.amd.com/news-events/press-releases/detail/1260/amd-and-openai-announce-strategic-partnership-to-deploy-6-gigawatts-of-amd-gpus",
+            "claim_date": "2025-10-06"
+          },
+          {
+            "url": "https://ir.amd.com/news-events/press-releases/detail/1279/amd-and-meta-announce-expanded-strategic-partnership-to-deploy-6-gigawatts-of-amd-gpus",
+            "claim_date": "2026-02-24"
+          },
+          {
+            "url": "https://ir.amd.com/news-events/press-releases/detail/1292/amd-and-anthropic-announce-strategic-partnership-to-deploy-up-to-2-gigawatts-of-amd-instinct-mi450-series-gpus",
+            "claim_date": "2026-07-22"
+          }
+        ]
+      },
+      {
+        "development": "Frontier-model architectures, numerical formats, inference engines and frameworks change rapidly.",
+        "company_exposure": "ROCm libraries, compilers and framework integrations must support new models and techniques quickly enough for customers to qualify Instinct hardware without excessive porting or optimization work.",
+        "affected_driver": "Software qualification time, developer adoption, realized performance and accelerator win rate.",
+        "financial_consequence": "Rapid support can improve hardware demand and pricing; compatibility or performance gaps can delay revenue and increase engineering and customer-support expense.",
+        "direction": "mixed",
+        "materiality_condition": "Material if leading frontier-model releases either run with near-day-zero production support and stable performance or require materially longer qualification than competing stacks across several major customers.",
+        "time_horizon": "near_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "ROCm support timing for major framework and model releases",
+          "Customer-published production benchmarks for throughput, latency, uptime and scaling",
+          "Time from hardware availability to production qualification",
+          "Outputs from customer engineering collaborations and upstream software contributions"
+        ],
+        "sources": [
+          {
+            "url": "https://rocm.docs.amd.com/en/latest/compatibility/compatibility-matrix.html",
+            "claim_date": "2026-07-16"
+          },
+          {
+            "url": "https://ir.amd.com/news-events/press-releases/detail/1292/amd-and-anthropic-announce-strategic-partnership-to-deploy-up-to-2-gigawatts-of-amd-instinct-mi450-series-gpus",
+            "claim_date": "2026-07-22"
+          },
+          {
+            "url": "https://ir.amd.com/news-events/press-releases/detail/1294/aai-2026-amd-delivers-full-stack-compute-for-the-agentic-ai-era",
+            "claim_date": "2026-07-23"
+          }
+        ]
+      },
+      {
+        "development": "Hyperscalers increase use of customer-designed accelerators or specialized inference architectures.",
+        "company_exposure": "Major customers can substitute custom or specialized compute for general-purpose external GPUs. Heterogeneous systems may still use EPYC CPUs, Pensando networking or Instinct for other workflow stages.",
+        "affected_driver": "Accelerator market share, platform content per deployment and customer concentration.",
+        "financial_consequence": "Lower Instinct volume and pricing if workloads migrate away from merchant GPUs, partly offset if CPU, networking or complementary accelerator content grows.",
+        "direction": "mixed",
+        "materiality_condition": "Material if custom or specialized accelerators absorb a substantial share of incremental production training or inference capacity at major customers and reduce planned Instinct orders; isolated pilots are insufficient.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Customer disclosures on internal-accelerator capacity and external GPU purchasing",
+          "Instinct attachment within announced customer deployments",
+          "EPYC and Pensando participation in non-Instinct AI systems",
+          "Commercial adoption of heterogeneous inference partnerships"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/2488/000000248826000018/amd-20251227.htm",
+            "claim_date": "2026-02-04"
+          },
+          {
+            "url": "https://ir.amd.com/news-events/press-releases/detail/1293/amd-and-cerebras-announce-industry-leading-ultra-low-latency-and-high-throughput-ai-inference-solution",
+            "claim_date": "2026-07-23"
+          }
+        ]
+      },
+      {
+        "development": "Larger models and rack-scale systems increase demand for leading-edge wafers, HBM and advanced packaging faster than supply expands.",
+        "company_exposure": "MI455X and Helios depend on external 2nm manufacturing, advanced packaging, HBM4, DRAM and assembly partners.",
+        "affected_driver": "Shipment volume, yields, component cost, inventory commitments and delivery timing.",
+        "financial_consequence": "Supply shortfalls can defer revenue and raise working capital or unit cost; successful capacity expansion can enable volume growth but may require significant commitments.",
+        "direction": "downside",
+        "materiality_condition": "Material if HBM4, 2nm or packaging allocation prevents scheduled Helios shipment volumes or raises unit costs enough to compress gross margin. On-time capacity with stable yields would limit the effect.",
+        "time_horizon": "near_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "HBM4 qualification and allocation",
+          "Advanced-packaging capacity, yield and delivery lead times",
+          "2nm production-ramp milestones",
+          "Inventory, supplier prepayments and gross-margin commentary"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/2488/000000248826000018/amd-20251227.htm",
+            "claim_date": "2026-02-04"
+          },
+          {
+            "url": "https://ir.amd.com/news-events/press-releases/detail/1286/amd-announces-more-than-10-billion-in-taiwan-ecosystem-investments-to-accelerate-ai-infrastructure",
+            "claim_date": "2026-05-21"
+          },
+          {
+            "url": "https://semiconductor.samsung.com/news-events/news/samsung-and-amd-expand-strategic-collaboration-on-next-generation-ai-memory-solutions/",
+            "claim_date": "2026-03-18"
+          }
+        ]
+      },
+      {
+        "development": "Governments tighten export controls as frontier-compute capabilities increase.",
+        "company_exposure": "High-performance Instinct products and future accelerators can become subject to destination, customer or capability-based licensing requirements.",
+        "affected_driver": "Addressable market, shipment timing, inventory recoverability and product-design requirements.",
+        "financial_consequence": "Lost or delayed revenue, inventory charges, lower gross margin and additional compliance or redesign cost.",
+        "direction": "downside",
+        "materiality_condition": "Material if new rules deny or materially delay licenses for current or future products, or require redesigns and charges for products serving meaningful customer demand.",
+        "time_horizon": "near_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "U.S. export-rule changes and license decisions",
+          "Revenue and inventory charges linked to controlled markets",
+          "Introduction and competitiveness of compliant product variants",
+          "Geographic mix of accelerator shipments"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/2488/000000248825000039/amd-20250415.htm",
+            "claim_date": "2025-04-15"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/2488/000000248826000018/amd-20251227.htm",
+            "claim_date": "2026-02-04"
+          }
+        ]
+      }
+    ],
+    "investment_thesis_and_tests": {
+      "public_bit_view_status": "no_public_view",
+      "attributable_public_thesis": null,
+      "what_would_support_it": [],
+      "what_would_challenge_it": [],
+      "sources": [
+        {
+          "url": "https://bitcap.com/en/news/bit-capital-ki-whitepaper-infrastruktur-des-ki-zeitalters",
+          "claim_date": "2023-09-15"
+        },
+        {
+          "url": "https://bitcap.com/en/news/bit-capital-quartalsbericht-equity-q1-2026-2",
+          "claim_date": "2026-03-31"
+        }
+      ]
+    },
+    "uncertainties_and_research_triggers": [
+      {
+        "uncertainty": "Commercial conversion and economics of announced multi-gigawatt agreements",
+        "why_it_matters": "Announced capacity is not equivalent to firm backlog or recognized revenue. Deployment milestones, pricing, customer acceptance, warrant vesting and strategic-investment funding can materially change the economics.",
+        "next_research_trigger": "Inspect the first post-launch disclosures of actual shipments, commissioned capacity, purchase commitments, revenue recognition, warrant vesting and cash funding for strategic investments.",
+        "sources": [
+          {
+            "url": "https://ir.amd.com/news-events/press-releases/detail/1260/amd-and-openai-announce-strategic-partnership-to-deploy-6-gigawatts-of-amd-gpus",
+            "claim_date": "2025-10-06"
+          },
+          {
+            "url": "https://ir.amd.com/news-events/press-releases/detail/1279/amd-and-meta-announce-expanded-strategic-partnership-to-deploy-6-gigawatts-of-amd-gpus",
+            "claim_date": "2026-02-24"
+          },
+          {
+            "url": "https://ir.amd.com/news-events/press-releases/detail/1292/amd-and-anthropic-announce-strategic-partnership-to-deploy-up-to-2-gigawatts-of-amd-instinct-mi450-series-gpus",
+            "claim_date": "2026-07-22"
+          }
+        ]
+      },
+      {
+        "uncertainty": "Production performance and economics of Helios and ROCm relative to incumbent stacks",
+        "why_it_matters": "Vendor benchmarks and software-download growth do not establish production uptime, total support burden or realized tokens per dollar across customer workloads.",
+        "next_research_trigger": "Seek independent or customer-published training and inference results covering throughput, latency, power, utilization, reliability, engineering effort and full-system cost.",
+        "sources": [
+          {
+            "url": "https://ir.amd.com/news-events/press-releases/detail/1294/aai-2026-amd-delivers-full-stack-compute-for-the-agentic-ai-era",
+            "claim_date": "2026-07-23"
+          },
+          {
+            "url": "https://rocm.docs.amd.com/en/latest/compatibility/compatibility-matrix.html",
+            "claim_date": "2026-07-16"
+          }
+        ]
+      },
+      {
+        "uncertainty": "Ability to scale HBM, advanced packaging and leading-node supply at acceptable cost",
+        "why_it_matters": "Large customer demand cannot convert if memory, packaging or wafer capacity and yields lag. Capacity commitments can also increase working-capital exposure if deployments slip.",
+        "next_research_trigger": "Monitor final HBM supply terms, packaging and 2nm yields, delivery lead times, supplier commitments, inventory growth and margin commentary during the Helios ramp.",
+        "sources": [
+          {
+            "url": "https://ir.amd.com/news-events/press-releases/detail/1286/amd-announces-more-than-10-billion-in-taiwan-ecosystem-investments-to-accelerate-ai-infrastructure",
+            "claim_date": "2026-05-21"
+          },
+          {
+            "url": "https://semiconductor.samsung.com/news-events/news/samsung-and-amd-expand-strategic-collaboration-on-next-generation-ai-memory-solutions/",
+            "claim_date": "2026-03-18"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/2488/000000248826000018/amd-20251227.htm",
+            "claim_date": "2026-02-04"
+          }
+        ]
+      },
+      {
+        "uncertainty": "Net effect of custom silicon and specialized inference systems",
+        "why_it_matters": "Customer-designed or specialized accelerators could displace Instinct, but heterogeneous architectures may increase demand for EPYC, networking or complementary GPU capacity.",
+        "next_research_trigger": "Compare major customers' internal-accelerator deployment growth with external Instinct orders and identify component content retained in heterogeneous systems.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/2488/000000248826000018/amd-20251227.htm",
+            "claim_date": "2026-02-04"
+          },
+          {
+            "url": "https://ir.amd.com/news-events/press-releases/detail/1293/amd-and-cerebras-announce-industry-leading-ultra-low-latency-and-high-throughput-ai-inference-solution",
+            "claim_date": "2026-07-23"
+          }
+        ]
+      },
+      {
+        "uncertainty": "Future export-control scope and license availability",
+        "why_it_matters": "Rules can change faster than product roadmaps, creating lost sales, inventory impairment and redesign costs even when underlying demand remains strong.",
+        "next_research_trigger": "Review new regulations, license outcomes, compliant-product announcements, controlled-market revenue and any inventory or reserve adjustments.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/2488/000000248825000039/amd-20250415.htm",
+            "claim_date": "2025-04-15"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/2488/000000248826000018/amd-20251227.htm",
+            "claim_date": "2026-02-04"
+          }
+        ]
+      }
+    ],
+    "source_ledger": [
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/2488/000000248826000018/amd-20251227.htm",
+        "title": "Form 10-K for the Fiscal Year Ended December 27, 2025",
+        "publisher": "U.S. Securities and Exchange Commission",
+        "published_at": "2026-02-04",
+        "source_type": "regulator_primary"
+      },
+      {
+        "url": "https://ir.amd.com/news-events/press-releases/detail/1284/amd-reports-first-quarter-2026-financial-results",
+        "title": "AMD Reports First Quarter 2026 Financial Results",
+        "publisher": "Advanced Micro Devices, Inc.",
+        "published_at": "2026-05-05",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://ir.amd.com/news-events/press-releases/detail/1294/aai-2026-amd-delivers-full-stack-compute-for-the-agentic-ai-era",
+        "title": "AAI 2026: AMD Delivers Full-Stack Compute for the Agentic AI Era",
+        "publisher": "Advanced Micro Devices, Inc.",
+        "published_at": "2026-07-23",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://ir.amd.com/news-events/press-releases/detail/1266/amd-unveils-strategy-to-lead-the-1-trillion-compute-market-and-accelerate-next-phase-of-growth",
+        "title": "AMD Unveils Strategy to Lead the $1 Trillion Compute Market and Accelerate Next Phase of Growth",
+        "publisher": "Advanced Micro Devices, Inc.",
+        "published_at": "2025-11-11",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://ir.amd.com/news-events/press-releases/detail/1260/amd-and-openai-announce-strategic-partnership-to-deploy-6-gigawatts-of-amd-gpus",
+        "title": "AMD and OpenAI Announce Strategic Partnership to Deploy 6 Gigawatts of AMD GPUs",
+        "publisher": "Advanced Micro Devices, Inc.",
+        "published_at": "2025-10-06",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://ir.amd.com/news-events/press-releases/detail/1279/amd-and-meta-announce-expanded-strategic-partnership-to-deploy-6-gigawatts-of-amd-gpus",
+        "title": "AMD and Meta Announce Expanded Strategic Partnership to Deploy 6 Gigawatts of AMD GPUs",
+        "publisher": "Advanced Micro Devices, Inc.",
+        "published_at": "2026-02-24",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://ir.amd.com/news-events/press-releases/detail/1292/amd-and-anthropic-announce-strategic-partnership-to-deploy-up-to-2-gigawatts-of-amd-instinct-mi450-series-gpus",
+        "title": "AMD and Anthropic Announce Strategic Partnership to Deploy Up to 2 Gigawatts of AMD Instinct MI450 Series GPUs",
+        "publisher": "Advanced Micro Devices, Inc.",
+        "published_at": "2026-07-22",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://rocm.docs.amd.com/en/latest/compatibility/compatibility-matrix.html",
+        "title": "ROCm 7.14.0 Compatibility Matrix",
+        "publisher": "AMD ROCm Documentation",
+        "published_at": "2026-07-16",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://ir.amd.com/news-events/press-releases/detail/1286/amd-announces-more-than-10-billion-in-taiwan-ecosystem-investments-to-accelerate-ai-infrastructure",
+        "title": "AMD Announces More Than $10 Billion in Taiwan Ecosystem Investments to Accelerate AI Infrastructure",
+        "publisher": "Advanced Micro Devices, Inc.",
+        "published_at": "2026-05-21",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://semiconductor.samsung.com/news-events/news/samsung-and-amd-expand-strategic-collaboration-on-next-generation-ai-memory-solutions/",
+        "title": "Samsung and AMD Expand Strategic Collaboration on Next-Generation AI Memory Solutions",
+        "publisher": "Samsung Semiconductor",
+        "published_at": "2026-03-18",
+        "source_type": "counterparty_primary"
+      },
+      {
+        "url": "https://ir.amd.com/news-events/press-releases/detail/1240/amd-completes-acquisition-of-zt-systems",
+        "title": "AMD Completes Acquisition of ZT Systems",
+        "publisher": "Advanced Micro Devices, Inc.",
+        "published_at": "2025-03-31",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://ir.amd.com/news-events/press-releases/detail/1263/amd-completes-divestiture-of-zt-systems-data-center-infrastructuremanufacturing-business-to-sanmina",
+        "title": "AMD Completes Divestiture of ZT Systems Data Center Infrastructure Manufacturing Business to Sanmina",
+        "publisher": "Advanced Micro Devices, Inc.",
+        "published_at": "2025-10-27",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/2488/000000248825000039/amd-20250415.htm",
+        "title": "Form 8-K: MI308 Export License Requirement",
+        "publisher": "U.S. Securities and Exchange Commission",
+        "published_at": "2025-04-16",
+        "source_type": "regulator_primary"
+      },
+      {
+        "url": "https://ir.amd.com/news-events/press-releases/detail/1293/amd-and-cerebras-announce-industry-leading-ultra-low-latency-and-high-throughput-ai-inference-solution",
+        "title": "AMD and Cerebras Announce Ultra-Low-Latency and High-Throughput AI Inference Solution",
+        "publisher": "Advanced Micro Devices, Inc.",
+        "published_at": "2026-07-23",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://bitcap.com/en/news/bit-capital-ki-whitepaper-infrastruktur-des-ki-zeitalters",
+        "title": "BIT Capital AI Whitepaper: Infrastructure of the AI Era",
+        "publisher": "BIT Capital",
+        "published_at": "2023-09-15",
+        "source_type": "bit_primary"
+      },
+      {
+        "url": "https://bitcap.com/en/news/bit-capital-quartalsbericht-equity-q1-2026-2",
+        "title": "BIT Capital Quarterly Report Equity Q1 2026",
+        "publisher": "BIT Capital",
+        "published_at": "2026-03-31",
+        "source_type": "bit_primary"
+      }
+    ]
+  },
+  "provenance": {
+    "research_date": "2026-07-28",
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "xhigh",
+    "prompt_version": "company-memo-pilot-v1",
+    "prompt_cache_key": "fli:company-memo:company-memo-pilot-v1",
+    "response_id": "resp_cgCY4bHngo6IxpHwqo7cF6Hh8r9WtYozkcYmioxxdFY-zNYWKd8F4nKENJiXr0M0cRp5AbKR1oPGe6S6r5qZbaKpSrGaTpEYUrwqjTnumLXgg0Swpx1qJAXglfG-gxdLlYZm3ZTOih28GQh0UbwhM3NZ1NT060rqBBoHZ1ySI2tCilqlxZxSJvIqxzHqs9f0b-C_P8J-NtuIOovqTa0b4TJb9UmjQxSqm7bK0XpTPew5cy_EdVc_82H-E-TH90RfDY2J8IzZ1j8AR059hxd5WZ0tv3aYRcR-wr3wbGaIVKPqsANdkJ_SunSNtj811cia6McFTEOgaJywe4H_hz2lBy_2G6a8O-7dNEp__6fpfHj-BMsjuBlRIdcvu3_7fEJNINtDuty0HEDWSGBqAoZkoCM3l4padatzzQBgiBMcuDdnu8XD8ayD-MO9JbNudGrbqKVb_OOc6iRee2nXTBbK9yg2",
+    "response_model": "gpt-5.6-sol",
+    "input_tokens": 108841,
+    "cached_tokens": 0,
+    "cache_write_tokens": 0,
+    "output_tokens": 82749,
+    "reasoning_tokens": 15665,
+    "reported_cost_usd": null,
+    "web_actions": [
+      {
+        "query": "site:ir.amd.com AMD 2025 annual report data center revenue Instinct EPYC 2026",
+        "type": "search",
+        "queries": [
+          "site:ir.amd.com AMD 2025 annual report data center revenue Instinct EPYC 2026",
+          "site:ir.amd.com AMD Advancing AI 2025 rack scale Helios official",
+          "site:amd.com ROCm official ecosystem frameworks 2026",
+          "site:bitcap.com AMD Advanced Micro Devices BIT Capital"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:ir.amd.com/news-events/press-releases \"AAI 2026\" AMD Delivers Full-Stack Compute Agentic AI Era",
+        "type": "search",
+        "queries": [
+          "site:ir.amd.com/news-events/press-releases \"AAI 2026\" AMD Delivers Full-Stack Compute Agentic AI Era",
+          "site:ir.amd.com/news-events/press-releases AMD Anthropic 2 gigawatts MI450 July 2026",
+          "site:ir.amd.com/news-events/press-releases AMD Microsoft next-gen Instinct EPYC July 2026",
+          "site:ir.amd.com/news-events/press-releases AMD Meta 6 gigawatts February 2026"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://bitcap.com/en/news/bit-capital-quartalsbericht-equity-q4-2025-2"
+      },
+      {
+        "pattern": "wafer fabrication",
+        "type": "find_in_page",
+        "url": "https://ir.amd.com/financial-information/sec-filings/content/0001193125-26-129106/0001193125-26-129106.pdf"
+      },
+      {
+        "query": "site:sec.gov/Archives/edgar/data/2488 2025 AMD 10-K February 2026",
+        "type": "search",
+        "queries": [
+          "site:sec.gov/Archives/edgar/data/2488 2025 AMD 10-K February 2026",
+          "AMD 2025 10-K third party manufacturers TSMC customer concentration",
+          "site:ir.amd.com/financial-information/sec-filings/content 2026 10-K AMD 2025 html",
+          "site:sec.gov/Archives/edgar/data/2488/ 2026 AMD 10-K"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/2488/000000248826000018/amd-20251227.htm"
+      },
+      {
+        "pattern": "TSMC",
+        "type": "find_in_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/2488/000000248826000018/amd-20251227.htm"
+      },
+      {
+        "query": "site:sec.gov/Archives/edgar/data/2488 2026 10-Q AMD March 28 2026",
+        "type": "search",
+        "queries": [
+          "site:sec.gov/Archives/edgar/data/2488 2026 10-Q AMD March 28 2026",
+          "site:ir.amd.com/financial-information/sec-filings/content AMD Q1 2026 10-Q March 28 2026",
+          "site:sec.gov/Archives/edgar/data/2488 AMD Q1 2026 China export control MI308 inventory charge",
+          "site:ir.amd.com AMD Q1 2026 financial tables inventory free cash flow"
+        ],
+        "sources": null
+      },
+      {
+        "pattern": "inventory",
+        "type": "find_in_page",
+        "url": "https://ir.amd.com/financial-information/sec-filings/content/0000002488-26-000076/amd-20260328.htm"
+      },
+      {
+        "query": "site:sec.gov/Archives/edgar/data/2488/000000248826000018/amd-20251227.htm \"wafer foundry\"",
+        "type": "search",
+        "queries": [
+          "site:sec.gov/Archives/edgar/data/2488/000000248826000018/amd-20251227.htm \"wafer foundry\"",
+          "site:sec.gov/Archives/edgar/data/2488/000000248826000018/amd-20251227.htm \"third-party manufacturers\"",
+          "site:sec.gov/Archives/edgar/data/2488/000000248826000018/amd-20251227.htm \"customer\" \"10%\"",
+          "site:sec.gov/Archives/edgar/data/2488/000000248826000018/amd-20251227.htm \"export\" \"China\""
+        ],
+        "sources": null
+      },
+      {
+        "query": "AMD 2025 annual report third-party foundries TSMC packaging suppliers",
+        "type": "search",
+        "queries": [
+          "AMD 2025 annual report third-party foundries TSMC packaging suppliers",
+          "AMD 2025 10-K customer concentration one customer 10 percent",
+          "AMD 2025 annual report export controls China MI308",
+          "AMD 2025 10-K products customers data center client gaming embedded"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:ir.amd.com/news-events/press-releases/detail AMD More Than $10 Billion Taiwan ecosystem investments May 21 2026",
+        "type": "search",
+        "queries": [
+          "site:ir.amd.com/news-events/press-releases/detail AMD More Than $10 Billion Taiwan ecosystem investments May 21 2026",
+          "site:ir.amd.com/news-events/press-releases/detail AMD Samsung HBM4 supply 2026",
+          "site:ir.amd.com/news-events/press-releases/detail AMD ZT Systems acquisition completion 2025 rack scale",
+          "site:ir.amd.com/news-events/press-releases/detail AMD divest ZT manufacturing business Sanmina 2025"
+        ],
+        "sources": null
+      },
+      {
+        "query": "AMD Announces More Than $10 Billion in Taiwan Ecosystem Investments to Accelerate AI Infrastructure official",
+        "type": "search",
+        "queries": [
+          "AMD Announces More Than $10 Billion in Taiwan Ecosystem Investments to Accelerate AI Infrastructure official",
+          "AMD Samsung HBM4 supply MI455X official May 2026",
+          "AMD completes acquisition ZT Systems official March 2025",
+          "AMD Sanmina ZT manufacturing business transaction official 2025"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:sec.gov/Archives/edgar/data/2488/000000248826000018/ AMD \"Data Center segment\" EPYC Instinct Pensando",
+        "type": "search",
+        "queries": [
+          "site:sec.gov/Archives/edgar/data/2488/000000248826000018/ AMD \"Data Center segment\" EPYC Instinct Pensando",
+          "site:sec.gov/Archives/edgar/data/2488/000000248826000018/ AMD \"Client and Gaming segment\" Ryzen Radeon semi-custom",
+          "site:sec.gov/Archives/edgar/data/2488/000000248826000018/ AMD \"Embedded segment\" FPGA adaptive SoC",
+          "site:sec.gov/Archives/edgar/data/2488/000000248826000018/ AMD competitors NVIDIA Intel Arm custom silicon"
+        ],
+        "sources": null
+      },
+      {
+        "query": "AMD 2025 10-K Data Center segment EPYC Instinct Pensando customers",
+        "type": "search",
+        "queries": [
+          "AMD 2025 10-K Data Center segment EPYC Instinct Pensando customers",
+          "AMD 2025 10-K Client Gaming segment Ryzen Radeon semi-custom customers",
+          "AMD 2025 10-K Embedded segment adaptive SoC FPGA customers",
+          "AMD 2025 annual report competitors NVIDIA Intel ARM custom silicon"
+        ],
+        "sources": null
+      },
+      {
+        "query": "\"AMD\" \"accounted for 10% or more\" 2025 revenue customer",
+        "type": "search",
+        "queries": [
+          "\"AMD\" \"accounted for 10% or more\" 2025 revenue customer",
+          "\"AMD\" \"One customer\" \"2025\" \"net revenue\" 10-K",
+          "\"AMD\" \"significant customer\" 2025 annual report",
+          "\"AMD\" \"small number of customers\" 2025 10-K"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:ir.amd.com/financial-information/sec-filings/content/0001193125-26-129106/0001193125-26-129106.pdf NVIDIA Intel competitors AMD 2025 annual report",
+        "type": "search",
+        "queries": [
+          "site:ir.amd.com/financial-information/sec-filings/content/0001193125-26-129106/0001193125-26-129106.pdf NVIDIA Intel competitors AMD 2025 annual report",
+          "site:ir.amd.com/financial-information/sec-filings/content/0001193125-26-129106/0001193125-26-129106.pdf \"NVIDIA\" \"Intel\"",
+          "AMD 2025 annual report competition NVIDIA Intel custom processors ROCm CUDA",
+          "AMD 2025 10-K competitors data center GPU NVIDIA custom silicon"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:bitcap.com/en AMD \"Advanced Micro Devices\"",
+        "type": "search",
+        "queries": [
+          "site:bitcap.com/en AMD \"Advanced Micro Devices\"",
+          "site:bitcap.com AMD \"Advanced Micro Devices\"",
+          "site:bitcap.com/en/news AMD AI chips BIT Capital",
+          "site:bitcap.com/en/news AMD"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:bitcap.com/en/news \"BIT Capital Quarterly Report Equity Q2 2026\"",
+        "type": "search",
+        "queries": [
+          "site:bitcap.com/en/news \"BIT Capital Quarterly Report Equity Q2 2026\"",
+          "site:bitcap.com/en/news \"AMD\" \"Q2 2026\" BIT Capital",
+          "site:bitcap.com/en/news \"Advanced Micro Devices\" BIT Capital 2026"
+        ],
+        "sources": null
+      }
+    ],
+    "consulted_sources": [
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/2488/000000248826000018/amd-20251227.htm",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://ir.amd.com/news-events/press-releases/detail/1284/amd-reports-first-quarter-2026-financial-results",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://ir.amd.com/news-events/press-releases/detail/1294/aai-2026-amd-delivers-full-stack-compute-for-the-agentic-ai-era",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://ir.amd.com/news-events/press-releases/detail/1266/amd-unveils-strategy-to-lead-the-1-trillion-compute-market-and-accelerate-next-phase-of-growth",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://ir.amd.com/news-events/press-releases/detail/1260/amd-and-openai-announce-strategic-partnership-to-deploy-6-gigawatts-of-amd-gpus",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://ir.amd.com/news-events/press-releases/detail/1279/amd-and-meta-announce-expanded-strategic-partnership-to-deploy-6-gigawatts-of-amd-gpus",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://ir.amd.com/news-events/press-releases/detail/1292/amd-and-anthropic-announce-strategic-partnership-to-deploy-up-to-2-gigawatts-of-amd-instinct-mi450-series-gpus",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://rocm.docs.amd.com/en/latest/compatibility/compatibility-matrix.html",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://ir.amd.com/news-events/press-releases/detail/1286/amd-announces-more-than-10-billion-in-taiwan-ecosystem-investments-to-accelerate-ai-infrastructure",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://semiconductor.samsung.com/news-events/news/samsung-and-amd-expand-strategic-collaboration-on-next-generation-ai-memory-solutions/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://ir.amd.com/news-events/press-releases/detail/1240/amd-completes-acquisition-of-zt-systems",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://ir.amd.com/news-events/press-releases/detail/1263/amd-completes-divestiture-of-zt-systems-data-center-infrastructuremanufacturing-business-to-sanmina",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/2488/000000248825000039/amd-20250415.htm",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://ir.amd.com/news-events/press-releases/detail/1293/amd-and-cerebras-announce-industry-leading-ultra-low-latency-and-high-throughput-ai-inference-solution",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://bitcap.com/en/news/bit-capital-ki-whitepaper-infrastruktur-des-ki-zeitalters",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://bitcap.com/en/news/bit-capital-quartalsbericht-equity-q1-2026-2",
+        "type": "model_citation"
+      }
+    ],
+    "request_tags": [
+      "app:frontier-lab-intelligence",
+      "pipeline:investment-company-context",
+      "job:company-memo-pilot",
+      "scope:single-company",
+      "prompt:company-memo-pilot-v1",
+      "company:amd",
+      "model:gpt-5.6-sol",
+      "reasoning:xhigh"
+    ]
+  }
+}

@@ -1,0 +1,1057 @@
+{
+  "schema_version": "company-memo-pilot-result-v1",
+  "company": {
+    "name": "Rubrik",
+    "ticker": "RBRK"
+  },
+  "memo": {
+    "business_and_economics": {
+      "summary": "The business sells a subscription platform for cyber and AI resilience across enterprise data, cloud and SaaS workloads, identity systems, applications and AI agents. Distributors and resellers are generally the contractual customers, while enterprises and public-sector organizations are the economic end users. The model is increasingly recurring and cloud-delivered: as of April 30, 2026, subscription ARR was $1.57 billion, average subscription dollar-based net retention was approximately 120%, and 2,946 customers generated at least $100,000 of subscription ARR. Growth therefore depends primarily on new-customer acquisition, workload and module expansion, retention, and successful monetization of identity and AI operations; legacy appliance and perpetual-license revenue is diminishing.",
+      "revenue_engines": [
+        {
+          "engine": "Core cyber-resilience subscriptions",
+          "who_pays": "Channel partners typically contract with the company on behalf of enterprise and public-sector end users purchasing data protection, threat analytics, sensitive-data posture, identity protection and orchestrated recovery.",
+          "economic_logic": "Subscription revenue includes term-based software licenses, SaaS services and support. Term-license and SaaS revenue can have different recognition timing, but subscription ARR captures the recurring contract base. Pricing varies by licensed capacity, protected workloads, applications, identities or usage under the applicable program.",
+          "sources": [
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1943896/000194389626000013/rbrk-20260131.htm",
+              "claim_date": "2026-03-19"
+            },
+            {
+              "url": "https://www.rubrik.com/content/dam/rubrik/en/resources/policy/rubrik-licensing-guide.pdf",
+              "claim_date": "2026-07-23"
+            }
+          ]
+        },
+        {
+          "engine": "Expansion across workloads and resilience modules",
+          "who_pays": "Existing customers adding cloud and SaaS data sources, Cloud Vault, data-security posture, identity resilience, codebase protection or additional recovery coverage.",
+          "economic_logic": "The platform strategy seeks higher spend per customer by making data, identity and recovery products complementary. Expansion raises subscription ARR, net retention and the population of large customers without requiring a separate customer acquisition for each module.",
+          "sources": [
+            {
+              "url": "https://ir.rubrik.com/Shareholder-letter/",
+              "claim_date": null
+            },
+            {
+              "url": "https://ir.rubrik.com/news-events/press-releases/news-details/2026/Rubrik-Reports-First-Quarter-Fiscal-Year-2027-Financial-Results/default.aspx",
+              "claim_date": "2026-06-04"
+            },
+            {
+              "url": "https://www.rubrik.com/products",
+              "claim_date": null
+            }
+          ]
+        },
+        {
+          "engine": "AI operations and agent resilience",
+          "who_pays": "Enterprises deploying production AI agents and seeking cross-platform discovery, monitoring, policy enforcement, auditability, performance management and reversal of unwanted actions.",
+          "economic_logic": "Rubrik Agent Cloud creates a prospective new subscription and cross-sell engine using the installed data, identity and recovery foundation. Revenue and attach are not separately disclosed, so this remains an early engine whose economics depend on paid production adoption, integration breadth and cloud or inference costs.",
+          "sources": [
+            {
+              "url": "https://www.rubrik.com/content/dam/rubrik/en/resources/solutions-brief/brf-rubrik-agent-cloud.pdf",
+              "claim_date": null
+            },
+            {
+              "url": "https://www.rubrik.com/company/newsroom/press-releases/25/rubrik-to-acquire-predibase-to-accelerate-agentic-ai-adoption",
+              "claim_date": "2025-06-25"
+            },
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1943896/000194389626000047/rbrk-20260430.htm",
+              "claim_date": "2026-06-05"
+            }
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1943896/000194389626000013/rbrk-20260131.htm",
+          "claim_date": "2026-03-19"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1943896/000194389626000047/rbrk-20260430.htm",
+          "claim_date": "2026-06-05"
+        },
+        {
+          "url": "https://ir.rubrik.com/news-events/press-releases/news-details/2026/Rubrik-Reports-First-Quarter-Fiscal-Year-2027-Financial-Results/default.aspx",
+          "claim_date": "2026-06-04"
+        },
+        {
+          "url": "https://ir.rubrik.com/Shareholder-letter/",
+          "claim_date": null
+        }
+      ]
+    },
+    "operating_and_financial_drivers": [
+      {
+        "driver": "Subscription ARR, retention and large-customer growth",
+        "why_it_matters": "New logos establish the installed base, while workload and module expansion determine net retention and customer lifetime value. The most useful recurring indicators are subscription ARR growth, net new ARR, dollar-based retention and customers exceeding $100,000 of ARR.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "pricing",
+          "cash_flow"
+        ],
+        "sources": [
+          {
+            "url": "https://ir.rubrik.com/news-events/press-releases/news-details/2026/Rubrik-Reports-First-Quarter-Fiscal-Year-2027-Financial-Results/default.aspx",
+            "claim_date": "2026-06-04"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1943896/000194389626000047/rbrk-20260430.htm",
+            "claim_date": "2026-06-05"
+          }
+        ]
+      },
+      {
+        "driver": "Cross-sell and product mix across data, identity and AI",
+        "why_it_matters": "Expansion from backup into cyber recovery, posture management, identity resilience and agent operations increases addressable spend and can strengthen retention. It also raises execution risk because each category requires product integration, specialist selling and credible outcomes.",
+        "financial_lines": [
+          "revenue",
+          "product_mix",
+          "gross_margin",
+          "operating_cost",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://ir.rubrik.com/Shareholder-letter/",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.rubrik.com/products",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.rubrik.com/content/dam/rubrik/en/resources/solutions-brief/brf-rubrik-agent-cloud.pdf",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "driver": "Cloud-delivery and infrastructure economics",
+        "why_it_matters": "The solutions operate on AWS, Azure and Google Cloud infrastructure, so negotiated provider pricing, storage and data-transfer intensity, telemetry volume and AI inference requirements can affect subscription gross margin. The largely completed transition away from direct appliance sales should reduce low-value hardware exposure.",
+        "financial_lines": [
+          "gross_margin",
+          "operating_cost",
+          "cash_flow"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1943896/000194389626000013/rbrk-20260131.htm",
+            "claim_date": "2026-03-19"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1943896/000194389626000047/rbrk-20260430.htm",
+            "claim_date": "2026-06-05"
+          }
+        ]
+      },
+      {
+        "driver": "Channel reach and go-to-market productivity",
+        "why_it_matters": "Distributors, resellers, managed-service providers and systems integrators provide market reach and implementation capacity. Partner concentration, rebates, enablement quality and sales-cycle execution can affect recognized revenue, customer acquisition cost, working capital and the speed at which new modules reach production.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "operating_cost",
+          "working_capital",
+          "cash_flow",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1943896/000194389626000047/rbrk-20260430.htm",
+            "claim_date": "2026-06-05"
+          },
+          {
+            "url": "https://www.rubrik.com/partners/resellers",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "driver": "Trust, security and demonstrated recovery outcomes",
+        "why_it_matters": "Customers purchase the platform to preserve operations during severe incidents. A material vulnerability, data leak, unsuccessful recovery or inability to reverse agent actions could damage renewals and win rates disproportionately; independently demonstrated clean recovery and shorter recovery times can support pricing and expansion.",
+        "financial_lines": [
+          "revenue",
+          "pricing",
+          "cash_flow",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1943896/000194389626000013/rbrk-20260131.htm",
+            "claim_date": "2026-03-19"
+          },
+          {
+            "url": "https://www.rubrik.com/company/newsroom/press-releases/26/rubrik-anthropic-project-glasswing",
+            "claim_date": "2026-06-02"
+          }
+        ]
+      }
+    ],
+    "ecosystem": [
+      {
+        "relationship": "customer_or_end_market",
+        "entities_or_group": "Large enterprises, governments, educational institutions and regulated sectors operating hybrid, multicloud and SaaS estates",
+        "why_it_matters": "These buyers have complex data and identity estates, meaningful downtime costs and regulatory obligations. Ransomware, business-continuity and data-sovereignty urgency supports demand, while long procurement cycles and constrained security budgets can delay deployment.",
+        "sources": [
+          {
+            "url": "https://www.rubrik.com/products",
+            "claim_date": null
+          },
+          {
+            "url": "https://ir.rubrik.com/news-events/press-releases/news-details/2026/Rubrik-Reports-First-Quarter-Fiscal-Year-2027-Financial-Results/default.aspx",
+            "claim_date": "2026-06-04"
+          }
+        ]
+      },
+      {
+        "relationship": "partner",
+        "entities_or_group": "Distributors, resellers, managed-service providers, global systems integrators and technology-alliance partners",
+        "why_it_matters": "Partners are the principal sales route and help customers implement recovery and AI controls. Their incentives, expertise and willingness to prioritize the platform affect pipeline conversion and module adoption; they also introduce concentration and execution risk.",
+        "sources": [
+          {
+            "url": "https://www.rubrik.com/partners/resellers",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.rubrik.com/company/newsroom/press-releases/26/global-systems-integrators-partner-with-rubrik-to-deliver-rubrik-agent-cloud-for-anthropics-claude-code",
+            "claim_date": "2026-06-09"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1943896/000194389626000047/rbrk-20260430.htm",
+            "claim_date": "2026-06-05"
+          }
+        ]
+      },
+      {
+        "relationship": "infrastructure_dependency",
+        "entities_or_group": "AWS, Microsoft Azure, Google Cloud and AI-agent platform APIs",
+        "why_it_matters": "Public-cloud infrastructure hosts important services and protected workloads, making provider pricing and availability relevant to gross margin and service reliability. Agent Cloud additionally depends on access to agent telemetry and action APIs; restricted or unstable interfaces could reduce monitoring or rewind coverage.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1943896/000194389626000013/rbrk-20260131.htm",
+            "claim_date": "2026-03-19"
+          },
+          {
+            "url": "https://www.rubrik.com/content/dam/rubrik/en/resources/solutions-brief/brf-rubrik-agent-cloud.pdf",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.rubrik.com/company/newsroom/press-releases/26/rubrik-security-cloud-launches-on-the-aws-european-sovereign-cloud",
+            "claim_date": "2026-07-08"
+          }
+        ]
+      },
+      {
+        "relationship": "competitor",
+        "entities_or_group": "Veeam, Commvault, Cohesity, Dell, IBM, Microsoft and cloud-native backup services; adjacent security, identity and observability platforms in AI operations",
+        "why_it_matters": "Core workloads face established backup and recovery competitors, hyperscaler-native substitutes and potential bundling. Agent governance broadens competition into less-settled categories where platform vendors or point solutions may own telemetry, policy enforcement or developer distribution.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1943896/000194389626000013/rbrk-20260131.htm",
+            "claim_date": "2026-03-19"
+          },
+          {
+            "url": "https://www.gartner.com/reviews/market/backup-and-data-protection-platforms/vendor/rubrik/alternatives",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.rubrik.com/content/dam/rubrik/en/resources/solutions-brief/brf-rubrik-agent-cloud.pdf",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "relationship": "regulatory_dependency",
+        "entities_or_group": "Data-residency, sovereignty, privacy and operational-resilience regimes across national and regional jurisdictions",
+        "why_it_matters": "Compliance requirements can create demand for immutable recovery and jurisdictional control, but they also require localized infrastructure, product certifications and operating investment. Failure to meet residency or access requirements can exclude regulated workloads.",
+        "sources": [
+          {
+            "url": "https://www.rubrik.com/company/newsroom/press-releases/26/rubrik-announces-rubrik-security-cloud-sovereign",
+            "claim_date": "2026-01-16"
+          },
+          {
+            "url": "https://www.rubrik.com/company/newsroom/press-releases/26/rubrik-security-cloud-launches-on-the-aws-european-sovereign-cloud",
+            "claim_date": "2026-07-08"
+          }
+        ]
+      }
+    ],
+    "strategy_and_committed_actions": [
+      {
+        "action": "Build one platform across data, identity and AI using complementary products and multiple product S-curves.",
+        "investment_relevance": "The strategy seeks durable expansion and lower customer acquisition friction as each additional module makes the installed platform more valuable. The key test is whether cross-sell produces sustained net retention and large-customer growth without excessive product or sales complexity.",
+        "sources": [
+          {
+            "url": "https://ir.rubrik.com/Shareholder-letter/",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.rubrik.com/products",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "action": "Commercialize Agent Cloud as a cross-platform control layer with monitoring, semantic policy enforcement, immutable audit and agent rewind.",
+        "investment_relevance": "This extends the recovery franchise into a new AI operations budget and could increase product breadth and ARR. Materiality requires paid production adoption rather than demonstrations, and the product must support enough agent frameworks and applications to be operationally useful.",
+        "sources": [
+          {
+            "url": "https://www.rubrik.com/content/dam/rubrik/en/resources/solutions-brief/brf-rubrik-agent-cloud.pdf",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.rubrik.com/company/newsroom/press-releases/26/rubrik-launches-rubrik-agent-cloud-for-anthropics-claude-code",
+            "claim_date": "2026-06-09"
+          }
+        ]
+      },
+      {
+        "action": "Use acquisitions to add AI-model infrastructure and identity continuity, including Predibase and Strata.io capabilities.",
+        "investment_relevance": "The acquired technology accelerates entry into agent accuracy, model efficiency, rewind and identity failover. Returns depend on technical integration, customer attach and whether the new products create incremental ARR sufficient to cover acquisition and ongoing R&D costs.",
+        "sources": [
+          {
+            "url": "https://www.rubrik.com/company/newsroom/press-releases/25/rubrik-to-acquire-predibase-to-accelerate-agentic-ai-adoption",
+            "claim_date": "2025-06-25"
+          },
+          {
+            "url": "https://www.rubrik.com/company/newsroom/press-releases/26/rubrik-advances-identity-resilience-through-strata-acquisition-and-identity-roll-forward-innovation",
+            "claim_date": "2026-06-09"
+          }
+        ]
+      },
+      {
+        "action": "Automate dependency-aware recovery through Autonomous Business Recovery and agentic interaction with the resilience platform.",
+        "investment_relevance": "Moving from backup restoration to reconstruction of a minimum viable business could improve differentiation, recovery outcomes and pricing. It also raises reliability and liability requirements because automated recovery must correctly handle data, identity, code, configuration and network dependencies.",
+        "sources": [
+          {
+            "url": "https://www.rubrik.com/company/newsroom/press-releases/26/rubrik-introduces-autonomous-business-recovery-for-cloud-applications",
+            "claim_date": "2026-06-09"
+          }
+        ]
+      },
+      {
+        "action": "Expand sovereign and international delivery, including availability on the AWS European Sovereign Cloud and a planned five-year UK investment exceeding £375 million.",
+        "investment_relevance": "Localized infrastructure and go-to-market capacity can unlock regulated European workloads and broaden the end market, but hiring and infrastructure commitments raise operating costs before resulting ARR is proven.",
+        "sources": [
+          {
+            "url": "https://www.rubrik.com/company/newsroom/press-releases/26/rubrik-security-cloud-launches-on-the-aws-european-sovereign-cloud",
+            "claim_date": "2026-07-08"
+          },
+          {
+            "url": "https://www.rubrik.com/company/newsroom/press-releases/26/rubrik-announces-375-million-uk-investment-and-names-london-as-emea-headquarters",
+            "claim_date": "2026-07-09"
+          }
+        ]
+      }
+    ],
+    "frontier_ai_transmission_paths": [
+      {
+        "development": "Frontier models and agent frameworks become reliable enough for broad autonomous production work.",
+        "company_exposure": "Agent Cloud is designed to discover agents across platforms, ingest their telemetry, enrich actions with data and identity context, enforce semantic policies and reverse unwanted changes.",
+        "affected_driver": "Paid Agent Cloud adoption and expansion within the installed customer base",
+        "financial_consequence": "Potential incremental subscription ARR, higher net retention and a richer product mix, partly offset by telemetry, inference, integration and support costs.",
+        "direction": "upside",
+        "materiality_condition": "The effect becomes material only if a meaningful share of existing or new customers purchase Agent Cloud for production estates, renew it, and expand coverage across multiple agent platforms and applications.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Disclosed paid Agent Cloud customers, ARR or attach rate",
+          "Number and breadth of production framework and application integrations",
+          "Agent Cloud renewal, expansion and customer-reference evidence",
+          "Product-level cloud, inference and support economics"
+        ],
+        "sources": [
+          {
+            "url": "https://www.rubrik.com/content/dam/rubrik/en/resources/solutions-brief/brf-rubrik-agent-cloud.pdf",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.rubrik.com/company/newsroom/press-releases/26/rubrik-launches-rubrik-agent-cloud-for-anthropics-claude-code",
+            "claim_date": "2026-06-09"
+          },
+          {
+            "url": "https://ir.rubrik.com/Shareholder-letter/",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "development": "Frontier models materially reduce the time and cost required to discover vulnerabilities, write exploits and automate attacks.",
+        "company_exposure": "The core platform protects and recovers data and identity after compromise, while the company is also testing frontier models to find and patch vulnerabilities in its own products.",
+        "affected_driver": "Cyber-resilience demand, pricing, customer retention and platform trust",
+        "financial_consequence": "Higher perceived breach probability could increase core subscription demand and recovery budgets; conversely, a successful exploit or failed recovery involving the platform could cause churn, remediation costs and reputational damage.",
+        "direction": "mixed",
+        "materiality_condition": "Demand upside is material only if AI-driven threats shift enterprise spending toward independently validated recovery and resilience. Downside is material if the company's own attack surface or recovery performance fails under machine-speed attacks.",
+        "time_horizon": "near_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Changes in customer budget allocation from prevention toward recovery",
+          "Win rates and pricing for cyber-recovery deployments",
+          "Verified clean-recovery outcomes and recovery-time performance",
+          "Material vulnerabilities, service incidents or failed customer recoveries"
+        ],
+        "sources": [
+          {
+            "url": "https://www.rubrik.com/company/newsroom/press-releases/26/rubrik-anthropic-project-glasswing",
+            "claim_date": "2026-06-02"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1943896/000194389626000013/rbrk-20260131.htm",
+            "claim_date": "2026-03-19"
+          }
+        ]
+      },
+      {
+        "development": "Frontier models improve planning, tool use and verification enough to automate complex, dependency-aware recovery workflows.",
+        "company_exposure": "Autonomous Business Recovery is intended to reconstruct applications across data, identity, code, network and configuration dependencies rather than restore isolated backups.",
+        "affected_driver": "Recovery efficacy, product differentiation and support intensity",
+        "financial_consequence": "Validated automation could improve win rates, retention and pricing while reducing manual support effort; unreliable automation could increase incident costs and liability.",
+        "direction": "upside",
+        "materiality_condition": "The pathway becomes material when production customers demonstrate materially shorter recovery times and lower manual effort without higher error, reinfection or service-incident rates.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Production adoption of Autonomous Business Recovery",
+          "Customer-validated recovery-time and recovery-point outcomes",
+          "Manual support hours and services required per recovery",
+          "Errors, rollbacks or security incidents caused by automated recovery"
+        ],
+        "sources": [
+          {
+            "url": "https://www.rubrik.com/company/newsroom/press-releases/26/rubrik-introduces-autonomous-business-recovery-for-cloud-applications",
+            "claim_date": "2026-06-09"
+          },
+          {
+            "url": "https://ir.rubrik.com/Shareholder-letter/",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "development": "Long-context retrieval and enterprise agents make governed access to proprietary structured and unstructured data a production requirement.",
+        "company_exposure": "The platform already indexes protected data and application metadata and combines data, identity and application context; Predibase adds model-tuning and inference capabilities intended to pair governed data with optimized models.",
+        "affected_driver": "AI-related module attach and expansion of protected data sources",
+        "financial_consequence": "The company could gain incremental ARR and net retention by becoming a governed data and recovery layer for AI applications, with gross-margin sensitivity to storage, transfer and inference usage.",
+        "direction": "upside",
+        "materiality_condition": "The opportunity is material only if customers route production AI data access or model workflows through paid services and expand protected datasets, rather than relying solely on hyperscaler, database or model-vendor governance.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Paid production adoption of AI data or model services",
+          "Protected data-source breadth and data volume linked to AI workflows",
+          "Policy coverage across retrieval, tuning and agent actions",
+          "Data leakage, permission or data-quality incidents"
+        ],
+        "sources": [
+          {
+            "url": "https://ir.rubrik.com/Shareholder-letter/",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.rubrik.com/company/newsroom/press-releases/25/rubrik-to-acquire-predibase-to-accelerate-agentic-ai-adoption",
+            "claim_date": "2025-06-25"
+          },
+          {
+            "url": "https://www.rubrik.com/content/dam/rubrik/en/resources/solutions-brief/brf-rubrik-agent-cloud.pdf",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "development": "Cloud and model platforms embed native agent observability, governance and rollback, or open standards make these controls interchangeable.",
+        "company_exposure": "Agent Cloud depends on platform telemetry and competes for an emerging control-layer role that may also be addressed by model vendors, cloud providers, security suites, identity vendors and observability platforms.",
+        "affected_driver": "Agent Cloud attach, pricing and retention",
+        "financial_consequence": "Bundling or commoditization could slow new ARR, force discounting, increase integration costs and reduce the return on AI-related acquisitions and R&D.",
+        "direction": "downside",
+        "materiality_condition": "The effect becomes material if native tools meet enterprise cross-platform requirements, restrict third-party API access, or consistently displace the product in competitive evaluations.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Native governance and rollback launches from model and cloud platforms",
+          "API access, telemetry completeness and partner-policy changes",
+          "Competitive win-loss and discounting trends",
+          "Customer preference for cross-platform versus platform-native control"
+        ],
+        "sources": [
+          {
+            "url": "https://www.rubrik.com/content/dam/rubrik/en/resources/solutions-brief/brf-rubrik-agent-cloud.pdf",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1943896/000194389626000013/rbrk-20260131.htm",
+            "claim_date": "2026-03-19"
+          },
+          {
+            "url": "https://www.gartner.com/reviews/market/backup-and-data-protection-platforms/vendor/rubrik/alternatives",
+            "claim_date": null
+          }
+        ]
+      }
+    ],
+    "investment_thesis_and_tests": {
+      "public_bit_view_status": "no_public_view",
+      "attributable_public_thesis": null,
+      "what_would_support_it": [],
+      "what_would_challenge_it": [],
+      "sources": [
+        {
+          "url": "https://bitcap.com/en/news",
+          "claim_date": "2026-07-28"
+        }
+      ]
+    },
+    "uncertainties_and_research_triggers": [
+      {
+        "uncertainty": "AI operations monetization is not separately disclosed.",
+        "why_it_matters": "Product announcements establish technical intent but do not show paid adoption, attach, renewal or contribution to net new ARR.",
+        "next_research_trigger": "Inspect future filings, earnings materials and analyst-day disclosures for Agent Cloud customers, ARR, attach rate, pipeline conversion and product-level gross-margin commentary.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1943896/000194389626000047/rbrk-20260430.htm",
+            "claim_date": "2026-06-05"
+          },
+          {
+            "url": "https://www.rubrik.com/content/dam/rubrik/en/resources/solutions-brief/brf-rubrik-agent-cloud.pdf",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "uncertainty": "The real-world scope and reliability of agent rewind and autonomous recovery remain insufficiently evidenced.",
+        "why_it_matters": "Audit trails and rollback are valuable only if they capture all consequential actions and restore applications to a correct state across complex dependencies.",
+        "next_research_trigger": "Seek named production references, supported-action matrices, recovery success rates, time-to-rewind metrics, failure modes and independent incident reviews.",
+        "sources": [
+          {
+            "url": "https://www.rubrik.com/company/newsroom/press-releases/26/rubrik-launches-rubrik-agent-cloud-for-anthropics-claude-code",
+            "claim_date": "2026-06-09"
+          },
+          {
+            "url": "https://www.rubrik.com/company/newsroom/press-releases/26/rubrik-introduces-autonomous-business-recovery-for-cloud-applications",
+            "claim_date": "2026-06-09"
+          }
+        ]
+      },
+      {
+        "uncertainty": "Ownership of the enterprise agent-control layer is unsettled.",
+        "why_it_matters": "The category overlaps with cloud platforms, model vendors, identity, security and observability. The company may become a cross-platform control point, remain an attach feature of cyber resilience, or face native-platform substitution.",
+        "next_research_trigger": "Track competitive evaluations, platform API changes, integration breadth, GSI deployments and whether customers standardize on cross-platform or native governance.",
+        "sources": [
+          {
+            "url": "https://www.rubrik.com/content/dam/rubrik/en/resources/solutions-brief/brf-rubrik-agent-cloud.pdf",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.gartner.com/reviews/market/backup-and-data-protection-platforms/vendor/rubrik/alternatives",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.rubrik.com/company/newsroom/press-releases/26/global-systems-integrators-partner-with-rubrik-to-deliver-rubrik-agent-cloud-for-anthropics-claude-code",
+            "claim_date": "2026-06-09"
+          }
+        ]
+      },
+      {
+        "uncertainty": "Cloud, telemetry and inference costs for AI products are not separately visible.",
+        "why_it_matters": "High-volume agent monitoring and semantic policy evaluation could create a meaningful variable-cost burden, weakening the otherwise attractive subscription gross-margin profile.",
+        "next_research_trigger": "Inspect gross-margin trends, cloud commitments, pricing-unit changes and management commentary on Agent Cloud unit economics as production usage scales.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1943896/000194389626000013/rbrk-20260131.htm",
+            "claim_date": "2026-03-19"
+          },
+          {
+            "url": "https://www.rubrik.com/content/dam/rubrik/en/resources/policy/rubrik-licensing-guide.pdf",
+            "claim_date": "2026-07-23"
+          }
+        ]
+      },
+      {
+        "uncertainty": "Trust-sensitive product or recovery failures could outweigh category growth.",
+        "why_it_matters": "The platform stores security-critical metadata and recovery copies and is expected to work during severe incidents. A vulnerability, outage, data leak or failed recovery could affect renewals, legal exposure and channel confidence.",
+        "next_research_trigger": "Review security advisories, material incident disclosures, uptime and recovery evidence, Project Glasswing remediation outcomes and customer references following real attacks.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1943896/000194389626000013/rbrk-20260131.htm",
+            "claim_date": "2026-03-19"
+          },
+          {
+            "url": "https://www.rubrik.com/company/newsroom/press-releases/26/rubrik-anthropic-project-glasswing",
+            "claim_date": "2026-06-02"
+          }
+        ]
+      }
+    ],
+    "source_ledger": [
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1943896/000194389626000013/rbrk-20260131.htm",
+        "title": "Fiscal 2026 Form 10-K",
+        "publisher": "U.S. Securities and Exchange Commission",
+        "published_at": "2026-03-19",
+        "source_type": "regulator_primary"
+      },
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1943896/000194389626000047/rbrk-20260430.htm",
+        "title": "First-quarter fiscal 2027 Form 10-Q",
+        "publisher": "U.S. Securities and Exchange Commission",
+        "published_at": "2026-06-05",
+        "source_type": "regulator_primary"
+      },
+      {
+        "url": "https://ir.rubrik.com/news-events/press-releases/news-details/2026/Rubrik-Reports-First-Quarter-Fiscal-Year-2027-Financial-Results/default.aspx",
+        "title": "First-quarter fiscal 2027 financial results",
+        "publisher": "Company investor relations",
+        "published_at": "2026-06-04",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://ir.rubrik.com/Shareholder-letter/",
+        "title": "Fiscal 2026 shareholder letter",
+        "publisher": "Company investor relations",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.rubrik.com/products",
+        "title": "Cyber-resilience platform and product overview",
+        "publisher": "Company website",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.rubrik.com/content/dam/rubrik/en/resources/policy/rubrik-licensing-guide.pdf",
+        "title": "Licensing guide",
+        "publisher": "Company website",
+        "published_at": "2026-07-23",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.rubrik.com/partners/resellers",
+        "title": "Distributor and reseller partner program",
+        "publisher": "Company website",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.rubrik.com/content/dam/rubrik/en/resources/solutions-brief/brf-rubrik-agent-cloud.pdf",
+        "title": "Agent Cloud solution brief",
+        "publisher": "Company website",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.rubrik.com/company/newsroom/press-releases/25/rubrik-to-acquire-predibase-to-accelerate-agentic-ai-adoption",
+        "title": "Predibase acquisition announcement",
+        "publisher": "Company newsroom",
+        "published_at": "2025-06-25",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.rubrik.com/company/newsroom/press-releases/26/rubrik-advances-identity-resilience-through-strata-acquisition-and-identity-roll-forward-innovation",
+        "title": "Strata acquisition and identity-resilience expansion",
+        "publisher": "Company newsroom",
+        "published_at": "2026-06-09",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.rubrik.com/company/newsroom/press-releases/26/rubrik-launches-rubrik-agent-cloud-for-anthropics-claude-code",
+        "title": "Agent Cloud for Claude Code and Claude Cowork",
+        "publisher": "Company newsroom",
+        "published_at": "2026-06-09",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.rubrik.com/company/newsroom/press-releases/26/rubrik-anthropic-project-glasswing",
+        "title": "Project Glasswing and Mythos research-preview access",
+        "publisher": "Company newsroom",
+        "published_at": "2026-06-02",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.rubrik.com/company/newsroom/press-releases/26/global-systems-integrators-partner-with-rubrik-to-deliver-rubrik-agent-cloud-for-anthropics-claude-code",
+        "title": "Systems-integrator alliance for Agent Cloud",
+        "publisher": "Company newsroom",
+        "published_at": "2026-06-09",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.rubrik.com/company/newsroom/press-releases/26/rubrik-introduces-autonomous-business-recovery-for-cloud-applications",
+        "title": "Autonomous Business Recovery announcement",
+        "publisher": "Company newsroom",
+        "published_at": "2026-06-09",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.rubrik.com/company/newsroom/press-releases/26/rubrik-announces-rubrik-security-cloud-sovereign",
+        "title": "Sovereign cloud offering announcement",
+        "publisher": "Company newsroom",
+        "published_at": "2026-01-16",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.rubrik.com/company/newsroom/press-releases/26/rubrik-security-cloud-launches-on-the-aws-european-sovereign-cloud",
+        "title": "AWS European Sovereign Cloud availability",
+        "publisher": "Company newsroom",
+        "published_at": "2026-07-08",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.rubrik.com/company/newsroom/press-releases/26/rubrik-announces-375-million-uk-investment-and-names-london-as-emea-headquarters",
+        "title": "UK investment and EMEA headquarters announcement",
+        "publisher": "Company newsroom",
+        "published_at": "2026-07-09",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.gartner.com/reviews/market/backup-and-data-protection-platforms/vendor/rubrik/alternatives",
+        "title": "Backup and data-protection platform alternatives",
+        "publisher": "Gartner Peer Insights",
+        "published_at": null,
+        "source_type": "high_quality_secondary"
+      },
+      {
+        "url": "https://bitcap.com/en/news",
+        "title": "Public news and research archive",
+        "publisher": "BIT Capital",
+        "published_at": null,
+        "source_type": "bit_primary"
+      }
+    ]
+  },
+  "provenance": {
+    "research_date": "2026-07-28",
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "xhigh",
+    "prompt_version": "company-memo-pilot-v1",
+    "prompt_cache_key": "fli:company-memo:company-memo-pilot-v1",
+    "response_id": "resp_fd3cPevtxgFblD8wEC8C3ZMwUVFWsWRNsX53WLKCmFdz1kmY0krHK7qG1bzrn9r_1lzdxLLadSkZnGXOqnKPkRw8tPwZtADCi2tkcJ9ct8TutRoEUHylK8XDHFhsMUXaMjxDRH3i-56wTscNjOuieI_kN4fwIAVFZMh761wwEeeRk4f7csVDDZfMfwWyMbE433swE6YRsMPojTZ6P-uC9hYcdjBcUJh7PDyisgjwF5qPqFaLcXbtu-6MHSY8KiM7EnesJUqwLEGGzD-S0vUIqC_YqVtXsPKlynWnlGSqOZ0NQD89wYs3TuC0SB902kQFW3yoWj000rvFjW11tVbsTqNSD2kly7dsW6hZ9_b-h3wFTfU8qEcRtr9YpUAo_0eekIECFX05PHSm_SrPKP_fZix_mFvqAP0hlM_8cWhCgAV4jBPgE_fMseEt2A0qYeNZHPADxOfkUImV00Xpd_LXo-Bp",
+    "response_model": "gpt-5.6-sol",
+    "input_tokens": 106236,
+    "cached_tokens": 0,
+    "cache_write_tokens": 0,
+    "output_tokens": 65560,
+    "reasoning_tokens": 10427,
+    "reported_cost_usd": null,
+    "web_actions": [
+      {
+        "query": "site:ir.rubrik.com annual report 10-K Rubrik 2026",
+        "type": "search",
+        "queries": [
+          "site:ir.rubrik.com annual report 10-K Rubrik 2026",
+          "site:ir.rubrik.com Rubrik quarterly results 2026 investor presentation",
+          "site:rubrik.com Rubrik Agent Cloud official",
+          "site:bitcap.com Rubrik BIT Capital"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://bitcap.com/en/news/bit-capital-quartalsbericht-equity-q1-2026-2"
+      },
+      {
+        "query": "site:sec.gov/Archives/edgar/data Rubrik 10-K 2026 RBRK",
+        "type": "search",
+        "queries": [
+          "site:sec.gov/Archives/edgar/data Rubrik 10-K 2026 RBRK",
+          "site:sec.gov/Archives/edgar/data Rubrik 10-Q 2026 April 30 2026 RBRK",
+          "site:ir.rubrik.com/static-files Rubrik 2026 annual report pdf",
+          "site:ir.rubrik.com/static-files Rubrik analyst day 2026 pdf"
+        ],
+        "sources": null
+      },
+      {
+        "query": "Rubrik Inc CIK SEC 10-K January 31 2026",
+        "type": "search",
+        "queries": [
+          "Rubrik Inc CIK SEC 10-K January 31 2026",
+          "Rubrik 2026 10-K annual report pdf",
+          "Rubrik FY2026 annual report 10-K",
+          "Rubrik Q1 2027 10-Q"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.sec.gov/edgar/browse/?CIK=1943896"
+      },
+      {
+        "pattern": "Subscription ARR",
+        "type": "find_in_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/1943896/000194389626000047/rbrk-20260430.htm"
+      },
+      {
+        "query": "site:sec.gov/Archives/edgar/data/1943896/000194389626000013 Rubrik revenue subscriptions customers channel partners competition fiscal 2026",
+        "type": "search",
+        "queries": [
+          "site:sec.gov/Archives/edgar/data/1943896/000194389626000013 Rubrik revenue subscriptions customers channel partners competition fiscal 2026",
+          "site:sec.gov/Archives/edgar/data/1943896/000194389626000013 \"subscription revenue\" Rubrik",
+          "site:sec.gov/Archives/edgar/data/1943896/000194389626000013 \"Our Customers\" Rubrik",
+          "site:sec.gov/Archives/edgar/data/1943896/000194389626000013 \"Competition\" Rubrik"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/1943896/000194389626000013/rbrk-20260131.htm?source=content_type%3Areact%7Cfirst_level_url%3Aarticle%7Csection%3Amain_content%7Cbutton%3Abody_link"
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/1943896/000194389626000013/0001943896-26-000013.txt"
+      },
+      {
+        "type": "open_page",
+        "url": "https://fintel.io/doc/sec-rubrik-inc-1943896-10k-2026-march-19-20531-7762"
+      },
+      {
+        "pattern": "We primarily generate revenue",
+        "type": "find_in_page",
+        "url": "https://fintel.io/doc/sec-rubrik-inc-1943896-10k-2026-march-19-20531-7762"
+      },
+      {
+        "query": "site:rubrik.com Rubrik subscription pricing capacity edition business model Rubrik Security Cloud official",
+        "type": "search",
+        "queries": [
+          "site:rubrik.com Rubrik subscription pricing capacity edition business model Rubrik Security Cloud official",
+          "site:rubrik.com products Rubrik Security Cloud subscription data security identity official",
+          "site:rubrik.com partner program resellers cloud marketplaces Rubrik official",
+          "site:rubrik.com company customers 100000 ARR Rubrik 2026"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:ir.rubrik.com/static-files \"Analyst Day\" Rubrik 2026",
+        "type": "search",
+        "queries": [
+          "site:ir.rubrik.com/static-files \"Analyst Day\" Rubrik 2026",
+          "site:ir.rubrik.com \"Analyst Day\" \"June 10, 2026\" Rubrik presentation",
+          "site:rubrik.com/company/newsroom 2026 AI data Rubrik Agent Cloud Project Glasswing Predibase",
+          "site:rubrik.com 2026 \"Project Glasswing\" Rubrik"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://ir.rubrik.com/news-events/events-and-presentations/events/event-details/2026/Rubrik-Analyst-Day-2026-2aCN9lqHGb/default.aspx"
+      },
+      {
+        "query": "site:ir.rubrik.com/static-files Rubrik \"subscription ARR\" \"2026\" \"Analyst Day\"",
+        "type": "search",
+        "queries": [
+          "site:ir.rubrik.com/static-files Rubrik \"subscription ARR\" \"2026\" \"Analyst Day\"",
+          "site:ir.rubrik.com/static-files Rubrik \"Security and AI Operations\" \"2026\" PDF",
+          "site:ir.rubrik.com/static-files \"Rubrik Agent Cloud\" investor presentation",
+          "site:ir.rubrik.com/static-files Rubrik \"FY31\""
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:rubrik.com/company/newsroom Rubrik acquisitions Predibase Laminar 2025 2026 official",
+        "type": "search",
+        "queries": [
+          "site:rubrik.com/company/newsroom Rubrik acquisitions Predibase Laminar 2025 2026 official",
+          "site:rubrik.com/company/newsroom Rubrik identity acquisition official",
+          "site:rubrik.com/company/newsroom Rubrik data security posture management acquisition official",
+          "site:ir.rubrik.com Rubrik acquisition fiscal 2026 Predibase Laminar"
+        ],
+        "sources": null
+      },
+      {
+        "query": "Rubrik 10-K 2026 AWS hosting costs subscription gross margin cloud infrastructure",
+        "type": "search",
+        "queries": [
+          "Rubrik 10-K 2026 AWS hosting costs subscription gross margin cloud infrastructure",
+          "Rubrik 10-K 2026 channel partners distributors resellers customers",
+          "Rubrik 10-K 2026 competitors Veeam Commvault Cohesity Dell IBM",
+          "Rubrik 10-K 2026 risk AI products cloud providers"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:fintel.io/doc/sec-rubrik-inc-1943896-10k-2026 \"Amazon Web Services\"",
+        "type": "search",
+        "queries": [
+          "site:fintel.io/doc/sec-rubrik-inc-1943896-10k-2026 \"Amazon Web Services\"",
+          "site:fintel.io/doc/sec-rubrik-inc-1943896-10k-2026 \"Channel Partners\"",
+          "site:fintel.io/doc/sec-rubrik-inc-1943896-10k-2026 \"Our competitors\"",
+          "site:fintel.io/doc/sec-rubrik-inc-1943896-10k-2026 \"subscription contracts\""
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:companiesmarketcap.com/rubrik/sec-reports-10k/0001943896-26-000013/ \"Channel Partners\"",
+        "type": "search",
+        "queries": [
+          "site:companiesmarketcap.com/rubrik/sec-reports-10k/0001943896-26-000013/ \"Channel Partners\"",
+          "site:companiesmarketcap.com/rubrik/sec-reports-10k/0001943896-26-000013/ \"cloud service providers\"",
+          "site:companiesmarketcap.com/rubrik/sec-reports-10k/0001943896-26-000013/ competitors",
+          "site:companiesmarketcap.com/rubrik/sec-reports-10k/0001943896-26-000013/ \"Subscription ARR\""
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/1943896/000194389625000012/rbrk-20250131.htm"
+      },
+      {
+        "query": "Rubrik 2025 10-K channel partners subscription contracts customers competition AWS Azure GCP",
+        "type": "search",
+        "queries": [
+          "Rubrik 2025 10-K channel partners subscription contracts customers competition AWS Azure GCP",
+          "Rubrik 2025 annual report business model subscription revenue appliance hardware manufacturer",
+          "Rubrik 2025 10-K \"No customer\" revenue",
+          "Rubrik 2025 10-K \"public cloud\" infrastructure costs"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:sec.gov/Archives/edgar/data/1943896/000194389626000047 Rubrik \"Channel Partners\" revenue 2026",
+        "type": "search",
+        "queries": [
+          "site:sec.gov/Archives/edgar/data/1943896/000194389626000047 Rubrik \"Channel Partners\" revenue 2026",
+          "site:sec.gov/Archives/edgar/data/1943896/000194389626000047 Rubrik \"percentage of total revenue\" channel",
+          "site:sec.gov/Archives/edgar/data/1943896/000194389626000047 Rubrik distributor revenue concentration",
+          "site:sec.gov/Archives/edgar/data/1943896/000194389626000047 Rubrik \"No end-user customer\""
+        ],
+        "sources": null
+      },
+      {
+        "query": "Rubrik Q1 2027 10-Q channel partners revenue concentration",
+        "type": "search",
+        "queries": [
+          "Rubrik Q1 2027 10-Q channel partners revenue concentration",
+          "Rubrik 2026 10-K channel partner concentration percentage revenue",
+          "Rubrik 2026 annual report distributors resellers concentration",
+          "Rubrik channel partners account for revenue 2026"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:rubrik.com/company/newsroom/press-releases/26 Rubrik AWS European Sovereign Cloud July 8 2026",
+        "type": "search",
+        "queries": [
+          "site:rubrik.com/company/newsroom/press-releases/26 Rubrik AWS European Sovereign Cloud July 8 2026",
+          "site:rubrik.com/company/newsroom/press-releases/26 Rubrik UK investment July 9 2026",
+          "site:rubrik.com/company/newsroom/press-releases/26 Rubrik Internet2 July 14 2026",
+          "site:rubrik.com/company/newsroom/press-releases/26 Rubrik sovereignty regulation 2026"
+        ],
+        "sources": null
+      },
+      {
+        "query": "Rubrik Security Cloud launches AWS European Sovereign Cloud July 8 2026",
+        "type": "search",
+        "queries": [
+          "Rubrik Security Cloud launches AWS European Sovereign Cloud July 8 2026",
+          "Rubrik £375 million UK investment July 9 2026 official",
+          "Rubrik Internet2 July 14 2026 official",
+          "Rubrik Security Cloud Sovereign 2026 official"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:bitcap.com/en Rubrik RBRK",
+        "type": "search",
+        "queries": [
+          "site:bitcap.com/en Rubrik RBRK",
+          "site:bitcap.com Rubrik Aktie",
+          "site:bitcap.com/news Rubrik",
+          "site:bitcap.com/en/news Rubrik"
+        ],
+        "sources": null
+      },
+      {
+        "pattern": "Agent Cloud",
+        "type": "find_in_page",
+        "url": "https://ir.rubrik.com/Shareholder-letter/"
+      }
+    ],
+    "consulted_sources": [
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1943896/000194389626000013/rbrk-20260131.htm",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1943896/000194389626000047/rbrk-20260430.htm",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://ir.rubrik.com/news-events/press-releases/news-details/2026/Rubrik-Reports-First-Quarter-Fiscal-Year-2027-Financial-Results/default.aspx",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://ir.rubrik.com/Shareholder-letter/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.rubrik.com/products",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.rubrik.com/content/dam/rubrik/en/resources/policy/rubrik-licensing-guide.pdf",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.rubrik.com/partners/resellers",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.rubrik.com/content/dam/rubrik/en/resources/solutions-brief/brf-rubrik-agent-cloud.pdf",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.rubrik.com/company/newsroom/press-releases/25/rubrik-to-acquire-predibase-to-accelerate-agentic-ai-adoption",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.rubrik.com/company/newsroom/press-releases/26/rubrik-advances-identity-resilience-through-strata-acquisition-and-identity-roll-forward-innovation",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.rubrik.com/company/newsroom/press-releases/26/rubrik-launches-rubrik-agent-cloud-for-anthropics-claude-code",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.rubrik.com/company/newsroom/press-releases/26/rubrik-anthropic-project-glasswing",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.rubrik.com/company/newsroom/press-releases/26/global-systems-integrators-partner-with-rubrik-to-deliver-rubrik-agent-cloud-for-anthropics-claude-code",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.rubrik.com/company/newsroom/press-releases/26/rubrik-introduces-autonomous-business-recovery-for-cloud-applications",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.rubrik.com/company/newsroom/press-releases/26/rubrik-announces-rubrik-security-cloud-sovereign",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.rubrik.com/company/newsroom/press-releases/26/rubrik-security-cloud-launches-on-the-aws-european-sovereign-cloud",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.rubrik.com/company/newsroom/press-releases/26/rubrik-announces-375-million-uk-investment-and-names-london-as-emea-headquarters",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.gartner.com/reviews/market/backup-and-data-protection-platforms/vendor/rubrik/alternatives",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://bitcap.com/en/news",
+        "type": "model_citation"
+      }
+    ],
+    "request_tags": [
+      "app:frontier-lab-intelligence",
+      "pipeline:investment-company-context",
+      "job:company-memo-pilot",
+      "scope:single-company",
+      "prompt:company-memo-pilot-v1",
+      "company:rbrk",
+      "model:gpt-5.6-sol",
+      "reasoning:xhigh"
+    ]
+  }
+}

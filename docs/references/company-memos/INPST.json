@@ -1,0 +1,901 @@
+{
+  "schema_version": "company-memo-pilot-result-v1",
+  "company": {
+    "name": "InPost",
+    "ticker": "INPST"
+  },
+  "memo": {
+    "business_and_economics": {
+      "summary": "The platform earns primarily from e-commerce parcel delivery through automated parcel machines, pickup/drop-off points and to-door services, supplemented by fulfilment, returns and consumer-initiated shipping. Network density supports a two-sided flywheel: convenient coverage encourages consumers to select the service at checkout, while higher parcel density improves last-mile economics and merchant appeal. International markets represented 51% of FY2025 revenue, making UK and Eurozone execution central alongside Poland's cash generation. As of 2026-07-28, a recommended all-cash offer remained pending; the acceptance period had been extended to 2026-09-18 for outstanding competition reviews.",
+      "revenue_engines": [
+        {
+          "engine": "Contracted B2C and marketplace parcel delivery through lockers, PUDOs and to-door channels",
+          "who_pays": "E-commerce merchants and marketplaces generally pay contracted per-parcel charges; delivery charges may ultimately be passed to consumers.",
+          "economic_logic": "Revenue scales with parcel volume, price per parcel and service mix. Dense automated networks consolidate many parcels at each stop, potentially lowering last-mile cost relative to individual home deliveries.",
+          "sources": [
+            {
+              "url": "https://inpost.eu/sites/default/files/2026-03/InPost_Group_IAR_2025_0.pdf",
+              "claim_date": "2026-03-18"
+            },
+            {
+              "url": "https://inpost.eu/investors/why-invest-inpost",
+              "claim_date": null
+            }
+          ]
+        },
+        {
+          "engine": "Consumer-to-consumer shipping, returns and marketplace-integrated sending",
+          "who_pays": "Consumers, marketplace sellers or marketplace partners pay shipping and return charges.",
+          "economic_logic": "The mobile application, label-free sending and marketplace integrations reduce transaction friction and can increase shipment frequency while feeding volume into the existing network.",
+          "sources": [
+            {
+              "url": "https://inpost.eu/what-we-do/our-products-innovations",
+              "claim_date": null
+            },
+            {
+              "url": "https://inpost.eu/sites/default/files/2025-04/InPost%20and%20Vinted%20signed%20a%20new%20partnership.pdf",
+              "claim_date": "2025-04-23"
+            },
+            {
+              "url": "https://inpost.eu/sites/default/files/2025-12/InPost%20-%20EBay%20press.pdf",
+              "claim_date": "2025-11-27"
+            }
+          ]
+        },
+        {
+          "engine": "Fulfilment and adjacent logistics services",
+          "who_pays": "Retailers and e-commerce merchants pay for fulfilment, collection, sorting, linehaul and related delivery services.",
+          "economic_logic": "Broader logistics capabilities can capture more of a merchant's supply chain and supply parcels to the out-of-home network; returns depend on integration, route density and asset utilization.",
+          "sources": [
+            {
+              "url": "https://inpost.eu/what-we-do/our-strategy",
+              "claim_date": null
+            },
+            {
+              "url": "https://inpost.eu/sites/default/files/2026-03/InPost_Group_IAR_2025_0.pdf",
+              "claim_date": "2026-03-18"
+            }
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "url": "https://inpost.eu/sites/default/files/2026-03/InPost_Group_IAR_2025_0.pdf",
+          "claim_date": "2026-03-18"
+        },
+        {
+          "url": "https://inpost.eu/sites/default/files/2026-05/InPost%201Q%202026%20press%20release.pdf",
+          "claim_date": "2026-05-13"
+        },
+        {
+          "url": "https://inpost.eu/sites/default/files/2026-07/Press%20release%20re%20extension%20offer%20period_0.pdf",
+          "claim_date": "2026-07-22"
+        }
+      ]
+    },
+    "operating_and_financial_drivers": [
+      {
+        "driver": "Parcel volume and channel mix",
+        "why_it_matters": "Volume is the main revenue multiplier, but economics differ between lockers, PUDOs, to-door, B2C and C2C. Marketplace momentum and conversion from home delivery to automated out-of-home delivery can therefore move both revenue and unit cost.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "product_mix",
+          "operating_cost",
+          "cash_flow"
+        ],
+        "sources": [
+          {
+            "url": "https://inpost.eu/sites/default/files/2026-03/InPost_Group_IAR_2025_0.pdf",
+            "claim_date": "2026-03-18"
+          },
+          {
+            "url": "https://inpost.eu/sites/default/files/2026-05/InPost%201Q%202026%20press%20release.pdf",
+            "claim_date": "2026-05-13"
+          }
+        ]
+      },
+      {
+        "driver": "APM density, placement, utilization and parcel dwell time",
+        "why_it_matters": "Convenient coverage drives consumer adoption, while parcels per machine and compartment turnover determine whether deployment capex produces attractive delivery density. Poor placement or slow collection can create unused capacity in one location and congestion in another.",
+        "financial_lines": [
+          "volume",
+          "product_mix",
+          "operating_cost",
+          "capital_expenditure",
+          "cash_flow"
+        ],
+        "sources": [
+          {
+            "url": "https://inpost.eu/what-we-do/our-strategy",
+            "claim_date": null
+          },
+          {
+            "url": "https://inpost.eu/what-we-do/our-products-innovations",
+            "claim_date": null
+          },
+          {
+            "url": "https://inpost.eu/sites/default/files/2026-03/InPost_Group_IAR_2025_0.pdf",
+            "claim_date": "2026-03-18"
+          }
+        ]
+      },
+      {
+        "driver": "Merchant contract pricing, indexation, committed volumes and service levels",
+        "why_it_matters": "Large marketplace agreements influence parcel yield, network loading and capacity planning. The non-binding 2026 Allegro framework proposal explicitly contemplated lower prices, revised indexation and multi-year volume and capacity terms, illustrating the trade-off between yield and volume visibility.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "pricing",
+          "operating_cost",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://inpost.eu/sites/default/files/2026-06/InPost%20-%20Allegro%20LOI.pdf",
+            "claim_date": "2026-06-18"
+          }
+        ]
+      },
+      {
+        "driver": "International segment mix and acquisition integration",
+        "why_it_matters": "International operations now produce more than half of revenue, but the UK transformation diluted group profitability and international free cash flow remained negative in Q1 2026. Integrating acquired networks and standardizing logistics systems are therefore critical to margin and cash conversion.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "product_mix",
+          "operating_cost",
+          "working_capital",
+          "cash_flow",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://inpost.eu/sites/default/files/2026-03/InPost_Group_IAR_2025_0.pdf",
+            "claim_date": "2026-03-18"
+          },
+          {
+            "url": "https://inpost.eu/sites/default/files/2026-05/InPost%201Q%202026%20press%20release.pdf",
+            "claim_date": "2026-05-13"
+          }
+        ]
+      },
+      {
+        "driver": "Network capex productivity and financing capacity",
+        "why_it_matters": "Locker deployment and logistics integration require investment before utilization is proven. FY2025 capex rose to PLN 1.83 billion, while Q1 2026 group free cash flow was negative and net leverage increased, making capex per incremental parcel and international cash conversion important constraints.",
+        "financial_lines": [
+          "capital_expenditure",
+          "cash_flow",
+          "balance_sheet",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://inpost.eu/sites/default/files/2026-03/InPost_Group_IAR_2025_0.pdf",
+            "claim_date": "2026-03-18"
+          },
+          {
+            "url": "https://inpost.eu/sites/default/files/2026-05/InPost%201Q%202026%20press%20release.pdf",
+            "claim_date": "2026-05-13"
+          }
+        ]
+      }
+    ],
+    "ecosystem": [
+      {
+        "relationship": "customer_or_end_market",
+        "entities_or_group": "E-commerce merchants, marketplaces, C2C sellers and parcel recipients across Poland, the Eurozone and the UK",
+        "why_it_matters": "Merchant checkout availability supplies parcels, while consumer convenience and service quality influence delivery-method selection, repeat usage and the network flywheel.",
+        "sources": [
+          {
+            "url": "https://inpost.eu/investors/why-invest-inpost",
+            "claim_date": null
+          },
+          {
+            "url": "https://inpost.eu/sites/default/files/2026-03/InPost_Group_IAR_2025_0.pdf",
+            "claim_date": "2026-03-18"
+          }
+        ]
+      },
+      {
+        "relationship": "partner",
+        "entities_or_group": "Allegro, Vinted, eBay and other marketplace integrations",
+        "why_it_matters": "Marketplace integrations can deliver committed or high-frequency parcel flows and embed the delivery option directly in checkout or seller workflows. They can also create pricing and concentration risk when counterparties have substantial bargaining power.",
+        "sources": [
+          {
+            "url": "https://inpost.eu/sites/default/files/2026-06/InPost%20-%20Allegro%20LOI.pdf",
+            "claim_date": "2026-06-18"
+          },
+          {
+            "url": "https://inpost.eu/sites/default/files/2025-04/InPost%20and%20Vinted%20signed%20a%20new%20partnership.pdf",
+            "claim_date": "2025-04-23"
+          },
+          {
+            "url": "https://inpost.eu/sites/default/files/2025-12/InPost%20-%20EBay%20press.pdf",
+            "claim_date": "2025-11-27"
+          }
+        ]
+      },
+      {
+        "relationship": "substitute",
+        "entities_or_group": "Home delivery, national postal and courier networks, and competing locker or PUDO networks",
+        "why_it_matters": "Consumers and merchants can select alternative carriers or delivery channels. Competitors can respond with lower pricing, denser networks or marketplace exclusivity, while home delivery remains the dominant channel in several expansion markets.",
+        "sources": [
+          {
+            "url": "https://inpost.eu/investors/why-invest-inpost",
+            "claim_date": null
+          },
+          {
+            "url": "https://inpost.eu/sites/default/files/2026-03/InPost_Group_IAR_2025_0.pdf",
+            "claim_date": "2026-03-18"
+          }
+        ]
+      },
+      {
+        "relationship": "infrastructure_dependency",
+        "entities_or_group": "APM and PUDO location hosts, sorting hubs, linehaul capacity, municipalities, electricity, telecommunications and the mobile/IT stack",
+        "why_it_matters": "Physical locations and digital connectivity are required for convenient coverage, remote locker access, tracking and parcel processing. Constraints or outages can reduce capacity, interrupt service and strand deployed assets.",
+        "sources": [
+          {
+            "url": "https://inpost.eu/what-we-do/our-strategy",
+            "claim_date": null
+          },
+          {
+            "url": "https://inpost.eu/what-we-do/our-products-innovations",
+            "claim_date": null
+          },
+          {
+            "url": "https://inpost.eu/sites/default/files/2026-03/InPost_Group_IAR_2025_0.pdf",
+            "claim_date": "2026-03-18"
+          }
+        ]
+      },
+      {
+        "relationship": "regulatory_dependency",
+        "entities_or_group": "Competition authorities and local authorities governing network locations",
+        "why_it_matters": "Competition clearances affect the pending change of control, while local cooperation and siting access influence how quickly and efficiently the locker network can expand.",
+        "sources": [
+          {
+            "url": "https://inpost.eu/sites/default/files/2026-07/Press%20release%20re%20extension%20offer%20period_0.pdf",
+            "claim_date": "2026-07-22"
+          },
+          {
+            "url": "https://inpost.eu/what-we-do/our-strategy",
+            "claim_date": null
+          }
+        ]
+      }
+    ],
+    "strategy_and_committed_actions": [
+      {
+        "action": "Continue rapid APM deployment and increase population coverage, particularly outside Poland.",
+        "investment_relevance": "Expansion can enlarge the addressable parcel base and strengthen network effects, but value creation requires utilization and delivery density to catch up with deployment capex.",
+        "sources": [
+          {
+            "url": "https://inpost.eu/what-we-do/our-strategy",
+            "claim_date": null
+          },
+          {
+            "url": "https://inpost.eu/sites/default/files/2026-03/InPost_Group_IAR_2025_0.pdf",
+            "claim_date": "2026-03-18"
+          }
+        ]
+      },
+      {
+        "action": "Integrate acquired UK and Iberian logistics operations and standardize first- and last-mile systems across markets.",
+        "investment_relevance": "Successful integration should improve service consistency, route density and scalability; failure would prolong international losses, operational complexity and cash consumption.",
+        "sources": [
+          {
+            "url": "https://inpost.eu/sites/default/files/2026-03/InPost_Group_IAR_2025_0.pdf",
+            "claim_date": "2026-03-18"
+          },
+          {
+            "url": "https://inpost.eu/sites/default/files/2026-05/InPost%201Q%202026%20press%20release.pdf",
+            "claim_date": "2026-05-13"
+          }
+        ]
+      },
+      {
+        "action": "Expand the consumer application, loyalty, returns, fulfilment and adjacent services.",
+        "investment_relevance": "A broader digital ecosystem can raise parcel frequency, consumer stickiness and merchant value, but new services must generate incremental volume or monetization rather than simply add development cost.",
+        "sources": [
+          {
+            "url": "https://inpost.eu/what-we-do/our-strategy",
+            "claim_date": null
+          },
+          {
+            "url": "https://inpost.eu/what-we-do/our-products-innovations",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "action": "Scale data science and AI across planning, operations and commercial workflows.",
+        "investment_relevance": "Management reports broader forecasting and monitoring, dynamic courier routing, automated inquiry handling and quantified AI sales-workflow improvements in France and Iberia. The investment question is whether these local workflow gains translate into group-level volume, cost or capital-efficiency gains.",
+        "sources": [
+          {
+            "url": "https://inpost.eu/what-we-do/our-strategy",
+            "claim_date": null
+          },
+          {
+            "url": "https://inpost.eu/what-we-do/our-products-innovations",
+            "claim_date": null
+          },
+          {
+            "url": "https://inpost.eu/sites/default/files/2026-03/InPost_Group_IAR_2025_0.pdf",
+            "claim_date": "2026-03-18"
+          }
+        ]
+      },
+      {
+        "action": "Proceed with the recommended all-cash offer, subject to shareholder acceptance and outstanding competition clearances.",
+        "investment_relevance": "The offer makes public-equity relevance time-sensitive. On 2026-07-22 the acceptance deadline was extended to 2026-09-18 because European Commission and Vietnamese competition reviews were continuing.",
+        "sources": [
+          {
+            "url": "https://inpost.eu/sites/default/files/2026-07/Press%20release%20re%20extension%20offer%20period_0.pdf",
+            "claim_date": "2026-07-22"
+          }
+        ]
+      }
+    ],
+    "frontier_ai_transmission_paths": [
+      {
+        "development": "More capable spatiotemporal forecasting and optimization models for locker placement and capacity allocation",
+        "company_exposure": "The group deploys capital into a large physical locker network and already uses an internal data-science function for monitoring, forecasting and planning.",
+        "affected_driver": "APM placement, compartment utilization, parcel dwell time, peak capacity and capex per incremental parcel",
+        "financial_consequence": "Better forecasts could increase parcels per machine, reduce congestion and avoid low-return deployments, supporting volume, operating cost and free cash flow. Bad forecasts could strand capital or create service bottlenecks.",
+        "direction": "mixed",
+        "materiality_condition": "The effect becomes material only if models are deployed across major markets and produce sustained improvements in utilization or peak handling without increasing capex per parcel; isolated pilots or forecast-accuracy claims are insufficient.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Parcels per APM or other disclosed utilization measures by market",
+          "Locker overflow, full-compartment and parcel-dwell indicators",
+          "Capex relative to incremental parcel capacity",
+          "Population coverage versus volume growth in newly deployed areas"
+        ],
+        "sources": [
+          {
+            "url": "https://inpost.eu/what-we-do/our-strategy",
+            "claim_date": null
+          },
+          {
+            "url": "https://inpost.eu/sites/default/files/2026-03/InPost_Group_IAR_2025_0.pdf",
+            "claim_date": "2026-03-18"
+          }
+        ]
+      },
+      {
+        "development": "Agentic route, dispatch and sortation optimization using live operational data",
+        "company_exposure": "First-mile collection, linehaul, sorting and last-mile delivery are core workflows; dynamic courier routing and a standardized logistics platform are already identified operating capabilities.",
+        "affected_driver": "Courier productivity, distance per parcel, sortation throughput, delivery punctuality and failed-delivery rates",
+        "financial_consequence": "Effective automation could lower transport and labor cost per parcel and improve service levels. Incorrect autonomous decisions could cause missed collections, capacity imbalances or SLA penalties.",
+        "direction": "mixed",
+        "materiality_condition": "Materiality requires measurable improvements in cost or throughput across production routes and peak periods while maintaining service quality, not merely successful simulations.",
+        "time_horizon": "near_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Delivery cost and adjusted profitability by segment",
+          "Parcels or stops per courier route",
+          "On-time delivery and failed-delivery rates",
+          "Peak-season throughput, exceptions and manual overrides"
+        ],
+        "sources": [
+          {
+            "url": "https://inpost.eu/what-we-do/our-products-innovations",
+            "claim_date": null
+          },
+          {
+            "url": "https://inpost.eu/sites/default/files/2026-03/InPost_Group_IAR_2025_0.pdf",
+            "claim_date": "2026-03-18"
+          }
+        ]
+      },
+      {
+        "development": "Reliable multilingual generative-AI agents for tracking, claims and parcel-support workflows",
+        "company_exposure": "The platform operates consumer applications, parcel tracking, chatbots, IVR and claims automation across multiple languages and markets.",
+        "affected_driver": "Support contacts per parcel, human handling time, claim leakage, resolution speed and consumer satisfaction",
+        "financial_consequence": "Successful automation could reduce support operating costs and improve retention. Hallucinated instructions, incorrect refunds or weak escalation could increase claims, compensation and reputational risk.",
+        "direction": "mixed",
+        "materiality_condition": "The effect becomes material if a meaningful share of contacts is resolved without human handling while complaint, repeat-contact, refund and error rates remain stable or improve.",
+        "time_horizon": "near_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Automated-resolution and human-escalation rates",
+          "Cost per support contact and contacts per parcel",
+          "Repeat-contact, complaint and compensation rates",
+          "App ratings, NPS and reported AI-support incidents"
+        ],
+        "sources": [
+          {
+            "url": "https://inpost.eu/what-we-do/our-products-innovations",
+            "claim_date": null
+          },
+          {
+            "url": "https://inpost.eu/sites/default/files/2026-03/InPost_Group_IAR_2025_0.pdf",
+            "claim_date": "2026-03-18"
+          }
+        ]
+      },
+      {
+        "development": "Generative-AI sales prospecting, lead qualification and merchant personalization",
+        "company_exposure": "The 2025 annual report disclosed AI-supported sales in France with up to a seven-fold reduction in lead-acquisition cost and an Iberian generative-AI qualification model that shortened the lead-to-meeting cycle fivefold.",
+        "affected_driver": "Merchant acquisition cost, sales-cycle duration, signed accounts and parcel volume per acquired merchant",
+        "financial_consequence": "If workflow improvements convert into productive merchant contracts, revenue and sales efficiency could improve. Low-quality leads or aggressive automation could waste capacity and damage merchant relationships.",
+        "direction": "upside",
+        "materiality_condition": "Reported workflow gains must convert into signed merchants, retained accounts and incremental profitable parcel volume across multiple markets; faster meetings alone are not financially material.",
+        "time_horizon": "near_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Merchant wins and retention by market",
+          "Lead-to-contract conversion rather than lead-to-meeting speed",
+          "Sales expense relative to new parcel volume",
+          "Parcel yield and utilization from AI-sourced accounts"
+        ],
+        "sources": [
+          {
+            "url": "https://inpost.eu/sites/default/files/2026-03/InPost_Group_IAR_2025_0.pdf",
+            "claim_date": "2026-03-18"
+          }
+        ]
+      },
+      {
+        "development": "Frontier-AI-enabled cyberattacks or unreliable autonomous changes to connected logistics software",
+        "company_exposure": "Lockers, applications, tracking, routing and sorting depend on an integrated digital and physical network holding operational and consumer data.",
+        "affected_driver": "System availability, parcel throughput, data integrity, claims, remediation spending and regulatory or contractual exposure",
+        "financial_consequence": "A material incident could interrupt parcel processing, reduce revenue, trigger compensation and raise security or compliance costs.",
+        "direction": "downside",
+        "materiality_condition": "The effect becomes material if an incident causes sustained app, APM or sortation downtime, personal-data compromise, parcel loss, regulatory action or significant SLA penalties.",
+        "time_horizon": "near_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "APM, application and sorting-system availability",
+          "Material cyber incidents and data-loss disclosures",
+          "Security and remediation expenditure",
+          "Parcel backlogs, compensation and marketplace SLA breaches"
+        ],
+        "sources": [
+          {
+            "url": "https://inpost.eu/what-we-do/our-products-innovations",
+            "claim_date": null
+          },
+          {
+            "url": "https://inpost.eu/sites/default/files/2026-03/InPost_Group_IAR_2025_0.pdf",
+            "claim_date": "2026-03-18"
+          }
+        ]
+      }
+    ],
+    "investment_thesis_and_tests": {
+      "public_bit_view_status": "no_public_view",
+      "attributable_public_thesis": null,
+      "what_would_support_it": [
+        "No company-specific public BIT thesis was located in the official materials reviewed through 2026-07-28. For any future positive case, international volume growth would need to convert into sustained profitability and free cash flow rather than continuing margin dilution.",
+        "APM deployment would need to produce rising utilization and attractive incremental parcel economics, with capex growth not persistently exceeding cash generation.",
+        "Disclosed AI workflow gains would need to translate into measurable parcel volume, operating-cost, service-quality or capital-efficiency improvements."
+      ],
+      "what_would_challenge_it": [
+        "Persistent UK or broader international cash consumption despite scale and network growth.",
+        "Price concessions or platform bargaining power that reduce parcel yield faster than committed volumes improve utilization.",
+        "Locker deployment materially outpacing usage, resulting in stranded capital or congestion in poorly allocated capacity.",
+        "Completion of the pending offer and subsequent delisting, which would remove the listed-equity transmission path."
+      ],
+      "sources": [
+        {
+          "url": "https://bitcap.com/en/newsletter",
+          "claim_date": null
+        },
+        {
+          "url": "https://bitcap.com/en/investmentprodukte",
+          "claim_date": null
+        },
+        {
+          "url": "https://inpost.eu/sites/default/files/2026-03/InPost_Group_IAR_2025_0.pdf",
+          "claim_date": "2026-03-18"
+        },
+        {
+          "url": "https://inpost.eu/sites/default/files/2026-05/InPost%201Q%202026%20press%20release.pdf",
+          "claim_date": "2026-05-13"
+        },
+        {
+          "url": "https://inpost.eu/sites/default/files/2026-07/Press%20release%20re%20extension%20offer%20period_0.pdf",
+          "claim_date": "2026-07-22"
+        }
+      ]
+    },
+    "uncertainties_and_research_triggers": [
+      {
+        "uncertainty": "The pending acquisition makes listing status and future public disclosure time-sensitive.",
+        "why_it_matters": "If the offer becomes unconditional and the shares are delisted, subsequent frontier-AI events may no longer have a tradable public-equity connection through this security.",
+        "next_research_trigger": "Check offer results, regulatory-clearance announcements, settlement and delisting notices immediately after 2026-09-18 or any newly announced deadline.",
+        "sources": [
+          {
+            "url": "https://inpost.eu/sites/default/files/2026-07/Press%20release%20re%20extension%20offer%20period_0.pdf",
+            "claim_date": "2026-07-22"
+          }
+        ]
+      },
+      {
+        "uncertainty": "International utilization and unit economics are not disclosed with enough granularity to isolate returns on each deployment cohort.",
+        "why_it_matters": "Strong network and parcel growth can coexist with poor returns if machines are deployed ahead of demand or acquired networks retain high fixed costs.",
+        "next_research_trigger": "Inspect future segment reporting for parcels per APM, capex by geography, international free cash flow, UK profitability and evidence of utilization maturation.",
+        "sources": [
+          {
+            "url": "https://inpost.eu/sites/default/files/2026-03/InPost_Group_IAR_2025_0.pdf",
+            "claim_date": "2026-03-18"
+          },
+          {
+            "url": "https://inpost.eu/sites/default/files/2026-05/InPost%201Q%202026%20press%20release.pdf",
+            "claim_date": "2026-05-13"
+          }
+        ]
+      },
+      {
+        "uncertainty": "The proposed Allegro framework was non-binding as of 2026-06-18, and its final economics were unresolved.",
+        "why_it_matters": "Lower pricing may be offset by volume commitments and better capacity planning, but the net effect on parcel yield and profitability cannot be determined before definitive terms and actual volumes are known.",
+        "next_research_trigger": "Review the definitive agreement, arbitration status, price-indexation formula, duration, minimum volumes, capacity obligations and service-level remedies.",
+        "sources": [
+          {
+            "url": "https://inpost.eu/sites/default/files/2026-06/InPost%20-%20Allegro%20LOI.pdf",
+            "claim_date": "2026-06-18"
+          }
+        ]
+      },
+      {
+        "uncertainty": "Public AI disclosures quantify selected sales-process improvements but not group-level financial contribution or control quality.",
+        "why_it_matters": "Workflow speed and lower lead costs may be immaterial if they do not produce retained merchants, parcel growth, lower per-parcel costs or reliable automated decisions.",
+        "next_research_trigger": "Look for audited or consistently reported KPIs connecting AI deployments to merchant conversion, support cost, route productivity, utilization, service failures and cash flow.",
+        "sources": [
+          {
+            "url": "https://inpost.eu/sites/default/files/2026-03/InPost_Group_IAR_2025_0.pdf",
+            "claim_date": "2026-03-18"
+          },
+          {
+            "url": "https://inpost.eu/what-we-do/our-products-innovations",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "uncertainty": "No attributable public BIT Capital view on the company was located.",
+        "why_it_matters": "A later event cannot support or challenge a BIT thesis until a company-specific thesis is publicly attributable; generic BIT commentary on AI or technology is insufficient.",
+        "next_research_trigger": "Monitor official BIT Capital quarterly reports, interviews and company-specific publications for an explicit view, preserving no_public_view until one appears.",
+        "sources": [
+          {
+            "url": "https://bitcap.com/en/newsletter",
+            "claim_date": null
+          },
+          {
+            "url": "https://bitcap.com/en/investmentprodukte",
+            "claim_date": null
+          }
+        ]
+      }
+    ],
+    "source_ledger": [
+      {
+        "url": "https://inpost.eu/sites/default/files/2026-03/InPost_Group_IAR_2025_0.pdf",
+        "title": "Integrated Annual Report 2025",
+        "publisher": "Company",
+        "published_at": "2026-03-18",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://inpost.eu/sites/default/files/2026-05/InPost%201Q%202026%20press%20release.pdf",
+        "title": "Q1 2026 Results Press Release",
+        "publisher": "Company",
+        "published_at": "2026-05-13",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://inpost.eu/what-we-do/our-strategy",
+        "title": "Our Strategy",
+        "publisher": "Company",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://inpost.eu/what-we-do/our-products-innovations",
+        "title": "Products and Innovations",
+        "publisher": "Company",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://inpost.eu/investors/why-invest-inpost",
+        "title": "Investor Business-Model Overview",
+        "publisher": "Company",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://inpost.eu/sites/default/files/2026-06/InPost%20-%20Allegro%20LOI.pdf",
+        "title": "Letter of Intent for New Allegro Framework Agreement",
+        "publisher": "Company",
+        "published_at": "2026-06-18",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://inpost.eu/sites/default/files/2025-04/InPost%20and%20Vinted%20signed%20a%20new%20partnership.pdf",
+        "title": "Multi-Year Vinted Partnership",
+        "publisher": "Company",
+        "published_at": "2025-04-23",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://inpost.eu/sites/default/files/2025-12/InPost%20-%20EBay%20press.pdf",
+        "title": "UK eBay Marketplace Partnership",
+        "publisher": "Company",
+        "published_at": "2025-11-27",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://inpost.eu/sites/default/files/2026-07/Press%20release%20re%20extension%20offer%20period_0.pdf",
+        "title": "Offer Period Extended to 18 September 2026",
+        "publisher": "Company and offeror",
+        "published_at": "2026-07-22",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://bitcap.com/en/newsletter",
+        "title": "Official Public News and Quarterly-Report Index",
+        "publisher": "BIT Capital",
+        "published_at": null,
+        "source_type": "bit_primary"
+      },
+      {
+        "url": "https://bitcap.com/en/investmentprodukte",
+        "title": "Official Investment Products Overview",
+        "publisher": "BIT Capital",
+        "published_at": null,
+        "source_type": "bit_primary"
+      }
+    ]
+  },
+  "provenance": {
+    "research_date": "2026-07-28",
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "xhigh",
+    "prompt_version": "company-memo-pilot-v1",
+    "prompt_cache_key": "fli:company-memo:company-memo-pilot-v1",
+    "response_id": "resp__aiM17w-gX2mtLEa0kMDi2Aq6qQc0ic408KL_dJVgOLBj91mMd3s99Sf8USfGnc6-lcPPE0TnbLWCtEe5xvZzw1lubBSYnMSoRMO7lcjHqXLLs2HvN2xobopdGSuvrvZw6KVY1GD0fcwZHMKPjevIsJ7Up6RGvm1XPdib-PHIMH3khua1lW8IRsV2OH99L6zu6uif2hjZwB9xTwbIwVOc-KQXbw9YS0WyfWK_1SJE30u_L2PFuEzjlPAg38c77FzsRIU7yKtI1Zt9T43fmsHnxlqHCUVuv1F7Iv0aJOaofTtShYzljrUDbLR-U-vTOXRJVHJVnOg7EQ-3uhx-Np8ZTQtKG-f-gYxPx5eObhX9aNJtLnKRLPN360KSFCdeGti-EOtXHzSQG3OgD5dkVMptJtebTdElfHR93XxwMWsSPiE7N4k3RXxYbf6BLOrYgbfVCBb3RsXYtY8p2XqaJ2Av--r",
+    "response_model": "gpt-5.6-sol",
+    "input_tokens": 103859,
+    "cached_tokens": 0,
+    "cache_write_tokens": 0,
+    "output_tokens": 44958,
+    "reasoning_tokens": 9589,
+    "reported_cost_usd": null,
+    "web_actions": [
+      {
+        "query": "site:inpost.eu/investors InPost annual report 2025 pdf",
+        "type": "search",
+        "queries": [
+          "site:inpost.eu/investors InPost annual report 2025 pdf",
+          "site:inpost.eu/investors InPost Q1 2026 results",
+          "site:inpost.eu/investors/consortiums-offer InPost consortium offer July 2026",
+          "site:inpost.eu \"AI\" \"data science\" InPost products innovations"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://inpost.eu/what-we-do/our-strategy"
+      },
+      {
+        "pattern": "Revenue by segment",
+        "type": "find_in_page",
+        "url": "https://inpost.eu/sites/default/files/2026-03/InPost_Group_IAR_2025_0.pdf"
+      },
+      {
+        "query": "site:inpost.eu/sites/default/files/2026-03/InPost_Group_IAR_2025_0.pdf InPost 2025 revenue parcel volume APM capex adjusted EBITDA",
+        "type": "search",
+        "queries": [
+          "site:inpost.eu/sites/default/files/2026-03/InPost_Group_IAR_2025_0.pdf InPost 2025 revenue parcel volume APM capex adjusted EBITDA",
+          "site:inpost.eu/sites/default/files/2026-03/InPost_Group_IAR_2025_0.pdf InPost customer Allegro contract concentration",
+          "site:inpost.eu/sites/default/files/2026-03/InPost_Group_IAR_2025_0.pdf InPost AI data science route optimization cybersecurity",
+          "site:inpost.eu/sites/default/files/2026-03/InPost_Group_IAR_2025_0.pdf InPost competitors regulation Digital Services Act NIS2"
+        ],
+        "sources": null
+      },
+      {},
+      {
+        "query": "site:inpost.eu \"InPost Group Q1 2026 results\"",
+        "type": "search",
+        "queries": [
+          "site:inpost.eu \"InPost Group Q1 2026 results\"",
+          "site:inpost.eu \"InPost Group FY 2025 Results\"",
+          "site:inpost.eu/sites/default/files/2026-05 InPost Q1 2026 pdf",
+          "site:inpost.eu/sites/default/files/2026-03 InPost FY 2025 results pdf"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://inpost.eu/sites/default/files/2026-03/InPost%20FY%202025%20Press%20Release_1.pdf"
+      },
+      {
+        "type": "open_page",
+        "url": "https://inpost.eu/sites/default/files/2026-03/InPost%20FY%202025%20Press%20Release_1.pdf"
+      },
+      {
+        "query": "site:inpost.eu/sites/default/files/2026-05 \"Q1 2026\" \"InPost\" presentation pdf",
+        "type": "search",
+        "queries": [
+          "site:inpost.eu/sites/default/files/2026-05 \"Q1 2026\" \"InPost\" presentation pdf",
+          "site:inpost.eu/sites/default/files/2026-03 \"FY 2025\" \"InPost\" presentation pdf",
+          "site:inpost.eu/sites/default/files/2026-05 InPost Q1 2026 Poland Eurozone UK margin APM",
+          "site:inpost.eu/sites/default/files/2026-03 InPost FY 2025 Poland Eurozone UK APM volumes"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://inpost.eu/investors/documents"
+      },
+      {
+        "query": "site:inpost.eu/investors 27 July 2026 InPost offer results",
+        "type": "search",
+        "queries": [
+          "site:inpost.eu/investors 27 July 2026 InPost offer results",
+          "site:inpost.eu/investors 28 July 2026 InPost offer",
+          "site:inpost.eu \"extension offer period\" \"InPost\" July 2026",
+          "IS Iris Lux Bidco InPost offer results July 2026"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:bitcapital.de InPost",
+        "type": "search",
+        "queries": [
+          "site:bitcapital.de InPost",
+          "site:bitcap.com InPost BIT Capital",
+          "\"BIT Capital\" \"InPost\"",
+          "site:youtube.com BIT Capital InPost"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:bitcap.com/en/news InPost",
+        "type": "search",
+        "queries": [
+          "site:bitcap.com/en/news InPost",
+          "site:bitcap.com/en \"InPost\"",
+          "site:bitcap.com \"InPost\"",
+          "site:bitcap.com/en/news BIT Capital company analysis logistics"
+        ],
+        "sources": null
+      },
+      {
+        "query": "\"InPost Group Integrated Annual Report 2025\" cybersecurity",
+        "type": "search",
+        "queries": [
+          "\"InPost Group Integrated Annual Report 2025\" cybersecurity",
+          "\"InPost Group Integrated Annual Report 2025\" data security",
+          "\"InPost Group Integrated Annual Report 2025\" risk management AI",
+          "\"InPost Group Integrated Annual Report 2025\" regulation"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.marketscreener.com/news/inpost-s-a-annual-financial-and-audit-reports-inpost-s-a-ce7e5ed8dc8df027"
+      },
+      {
+        "query": "\"seven-fold reduction in lead acquisition costs\" InPost",
+        "type": "search",
+        "queries": [
+          "\"seven-fold reduction in lead acquisition costs\" InPost",
+          "\"lead-to-meeting cycle fivefold\" InPost",
+          "\"advanced tools across markets\" \"AI-driven sales support\" InPost",
+          "\"InPost\" \"AI-driven\" \"route\""
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:inpost.eu InPost \"Data Science Hub\" forecasting",
+        "type": "search",
+        "queries": [
+          "site:inpost.eu InPost \"Data Science Hub\" forecasting",
+          "site:inpost.eu InPost \"dynamic courier routing\"",
+          "site:inpost.eu InPost chatbot IVR claims robots AI",
+          "site:inpost.eu InPost AI parcel locker demand forecasting"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://inpost.eu/sites/default/files/2026-03/InPost_Group_IAR_2025_0_0.pdf"
+      },
+      {
+        "query": "site:inpost.eu \"InPost Signs Letter of Intent for New Framework Agreement with Allegro\"",
+        "type": "search",
+        "queries": [
+          "site:inpost.eu \"InPost Signs Letter of Intent for New Framework Agreement with Allegro\"",
+          "site:inpost.eu/sites/default/files/2026-06 InPost Allegro letter of intent pdf",
+          "site:inpost.eu InPost Allegro contract parcels revenue 2025 annual report",
+          "site:inpost.eu InPost partnership Vinted eBay Amazon 2025"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:inpost.eu/sites/default/files InPost competitors DHL DPD GLS Evri Royal Mail lockers",
+        "type": "search",
+        "queries": [
+          "site:inpost.eu/sites/default/files InPost competitors DHL DPD GLS Evri Royal Mail lockers",
+          "site:inpost.eu InPost competition home delivery lockers PUDO",
+          "site:inpost.eu/sites/default/files/2026-03/InPost_Group_IAR_2025_0.pdf \"DHL\"",
+          "site:inpost.eu/sites/default/files/2026-03/InPost_Group_IAR_2025_0.pdf \"competition\""
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:inpost.eu/sites/default/files/2026-03/InPost_Group_IAR_2025_0.pdf \"integrated approach to data security\"",
+        "type": "search",
+        "queries": [
+          "site:inpost.eu/sites/default/files/2026-03/InPost_Group_IAR_2025_0.pdf \"integrated approach to data security\"",
+          "site:inpost.eu/sites/default/files/2026-03/InPost_Group_IAR_2025_0.pdf \"cyber\" \"risk\"",
+          "site:inpost.eu/sites/default/files/2026-03/InPost_Group_IAR_2025_0.pdf \"AI\" \"risk\"",
+          "site:inpost.eu/sites/default/files/2026-03/InPost_Group_IAR_2025_0.pdf \"customer service\" chatbot"
+        ],
+        "sources": null
+      }
+    ],
+    "consulted_sources": [
+      {
+        "url": "https://inpost.eu/sites/default/files/2026-03/InPost_Group_IAR_2025_0.pdf",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://inpost.eu/sites/default/files/2026-05/InPost%201Q%202026%20press%20release.pdf",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://inpost.eu/what-we-do/our-strategy",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://inpost.eu/what-we-do/our-products-innovations",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://inpost.eu/investors/why-invest-inpost",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://inpost.eu/sites/default/files/2026-06/InPost%20-%20Allegro%20LOI.pdf",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://inpost.eu/sites/default/files/2025-04/InPost%20and%20Vinted%20signed%20a%20new%20partnership.pdf",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://inpost.eu/sites/default/files/2025-12/InPost%20-%20EBay%20press.pdf",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://inpost.eu/sites/default/files/2026-07/Press%20release%20re%20extension%20offer%20period_0.pdf",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://bitcap.com/en/newsletter",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://bitcap.com/en/investmentprodukte",
+        "type": "model_citation"
+      }
+    ],
+    "request_tags": [
+      "app:frontier-lab-intelligence",
+      "pipeline:investment-company-context",
+      "job:company-memo-pilot",
+      "scope:single-company",
+      "prompt:company-memo-pilot-v1",
+      "company:inpst",
+      "model:gpt-5.6-sol",
+      "reasoning:xhigh"
+    ]
+  }
+}

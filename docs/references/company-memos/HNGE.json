@@ -1,0 +1,746 @@
+{
+  "schema_version": "company-memo-pilot-result-v1",
+  "company": {
+    "name": "Hinge Health",
+    "ticker": "HNGE"
+  },
+  "memo": {
+    "business_and_economics": {
+      "summary": "Technology-enabled musculoskeletal care combines software and AI-enabled motion tracking, an FDA-cleared pain-relief wearable, and licensed clinicians across acute injury, chronic pain, and post-surgical rehabilitation. The commercial model is principally B2B/B2B2C: buyers require credible clinical outcomes and medical-cost ROI, while realized economics depend on converting eligible populations into engaged members and delivering care efficiently.",
+      "revenue_engines": [
+        {
+          "engine": "Digital musculoskeletal-care program memberships and related care delivery",
+          "who_pays": "Primarily self-insured employers, including public-sector employers, under client contracts; health-plan and benefits-partner arrangements extend distribution and contracting access.",
+          "economic_logic": "Revenue and billings scale with client wins, contracted/eligible lives, and member engagement. In 2025, the company reported 2,830 clients, 25 million contracted lives, and 3.9% annual yield; the key commercial task is turning accessible lives into active care participants while preserving client ROI and renewal value.",
+          "sources": [
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1673743/000162828026025607/hingehealthinc_10kye2025.pdf",
+              "claim_date": "2025-12-31"
+            },
+            {
+              "url": "https://ir.hingehealth.com/news/news-details/2026/Hinge-Health-reports-fourth-quarter-and-full-year-2025-financial-results/default.aspx",
+              "claim_date": "2025-12-31"
+            },
+            {
+              "url": "https://www.hingehealth.com/for-organizations/employers/",
+              "claim_date": null
+            }
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1673743/000162828026025607/hingehealthinc_10kye2025.pdf",
+          "claim_date": "2025-12-31"
+        },
+        {
+          "url": "https://ir.hingehealth.com/overview/default.aspx",
+          "claim_date": null
+        }
+      ]
+    },
+    "operating_and_financial_drivers": [
+      {
+        "driver": "Client wins, contracted lives, and accessible-population expansion",
+        "why_it_matters": "Contracted lives are the addressable pool from which enrollment and billings can grow. Client count and partner reach also indicate distribution breadth, but accessible lives do not become revenue or clinical value without conversion and engagement.",
+        "financial_lines": [
+          "volume",
+          "revenue",
+          "cash_flow",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://ir.hingehealth.com/news/news-details/2026/Hinge-Health-reports-fourth-quarter-and-full-year-2025-financial-results/default.aspx",
+            "claim_date": "2025-12-31"
+          },
+          {
+            "url": "https://ir.hingehealth.com/overview/default.aspx",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "driver": "Member enrollment, engagement, and annual yield",
+        "why_it_matters": "The company explicitly reports annual yield as a core KPI. Better onboarding, targeted outreach, exercise adherence, and member experience can convert a larger share of contracted lives into active care, supporting billings and strengthening the ROI evidence used in enterprise selling and renewal discussions.",
+        "financial_lines": [
+          "volume",
+          "revenue",
+          "pricing",
+          "cash_flow"
+        ],
+        "sources": [
+          {
+            "url": "https://ir.hingehealth.com/news/news-details/2026/Hinge-Health-reports-fourth-quarter-and-full-year-2025-financial-results/default.aspx",
+            "claim_date": "2025-12-31"
+          },
+          {
+            "url": "https://www.hingehealth.com/for-organizations/employers/",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "driver": "Clinical outcomes, medical-cost ROI, and buyer trust",
+        "why_it_matters": "Employers, plans, and benefits partners buy a healthcare intervention rather than generic software. Demonstrable pain, function, utilization, and cost outcomes are therefore central to competitive win rates, client retention, expansion, and pricing resilience; weak or non-generalizable evidence can impair each of those variables.",
+        "financial_lines": [
+          "revenue",
+          "pricing",
+          "operating_cost",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1673743/000162828026025607/hingehealthinc_10kye2025.pdf",
+            "claim_date": "2025-12-31"
+          },
+          {
+            "url": "https://www.hingehealth.com/for-organizations/employers/",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "driver": "Automation of care delivery while retaining clinically appropriate human oversight",
+        "why_it_matters": "Licensed physical therapists, physicians, nurses, and health coaches remain part of delivery. The degree to which technology can improve triage, exercise feedback, documentation, outreach, and clinician decision support without degrading safety or outcomes governs care-team capacity, gross margin, and the credibility of the automation proposition.",
+        "financial_lines": [
+          "gross_margin",
+          "operating_cost",
+          "cash_flow",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1673743/000162828026025607/hingehealthinc_10kye2025.pdf",
+            "claim_date": "2025-12-31"
+          },
+          {
+            "url": "https://www.hingehealth.com/resources/press-releases/hinge-health-unveils-new-ai-powered-care-tools/",
+            "claim_date": "2025-10-21"
+          }
+        ]
+      },
+      {
+        "driver": "Care-continuum and network product mix, including HingeSelect",
+        "why_it_matters": "The expansion from first-line digital care into specialist evaluation, imaging, procedures, surgery, and peri-operative recovery may deepen client value and retention. It also adds provider-network, clinical-coordination, and quality-control execution risk; public materials do not separately disclose its unit economics.",
+        "financial_lines": [
+          "revenue",
+          "product_mix",
+          "gross_margin",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://ir.hingehealth.com/news/news-details/2026/Hinge-Health-adds-surgery-to-HingeSelect-delivering-a-fully-integrated-musculoskeletal-care-platform/default.aspx",
+            "claim_date": "2026-06-10"
+          }
+        ]
+      }
+    ],
+    "ecosystem": [
+      {
+        "relationship": "customer_or_end_market",
+        "entities_or_group": "Self-insured employers, including public-sector employers, and their covered populations",
+        "why_it_matters": "These buyers fund access and assess the offering against healthcare spend, employee experience, and utilization outcomes. Budget scrutiny, procurement cycles, and perceived ROI directly affect new-logo growth, expansion, and renewals.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1673743/000162828026025607/hingehealthinc_10kye2025.pdf",
+            "claim_date": "2025-12-31"
+          },
+          {
+            "url": "https://www.hingehealth.com/for-organizations/employers/",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "relationship": "partner",
+        "entities_or_group": "Health plans, PBMs, TPAs, benefits navigators, and ecosystem vendors",
+        "why_it_matters": "Partner integrations support contracting, eligibility, referrals, billing, implementation, and data exchange. This can reduce customer friction and improve member conversion, but makes distribution and operational execution partly dependent on partner workflows.",
+        "sources": [
+          {
+            "url": "https://ir.hingehealth.com/overview/default.aspx",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.hingehealth.com/for-organizations/ecosystem-partners/",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.hingehealth.com/for-organizations/employers/",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "relationship": "partner",
+        "entities_or_group": "Orthopedic specialists, surgeons, imaging and procedure providers in the HingeSelect network",
+        "why_it_matters": "The network is necessary to deliver an end-to-end MSK offering when conservative digital care is insufficient. Network quality, availability, referrals, and cost performance are material to the credibility and economics of the expanded platform.",
+        "sources": [
+          {
+            "url": "https://ir.hingehealth.com/news/news-details/2026/Hinge-Health-adds-surgery-to-HingeSelect-delivering-a-fully-integrated-musculoskeletal-care-platform/default.aspx",
+            "claim_date": "2026-06-10"
+          }
+        ]
+      },
+      {
+        "relationship": "regulatory_dependency",
+        "entities_or_group": "Licensed clinicians and professional entities; FDA medical-device requirements; health-data privacy and security obligations",
+        "why_it_matters": "Clinical services require licensed professionals and compliant operating structures. Enso is marketed as FDA-cleared, while care delivery and partner integration involve sensitive health data; expanded AI functionality must remain compatible with clinical governance, privacy, security, and applicable medical-device rules.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1673743/000162828026025607/hingehealthinc_10kye2025.pdf",
+            "claim_date": "2025-12-31"
+          },
+          {
+            "url": "https://www.hingehealth.com/product/enso/",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.ftc.gov/business-guidance/resources/mobile-health-apps-interactive-tool",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "relationship": "competitor",
+        "entities_or_group": "Digital and hybrid MSK-care vendors, alongside conventional physical therapy, orthopedic, and surgical pathways",
+        "why_it_matters": "The company must prove that its integrated digital, wearable, clinician, and network model produces better outcomes or lower total cost than alternatives. Frontier AI can lower the cost of feature parity for digital competitors, while clinical validation and integrated workflows may remain differentiators.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1673743/000162828026025607/hingehealthinc_10kye2025.pdf",
+            "claim_date": "2025-12-31"
+          }
+        ]
+      }
+    ],
+    "strategy_and_committed_actions": [
+      {
+        "action": "Deploy AI-enabled member and clinician tools: Movement Analysis uses computer vision to capture objective movement measures, while Robin is an AI Care Assistant initially focused on flare-up intake, resource sharing, and clinician handoff. The stated design principle is to complement, rather than replace, human care.",
+        "investment_relevance": "This creates a direct operating surface for advances in computer vision and language/agent models. The relevant test is not feature availability but whether deployment raises engagement and clinical quality or reduces labor per member without increasing safety risk.",
+        "sources": [
+          {
+            "url": "https://www.hingehealth.com/resources/press-releases/hinge-health-unveils-new-ai-powered-care-tools/",
+            "claim_date": "2025-10-21"
+          }
+        ]
+      },
+      {
+        "action": "Maintain an in-house computer-vision foundation built through the 2021 acquisition of wrnch, combining camera-based motion tracking with wearable sensors and clinician-led care.",
+        "investment_relevance": "Ownership of motion-data workflows and computer-vision capability may make improved pose-estimation or multimodal models more actionable than for a generic benefits vendor. It is only a durable advantage if performance translates into validated clinical and commercial outcomes.",
+        "sources": [
+          {
+            "url": "https://www.hingehealth.com/resources/press-releases/hinge-health-acquires-the-most-advanced-computer-vision-technology/",
+            "claim_date": "2021-09-17"
+          }
+        ]
+      },
+      {
+        "action": "Expand HingeSelect across the MSK journey to include orthopedic surgery, coordinated with conservative care, specialist assessment, and post-operative recovery.",
+        "investment_relevance": "The strategy broadens the clinical workflow and potential customer value proposition. It also raises the importance of provider-network execution and makes high-quality AI-supported triage more economically consequential, because inappropriate referrals or missed escalation can affect a broader episode of care.",
+        "sources": [
+          {
+            "url": "https://ir.hingehealth.com/news/news-details/2026/Hinge-Health-adds-surgery-to-HingeSelect-delivering-a-fully-integrated-musculoskeletal-care-platform/default.aspx",
+            "claim_date": "2026-06-10"
+          }
+        ]
+      }
+    ],
+    "frontier_ai_transmission_paths": [
+      {
+        "development": "A frontier lab releases materially more accurate and robust multimodal human-motion or pose-estimation models, including performance across diverse bodies, camera conditions, and impaired movement patterns.",
+        "company_exposure": "The platform already uses TrueMotion computer vision and wearable sensors for movement analysis, personalized exercise feedback, and clinician decision support.",
+        "affected_driver": "Accuracy and usefulness of functional assessment, care-plan personalization, exercise adherence, and clinician triage.",
+        "financial_consequence": "Upside if better assessment raises enrollment, completion, outcomes, client ROI, and renewal/expansion; it could also lower assessment and follow-up effort per active member.",
+        "direction": "upside",
+        "materiality_condition": "The effect is material only if the upgraded capability is clinically validated against the existing workflow, improves measured member outcomes or engagement across relevant cohorts, and is deployed broadly without raising escalation or safety-event rates.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Feature rollout and eligible-member penetration for Movement Analysis",
+          "Changes in exercise completion, functional measures, pain outcomes, and clinician escalation rates by cohort",
+          "Client ROI studies using credible comparators and sufficient follow-up",
+          "Evidence that improved motion assessment changes renewal, expansion, or annual-yield trends"
+        ],
+        "sources": [
+          {
+            "url": "https://www.hingehealth.com/resources/press-releases/hinge-health-unveils-new-ai-powered-care-tools/",
+            "claim_date": "2025-10-21"
+          },
+          {
+            "url": "https://www.hingehealth.com/resources/press-releases/hinge-health-acquires-the-most-advanced-computer-vision-technology/",
+            "claim_date": "2021-09-17"
+          }
+        ]
+      },
+      {
+        "development": "Frontier language and agent models become more reliable at constrained health-information intake, dialogue summarization, proactive outreach, and routing under human supervision.",
+        "company_exposure": "Robin already gathers flare-up details, shares resources, and summarizes the situation for the physical therapist; the company has described future roles such as common-question handling and proactive check-ins.",
+        "affected_driver": "Care-team workload per member, response time, member engagement, triage quality, and safety escalation.",
+        "financial_consequence": "Mixed: successful automation can improve gross margin and operating leverage while supporting engagement; incorrect guidance, weak escalation, or increased clinician review can create outcome, trust, compliance, and cost downside.",
+        "direction": "mixed",
+        "materiality_condition": "The pathway is material only if automated interactions demonstrably deflect or shorten low-value work while maintaining or improving outcomes, member satisfaction, and safety versus a clinician-led baseline.",
+        "time_horizon": "near_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Member adoption, containment, handoff, and repeat-contact rates for Robin",
+          "Clinician minutes per active member and time-to-response for flare-ups",
+          "Safety incidents, missed escalations, complaints, and post-deployment clinical audit results",
+          "Gross-margin progression attributable to care-delivery efficiency rather than accounting or mix"
+        ],
+        "sources": [
+          {
+            "url": "https://www.hingehealth.com/resources/press-releases/hinge-health-unveils-new-ai-powered-care-tools/",
+            "claim_date": "2025-10-21"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1673743/000162828026025607/hingehealthinc_10kye2025.pdf",
+            "claim_date": "2025-12-31"
+          }
+        ]
+      },
+      {
+        "development": "Frontier models make competent motion coaching, conversational support, and care-navigation features cheaper and faster for competing digital-health and benefits vendors to build.",
+        "company_exposure": "The company competes in a healthcare-delivery category where its technology, clinical model, outcomes evidence, partner integration, and purchasing simplicity all contribute to differentiation.",
+        "affected_driver": "Competitive win rate, pricing power, sales-cycle friction, retention, and required research-and-development or clinical-validation spend.",
+        "financial_consequence": "Mixed but skewed to downside if feature parity erodes differentiation and prompts pricing pressure or higher go-to-market spend; upside is possible if the company integrates equivalent capabilities faster because of its existing workflow, data, and clinical infrastructure.",
+        "direction": "mixed",
+        "materiality_condition": "The effect becomes material if AI-enabled rivals demonstrate comparable independently credible outcomes, win competitive RFPs, shorten implementation, or force discounts without offsetting increases in the company's engagement or clinical-performance advantage.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Head-to-head win rate, discounting, sales-cycle duration, and client-retention trends",
+          "Competitor clinical studies and enterprise health-plan integrations",
+          "Changes in product-development expense and time-to-market for new care features",
+          "Whether buyers increasingly treat AI coaching as a commodity rather than a differentiated capability"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1673743/000162828026025607/hingehealthinc_10kye2025.pdf",
+            "claim_date": "2025-12-31"
+          },
+          {
+            "url": "https://www.hingehealth.com/resources/press-releases/hinge-health-unveils-new-ai-powered-care-tools/",
+            "claim_date": "2025-10-21"
+          }
+        ]
+      },
+      {
+        "development": "More capable generative and multimodal health AI expands potential use of sensitive patient data and increases scrutiny of model safety, privacy, security, and medical claims.",
+        "company_exposure": "The care model handles health information, uses AI tools alongside clinicians, and includes an FDA-cleared wearable. The company has publicly framed responsible AI, privacy, security, transparency, and human complementarity as design principles.",
+        "affected_driver": "Deployment speed, compliance burden, enterprise security review, client trust, clinical governance, and litigation or regulatory risk.",
+        "financial_consequence": "Downside if safety, privacy, or regulatory issues delay launches, increase compliance and clinical-review expense, impair partner trust, or create remediation costs; the offsetting upside is that strong governance may become a sales differentiator.",
+        "direction": "mixed",
+        "materiality_condition": "The effect is material if an AI-specific incident, a new regulatory requirement, or a customer security standard materially changes launch timing, review workload, care-model design, or retention and procurement outcomes.",
+        "time_horizon": "near_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "AI governance disclosures, model documentation, and human-oversight protocols",
+          "Security incidents, privacy complaints, regulator correspondence, or material client-review delays",
+          "Changes to product claims, clinical escalation policies, or Enso/app regulatory positioning",
+          "Evidence that compliance controls shorten rather than lengthen enterprise procurement"
+        ],
+        "sources": [
+          {
+            "url": "https://www.hingehealth.com/resources/press-releases/hinge-health-unveils-new-ai-powered-care-tools/",
+            "claim_date": "2025-10-21"
+          },
+          {
+            "url": "https://www.hingehealth.com/product/enso/",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.ftc.gov/business-guidance/resources/mobile-health-apps-interactive-tool",
+            "claim_date": null
+          }
+        ]
+      }
+    ],
+    "investment_thesis_and_tests": {
+      "public_bit_view_status": "no_public_view",
+      "attributable_public_thesis": null,
+      "what_would_support_it": [
+        "Not applicable: no attributable, company-specific BIT thesis was identified. A future BIT publication that explicitly states an investment conclusion and ties it to identifiable operating claims—such as engagement, clinical outcomes, automation, care-team leverage, or network economics—would establish a testable thesis.",
+        "The January 22, 2026 BIT publication references the company as a top-three holding but supplies no company-specific rationale; portfolio presence must not be treated as thesis evidence."
+      ],
+      "what_would_challenge_it": [
+        "Not applicable absent an attributable thesis. If BIT later publishes a specific claim, challenge it against disclosed annual-yield progression, clinical validation quality, client retention and expansion, care-delivery margin, and HingeSelect network execution.",
+        "Do not upgrade the status based on fund holdings, position size, sector labels, or generic statements about technology, healthcare, or AI."
+      ],
+      "sources": [
+        {
+          "url": "https://bitcap.com/en/news/tiam-fundresearch-das-sind-die-besten-fonds-2025",
+          "claim_date": "2026-01-22"
+        }
+      ]
+    },
+    "uncertainties_and_research_triggers": [
+      {
+        "uncertainty": "The public record does not provide a sufficiently granular, durable view of pricing, enrollment economics, revenue by payer/channel, or contribution margin by product and member cohort.",
+        "why_it_matters": "This prevents clean quantification of how much incremental annual yield, automation, or HingeSelect adoption converts into revenue, gross margin, and cash flow.",
+        "next_research_trigger": "Inspect subsequent annual reports, investor-day materials, contract disclosures, and earnings commentary for engagement-based pricing mechanics, average revenue per active member, client-retention cohorts, product mix, and direct-care cost per member.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1673743/000162828026025607/hingehealthinc_10kye2025.pdf",
+            "claim_date": "2025-12-31"
+          },
+          {
+            "url": "https://ir.hingehealth.com/news/news-details/2026/Hinge-Health-reports-fourth-quarter-and-full-year-2025-financial-results/default.aspx",
+            "claim_date": "2025-12-31"
+          }
+        ]
+      },
+      {
+        "uncertainty": "Feature-specific clinical validity, bias, and real-world safety evidence for Movement Analysis and Robin are not established by the product announcement alone.",
+        "why_it_matters": "Model capability matters financially only if it improves outcomes or labor efficiency across varied patient groups without unsafe recommendations, missed escalation, or loss of trust.",
+        "next_research_trigger": "Seek peer-reviewed or independently designed studies comparing AI-enabled workflows with prior workflows, stratified outcome and error rates, escalation protocols, and client-level ROI analyses with transparent comparators.",
+        "sources": [
+          {
+            "url": "https://www.hingehealth.com/resources/press-releases/hinge-health-unveils-new-ai-powered-care-tools/",
+            "claim_date": "2025-10-21"
+          }
+        ]
+      },
+      {
+        "uncertainty": "The division of work between automation and licensed clinicians, including the labor saved versus additional review and escalation workload, is not publicly quantified.",
+        "why_it_matters": "This is the principal bridge from AI capability to gross-margin and operating-leverage improvement. A member-facing assistant can increase utilization costs if it generates more contacts or requires substantial clinician supervision.",
+        "next_research_trigger": "Monitor clinician-to-member capacity, member-contact mix, automated containment and handoff metrics, clinical audit results, and management attribution for gross-margin changes.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1673743/000162828026025607/hingehealthinc_10kye2025.pdf",
+            "claim_date": "2025-12-31"
+          },
+          {
+            "url": "https://www.hingehealth.com/resources/press-releases/hinge-health-unveils-new-ai-powered-care-tools/",
+            "claim_date": "2025-10-21"
+          }
+        ]
+      },
+      {
+        "uncertainty": "The economics, network breadth, medical-management responsibility, and early commercial traction of the surgical HingeSelect expansion are not separately disclosed.",
+        "why_it_matters": "The expansion could increase strategic relevance and wallet share, but it can also add provider-network, quality, referral, and coordination complexity that is structurally different from a primarily digital program.",
+        "next_research_trigger": "Inspect client launches, covered-life penetration, provider-network disclosures, referral appropriateness, surgical cost/outcome data, and any product-level revenue or margin attribution.",
+        "sources": [
+          {
+            "url": "https://ir.hingehealth.com/news/news-details/2026/Hinge-Health-adds-surgery-to-HingeSelect-delivering-a-fully-integrated-musculoskeletal-care-platform/default.aspx",
+            "claim_date": "2026-06-10"
+          }
+        ]
+      },
+      {
+        "uncertainty": "Public materials do not identify the model suppliers, training-data boundaries, evaluation framework, or third-party data-processing architecture behind the AI care tools.",
+        "why_it_matters": "Those details determine exposure to frontier-lab dependency, inference cost, model changes, data-governance risk, and the feasibility of deploying more capable external models in regulated healthcare workflows.",
+        "next_research_trigger": "Look for model cards, privacy-policy or data-processing changes, security documentation, clinical-AI governance disclosures, regulator correspondence, and customer procurement disclosures.",
+        "sources": [
+          {
+            "url": "https://www.hingehealth.com/resources/press-releases/hinge-health-unveils-new-ai-powered-care-tools/",
+            "claim_date": "2025-10-21"
+          },
+          {
+            "url": "https://www.ftc.gov/business-guidance/resources/mobile-health-apps-interactive-tool",
+            "claim_date": null
+          }
+        ]
+      }
+    ],
+    "source_ledger": [
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1673743/000162828026025607/hingehealthinc_10kye2025.pdf",
+        "title": "2025 Form 10-K",
+        "publisher": "SEC EDGAR / company filing",
+        "published_at": "2026-03-03",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://ir.hingehealth.com/news/news-details/2026/Hinge-Health-reports-fourth-quarter-and-full-year-2025-financial-results/default.aspx",
+        "title": "Fourth quarter and full-year 2025 financial results",
+        "publisher": "Company investor relations",
+        "published_at": "2026-02-10",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://ir.hingehealth.com/overview/default.aspx",
+        "title": "Corporate overview",
+        "publisher": "Company investor relations",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.hingehealth.com/resources/press-releases/hinge-health-unveils-new-ai-powered-care-tools/",
+        "title": "AI-powered care tools announcement",
+        "publisher": "Company newsroom",
+        "published_at": "2025-10-21",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.hingehealth.com/resources/press-releases/hinge-health-acquires-the-most-advanced-computer-vision-technology/",
+        "title": "Computer-vision acquisition announcement",
+        "publisher": "Company newsroom",
+        "published_at": "2021-09-17",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://ir.hingehealth.com/news/news-details/2026/Hinge-Health-adds-surgery-to-HingeSelect-delivering-a-fully-integrated-musculoskeletal-care-platform/default.aspx",
+        "title": "HingeSelect surgical expansion announcement",
+        "publisher": "Company investor relations",
+        "published_at": "2026-06-10",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.hingehealth.com/for-organizations/ecosystem-partners/",
+        "title": "Ecosystem partners",
+        "publisher": "Company website",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.hingehealth.com/for-organizations/employers/",
+        "title": "Employer offering",
+        "publisher": "Company website",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.hingehealth.com/product/enso/",
+        "title": "Enso wearable product information",
+        "publisher": "Company website",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.ftc.gov/business-guidance/resources/mobile-health-apps-interactive-tool",
+        "title": "Mobile Health Apps Interactive Tool",
+        "publisher": "Federal Trade Commission",
+        "published_at": null,
+        "source_type": "regulator_primary"
+      },
+      {
+        "url": "https://bitcap.com/en/news/tiam-fundresearch-das-sind-die-besten-fonds-2025",
+        "title": "TIAM Fundresearch: These are the best funds of 2025",
+        "publisher": "BIT Capital",
+        "published_at": "2026-01-22",
+        "source_type": "bit_primary"
+      }
+    ]
+  },
+  "provenance": {
+    "research_date": "2026-07-28",
+    "model": "gpt-5.6-terra",
+    "reasoning_effort": "xhigh",
+    "prompt_version": "company-memo-pilot-v1",
+    "prompt_cache_key": "fli:company-memo:company-memo-pilot-v1",
+    "response_id": "resp_kSWIkrzGSl8LWqUhwBUUceJYtgb210_0tM5JX4uZSERdtVLRW-zKfMO2cVRffLuQeGvsEkV4_zEyaoZ6TWmOcKRk71ttd-AwhoSeKo1RwQpp7y2WBoPO8h4XfuH0YErJRVbOCVkkqGwjPILFLxz8OFUK0FW-NejdyuB1-KM8DakNEeEU6oFDsQ-XDfy8t_IJ08Ulenli30Vh6UbZg-ZS0I-C1WMP9q5t0pOVduG6pTlvK_S_9vmT8SJVOtzTFwyq5sWgZeQJOeqMypL0jGNYFftjlla8TpJY5pacuqqLE-41Zzu0J59FjEGNkfb6DouXGDjMv1SK6mwRe4lfhqB0W-SYP3hhNZBj1hFPG_ludsvDURVu3CPbrudgipkcmJXTPosUClIr1Iz4we_B5qD5KiyBpoKpmcRlYF1cZ7wcVa51BYK1nnvvYuSOOUpndkJ_Aiqr4JXUE8seoLxRTF9_dQ18",
+    "response_model": "gpt-5.6-terra",
+    "input_tokens": 101746,
+    "cached_tokens": 0,
+    "cache_write_tokens": 0,
+    "output_tokens": 65328,
+    "reasoning_tokens": 12514,
+    "reported_cost_usd": null,
+    "web_actions": [
+      {
+        "query": "site:ir.hingehealth.com Hinge Health annual report 2025 10-K HNGE",
+        "type": "search",
+        "queries": [
+          "site:ir.hingehealth.com Hinge Health annual report 2025 10-K HNGE",
+          "site:sec.gov/Archives/edgar/data Hinge Health HNGE 10-K 2025",
+          "site:ir.hingehealth.com Hinge Health quarterly results 2026",
+          "site:hingehealth.com Hinge Health AI computer vision clinical care technology"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://ir.hingehealth.com/overview/"
+      },
+      {
+        "query": "Hinge Health 2025 annual report 10-K February 2026 HNGE accession number",
+        "type": "search",
+        "queries": [
+          "Hinge Health 2025 annual report 10-K February 2026 HNGE accession number",
+          "Hinge Health Inc CIK 2026 10-Q May 7 2026 sec companyfacts",
+          "site:sec.gov/Archives/edgar/data/ Hinge Health 2026 annual report HNGE",
+          "site:ir.hingehealth.com/news/news-details/2026 Hinge Health Investor Day raises guidance June 9 2026"
+        ],
+        "sources": null
+      },
+      {
+        "pattern": "Our clients are primarily",
+        "type": "find_in_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/1673743/000162828026013808/hnge-20251231.htm"
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/1673743/000162828026013808/hnge-20251231.htm"
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/1673743/000162828026025607/hingehealthinc_10kye2025.pdf"
+      },
+      {
+        "query": "site:sec.gov/Archives/edgar/data/1673743 Hinge Health \"Annual yield\"",
+        "type": "search",
+        "queries": [
+          "site:sec.gov/Archives/edgar/data/1673743 Hinge Health \"Annual yield\"",
+          "site:sec.gov/Archives/edgar/data/1673743 Hinge Health \"eligible lives\" \"revenue\"",
+          "site:sec.gov/Archives/edgar/data/1673743 Hinge Health \"Pricing\" \"clients\"",
+          "site:sec.gov/Archives/edgar/data/1673743 Hinge Health \"competition\" \"Sword\""
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://ir.hingehealth.com/news/news-details/2026/Hinge-Health-adds-surgery-to-HingeSelect-delivering-a-fully-integrated-musculoskeletal-care-platform/default.aspx"
+      },
+      {
+        "query": "Hinge Health hosts its first Investor Day raises guidance June 9 2026 presentation pdf",
+        "type": "search",
+        "queries": [
+          "Hinge Health hosts its first Investor Day raises guidance June 9 2026 presentation pdf",
+          "Hinge Health adds surgery HingeSelect June 10 2026",
+          "Hinge Health investor presentation June 2026 PDF Hinge Health IR"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:ir.hingehealth.com/static-files Hinge Health \"Investor Presentation\" \"June 2026\"",
+        "type": "search",
+        "queries": [
+          "site:ir.hingehealth.com/static-files Hinge Health \"Investor Presentation\" \"June 2026\"",
+          "site:ir.hingehealth.com/static-files Hinge Health 2026 investor day PDF",
+          "site:ir.hingehealth.com \"2026 Investor Presentation\" filetype:pdf",
+          "site:ir.hingehealth.com/events-presentations Hinge Health \"Presentation\" \"2026\" PDF"
+        ],
+        "sources": null
+      },
+      {
+        "query": "Hinge Health S-1 revenue model annual yield client contract period 2025",
+        "type": "search",
+        "queries": [
+          "Hinge Health S-1 revenue model annual yield client contract period 2025",
+          "Hinge Health S-1 2025 'annual yield' 'enrolled members'",
+          "Hinge Health Form S-1 2025 risk factors AI models competitors",
+          "site:sec.gov/Archives/edgar/data/1673743/ Hinge Health S-1 2025"
+        ],
+        "sources": null
+      },
+      {
+        "pattern": "Our clients are primarily",
+        "type": "find_in_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/1673743/000119312525118259/d829170ds1a.htm"
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/1673743/000119312525118259/d829170ds1a.htm"
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/1673743/000119312525118259/0001193125-25-118259.txt"
+      },
+      {
+        "query": "site:hingehealth.com Enso FDA cleared wearable Hinge Health",
+        "type": "search",
+        "queries": [
+          "site:hingehealth.com Enso FDA cleared wearable Hinge Health",
+          "site:sec.gov/Archives/edgar/data/1673743 Hinge Health \"HIPAA\"",
+          "site:sec.gov/Archives/edgar/data/1673743 Hinge Health \"health plans\" \"TPAs\"",
+          "site:hingehealth.com Hinge Health ecosystem partners health plans PBMs TPA"
+        ],
+        "sources": null
+      },
+      {
+        "query": "\"Hinge Health\" \"physical therapy practices\" \"competition\"",
+        "type": "search",
+        "queries": [
+          "\"Hinge Health\" \"physical therapy practices\" \"competition\"",
+          "\"Hinge Health\" \"clients pay\" \"member\" \"subscription\"",
+          "\"Hinge Health\" \"Our clients\" \"self-insured employers\"",
+          "\"Hinge Health\" \"healthcare laws\" \"HIPAA\" \"FDA\""
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:bitcap.com Hinge Health",
+        "type": "search",
+        "queries": [
+          "site:bitcap.com Hinge Health",
+          "site:bitcapital.com Hinge Health",
+          "\"BIT Capital\" \"Hinge Health\"",
+          "\"Hinge Health\" \"BIT Capital\" thesis"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://bitcap.com/news/bit-capital-quartalsbericht-equity-q1-2026"
+      },
+      {
+        "query": "site:ir.hingehealth.com \"Annual yield\" Hinge Health definition",
+        "type": "search",
+        "queries": [
+          "site:ir.hingehealth.com \"Annual yield\" Hinge Health definition",
+          "site:sec.gov/Archives/edgar/data/1673743 \"annual yield\" Hinge Health",
+          "Hinge Health 2025 annual yield definition active members eligible lives",
+          "Hinge Health annual yield member enrollment 3.9% 2025 definition"
+        ],
+        "sources": null
+      }
+    ],
+    "consulted_sources": [
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1673743/000162828026025607/hingehealthinc_10kye2025.pdf",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://ir.hingehealth.com/news/news-details/2026/Hinge-Health-reports-fourth-quarter-and-full-year-2025-financial-results/default.aspx",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://ir.hingehealth.com/overview/default.aspx",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.hingehealth.com/resources/press-releases/hinge-health-unveils-new-ai-powered-care-tools/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.hingehealth.com/resources/press-releases/hinge-health-acquires-the-most-advanced-computer-vision-technology/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://ir.hingehealth.com/news/news-details/2026/Hinge-Health-adds-surgery-to-HingeSelect-delivering-a-fully-integrated-musculoskeletal-care-platform/default.aspx",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.hingehealth.com/for-organizations/ecosystem-partners/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.hingehealth.com/for-organizations/employers/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.hingehealth.com/product/enso/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.ftc.gov/business-guidance/resources/mobile-health-apps-interactive-tool",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://bitcap.com/en/news/tiam-fundresearch-das-sind-die-besten-fonds-2025",
+        "type": "model_citation"
+      }
+    ],
+    "request_tags": [
+      "app:frontier-lab-intelligence",
+      "pipeline:investment-company-context",
+      "job:company-memo-pilot",
+      "scope:single-company",
+      "prompt:company-memo-pilot-v1",
+      "company:hnge",
+      "model:gpt-5.6-terra",
+      "reasoning:xhigh"
+    ]
+  }
+}

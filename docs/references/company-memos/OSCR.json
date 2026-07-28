@@ -1,0 +1,925 @@
+{
+  "schema_version": "company-memo-pilot-result-v1",
+  "company": {
+    "name": "Oscar Health",
+    "ticker": "OSCR"
+  },
+  "memo": {
+    "business_and_economics": {
+      "summary": "The economic core is risk-bearing ACA individual-market insurance, not software licensing. Premium scale is governed by enrollment, approved rates, product and geographic mix, risk adjustment, medical costs, and administrative expense. ICHRA is primarily a distribution route into individual plans, while +Oscar and Lucie are adjacent technology, engagement, brokerage, and marketplace businesses whose standalone economics remain less visible. Oscar reported 3.17 million members as of 2026-03-31, making AI potentially material only where it measurably changes membership, retention, medical loss ratio, SG&A, or adjacent-services revenue.",
+      "revenue_engines": [
+        {
+          "engine": "Individual-market insurance premiums, including ICHRA-sourced enrollment",
+          "who_pays": "The federal government through advance premium tax credits, members through their net premium contributions, and employers indirectly through ICHRA reimbursements.",
+          "economic_logic": "Enrollment multiplied by approved premium rates and plan mix, net of risk-adjustment transfers and reinsurance. Medical claims and insurance administration determine the underwriting margin.",
+          "sources": [
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1568651/000156865126000011/oscr-20251231.htm",
+              "claim_date": "2026-02-13"
+            },
+            {
+              "url": "https://www.hioscar.com/ichra",
+              "claim_date": null
+            }
+          ]
+        },
+        {
+          "engine": "+Oscar technology and engagement services",
+          "who_pays": "Healthcare payors and providers purchasing Campaign Builder and related technology or operating services.",
+          "economic_logic": "Contract and service revenue can scale with client lives and workflow usage while reusing Oscar's technology platform. As of 2025-12-31, Campaign Builder served nearly 0.6 million external client lives, but services economics are not separately disclosed at a level that establishes materiality.",
+          "sources": [
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1568651/000156865126000011/oscr-20251231.htm",
+              "claim_date": "2026-02-13"
+            },
+            {
+              "url": "https://www.hioscar.com/plus-oscar",
+              "claim_date": null
+            }
+          ]
+        },
+        {
+          "engine": "Lucie marketplace, brokerage, and enrollment services",
+          "who_pays": "Health-plan and supplemental-product carriers or other business counterparties under brokerage and platform arrangements; current commercial terms are not publicly disaggregated.",
+          "economic_logic": "A carrier-agnostic storefront can generate economics from enrollment, product attachment, and platform relationships while also directing eligible consumers toward Oscar plans. Lucie was launched on 2026-04-20, so its revenue contribution remains unproven.",
+          "sources": [
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1568651/000156865126000011/oscr-20251231.htm",
+              "claim_date": "2026-02-13"
+            },
+            {
+              "url": "https://ir.hioscar.com/news-events-presentations/news-press-releases/news-details/2026/Meet-Lucie--A-New-Way-to-Shop-for-Healthcare-/default.aspx",
+              "claim_date": "2026-04-20"
+            }
+          ]
+        },
+        {
+          "engine": "Investment income",
+          "who_pays": "Issuers of fixed-income securities and depository counterparties supporting Oscar's insurance and corporate investment portfolios.",
+          "economic_logic": "Interest and investment income rise with investable balances and portfolio yields, but remain secondary to insurance underwriting economics.",
+          "sources": [
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1568651/000156865126000011/oscr-20251231.htm",
+              "claim_date": "2026-02-13"
+            }
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1568651/000156865126000011/oscr-20251231.htm",
+          "claim_date": "2026-02-13"
+        },
+        {
+          "url": "https://ir.hioscar.com/news-events-presentations/news-press-releases/news-details/2026/Oscar-Health-Announces-Strong-Financial-Results-for-First-Quarter-2026-And-Reaffirms-2026-Guidance/default.aspx",
+          "claim_date": "2026-05-06"
+        }
+      ]
+    },
+    "operating_and_financial_drivers": [
+      {
+        "driver": "Membership, premium rates, and geographic or product mix",
+        "why_it_matters": "Membership and approved rates drive premium volume, but member morbidity, metal-tier mix, geography, retention, and special-enrollment additions affect both revenue and expected claims. Oscar attributed first-quarter 2026 revenue growth primarily to membership and rate increases.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "pricing",
+          "product_mix",
+          "gross_margin",
+          "cash_flow",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://ir.hioscar.com/news-events-presentations/news-press-releases/news-details/2026/Oscar-Health-Announces-Strong-Financial-Results-for-First-Quarter-2026-And-Reaffirms-2026-Guidance/default.aspx",
+            "claim_date": "2026-05-06"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1568651/000156865126000011/oscr-20251231.htm",
+            "claim_date": "2026-02-13"
+          }
+        ]
+      },
+      {
+        "driver": "Medical loss ratio, utilization, provider unit costs, and care routing",
+        "why_it_matters": "Medical expenses are the largest cost pool. Pricing adequacy, utilization, provider reimbursement, pharmacy costs, plan design, care navigation, and reserve development determine whether premium growth converts into underwriting profit.",
+        "financial_lines": [
+          "gross_margin",
+          "cash_flow",
+          "working_capital",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1568651/000156865126000011/oscr-20251231.htm",
+            "claim_date": "2026-02-13"
+          },
+          {
+            "url": "https://ir.hioscar.com/news-events-presentations/news-press-releases/news-details/2026/Oscar-Health-Announces-Strong-Financial-Results-for-First-Quarter-2026-And-Reaffirms-2026-Guidance/default.aspx",
+            "claim_date": "2026-05-06"
+          }
+        ]
+      },
+      {
+        "driver": "ACA risk adjustment and claims-reserve accuracy",
+        "why_it_matters": "Risk adjustment can materially reduce or increase net premium revenue based on Oscar's members' relative morbidity versus each market. In 2025, higher-than-estimated market risk scores drove a major outlook revision, demonstrating that risk-adjustment estimation can overwhelm incremental technology benefits.",
+        "financial_lines": [
+          "revenue",
+          "gross_margin",
+          "working_capital",
+          "cash_flow",
+          "balance_sheet",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1568651/000156865125000018/oscarhealthannouncesprelim.htm",
+            "claim_date": "2025-07-22"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1568651/000156865126000011/oscr-20251231.htm",
+            "claim_date": "2026-02-13"
+          }
+        ]
+      },
+      {
+        "driver": "SG&A efficiency, distribution expense, and technology-enabled automation",
+        "why_it_matters": "Fixed-cost leverage and lower variable service, enrollment, claims, and care-navigation costs reduce SG&A per premium dollar. Oscar reported a 15.2% SG&A ratio in first-quarter 2026 and attributed part of the improvement to AI across operations and member workflows, but has not quantified AI-specific savings.",
+        "financial_lines": [
+          "operating_cost",
+          "cash_flow",
+          "gross_margin",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://assets.ctfassets.net/plyq12u1bv8a/4rFsWqh3Rim5fWSQFzibLm/2ff44ebf10b5f63e3ae3d00c7a2a1469/OscarHealth1Q2026_FactSheet_.pdf",
+            "claim_date": "2026-05-06"
+          },
+          {
+            "url": "https://ir.hioscar.com/news-events-presentations/news-press-releases/news-details/2026/Oscar-Health-Announces-Strong-Financial-Results-for-First-Quarter-2026-And-Reaffirms-2026-Guidance/default.aspx",
+            "claim_date": "2026-05-06"
+          }
+        ]
+      },
+      {
+        "driver": "Statutory capital, liquidity, and growth funding",
+        "why_it_matters": "Insurance subsidiaries must maintain regulatory capital and liquidity while funding claims, risk-adjustment settlements, and rapid enrollment growth. Capital requirements can constrain expansion even when reported corporate cash is substantial.",
+        "financial_lines": [
+          "balance_sheet",
+          "cash_flow",
+          "working_capital",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1568651/000156865126000011/oscr-20251231.htm",
+            "claim_date": "2026-02-13"
+          }
+        ]
+      }
+    ],
+    "ecosystem": [
+      {
+        "relationship": "customer_or_end_market",
+        "entities_or_group": "Individuals and families buying ACA plans; employers, employees, and brokers adopting ICHRA or Lucie",
+        "why_it_matters": "Consumer affordability, plan choice, broker distribution, employer contribution design, and shopping conversion determine enrollment and retention. ICHRA can expand the individual-market addressable population without returning Oscar to traditional group underwriting.",
+        "sources": [
+          {
+            "url": "https://www.hioscar.com/ichra",
+            "claim_date": null
+          },
+          {
+            "url": "https://ir.hioscar.com/news-events-presentations/news-press-releases/news-details/2026/Meet-Lucie--A-New-Way-to-Shop-for-Healthcare-/default.aspx",
+            "claim_date": "2026-04-20"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1568651/000156865126000011/oscr-20251231.htm",
+            "claim_date": "2026-02-13"
+          }
+        ]
+      },
+      {
+        "relationship": "supplier",
+        "entities_or_group": "Physicians, hospitals, pharmacies, laboratories, and other in-network care providers",
+        "why_it_matters": "Network breadth and provider availability influence plan attractiveness, while contracted prices, utilization, quality, and referral patterns drive medical costs. AI recommendations are financially useful only if they route members to appropriate, available, high-value care.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1568651/000156865126000011/oscr-20251231.htm",
+            "claim_date": "2026-02-13"
+          },
+          {
+            "url": "https://www.hioscar.com/oswell",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "relationship": "partner",
+        "entities_or_group": "OpenAI",
+        "why_it_matters": "Oscar states that Oswell is powered by OpenAI. Changes in model capability, pricing, latency, availability, safety, or data-handling controls can therefore affect Oswell's product quality, cost, and risk profile.",
+        "sources": [
+          {
+            "url": "https://ir.hioscar.com/news-events-presentations/news-press-releases/news-details/2025/Oscar-Unveils-New-Choices-and-AI-Tools-Shaping-the-Future-of-Individual-Healthcare-for-More-Americans-and-Businesses/default.aspx",
+            "claim_date": "2025-10-20"
+          },
+          {
+            "url": "https://www.hioscar.com/oswell",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "relationship": "competitor",
+        "entities_or_group": "National and regional health insurers, Medicaid-focused marketplace carriers, and local Blue Cross plans",
+        "why_it_matters": "Competitors influence benchmark premiums, broker shelf space, network expectations, and risk-adjustment outcomes. Lucie's carrier-agnostic model also means Oscar may distribute competing plans while attempting to monetize the broader marketplace.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1568651/000156865126000011/oscr-20251231.htm",
+            "claim_date": "2026-02-13"
+          },
+          {
+            "url": "https://ir.hioscar.com/news-events-presentations/news-press-releases/news-details/2026/Meet-Lucie--A-New-Way-to-Shop-for-Healthcare-/default.aspx",
+            "claim_date": "2026-04-20"
+          }
+        ]
+      },
+      {
+        "relationship": "regulatory_dependency",
+        "entities_or_group": "CMS, HHS, state insurance regulators, and ACA marketplace authorities",
+        "why_it_matters": "Premium tax credits, marketplace eligibility, risk adjustment, rate review, benefit mandates, network rules, privacy requirements, and statutory capital standards directly affect enrollment, net revenue, product design, liquidity, and AI deployment risk.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1568651/000156865126000011/oscr-20251231.htm",
+            "claim_date": "2026-02-13"
+          },
+          {
+            "url": "https://www.hioscar.com/en/legal/privacy",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.hioscar.com/center/npp",
+            "claim_date": null
+          }
+        ]
+      }
+    ],
+    "strategy_and_committed_actions": [
+      {
+        "action": "Expand individual-market coverage and differentiated plan designs",
+        "investment_relevance": "For 2026, Oscar announced availability in 573 counties across 20 states, including Alabama and Mississippi. Expansion can increase premium volume but raises execution, pricing, provider-network, and capital requirements.",
+        "sources": [
+          {
+            "url": "https://ir.hioscar.com/news-events-presentations/news-press-releases/news-details/2025/Oscar-Unveils-New-Choices-and-AI-Tools-Shaping-the-Future-of-Individual-Healthcare-for-More-Americans-and-Businesses/default.aspx",
+            "claim_date": "2025-10-20"
+          }
+        ]
+      },
+      {
+        "action": "Build ICHRA and Lucie into a carrier-agnostic healthcare-shopping channel",
+        "investment_relevance": "The strategy seeks to move employer-sponsored benefits toward defined contributions and individual choice. Materiality depends on employer and broker adoption, enrollment conversion, product attachment, and whether Oscar earns attractive economics on both its own and third-party products.",
+        "sources": [
+          {
+            "url": "https://www.hioscar.com/ichra",
+            "claim_date": null
+          },
+          {
+            "url": "https://ir.hioscar.com/news-events-presentations/news-press-releases/news-details/2026/Meet-Lucie--A-New-Way-to-Shop-for-Healthcare-/default.aspx",
+            "claim_date": "2026-04-20"
+          },
+          {
+            "url": "https://assets.ctfassets.net/plyq12u1bv8a/4rFsWqh3Rim5fWSQFzibLm/2ff44ebf10b5f63e3ae3d00c7a2a1469/OscarHealth1Q2026_FactSheet_.pdf",
+            "claim_date": "2026-05-06"
+          }
+        ]
+      },
+      {
+        "action": "Deploy Oswell as a personalized health and benefits agent",
+        "investment_relevance": "Oswell uses medical records, care-guide interactions, and benefit documents to answer medication, test-result, symptom, network, cost, and refill questions and connect members to clinicians. This creates direct exposure to frontier-model capability and safety.",
+        "sources": [
+          {
+            "url": "https://www.hioscar.com/oswell",
+            "claim_date": null
+          },
+          {
+            "url": "https://ir.hioscar.com/news-events-presentations/news-press-releases/news-details/2025/Oscar-Unveils-New-Choices-and-AI-Tools-Shaping-the-Future-of-Individual-Healthcare-for-More-Americans-and-Businesses/default.aspx",
+            "claim_date": "2025-10-20"
+          }
+        ]
+      },
+      {
+        "action": "Scale AI-enabled operational and care-navigation workflows",
+        "investment_relevance": "Oscar reported scaling bilingual voice agents and a real-time drug-pricing tool, while attributing part of its operating-efficiency improvement to AI. These are more directly tied to SG&A and medication adherence than generic AI experimentation.",
+        "sources": [
+          {
+            "url": "https://assets.ctfassets.net/plyq12u1bv8a/4rFsWqh3Rim5fWSQFzibLm/2ff44ebf10b5f63e3ae3d00c7a2a1469/OscarHealth1Q2026_FactSheet_.pdf",
+            "claim_date": "2026-05-06"
+          }
+        ]
+      },
+      {
+        "action": "Commercialize engagement and workflow technology through +Oscar",
+        "investment_relevance": "Campaign Builder extends Oscar's engagement, analytics, care-gap, and workflow technology to external payors and providers. The strategic test is whether external client growth converts into material, recurring, profitable services revenue.",
+        "sources": [
+          {
+            "url": "https://www.hioscar.com/plus-oscar",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1568651/000156865126000011/oscr-20251231.htm",
+            "claim_date": "2026-02-13"
+          }
+        ]
+      }
+    ],
+    "frontier_ai_transmission_paths": [
+      {
+        "development": "More reliable, long-context, tool-using health agents with stronger grounding and escalation behavior",
+        "company_exposure": "Oswell retrieves from member medical records, care-guide interactions, and benefit documents and can route users to Oscar clinicians and in-network providers.",
+        "affected_driver": "Member-service resolution, retention, care-navigation quality, avoidable utilization, and administrative contacts per member",
+        "financial_consequence": "Potentially lower SG&A per member, higher retention and premium volume, and lower medical costs if members are directed to appropriate care earlier.",
+        "direction": "upside",
+        "materiality_condition": "The effect becomes material only if a substantial share of members use Oswell, it resolves meaningful service or navigation demand without merely shifting work to clinicians, and controlled cohorts show lower contact or utilization costs without worse outcomes.",
+        "time_horizon": "near_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Monthly active users and repeat usage",
+          "Self-service resolution and human-escalation rates",
+          "Care-team contacts and cost per member",
+          "Retention and member satisfaction by user cohort",
+          "Emergency, urgent-care, and medication-adherence outcomes"
+        ],
+        "sources": [
+          {
+            "url": "https://www.hioscar.com/oswell",
+            "claim_date": null
+          },
+          {
+            "url": "https://ir.hioscar.com/news-events-presentations/news-press-releases/news-details/2025/Oscar-Unveils-New-Choices-and-AI-Tools-Shaping-the-Future-of-Individual-Healthcare-for-More-Americans-and-Businesses/default.aspx",
+            "claim_date": "2025-10-20"
+          }
+        ]
+      },
+      {
+        "development": "Improved speech models and agentic workflow automation",
+        "company_exposure": "Oscar is scaling bilingual voice agents for care navigation and using AI across operational and member workflows.",
+        "affected_driver": "Call handling, care-navigation throughput, enrollment support, claims administration, and variable SG&A per member",
+        "financial_consequence": "Lower service labor and vendor expense, faster response times, and improved operating leverage as membership grows.",
+        "direction": "upside",
+        "materiality_condition": "Savings must exceed model, integration, monitoring, and clinical-oversight costs while service quality, regulatory compliance, and member satisfaction remain stable or improve.",
+        "time_horizon": "near_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "SG&A ratio and administrative cost per member",
+          "Automated-contact share and average handling time",
+          "Transfer, abandonment, and repeat-contact rates",
+          "Bilingual service quality and complaint rates",
+          "Model and oversight expense"
+        ],
+        "sources": [
+          {
+            "url": "https://assets.ctfassets.net/plyq12u1bv8a/4rFsWqh3Rim5fWSQFzibLm/2ff44ebf10b5f63e3ae3d00c7a2a1469/OscarHealth1Q2026_FactSheet_.pdf",
+            "claim_date": "2026-05-06"
+          },
+          {
+            "url": "https://ir.hioscar.com/news-events-presentations/news-press-releases/news-details/2026/Oscar-Health-Announces-Strong-Financial-Results-for-First-Quarter-2026-And-Reaffirms-2026-Guidance/default.aspx",
+            "claim_date": "2026-05-06"
+          }
+        ]
+      },
+      {
+        "development": "Frontier-model hallucinations, prompt injection, data leakage, or overconfident clinical and benefit guidance",
+        "company_exposure": "Oswell handles highly sensitive health and benefit information and is positioned to discuss symptoms, medications, drug interactions, test results, coverage, costs, and provider selection.",
+        "affected_driver": "Clinical safety, benefit accuracy, grievances, appeals, privacy compliance, cybersecurity, retention, and brand trust",
+        "financial_consequence": "Potential higher operating and legal costs, regulatory sanctions, remediation expense, member attrition, inappropriate utilization, or medical and financial harm.",
+        "direction": "downside",
+        "materiality_condition": "The risk becomes material if deployment scales faster than grounding, access controls, monitoring, clinician escalation, and incident response, or if a recurring error affects medication, urgent symptoms, coverage, or network guidance.",
+        "time_horizon": "near_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Documented safety incidents and near misses",
+          "Benefit or network misquotation complaints",
+          "Clinician-escalation sensitivity for urgent cases",
+          "Privacy or security notifications",
+          "Appeals, grievances, litigation, and regulatory inquiries"
+        ],
+        "sources": [
+          {
+            "url": "https://www.hioscar.com/oswell",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.hioscar.com/en/legal/privacy",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.hioscar.com/center/npp",
+            "claim_date": null
+          },
+          {
+            "url": "https://ir.hioscar.com/news-events-presentations/news-press-releases/news-details/2025/Oscar-Unveils-New-Choices-and-AI-Tools-Shaping-the-Future-of-Individual-Healthcare-for-More-Americans-and-Businesses/default.aspx",
+            "claim_date": "2025-10-20"
+          }
+        ]
+      },
+      {
+        "development": "Agentic comparison, recommendation, and enrollment systems for health benefits",
+        "company_exposure": "Lucie is intended to help consumers and brokers compare and bundle medical and supplemental products, while Oscar's ICHRA strategy moves employer benefits toward individual selection.",
+        "affected_driver": "Quote-to-enrollment conversion, broker productivity, ICHRA adoption, product attachment, Oscar membership, and marketplace revenue",
+        "financial_consequence": "Higher premium volume and adjacent brokerage or platform revenue, offset by potential compliance costs or lost trust if recommendations are biased, incomplete, or inaccurate.",
+        "direction": "mixed",
+        "materiality_condition": "Lucie must attract meaningful employer, broker, and consumer volume, improve conversion or attachment versus conventional enrollment tools, and preserve credible carrier neutrality and compliant recommendations.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "ICHRA employers and covered lives",
+          "Quote-to-enrollment conversion",
+          "Medical and supplemental attach rates",
+          "Oscar versus third-party carrier mix",
+          "Broker retention and productivity metrics58a9e03ccad6f2292a391e10cffa961d"
+        ],
+        "sources": [
+          {
+            "url": "https://ir.hioscar.com/news-events-presentations/news-press-releases/news-details/2026/Meet-Lucie--A-New-Way-to-Shop-for-Healthcare-/default.aspx",
+            "claim_date": "2026-04-20"
+          },
+          {
+            "url": "https://www.hioscar.com/ichra",
+            "claim_date": null
+          },
+          {
+            "url": "https://assets.ctfassets.net/plyq12u1bv8a/4rFsWqh3Rim5fWSQFzibLm/2ff44ebf10b5f63e3ae3d00c7a2a1469/OscarHealth1Q2026_FactSheet_.pdf",
+            "claim_date": "2026-05-06"
+          }
+        ]
+      },
+      {
+        "development": "Cheaper, more capable enterprise agents for healthcare engagement and workflow creation",
+        "company_exposure": "+Oscar sells Campaign Builder to payors and providers, but improving general-purpose AI may both enhance the product and make internal or competing alternatives easier to build.",
+        "affected_driver": "+Oscar client acquisition, client retention, implementation effort, product differentiation, and services gross margin",
+        "financial_consequence": "Potential services-revenue and margin growth if Oscar productizes healthcare-specific data and workflows faster than customers can build them; potential pricing pressure if the model layer commoditizes the offering.",
+        "direction": "mixed",
+        "materiality_condition": "The path matters only if external contract wins, client lives, and services revenue grow enough to become financially visible and the healthcare-specific workflow advantage exceeds implementation and model costs.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "External client lives and contract wins",
+          "+Oscar services revenue and margin disclosure",
+          "Customer churn and renewal terms",
+          "Workflow deployment time and implementation cost",
+          "Evidence of customers selecting in-house frontier-AI alternatives"
+        ],
+        "sources": [
+          {
+            "url": "https://www.hioscar.com/plus-oscar",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1568651/000156865126000011/oscr-20251231.htm",
+            "claim_date": "2026-02-13"
+          }
+        ]
+      }
+    ],
+    "investment_thesis_and_tests": {
+      "public_bit_view_status": "no_public_view",
+      "attributable_public_thesis": null,
+      "what_would_support_it": [
+        "No attributable public BIT Capital thesis was identified as of 2026-07-28. A future constructive thesis would require sustained membership growth with pricing adequate for medical costs and risk adjustment.",
+        "Quantified evidence that AI lowers service or administrative cost per member, improves retention, or changes utilization without creating safety or compliance problems.",
+        "Material and profitable adoption of ICHRA, Lucie, or +Oscar rather than product announcements without separately visible economics."
+      ],
+      "what_would_challenge_it": [
+        "Persistent MLR or risk-adjustment volatility that overwhelms revenue growth and administrative efficiencies.",
+        "AI-related clinical, benefit, privacy, cybersecurity, or regulatory failures at member scale.",
+        "Failure of Lucie, ICHRA, or +Oscar to generate material covered lives, revenue, or margin despite continued investment."
+      ],
+      "sources": [
+        {
+          "url": "https://bitcap.com/en/news",
+          "claim_date": "2026-07-28"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1568651/000156865126000011/oscr-20251231.htm",
+          "claim_date": "2026-02-13"
+        },
+        {
+          "url": "https://ir.hioscar.com/news-events-presentations/news-press-releases/news-details/2026/Oscar-Health-Announces-Strong-Financial-Results-for-First-Quarter-2026-And-Reaffirms-2026-Guidance/default.aspx",
+          "claim_date": "2026-05-06"
+        }
+      ]
+    },
+    "uncertainties_and_research_triggers": [
+      {
+        "uncertainty": "Oscar does not disclose Oswell or voice-agent usage, resolution, safety, or cohort-level financial outcomes.",
+        "why_it_matters": "Without adoption, control-group, and escalation data, analysts cannot distinguish material operating improvement from broad product claims or ordinary fixed-cost leverage.",
+        "next_research_trigger": "Inspect quarterly materials, product updates, and regulatory disclosures for active users, resolved contacts, clinician escalations, contact-cost changes, retention, and utilization by AI-user cohort.",
+        "sources": [
+          {
+            "url": "https://www.hioscar.com/oswell",
+            "claim_date": null
+          },
+          {
+            "url": "https://assets.ctfassets.net/plyq12u1bv8a/4rFsWqh3Rim5fWSQFzibLm/2ff44ebf10b5f63e3ae3d00c7a2a1469/OscarHealth1Q2026_FactSheet_.pdf",
+            "claim_date": "2026-05-06"
+          }
+        ]
+      },
+      {
+        "uncertainty": "The revenue and margin contributions of +Oscar, Lucie, and brokerage or platform services are not sufficiently disaggregated.",
+        "why_it_matters": "These businesses could provide attractive capital-light growth, but may remain immaterial relative to insurance premiums or require substantial implementation and distribution spending.",
+        "next_research_trigger": "Look for segment disclosure, services-and-other-revenue detail, named contracts, external client lives, marketplace enrollments, commission economics, and contribution-margin commentary.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1568651/000156865126000011/oscr-20251231.htm",
+            "claim_date": "2026-02-13"
+          },
+          {
+            "url": "https://www.hioscar.com/plus-oscar",
+            "claim_date": null
+          },
+          {
+            "url": "https://ir.hioscar.com/news-events-presentations/news-press-releases/news-details/2026/Meet-Lucie--A-New-Way-to-Shop-for-Healthcare-/default.aspx",
+            "claim_date": "2026-04-20"
+          }
+        ]
+      },
+      {
+        "uncertainty": "Oscar does not clearly disclose how much membership or retention is attributable to ICHRA and Lucie.",
+        "why_it_matters": "ICHRA is central to the strategy of shifting employer benefits into the individual market, but the channel cannot be valued or stress-tested without employer, employee, and broker adoption data.",
+        "next_research_trigger": "Track ICHRA employer count, covered lives, broker and platform integrations, renewal rates, geographic mix, and Oscar's share of plans selected through Lucie.",
+        "sources": [
+          {
+            "url": "https://www.hioscar.com/ichra",
+            "claim_date": null
+          },
+          {
+            "url": "https://ir.hioscar.com/news-events-presentations/news-press-releases/news-details/2026/Meet-Lucie--A-New-Way-to-Shop-for-Healthcare-/default.aspx",
+            "claim_date": "2026-04-20"
+          }
+        ]
+      },
+      {
+        "uncertainty": "Public materials provide limited detail on Oswell's independent safety evaluation, model portability, vendor economics, and incident-governance process.",
+        "why_it_matters": "OpenAI model dependence and PHI access create potential vendor concentration, privacy, clinical-safety, and regulatory exposure that cannot be assessed from functionality claims alone.",
+        "next_research_trigger": "Seek system cards or evaluation summaries, grounding and escalation thresholds, audit results, model-change controls, vendor-spend disclosure, portability evidence, and any reportable incidents.",
+        "sources": [
+          {
+            "url": "https://ir.hioscar.com/news-events-presentations/news-press-releases/news-details/2025/Oscar-Unveils-New-Choices-and-AI-Tools-Shaping-the-Future-of-Individual-Healthcare-for-More-Americans-and-Businesses/default.aspx",
+            "claim_date": "2025-10-20"
+          },
+          {
+            "url": "https://www.hioscar.com/en/legal/privacy",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.hioscar.com/center/npp",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "uncertainty": "Core insurance variables can obscure or dominate any AI contribution.",
+        "why_it_matters": "Risk adjustment, morbidity, utilization, pricing, and reserve development can move earnings by far more than incremental technology savings, creating false attribution after strong or weak quarters.",
+        "next_research_trigger": "Reconcile any claimed AI benefit against medical-cost trend, risk-adjustment accruals, reserve development, membership mix, rate actions, and non-AI SG&A leverage.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1568651/000156865125000018/oscarhealthannouncesprelim.htm",
+            "claim_date": "2025-07-22"
+          },
+          {
+            "url": "https://ir.hioscar.com/news-events-presentations/news-press-releases/news-details/2026/Oscar-Health-Announces-Strong-Financial-Results-for-First-Quarter-2026-And-Reaffirms-2026-Guidance/default.aspx",
+            "claim_date": "2026-05-06"
+          }
+        ]
+      }
+    ],
+    "source_ledger": [
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1568651/000156865126000011/oscr-20251231.htm",
+        "title": "2025 Form 10-K",
+        "publisher": "Oscar Health, Inc. / U.S. Securities and Exchange Commission",
+        "published_at": "2026-02-13",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://ir.hioscar.com/news-events-presentations/news-press-releases/news-details/2026/Oscar-Health-Announces-Strong-Financial-Results-for-First-Quarter-2026-And-Reaffirms-2026-Guidance/default.aspx",
+        "title": "Oscar Health Announces Strong Financial Results for First Quarter 2026 and Reaffirms 2026 Guidance",
+        "publisher": "Oscar Health, Inc.",
+        "published_at": "2026-05-06",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1568651/000156865125000018/oscarhealthannouncesprelim.htm",
+        "title": "Oscar Health Announces Preliminary Financial Results for Second Quarter 2025 and Revises 2025 Guidance",
+        "publisher": "Oscar Health, Inc. / U.S. Securities and Exchange Commission",
+        "published_at": "2025-07-22",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.hioscar.com/oswell",
+        "title": "Meet Oswell",
+        "publisher": "Oscar Health, Inc.",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://ir.hioscar.com/news-events-presentations/news-press-releases/news-details/2025/Oscar-Unveils-New-Choices-and-AI-Tools-Shaping-the-Future-of-Individual-Healthcare-for-More-Americans-and-Businesses/default.aspx",
+        "title": "Oscar Unveils New Choices and AI Tools Shaping the Future of Individual Healthcare",
+        "publisher": "Oscar Health, Inc.",
+        "published_at": "2025-10-20",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.hioscar.com/plus-oscar",
+        "title": "Introducing +Oscar",
+        "publisher": "Oscar Health, Inc.",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://ir.hioscar.com/news-events-presentations/news-press-releases/news-details/2026/Meet-Lucie--A-New-Way-to-Shop-for-Healthcare-/default.aspx",
+        "title": "Meet Lucie. A New Way to Shop for Healthcare.",
+        "publisher": "Oscar Health, Inc.",
+        "published_at": "2026-04-20",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.hioscar.com/ichra",
+        "title": "Oscar for Employers: ICHRA",
+        "publisher": "Oscar Health, Inc.",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://assets.ctfassets.net/plyq12u1bv8a/4rFsWqh3Rim5fWSQFzibLm/2ff44ebf10b5f63e3ae3d00c7a2a1469/OscarHealth1Q2026_FactSheet_.pdf",
+        "title": "Oscar Health 1Q 2026 Fact Sheet",
+        "publisher": "Oscar Health, Inc.",
+        "published_at": "2026-05-06",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.hioscar.com/en/legal/privacy",
+        "title": "Privacy Policy",
+        "publisher": "Oscar Health, Inc.",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.hioscar.com/center/npp",
+        "title": "Notice of Privacy Practices 2026",
+        "publisher": "Oscar Health, Inc.",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://bitcap.com/en/news",
+        "title": "News and Publications",
+        "publisher": "BIT Capital",
+        "published_at": null,
+        "source_type": "bit_primary"
+      }
+    ]
+  },
+  "provenance": {
+    "research_date": "2026-07-28",
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "xhigh",
+    "prompt_version": "company-memo-pilot-v1",
+    "prompt_cache_key": "fli:company-memo:company-memo-pilot-v1",
+    "response_id": "resp_tc4869axh3nS_9g1hTLYBnQQbBya0cUT76Q2fR0k8haLIVn7h4ueOwginRVzxqyWj845hQyU6RyKc-gFhYy6i3pVg0ptF5yZpwRjDIjeBrw8XbcISECYT_j3U_KpQgLhVncEcNPlwBPV9it7i0XnuBG2p4EGkB3ei_90t8l8fLRFZYbiYOvouqFzGelJCdzRrhYXr35fZF4Qc8Zh_zVpSiaNiTHmj9lL5-XMIbsTvgfYijAiCqEPy68tvPYZRrU4IqEmk8RMhH_HKxH2QafLLIG8xh92WQFIJ3A-aiFYUpb_aateH1F1RlA_h31iHYPVmB4CSbj4OSHRkjHpoEbxzOdqY-Al8Yj_NCOi-lTlLkR52QMZ3UjjuUwauUsMTYR_2L54yjoMmOypev66E8oNZoBKhYye4S7fGmTeJGHd3kCDVGiJW_7bFP6NW0r4S2WsqaCcq23wIoi-KRCHt6TPpPVQ",
+    "response_model": "gpt-5.6-sol",
+    "input_tokens": 117426,
+    "cached_tokens": 0,
+    "cache_write_tokens": 0,
+    "output_tokens": 51708,
+    "reasoning_tokens": 8817,
+    "reported_cost_usd": null,
+    "web_actions": [
+      {
+        "query": "site:ir.hioscar.com Oscar Health 2025 annual report 10-k pdf",
+        "type": "search",
+        "queries": [
+          "site:ir.hioscar.com Oscar Health 2025 annual report 10-k pdf",
+          "site:ir.hioscar.com Oscar Health 2026 quarterly results Oswell AI",
+          "site:hioscar.com +Oscar Campaign Builder AI Oswell official",
+          "site:bitcap.com Oscar Health BIT Capital"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://bitcap.com/en/news"
+      },
+      {
+        "query": "Oscar Health 2025 10-K 2026 SEC Oscar Health Inc revenue premium service risk adjustment",
+        "type": "search",
+        "queries": [
+          "Oscar Health 2025 10-K 2026 SEC Oscar Health Inc revenue premium service risk adjustment",
+          "site:sec.gov/Archives/edgar/data/1568651 2025 10-k Oscar Health",
+          "site:ir.hioscar.com/static-files Oscar Health 2025 annual report pdf",
+          "Oscar Health 2025 annual report pdf"
+        ],
+        "sources": null
+      },
+      {
+        "pattern": "We have two reportable segments",
+        "type": "find_in_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/1568651/000156865126000011/oscr-20251231.htm"
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/1568651/000156865126000011/oscr-20251231.htm"
+      },
+      {
+        "query": "site:ir.hioscar.com/static-files Oscar 2024 investor day pdf ICHRA +Oscar Campaign Builder",
+        "type": "search",
+        "queries": [
+          "site:ir.hioscar.com/static-files Oscar 2024 investor day pdf ICHRA +Oscar Campaign Builder",
+          "site:ir.hioscar.com Oscar 2024 Investor Day ICHRA 2030 revenue target",
+          "site:hioscar.com Lucie Health Marketplace official Oscar ICHRA",
+          "site:sec.gov/Archives/edgar/data/1568651 Oscar Lucie Health Marketplace 2025"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://ir.hioscar.com/news-events-presentations/events-presentations/event-details/2024/Oscar-Health-Inc-2024-Investor-Day/default.aspx"
+      },
+      {
+        "query": "\"Oscar Health, Inc. 2024 Investor Day\" PDF",
+        "type": "search",
+        "queries": [
+          "\"Oscar Health, Inc. 2024 Investor Day\" PDF",
+          "\"Oscar 2024 Investor Day\" \"PDF\"",
+          "\"Oscar Health 2024 Investor Day\" slides",
+          "site:d18rn0p25nwr6d.cloudfront.net Oscar Health Investor Day 2024 pdf"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:sec.gov/Archives/edgar/data/1568651/000156865126000011 \"Oscar's Insurance Business\"",
+        "type": "search",
+        "queries": [
+          "site:sec.gov/Archives/edgar/data/1568651/000156865126000011 \"Oscar's Insurance Business\"",
+          "site:sec.gov/Archives/edgar/data/1568651/000156865126000011 \"Lucie\"",
+          "site:sec.gov/Archives/edgar/data/1568651/000156865126000011 \"Campaign Builder\"",
+          "site:sec.gov/Archives/edgar/data/1568651/000156865126000011 \"risk adjustment\" Oscar"
+        ],
+        "sources": null
+      },
+      {
+        "query": "Oscar Health 2025 10-K \"Lucie\"",
+        "type": "search",
+        "queries": [
+          "Oscar Health 2025 10-K \"Lucie\"",
+          "Oscar Health 2025 10-K \"Campaign Builder\"",
+          "Oscar Health 2025 10-K \"risk adjustment\"",
+          "Oscar Health 2025 10-K \"revenue\" \"services\""
+        ],
+        "sources": null
+      },
+      {
+        "query": "Oscar Health 2025 10-K \"total revenue\" \"premium\" \"other revenue\"",
+        "type": "search",
+        "queries": [
+          "Oscar Health 2025 10-K \"total revenue\" \"premium\" \"other revenue\"",
+          "Oscar Health 2025 10-K \"service revenue\"",
+          "Oscar Health 2025 10-K \"revenue from contracts with customers\"",
+          "Oscar Health 2025 annual report \"Investment income and other revenue\""
+        ],
+        "sources": null
+      },
+      {
+        "query": "Oscar Health 2025 10-K pharmacy benefit manager PBM",
+        "type": "search",
+        "queries": [
+          "Oscar Health 2025 10-K pharmacy benefit manager PBM",
+          "Oscar Health 2025 10-K provider network vendor cloud",
+          "Oscar Health 2025 10-K \"Optum\"",
+          "Oscar Health 2025 10-K \"Amazon Web Services\" OR \"Google Cloud\""
+        ],
+        "sources": null
+      },
+      {
+        "query": "Oscar Health 2025 10-K ACA subsidies premium tax credits risk",
+        "type": "search",
+        "queries": [
+          "Oscar Health 2025 10-K ACA subsidies premium tax credits risk",
+          "Oscar Health 2025 10-K enhanced premium tax credits expiration",
+          "Oscar Health 2025 10-K capital reserve surplus requirements",
+          "Oscar Health 2025 10-K state regulators rate approval"
+        ],
+        "sources": null
+      },
+      {
+        "query": "Oscar Health 2025 10-K Lucie brokerage services enrollment platform commissions",
+        "type": "search",
+        "queries": [
+          "Oscar Health 2025 10-K Lucie brokerage services enrollment platform commissions",
+          "Oscar Health 2025 10-K \"brokerage services\"",
+          "Oscar Health 2025 10-K \"enrollment platform\"",
+          "Oscar Health Lucie revenue commissions carriers marketplace"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://assets.ctfassets.net/plyq12u1bv8a/4rFsWqh3Rim5fWSQFzibLm/2ff44ebf10b5f63e3ae3d00c7a2a1469/OscarHealth1Q2026_FactSheet_.pdf"
+      },
+      {
+        "query": "site:sec.gov/Archives/edgar/data/1568651/ 2026 10-Q Oscar Health March 31 2026",
+        "type": "search",
+        "queries": [
+          "site:sec.gov/Archives/edgar/data/1568651/ 2026 10-Q Oscar Health March 31 2026",
+          "Oscar Health 2026 Q1 10-Q SEC 1568651",
+          "Oscar Health Q1 2026 Fact Sheet AI voice agents drug pricing",
+          "site:ir.hioscar.com 2026 first quarter fact sheet AI voice agents"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:bitcap.com/en Oscar Health",
+        "type": "search",
+        "queries": [
+          "site:bitcap.com/en Oscar Health",
+          "site:bitcap.com \"Oscar Health\"",
+          "site:bitcap.com OSCR",
+          "BIT Capital Oscar Health Jan Beckers"
+        ],
+        "sources": null
+      },
+      {
+        "query": "Oscar Health 2025 10-K artificial intelligence risk inaccurate output privacy",
+        "type": "search",
+        "queries": [
+          "Oscar Health 2025 10-K artificial intelligence risk inaccurate output privacy",
+          "Oscar Health 2025 annual report generative AI risk HIPAA",
+          "site:hioscar.com Oswell privacy safety AI medical behavioral safety research",
+          "site:hioscar.com privacy policy health data AI Oscar Oswell"
+        ],
+        "sources": null
+      }
+    ],
+    "consulted_sources": [
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1568651/000156865126000011/oscr-20251231.htm",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://ir.hioscar.com/news-events-presentations/news-press-releases/news-details/2026/Oscar-Health-Announces-Strong-Financial-Results-for-First-Quarter-2026-And-Reaffirms-2026-Guidance/default.aspx",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1568651/000156865125000018/oscarhealthannouncesprelim.htm",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.hioscar.com/oswell",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://ir.hioscar.com/news-events-presentations/news-press-releases/news-details/2025/Oscar-Unveils-New-Choices-and-AI-Tools-Shaping-the-Future-of-Individual-Healthcare-for-More-Americans-and-Businesses/default.aspx",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.hioscar.com/plus-oscar",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://ir.hioscar.com/news-events-presentations/news-press-releases/news-details/2026/Meet-Lucie--A-New-Way-to-Shop-for-Healthcare-/default.aspx",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.hioscar.com/ichra",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://assets.ctfassets.net/plyq12u1bv8a/4rFsWqh3Rim5fWSQFzibLm/2ff44ebf10b5f63e3ae3d00c7a2a1469/OscarHealth1Q2026_FactSheet_.pdf",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.hioscar.com/en/legal/privacy",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.hioscar.com/center/npp",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://bitcap.com/en/news",
+        "type": "model_citation"
+      }
+    ],
+    "request_tags": [
+      "app:frontier-lab-intelligence",
+      "pipeline:investment-company-context",
+      "job:company-memo-pilot",
+      "scope:single-company",
+      "prompt:company-memo-pilot-v1",
+      "company:oscr",
+      "model:gpt-5.6-sol",
+      "reasoning:xhigh"
+    ]
+  }
+}

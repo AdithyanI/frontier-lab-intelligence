@@ -1,0 +1,946 @@
+{
+  "schema_version": "company-memo-pilot-result-v1",
+  "company": {
+    "name": "TSMC",
+    "ticker": "TSM"
+  },
+  "memo": {
+    "business_and_economics": {
+      "summary": "A pure-play foundry that manufactures customers' proprietary semiconductor designs rather than competing with them through branded chips. Revenue comes primarily from wafer fabrication across leading-edge and specialty processes, augmented by advanced packaging, testing, mask-making and design-enablement services. The model is capital- and fixed-cost-intensive: technology differentiation, yield, utilization, product mix, pricing and packaging throughput determine whether large fabrication investments generate attractive margins and cash flow.",
+      "revenue_engines": [
+        {
+          "engine": "Leading-edge wafer fabrication for AI/HPC and premium consumer silicon",
+          "who_pays": "Fabless semiconductor designers, system companies developing custom silicon, and integrated device manufacturers outsourcing production.",
+          "economic_logic": "Customers pay for manufacturing on advanced process nodes. Revenue and margin rise when wafer starts, utilization and the mix of complex leading-edge products increase. In 2Q26, HPC represented 66% of net revenue and technologies at 7 nanometers or below represented 77% of wafer revenue.",
+          "sources": [
+            {
+              "url": "https://investor.tsmc.com/english/encrypt/files/encrypt_file/reports/2026-07/6f49632674bd2d0fd48cb65aaf89ec6ab510b559/2Q26%20ManagementReport.pdf",
+              "claim_date": "2026-07-16"
+            },
+            {
+              "url": "https://investor.tsmc.com/static/annualReports/2025/english/pdf/2025_tsmc_ar_e_ch2.pdf",
+              "claim_date": "2025-12-31"
+            }
+          ]
+        },
+        {
+          "engine": "Advanced packaging, 3D integration and testing",
+          "who_pays": "AI accelerator, server, networking and other high-performance chip customers requiring multi-die integration and high-bandwidth memory connectivity.",
+          "economic_logic": "CoWoS, SoIC and InFO add manufacturing and integration content beyond the wafer. Turnkey packaging and testing can shorten customer time-to-volume and capture more value per completed system, while requiring additional capacity and coordination with memory, substrate and materials suppliers.",
+          "sources": [
+            {
+              "url": "https://www.tsmc.com/english/dedicatedFoundry/technology/platform_HPC_tech_WLSI",
+              "claim_date": null
+            },
+            {
+              "url": "https://www.tsmc.com/english/dedicatedFoundry/services/advanced-packaging",
+              "claim_date": null
+            }
+          ]
+        },
+        {
+          "engine": "Specialty and mature-process manufacturing",
+          "who_pays": "Automotive, industrial, IoT, communications and consumer-electronics chip designers.",
+          "economic_logic": "Long-lived specialty processes broaden the customer and application base, support utilization across older fabs and provide differentiated features that are not solely dependent on transistor scaling. Economics depend on end-market units, specialty content, utilization and disciplined capacity additions.",
+          "sources": [
+            {
+              "url": "https://investor.tsmc.com/static/annualReports/2025/english/pdf/2025_tsmc_ar_e_ch2.pdf",
+              "claim_date": "2025-12-31"
+            },
+            {
+              "url": "https://investor.tsmc.com/english/encrypt/files/encrypt_file/reports/2026-07/6f49632674bd2d0fd48cb65aaf89ec6ab510b559/2Q26%20ManagementReport.pdf",
+              "claim_date": "2026-07-16"
+            }
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "url": "https://investor.tsmc.com/static/annualReports/2025/english/pdf/2025_tsmc_ar_e_ch2.pdf",
+          "claim_date": "2025-12-31"
+        },
+        {
+          "url": "https://investor.tsmc.com/sites/ir/sec-filings/2025_20F%20Report.pdf",
+          "claim_date": "2026-04-16"
+        },
+        {
+          "url": "https://www.tsmc.com/english/dedicatedFoundry/services/advanced-packaging",
+          "claim_date": null
+        }
+      ]
+    },
+    "operating_and_financial_drivers": [
+      {
+        "driver": "AI/HPC demand, leading-edge mix and customer tape-outs",
+        "why_it_matters": "Accelerators, custom ASICs, CPUs and networking chips pull advanced-node wafer demand and advanced packaging. The financial translation depends on sustained production orders rather than announced cloud capital spending alone.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "pricing",
+          "product_mix",
+          "gross_margin",
+          "capital_expenditure",
+          "cash_flow"
+        ],
+        "sources": [
+          {
+            "url": "https://investor.tsmc.com/english/encrypt/files/encrypt_file/reports/2026-07/6f49632674bd2d0fd48cb65aaf89ec6ab510b559/2Q26%20ManagementReport.pdf",
+            "claim_date": "2026-07-16"
+          },
+          {
+            "url": "https://investor.tsmc.com/static/annualReports/2025/english/index.html",
+            "claim_date": "2026-04-16"
+          }
+        ]
+      },
+      {
+        "driver": "Yield, utilization and ramp economics at new nodes",
+        "why_it_matters": "Early-node depreciation, learning costs and lower initial utilization can dilute margins before yield and volume mature. Conversely, strong utilization and cost improvement spread fixed costs over more wafers. The 2-nanometer ramp began contributing to wafer revenue in 2Q26.",
+        "financial_lines": [
+          "volume",
+          "product_mix",
+          "gross_margin",
+          "operating_cost",
+          "capital_expenditure",
+          "working_capital",
+          "cash_flow"
+        ],
+        "sources": [
+          {
+            "url": "https://investor.tsmc.com/english/encrypt/files/encrypt_file/reports/2026-07/6f49632674bd2d0fd48cb65aaf89ec6ab510b559/2Q26%20ManagementReport.pdf",
+            "claim_date": "2026-07-16"
+          },
+          {
+            "url": "https://investor.tsmc.com/static/annualReports/2025/english/index.html",
+            "claim_date": "2026-04-16"
+          },
+          {
+            "url": "https://investor.tsmc.com/english/encrypt/files/encrypt_file/reports/2026-07/547d1696765e05ce3adb81c108ce1c8c1682b80c/TSMC%202Q26%20Transcript.pdf",
+            "claim_date": "2026-07-16"
+          }
+        ]
+      },
+      {
+        "driver": "Advanced-packaging capacity, cycle time and supply coordination",
+        "why_it_matters": "AI systems increasingly require large interposers, multiple logic dies and HBM stacks. CoWoS or substrate bottlenecks can delay completed shipments even when front-end wafers are available; successful expansion increases system content and customer attachment.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "product_mix",
+          "gross_margin",
+          "capital_expenditure",
+          "working_capital",
+          "cash_flow",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.tsmc.com/english/dedicatedFoundry/technology/platform_HPC_tech_WLSI",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.tsmc.com/english/dedicatedFoundry/services/advanced-packaging",
+            "claim_date": null
+          },
+          {
+            "url": "https://pr.tsmc.com/english/news/3174",
+            "claim_date": "2024-10-04"
+          }
+        ]
+      },
+      {
+        "driver": "Capital intensity and global-fab execution",
+        "why_it_matters": "Demand must be forecast years ahead because fabs require long construction, qualification and ramp periods. Overseas capacity improves resilience and proximity to customers but carries higher initial cost, duplicated infrastructure and ramp risk. Management raised the 2026 capital budget to US$60-64 billion and announced a further US$100 billion Arizona investment on 2026-07-16.",
+        "financial_lines": [
+          "gross_margin",
+          "operating_cost",
+          "capital_expenditure",
+          "working_capital",
+          "cash_flow",
+          "balance_sheet",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://investor.tsmc.com/english/encrypt/files/encrypt_file/reports/2026-07/547d1696765e05ce3adb81c108ce1c8c1682b80c/TSMC%202Q26%20Transcript.pdf",
+            "claim_date": "2026-07-16"
+          },
+          {
+            "url": "https://investor.tsmc.com/static/annualReports/2025/english/pdf/2025_tsmc_ar_e_ch2.pdf",
+            "claim_date": "2025-12-31"
+          }
+        ]
+      },
+      {
+        "driver": "Customer, geography and regulatory concentration",
+        "why_it_matters": "The two largest customers represented 19% and 17% of 2025 net revenue. A major redesign, order cut or export restriction can therefore affect utilization and mix before capacity is redeployed. Trade controls can also delay equipment licenses or limit customers' addressable markets.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "product_mix",
+          "gross_margin",
+          "capital_expenditure",
+          "working_capital",
+          "cash_flow",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://investor.tsmc.com/sites/ir/sec-filings/2025_20F%20Report.pdf",
+            "claim_date": "2025-12-31"
+          },
+          {
+            "url": "https://investor.tsmc.com/english/encrypt/files/encrypt_file/reports/2026-07/6f49632674bd2d0fd48cb65aaf89ec6ab510b559/2Q26%20ManagementReport.pdf",
+            "claim_date": "2026-07-16"
+          }
+        ]
+      }
+    ],
+    "ecosystem": [
+      {
+        "relationship": "customer_or_end_market",
+        "entities_or_group": "AI/HPC, smartphone, automotive, IoT and consumer-electronics customers, including two individually material customers",
+        "why_it_matters": "HPC was 66% of 2Q26 revenue, while the two largest customers together represented 36% of 2025 revenue. AI demand is therefore highly important, but company-specific architecture and ordering decisions can materially affect utilization and mix.",
+        "sources": [
+          {
+            "url": "https://investor.tsmc.com/english/encrypt/files/encrypt_file/reports/2026-07/6f49632674bd2d0fd48cb65aaf89ec6ab510b559/2Q26%20ManagementReport.pdf",
+            "claim_date": "2026-07-16"
+          },
+          {
+            "url": "https://investor.tsmc.com/sites/ir/sec-filings/2025_20F%20Report.pdf",
+            "claim_date": "2025-12-31"
+          }
+        ]
+      },
+      {
+        "relationship": "supplier",
+        "entities_or_group": "Semiconductor-equipment, silicon-wafer, gas, chemical, photoresist, substrate, memory and other qualified materials suppliers",
+        "why_it_matters": "Leading-edge capacity and packaging output require timely delivery of specialized tools and qualified inputs. Substitution can require lengthy qualification, while trade controls may delay equipment access or raise costs.",
+        "sources": [
+          {
+            "url": "https://investor.tsmc.com/sites/ir/sec-filings/2025_20F%20Report.pdf",
+            "claim_date": "2026-04-16"
+          },
+          {
+            "url": "https://www.tsmc.com/english/dedicatedFoundry/services/advanced-packaging",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "relationship": "partner",
+        "entities_or_group": "Amkor and the broader advanced-packaging, testing and design-enablement ecosystem",
+        "why_it_matters": "The Arizona collaboration contemplates turnkey packaging and test services near front-end fabs, including CoWoS and InFO, which could shorten product cycle times and improve regional supply-chain completeness.",
+        "sources": [
+          {
+            "url": "https://pr.tsmc.com/english/news/3174",
+            "claim_date": "2024-10-04"
+          }
+        ]
+      },
+      {
+        "relationship": "competitor",
+        "entities_or_group": "Other pure-play foundries and integrated device manufacturers offering external foundry capacity",
+        "why_it_matters": "Competition is based on process performance, power, density, yield, price, capacity availability, packaging, design tools and geographic resilience. A credible rival-node or packaging alternative could weaken pricing or customer concentration advantages.",
+        "sources": [
+          {
+            "url": "https://investor.tsmc.com/sites/ir/sec-filings/2025_20F%20Report.pdf",
+            "claim_date": "2026-04-16"
+          },
+          {
+            "url": "https://investor.tsmc.com/static/annualReports/2025/english/pdf/2025_tsmc_ar_e_ch2.pdf",
+            "claim_date": "2025-12-31"
+          }
+        ]
+      },
+      {
+        "relationship": "regulatory_dependency",
+        "entities_or_group": "Taiwan, U.S., Japanese, European and other governments administering export controls, permits, incentives, tariffs and environmental requirements",
+        "why_it_matters": "Rules can change which chips or tools may be shipped, alter customer demand by geography, affect fab construction economics and condition access to subsidies or infrastructure. Localization can reduce continuity risk while increasing cost and execution complexity.",
+        "sources": [
+          {
+            "url": "https://investor.tsmc.com/sites/ir/sec-filings/2025_20F%20Report.pdf",
+            "claim_date": "2026-04-16"
+          },
+          {
+            "url": "https://investor.tsmc.com/static/annualReports/2025/english/pdf/2025_tsmc_ar_e_ch2.pdf",
+            "claim_date": "2025-12-31"
+          }
+        ]
+      }
+    ],
+    "strategy_and_committed_actions": [
+      {
+        "action": "Ramp 2-nanometer production and extend the roadmap through N2P, A16, A14, A13 and A12",
+        "investment_relevance": "Sustained process leadership supports premium products, customer retention and energy-efficient AI computing. It also creates large depreciation and yield-ramp exposure. N2 entered high-volume manufacturing in 4Q25; N2P and A16 were scheduled for second-half 2026 production, A14 for 2028, and A13/A12 for 2029.",
+        "sources": [
+          {
+            "url": "https://investor.tsmc.com/static/annualReports/2025/english/index.html",
+            "claim_date": "2026-04-16"
+          },
+          {
+            "url": "https://pr.tsmc.com/english/news/3302",
+            "claim_date": "2026-04-22"
+          }
+        ]
+      },
+      {
+        "action": "Expand 3DFabric, CoWoS and other heterogeneous-integration capabilities",
+        "investment_relevance": "Larger interposers and denser logic-memory integration increase the addressable manufacturing content of AI systems and may deepen customer dependence on a combined wafer-and-package platform. CoWoS solutions certified at 5.5 times reticle size in 2025 were planned for volume production in 2026.",
+        "sources": [
+          {
+            "url": "https://www.tsmc.com/english/dedicatedFoundry/technology/platform_HPC_tech_WLSI",
+            "claim_date": null
+          },
+          {
+            "url": "https://pr.tsmc.com/english/news/3302",
+            "claim_date": "2026-04-22"
+          }
+        ]
+      },
+      {
+        "action": "Accelerate leading-edge and packaging capacity while diversifying manufacturing geography",
+        "investment_relevance": "The raised 2026 capital plan and additional Arizona commitment indicate confidence in multiyear demand, but increase execution, depreciation and overseas-cost exposure. Japan and Germany add regional capacity for specialty and selected advanced technologies.",
+        "sources": [
+          {
+            "url": "https://investor.tsmc.com/english/encrypt/files/encrypt_file/reports/2026-07/547d1696765e05ce3adb81c108ce1c8c1682b80c/TSMC%202Q26%20Transcript.pdf",
+            "claim_date": "2026-07-16"
+          },
+          {
+            "url": "https://investor.tsmc.com/static/annualReports/2025/english/pdf/2025_tsmc_ar_e_ch2.pdf",
+            "claim_date": "2025-12-31"
+          },
+          {
+            "url": "https://pr.tsmc.com/english/news/3174",
+            "claim_date": "2024-10-04"
+          }
+        ]
+      },
+      {
+        "action": "Apply machine learning and image recognition to advanced-packaging manufacturing",
+        "investment_relevance": "The company identifies fab cycle-time optimization, quality defense and defect prevention as operational uses. Material financial value would require measurable yield, throughput or labor-productivity gains at scale rather than isolated automation improvements.",
+        "sources": [
+          {
+            "url": "https://www.tsmc.com/english/dedicatedFoundry/services/advanced-packaging",
+            "claim_date": null
+          }
+        ]
+      }
+    ],
+    "frontier_ai_transmission_paths": [
+      {
+        "development": "Frontier models require more training, inference and reasoning compute, increasing accelerator and custom-silicon deployments.",
+        "company_exposure": "Customers use leading-edge processes to manufacture GPUs, ASICs, CPUs and networking chips, with HPC already the largest revenue platform.",
+        "affected_driver": "Advanced-node wafer starts, HPC mix, utilization, pricing and the pace of N2 capacity additions.",
+        "financial_consequence": "Higher wafer volume and richer mix can raise revenue and gross profit, while also requiring substantial capital expenditure and working capital.",
+        "direction": "upside",
+        "materiality_condition": "Cloud and enterprise AI spending must translate into sustained production orders that fill incremental N3 and N2 capacity at economically attractive pricing; announced data-center budgets alone are insufficient.",
+        "time_horizon": "near_term",
+        "thesis_effect": "supports",
+        "watchpoints": [
+          "HPC revenue growth and share",
+          "Advanced-node wafer-revenue share",
+          "Wafer shipments and utilization commentary",
+          "N2 ramp and customer tape-outs",
+          "Capital-budget revisions and customer order visibility"
+        ],
+        "sources": [
+          {
+            "url": "https://investor.tsmc.com/english/encrypt/files/encrypt_file/reports/2026-07/6f49632674bd2d0fd48cb65aaf89ec6ab510b559/2Q26%20ManagementReport.pdf",
+            "claim_date": "2026-07-16"
+          },
+          {
+            "url": "https://investor.tsmc.com/static/annualReports/2025/english/index.html",
+            "claim_date": "2026-04-16"
+          },
+          {
+            "url": "https://bitcap.com/en/news/bit-capital-ki-whitepaper-infrastruktur-des-ki-zeitalters",
+            "claim_date": "2023-09-15"
+          }
+        ]
+      },
+      {
+        "development": "AI accelerators become larger multi-die systems with more HBM and increasingly complex chiplet interconnects.",
+        "company_exposure": "CoWoS, SoIC and related turnkey services integrate leading-edge logic, chiplets and HBM into finished computing packages.",
+        "affected_driver": "Advanced-packaging attachment rate, package size, capacity, yield, cycle time and supply availability.",
+        "financial_consequence": "Greater packaging content can increase revenue and product mix, but bottlenecks or poor yields can delay shipments and raise capital and working-capital needs.",
+        "direction": "upside",
+        "materiality_condition": "The company must retain a high share of customer packaging, add capacity in step with demand and secure sufficient HBM, substrates and other inputs without persistent cycle-time or yield penalties.",
+        "time_horizon": "near_term",
+        "thesis_effect": "supports",
+        "watchpoints": [
+          "CoWoS capacity and lead times",
+          "Interposer and package-size roadmap",
+          "Advanced-packaging capital allocation",
+          "HBM and substrate availability",
+          "Packaging yield and cycle-time disclosures"
+        ],
+        "sources": [
+          {
+            "url": "https://www.tsmc.com/english/dedicatedFoundry/technology/platform_HPC_tech_WLSI",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.tsmc.com/english/dedicatedFoundry/services/advanced-packaging",
+            "claim_date": null
+          },
+          {
+            "url": "https://pr.tsmc.com/english/news/3302",
+            "claim_date": "2026-04-22"
+          }
+        ]
+      },
+      {
+        "development": "Algorithmic efficiency, smaller models, inference optimization or architecture changes reduce silicon required per unit of useful AI work.",
+        "company_exposure": "Wafer demand depends on customer die area, chip count, process choice and deployment volume; design shifts may also redistribute demand among a concentrated customer base.",
+        "affected_driver": "Accelerator wafer demand per workload, die size, node mix, utilization and customer mix.",
+        "financial_consequence": "Efficiency could reduce incremental wafer demand or pricing tension, although lower compute costs may expand usage and stimulate more custom-silicon tape-outs.",
+        "direction": "mixed",
+        "materiality_condition": "The downside becomes material if improvement in useful compute per chip persistently outpaces growth in AI usage and new applications, leaving committed leading-edge or packaging capacity underutilized.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "challenges",
+        "watchpoints": [
+          "AI workload growth versus accelerator shipments",
+          "Accelerator die sizes and chip counts",
+          "Custom-ASIC tape-outs",
+          "HPC growth versus hyperscaler capital spending",
+          "Leading-edge utilization and capacity deferrals"
+        ],
+        "sources": [
+          {
+            "url": "https://investor.tsmc.com/sites/ir/sec-filings/2025_20F%20Report.pdf",
+            "claim_date": "2026-04-16"
+          },
+          {
+            "url": "https://investor.tsmc.com/english/encrypt/files/encrypt_file/reports/2026-07/6f49632674bd2d0fd48cb65aaf89ec6ab510b559/2Q26%20ManagementReport.pdf",
+            "claim_date": "2026-07-16"
+          },
+          {
+            "url": "https://bitcap.com/en/news/bit-capital-ki-whitepaper-infrastruktur-des-ki-zeitalters",
+            "claim_date": "2023-09-15"
+          }
+        ]
+      },
+      {
+        "development": "Frontier models are distilled, quantized or redesigned for phones, PCs, vehicles and other edge devices.",
+        "company_exposure": "The company supplies advanced mobile logic and a broad portfolio of automotive, IoT and specialty processes.",
+        "affected_driver": "Silicon content per device, migration to newer power-efficient nodes, specialty-process demand and consumer-device utilization.",
+        "financial_consequence": "More on-device AI content can raise wafer demand and improve mix, but weak unit cycles or customer cost constraints can offset the content increase.",
+        "direction": "mixed",
+        "materiality_condition": "Incremental AI silicon area and advanced-node adoption must exceed any reduction in device units, component consolidation or model-compute requirements.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "supports",
+        "watchpoints": [
+          "Smartphone revenue and utilization",
+          "N2 and N3 mobile tape-outs",
+          "Edge-NPU product launches",
+          "Automotive and IoT revenue growth",
+          "Silicon content per device"
+        ],
+        "sources": [
+          {
+            "url": "https://investor.tsmc.com/static/annualReports/2025/english/pdf/2025_tsmc_ar_e_ch2.pdf",
+            "claim_date": "2025-12-31"
+          },
+          {
+            "url": "https://investor.tsmc.com/english/encrypt/files/encrypt_file/reports/2026-07/6f49632674bd2d0fd48cb65aaf89ec6ab510b559/2Q26%20ManagementReport.pdf",
+            "claim_date": "2026-07-16"
+          },
+          {
+            "url": "https://pr.tsmc.com/english/news/3302",
+            "claim_date": "2026-04-22"
+          }
+        ]
+      },
+      {
+        "development": "Governments tighten AI-chip controls or subsidize sovereign and localized AI supply chains.",
+        "company_exposure": "Customer products and manufacturing equipment are subject to export rules, while the company is committing substantial capital to Taiwan, the U.S., Japan and Europe.",
+        "affected_driver": "Customer geography mix, export-license availability, overseas capacity utilization, construction cost and subsidy realization.",
+        "financial_consequence": "Restrictions can reduce addressable demand or strand product-specific capacity; localization can add demand resilience and incentives but may dilute margins through higher overseas costs.",
+        "direction": "mixed",
+        "materiality_condition": "The effect becomes material if controls restrict major customer products or critical equipment, or if localized fabs fail to reach sufficient utilization and cost performance after subsidies.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "mixed",
+        "watchpoints": [
+          "Export-control and tariff changes",
+          "China and North America revenue shares",
+          "Overseas-fab margin dilution",
+          "Arizona, Japan and Germany ramp milestones",
+          "Government incentive receipts and conditions"
+        ],
+        "sources": [
+          {
+            "url": "https://investor.tsmc.com/sites/ir/sec-filings/2025_20F%20Report.pdf",
+            "claim_date": "2026-04-16"
+          },
+          {
+            "url": "https://investor.tsmc.com/static/annualReports/2025/english/pdf/2025_tsmc_ar_e_ch2.pdf",
+            "claim_date": "2025-12-31"
+          },
+          {
+            "url": "https://investor.tsmc.com/english/encrypt/files/encrypt_file/reports/2026-07/547d1696765e05ce3adb81c108ce1c8c1682b80c/TSMC%202Q26%20Transcript.pdf",
+            "claim_date": "2026-07-16"
+          }
+        ]
+      }
+    ],
+    "investment_thesis_and_tests": {
+      "public_bit_view_status": "commentary",
+      "attributable_public_thesis": "On 2025-11-19, BIT Capital published a press item pointing to an F.A.Z. interview in which founder and CIO Jan Beckers explained why the foundry appeared more promising than Nvidia. BIT's page does not disclose the full company-specific operating, valuation or risk thesis. Separately, BIT's public AI-infrastructure research argues that generative AI drives demand across GPUs, HBM, networking and data centers, which is directionally consistent with a foundry-and-packaging exposure.",
+      "what_would_support_it": [
+        "AI infrastructure spending converts into sustained, multi-customer leading-edge wafer and advanced-packaging demand rather than dependence on one accelerator vendor.",
+        "N2, A16 and CoWoS ramps maintain technology leadership, high utilization, acceptable yields and pricing sufficient to earn attractive returns on elevated capital expenditure.",
+        "The broad foundry model captures custom ASIC and architecture shifts even when individual chip vendors gain or lose share.",
+        "Global expansion improves continuity and customer proximity without creating persistent margin dilution or structurally weak cash conversion."
+      ],
+      "what_would_challenge_it": [
+        "Model efficiency or AI capital-spending normalization causes accelerator wafer and packaging demand to undershoot committed capacity.",
+        "Customer concentration increases or a major customer redesigns products away from the company's nodes or packaging.",
+        "A competitor closes the process, yield or advanced-packaging gap and introduces credible pricing pressure.",
+        "Overseas fab costs, export controls, geopolitical disruption or repeated capex escalation reduce returns despite revenue growth."
+      ],
+      "sources": [
+        {
+          "url": "https://bitcap.com/en/news/f-a-z-warum-tsmc-mehr-verspricht-als-nvidia",
+          "claim_date": "2025-11-19"
+        },
+        {
+          "url": "https://bitcap.com/en/news/bit-capital-ki-whitepaper-infrastruktur-des-ki-zeitalters",
+          "claim_date": "2023-09-15"
+        },
+        {
+          "url": "https://investor.tsmc.com/english/encrypt/files/encrypt_file/reports/2026-07/6f49632674bd2d0fd48cb65aaf89ec6ab510b559/2Q26%20ManagementReport.pdf",
+          "claim_date": "2026-07-16"
+        },
+        {
+          "url": "https://investor.tsmc.com/sites/ir/sec-filings/2025_20F%20Report.pdf",
+          "claim_date": "2026-04-16"
+        }
+      ]
+    },
+    "uncertainties_and_research_triggers": [
+      {
+        "uncertainty": "The company does not separately disclose enough advanced-packaging revenue, capacity or attachment-rate detail to quantify the CoWoS earnings contribution.",
+        "why_it_matters": "Packaging may be both a major AI bottleneck and a growing source of manufacturing content, but wafer demand can be misread if completed-package throughput is unknown.",
+        "next_research_trigger": "Inspect each earnings call and technology symposium for CoWoS capacity growth, lead times, package dimensions, capital allocation, yield and cycle-time commentary.",
+        "sources": [
+          {
+            "url": "https://www.tsmc.com/english/dedicatedFoundry/technology/platform_HPC_tech_WLSI",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.tsmc.com/english/dedicatedFoundry/services/advanced-packaging",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "uncertainty": "The durability and quality of AI orders versus double ordering, customer inventory or rapidly improving model efficiency remain uncertain.",
+        "why_it_matters": "The company is committing capital years before final demand is visible; an order correction would affect utilization, margins and cash flow.",
+        "next_research_trigger": "Compare HPC growth, wafer shipments, utilization and capex with hyperscaler AI deployments, accelerator shipments and customer inventory commentary over multiple quarters.",
+        "sources": [
+          {
+            "url": "https://investor.tsmc.com/english/encrypt/files/encrypt_file/reports/2026-07/547d1696765e05ce3adb81c108ce1c8c1682b80c/TSMC%202Q26%20Transcript.pdf",
+            "claim_date": "2026-07-16"
+          },
+          {
+            "url": "https://investor.tsmc.com/english/encrypt/files/encrypt_file/reports/2026-07/6f49632674bd2d0fd48cb65aaf89ec6ab510b559/2Q26%20ManagementReport.pdf",
+            "claim_date": "2026-07-16"
+          }
+        ]
+      },
+      {
+        "uncertainty": "Implementation timing, funding and unit economics for the additional Arizona commitment are not yet fully specified in the cited public materials.",
+        "why_it_matters": "Construction pace, technology selection, subsidies, local supply chains and utilization will determine whether geographic diversification preserves returns or creates prolonged margin dilution.",
+        "next_research_trigger": "Review subsequent board capital appropriations, Arizona construction milestones, subsidy agreements, tool-installation schedules and quantified overseas-fab margin effects.",
+        "sources": [
+          {
+            "url": "https://investor.tsmc.com/english/encrypt/files/encrypt_file/reports/2026-07/547d1696765e05ce3adb81c108ce1c8c1682b80c/TSMC%202Q26%20Transcript.pdf",
+            "claim_date": "2026-07-16"
+          },
+          {
+            "url": "https://investor.tsmc.com/static/annualReports/2025/english/pdf/2025_tsmc_ar_e_ch2.pdf",
+            "claim_date": "2025-12-31"
+          }
+        ]
+      },
+      {
+        "uncertainty": "The two largest customers are anonymized in filings, limiting precise product and contract-risk attribution.",
+        "why_it_matters": "Their combined 36% share of 2025 revenue makes architecture, inventory and negotiating changes potentially material.",
+        "next_research_trigger": "Track annual customer-share disclosures, named customer product roadmaps, tape-outs, packaging choices and any changes in purchase commitments or order visibility.",
+        "sources": [
+          {
+            "url": "https://investor.tsmc.com/sites/ir/sec-filings/2025_20F%20Report.pdf",
+            "claim_date": "2025-12-31"
+          }
+        ]
+      },
+      {
+        "uncertainty": "Export-control, tariff and geopolitical outcomes can change faster than fabrication capacity can be reconfigured.",
+        "why_it_matters": "Controls can affect both customer chip shipments and access to manufacturing equipment, while Taiwan concentration creates low-frequency but severe continuity risk.",
+        "next_research_trigger": "Reassess after material export-rule changes, cross-strait developments, equipment-license denials, unusual geography-mix movements or changes to continuity and insurance disclosures.",
+        "sources": [
+          {
+            "url": "https://investor.tsmc.com/sites/ir/sec-filings/2025_20F%20Report.pdf",
+            "claim_date": "2026-04-16"
+          },
+          {
+            "url": "https://investor.tsmc.com/english/encrypt/files/encrypt_file/reports/2026-07/6f49632674bd2d0fd48cb65aaf89ec6ab510b559/2Q26%20ManagementReport.pdf",
+            "claim_date": "2026-07-16"
+          }
+        ]
+      }
+    ],
+    "source_ledger": [
+      {
+        "url": "https://investor.tsmc.com/static/annualReports/2025/english/pdf/2025_tsmc_ar_e_ch2.pdf",
+        "title": "2025 Annual Report — Company Profile and Market Overview",
+        "publisher": "Company investor relations",
+        "published_at": "2026-04-16",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://investor.tsmc.com/static/annualReports/2025/english/index.html",
+        "title": "2025 Annual Report Website",
+        "publisher": "Company investor relations",
+        "published_at": "2026-04-16",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://investor.tsmc.com/sites/ir/sec-filings/2025_20F%20Report.pdf",
+        "title": "2025 Form 20-F",
+        "publisher": "Company investor relations",
+        "published_at": "2026-04-16",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://investor.tsmc.com/english/encrypt/files/encrypt_file/reports/2026-07/6f49632674bd2d0fd48cb65aaf89ec6ab510b559/2Q26%20ManagementReport.pdf",
+        "title": "Second-Quarter 2026 Management Report",
+        "publisher": "Company investor relations",
+        "published_at": "2026-07-16",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://investor.tsmc.com/english/encrypt/files/encrypt_file/reports/2026-07/547d1696765e05ce3adb81c108ce1c8c1682b80c/TSMC%202Q26%20Transcript.pdf",
+        "title": "Second-Quarter 2026 Earnings Conference Transcript",
+        "publisher": "Company investor relations",
+        "published_at": "2026-07-16",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://pr.tsmc.com/english/news/3302",
+        "title": "2026 North America Technology Symposium Process and Packaging Roadmap",
+        "publisher": "Company press center",
+        "published_at": "2026-04-22",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.tsmc.com/english/dedicatedFoundry/technology/platform_HPC_tech_WLSI",
+        "title": "HPC Platform — 3DFabric and CoWoS",
+        "publisher": "Company product documentation",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.tsmc.com/english/dedicatedFoundry/services/advanced-packaging",
+        "title": "Advanced Packaging Services",
+        "publisher": "Company product documentation",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://pr.tsmc.com/english/news/3174",
+        "title": "Advanced-Packaging and Test Collaboration in Arizona",
+        "publisher": "Company and Amkor",
+        "published_at": "2024-10-04",
+        "source_type": "counterparty_primary"
+      },
+      {
+        "url": "https://bitcap.com/en/news/f-a-z-warum-tsmc-mehr-verspricht-als-nvidia",
+        "title": "F.A.Z. Interview Press Item: Why the Foundry Promises More Than Nvidia",
+        "publisher": "BIT Capital",
+        "published_at": "2025-11-19",
+        "source_type": "bit_primary"
+      },
+      {
+        "url": "https://bitcap.com/en/news/bit-capital-ki-whitepaper-infrastruktur-des-ki-zeitalters",
+        "title": "AI Whitepaper: Infrastructure of the AI Era",
+        "publisher": "BIT Capital",
+        "published_at": "2023-09-15",
+        "source_type": "bit_primary"
+      }
+    ]
+  },
+  "provenance": {
+    "research_date": "2026-07-28",
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "xhigh",
+    "prompt_version": "company-memo-pilot-v1",
+    "prompt_cache_key": "fli:company-memo:company-memo-pilot-v1",
+    "response_id": "resp_Ubc6rA6vvjYpnlsDdPsbhALbgCXIGNcKG-UYH8VcnR8ChIKbkxsYe8PxGOoSGRNGo2hFyqx9DlIYEnS9p6yoGBw5c5pg3bevSW316wRnqRUb2aD9l8TFEMinkjbekeJX4MCawkx7alkWGS5YNn75CbNL7JJLzqva69qiVZFtmqtZ9-8zv0TGvDIu8FtzmkKEh94tp2-IT2m-1-OaWt5urxG1_FRdml0ag8VEe4boX67VoW8kQ6DZdvPbsg2OKRuxI9gDonjCwautTrSFLBz9v0FinezN4irLZbhc8xTpBhP7aFZxUAsSJA4LCtK2S71Pzh_wStTAsuuWGCWkEynP5ioNK5gRyjg3Es__9RcBkifydBWsePpY6bp2ZADyhInDXQjMMwO35s67c9KBkiSrWtmH3DxHng4Ryq1EJvklnr5TdCFolDJ3AOqYnbTdfDSML6yZ6KfH9wY1OUK0uz-Iqc7c",
+    "response_model": "gpt-5.6-sol",
+    "input_tokens": 115592,
+    "cached_tokens": 0,
+    "cache_write_tokens": 0,
+    "output_tokens": 67461,
+    "reasoning_tokens": 11303,
+    "reported_cost_usd": null,
+    "web_actions": [
+      {
+        "query": "site:investor.tsmc.com 2025 annual report TSMC",
+        "type": "search",
+        "queries": [
+          "site:investor.tsmc.com 2025 annual report TSMC",
+          "site:investor.tsmc.com TSMC quarterly results 2026 July",
+          "site:tsmc.com TSMC AI advanced packaging CoWoS 2025 official",
+          "site:bitcap.com TSMC Taiwan Semiconductor thesis"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://bitcap.com/news/bit-capital-quartalsbericht-equity-q1-2026"
+      },
+      {
+        "query": "site:investor.tsmc.com 2Q26 transcript AI accelerator revenue CAGR CoWoS capacity 2026 TSMC",
+        "type": "search",
+        "queries": [
+          "site:investor.tsmc.com 2Q26 transcript AI accelerator revenue CAGR CoWoS capacity 2026 TSMC",
+          "site:investor.tsmc.com 2026 second quarter earnings conference transcript TSMC PDF",
+          "site:investor.tsmc.com 2025 annual report customer concentration capex overseas fabs gross margin TSMC",
+          "site:investor.tsmc.com 2026 Q2 management report N2 CoWoS Arizona Japan Germany TSMC"
+        ],
+        "sources": null
+      },
+      {
+        "pattern": "AI accelerator revenue",
+        "type": "find_in_page",
+        "url": "https://investor.tsmc.com/english/encrypt/files/encrypt_file/reports/2026-07/547d1696765e05ce3adb81c108ce1c8c1682b80c/TSMC%202Q26%20Transcript.pdf"
+      },
+      {
+        "type": "open_page",
+        "url": "https://investor.tsmc.com/english/encrypt/files/encrypt_file/reports/2026-07/547d1696765e05ce3adb81c108ce1c8c1682b80c/TSMC%202Q26%20Transcript.pdf"
+      },
+      {},
+      {
+        "type": "open_page",
+        "url": "https://investor.tsmc.com/static/annualReports/2025/english/index.html"
+      },
+      {
+        "query": "site:investor.tsmc.com/static/annualReports/2025/english TSMC 2025 customer concentration 28% revenue",
+        "type": "search",
+        "queries": [
+          "site:investor.tsmc.com/static/annualReports/2025/english TSMC 2025 customer concentration 28% revenue",
+          "site:investor.tsmc.com/static/annualReports/2025/english TSMC 2025 HPC percentage revenue smartphone platform",
+          "site:investor.tsmc.com/static/annualReports/2025/english TSMC 2025 capital expenditures 2026 capex capacity overseas fabs",
+          "site:investor.tsmc.com/static/annualReports/2025/english TSMC 2025 business model foundry wafer sales packaging testing customers"
+        ],
+        "sources": null
+      },
+      {
+        "query": "TSMC 2025 annual report largest customer percentage net revenue 2025",
+        "type": "search",
+        "queries": [
+          "TSMC 2025 annual report largest customer percentage net revenue 2025",
+          "TSMC 2025 annual report HPC revenue percentage 2025",
+          "TSMC 2025 annual report capital expenditures 2025 capacity 17 million wafers",
+          "TSMC 2025 annual report revenue by platform HPC smartphone 2025"
+        ],
+        "sources": null
+      },
+      {
+        "pattern": "customer accounted for",
+        "type": "find_in_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/1046179/000162828026025362/tsm-20251231.htm"
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/1046179/000162828026025362/tsm-20251231.htm"
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/1046179/000162828026025362/0001628280-26-025362.txt"
+      },
+      {
+        "query": "site:investor.tsmc.com/static/annualReports/2025/english/pdf/ \"Customer Trust\" TSMC",
+        "type": "search",
+        "queries": [
+          "site:investor.tsmc.com/static/annualReports/2025/english/pdf/ \"Customer Trust\" TSMC",
+          "site:investor.tsmc.com/static/annualReports/2025/english/pdf/ \"Net Revenue by Platform\" TSMC 2025",
+          "site:investor.tsmc.com/static/annualReports/2025/english/pdf/ \"capital expenditures\" \"2025\" TSMC",
+          "site:investor.tsmc.com/static/annualReports/2025/english/pdf/ \"customer concentration\" TSMC"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://investor.tsmc.com/static/annualReports/2025/english/ebook/index.html"
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.tsmc.com/english/dedicatedFoundry/services/advanced-packaging"
+      },
+      {
+        "type": "open_page",
+        "url": "https://investor.tsmc.com/english/encrypt/files/encrypt_file/reports/2026-01/00fe50f72b38d74e6b9b066398f020f337cd4e9d/4Q25%20Management%20Report.pdf"
+      },
+      {
+        "query": "TSM Q2 2026 earnings call transcript capex AI accelerator revenue CoWoS overseas fab gross margin",
+        "type": "search",
+        "queries": [
+          "TSM Q2 2026 earnings call transcript capex AI accelerator revenue CoWoS overseas fab gross margin",
+          "TSMC Q2 2026 earnings transcript Arizona CoWoS capacity 2026 AI demand",
+          "TSMC July 16 2026 transcript capital budget 2026 $52 billion $56 billion",
+          "TSMC Q2 2026 transcript AI accelerator revenue CAGR 2026 2029"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.investing.com/news/transcripts/earnings-call-transcript-tsmc-lifts-2026-outlook-as-ai-demand-stays-hot-in-q2-2026-93CH-4794777"
+      },
+      {
+        "pattern": "AI accelerator",
+        "type": "find_in_page",
+        "url": "https://finance.yahoo.com/quote/TSM/earnings/TSM-Q2-2026-earnings_call-649922.html"
+      },
+      {
+        "query": "site:pr.tsmc.com 2026 Arizona additional $100 billion TSMC official",
+        "type": "search",
+        "queries": [
+          "site:pr.tsmc.com 2026 Arizona additional $100 billion TSMC official",
+          "site:pr.tsmc.com TSMC Japan Germany Arizona 2026 expansion official",
+          "site:investor.tsmc.com 2026 Q2 additional $100 billion Arizona transcript",
+          "site:tsmc.com Arizona investment 2026 TSMC official"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:sec.gov/Archives/edgar/data/1046179/000162828026025362 TSMC 2025 \"22%\" customer",
+        "type": "search",
+        "queries": [
+          "site:sec.gov/Archives/edgar/data/1046179/000162828026025362 TSMC 2025 \"22%\" customer",
+          "site:sec.gov/Archives/edgar/data/1046179/000162828026025362 TSMC 2025 \"17%\" customer",
+          "site:investor.tsmc.com/sites/ir/sec-filings/2025_20F \"22%\" customer",
+          "site:investor.tsmc.com/sites/ir/sec-filings/2025_20F customer accounted 2025 net revenue"
+        ],
+        "sources": null
+      },
+      {
+        "query": "TSMC 2025 20-F largest customer 22% 17% revenue",
+        "type": "search",
+        "queries": [
+          "TSMC 2025 20-F largest customer 22% 17% revenue",
+          "TSMC 2025 annual report two customers accounted 22% 17% official",
+          "Taiwan Semiconductor 2025 customer concentration 22 percent 17 percent 20-F",
+          "TSMC 2025 major customers percentage revenue annual report"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:investor.tsmc.com/sites/ir/sec-filings/2025_20F%20Report.pdf TSMC ASML EUV sole supplier 2025",
+        "type": "search",
+        "queries": [
+          "site:investor.tsmc.com/sites/ir/sec-filings/2025_20F%20Report.pdf TSMC ASML EUV sole supplier 2025",
+          "site:investor.tsmc.com/sites/ir/sec-filings/2025_20F%20Report.pdf TSMC limited number suppliers equipment materials 2025",
+          "site:investor.tsmc.com/sites/ir/sec-filings/2025_20F%20Report.pdf TSMC raw materials single source suppliers 2025",
+          "site:investor.tsmc.com/sites/ir/sec-filings/2025_20F%20Report.pdf TSMC electricity water supply risk 2025"
+        ],
+        "sources": null
+      },
+      {
+        "query": "TSMC 2025 20-F suppliers ASML EUV sole source",
+        "type": "search",
+        "queries": [
+          "TSMC 2025 20-F suppliers ASML EUV sole source",
+          "TSMC 2025 annual report equipment suppliers limited number source",
+          "TSMC 2025 20-F raw materials suppliers disruption electricity water",
+          "TSMC annual report 2025 supply chain dependency equipment materials official"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:investor.tsmc.com/sites/ir/sec-filings/2025_20F%20Report.pdf export controls TSMC 2025",
+        "type": "search",
+        "queries": [
+          "site:investor.tsmc.com/sites/ir/sec-filings/2025_20F%20Report.pdf export controls TSMC 2025",
+          "TSMC 2025 20-F export controls tariffs China official",
+          "TSMC 2025 annual report U.S. export controls customer demand official",
+          "site:investor.tsmc.com 2025 20-F geopolitical tension export control TSMC"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:bitcap.com TSMC",
+        "type": "search",
+        "queries": [
+          "site:bitcap.com TSMC",
+          "site:bitcap.com \"Taiwan Semiconductor\"",
+          "site:bitcap.com \"2330\" semiconductor",
+          "site:investor.tsmc.com/static/annualReports/2025/english/pdf/2025_tsmc_ar_e_ch2.pdf competitors foundry Samsung Intel TSMC"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://bitcap.com/en/news/f-a-z-warum-tsmc-mehr-verspricht-als-nvidia"
+      }
+    ],
+    "consulted_sources": [
+      {
+        "url": "https://investor.tsmc.com/static/annualReports/2025/english/pdf/2025_tsmc_ar_e_ch2.pdf",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://investor.tsmc.com/static/annualReports/2025/english/index.html",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://investor.tsmc.com/sites/ir/sec-filings/2025_20F%20Report.pdf",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://investor.tsmc.com/english/encrypt/files/encrypt_file/reports/2026-07/6f49632674bd2d0fd48cb65aaf89ec6ab510b559/2Q26%20ManagementReport.pdf",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://investor.tsmc.com/english/encrypt/files/encrypt_file/reports/2026-07/547d1696765e05ce3adb81c108ce1c8c1682b80c/TSMC%202Q26%20Transcript.pdf",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://pr.tsmc.com/english/news/3302",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.tsmc.com/english/dedicatedFoundry/technology/platform_HPC_tech_WLSI",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.tsmc.com/english/dedicatedFoundry/services/advanced-packaging",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://pr.tsmc.com/english/news/3174",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://bitcap.com/en/news/f-a-z-warum-tsmc-mehr-verspricht-als-nvidia",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://bitcap.com/en/news/bit-capital-ki-whitepaper-infrastruktur-des-ki-zeitalters",
+        "type": "model_citation"
+      }
+    ],
+    "request_tags": [
+      "app:frontier-lab-intelligence",
+      "pipeline:investment-company-context",
+      "job:company-memo-pilot",
+      "scope:single-company",
+      "prompt:company-memo-pilot-v1",
+      "company:tsm",
+      "model:gpt-5.6-sol",
+      "reasoning:xhigh"
+    ]
+  }
+}

@@ -1,0 +1,976 @@
+{
+  "schema_version": "company-memo-pilot-result-v1",
+  "company": {
+    "name": "SanDisk",
+    "ticker": "SNDK"
+  },
+  "memo": {
+    "business_and_economics": {
+      "summary": "A standalone, pure-play NAND flash business since its February 2025 separation from Western Digital. It designs NAND, controllers, firmware and finished storage products, while obtaining substantially all flash wafers through manufacturing joint ventures with Kioxia in Japan. Revenue is generated across Datacenter, Edge and Consumer end markets. Core economics remain sensitive to NAND pricing, bit shipments, technology-driven cost reductions and product mix, although multi-year customer commitments are intended to reduce demand volatility.",
+      "revenue_engines": [
+        {
+          "engine": "Datacenter flash and enterprise SSDs",
+          "who_pays": "Hyperscale and cloud operators, enterprise customers, AI infrastructure builders, storage OEMs and semi-custom customers.",
+          "economic_logic": "Revenue reflects enterprise SSD and component capacity shipped, price per bit and product value. High-performance, high-capacity and power-efficient NVMe products can command better economics than commodity NAND, but require lengthy customer qualification and dependable firmware, controllers and supply.",
+          "sources": [
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/2023554/000202355425000034/sndk-20250627.htm",
+              "claim_date": "2025-08-21"
+            },
+            {
+              "url": "https://www.sandisk.com/company/newsroom/press-releases/2026/2026-04-30-sandisk-reports-fiscal-third-quarter-2026-financial-results",
+              "claim_date": "2026-04-30"
+            },
+            {
+              "url": "https://documents.sandisk.com/content/dam/asset-library/en_us/assets/public/sandisk/product/embedded-flash/brochure/brochure-enterprise-ssd-empowering-ai.pdf",
+              "claim_date": null
+            }
+          ]
+        },
+        {
+          "engine": "Edge, embedded and client storage",
+          "who_pays": "PC, smartphone, gaming, automotive and industrial OEMs, plus component and distribution-channel customers.",
+          "economic_logic": "Revenue is governed by device unit shipments, storage content per device, design wins, qualification cycles and the mix of embedded flash, client SSDs and removable components. Higher-capacity configurations can raise revenue per device, while consumer-electronics cycles and price erosion can offset content growth.",
+          "sources": [
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/2023554/000202355425000034/sndk-20250627.htm",
+              "claim_date": "2025-08-21"
+            },
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/2023554/000162828026029401/sndk-20260403.htm",
+              "claim_date": "2026-05-01"
+            }
+          ]
+        },
+        {
+          "engine": "Branded consumer storage",
+          "who_pays": "Retailers, distributors, e-commerce channels and end users buying memory cards, USB drives, portable SSDs and internal SSDs.",
+          "economic_logic": "Revenue depends on retail sell-through, channel inventory, brand strength, promotions, capacity mix and pricing. The broad channel provides scale and cash generation but is exposed to seasonal demand, substitution and rapid NAND price pass-through.",
+          "sources": [
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/2023554/000202355425000034/sndk-20250627.htm",
+              "claim_date": "2025-08-21"
+            },
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/2023554/000162828026029401/sndk-20260403.htm",
+              "claim_date": "2026-05-01"
+            }
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/2023554/000202355425000034/sndk-20250627.htm",
+          "claim_date": "2025-08-21"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/2023554/000162828026029401/sndk-20260403.htm",
+          "claim_date": "2026-05-01"
+        },
+        {
+          "url": "https://www.sandisk.com/company/newsroom/press-releases/2026/2026-04-30-sandisk-reports-fiscal-third-quarter-2026-financial-results",
+          "claim_date": "2026-04-30"
+        }
+      ]
+    },
+    "operating_and_financial_drivers": [
+      {
+        "driver": "NAND bit shipments, market pricing and cost per bit",
+        "why_it_matters": "Revenue is approximately the interaction of bits sold, price per bit and mix. Because NAND has high fixed costs and volatile industry supply, pricing changes can move gross profit faster than shipment volume. Node migration, yield and utilization must reduce cost per bit quickly enough to offset normal price erosion.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "pricing",
+          "gross_margin",
+          "working_capital",
+          "cash_flow",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/2023554/000202355425000034/sndk-20250627.htm",
+            "claim_date": "2025-08-21"
+          },
+          {
+            "url": "https://www.sandisk.com/company/newsroom/press-releases/2026/2026-04-30-sandisk-reports-fiscal-third-quarter-2026-financial-results",
+            "claim_date": "2026-04-30"
+          }
+        ]
+      },
+      {
+        "driver": "Datacenter and higher-value customer mix",
+        "why_it_matters": "Enterprise SSDs can improve revenue per bit and gross margin relative to commodity components, but qualification timing and customer concentration create execution risk. Fiscal Q3 2026 results explicitly attributed outperformance to higher pricing and a shift toward higher-value customers, led by Datacenter.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "pricing",
+          "product_mix",
+          "gross_margin",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sandisk.com/company/newsroom/press-releases/2026/2026-04-30-sandisk-reports-fiscal-third-quarter-2026-financial-results",
+            "claim_date": "2026-04-30"
+          },
+          {
+            "url": "https://www.sandisk.com/company/newsroom/press-releases/2025/2025-10-14-sandisk-pcie-gen-5-enterprise-ssd-recognized-as-ocp-inspired-by-open-compute-project",
+            "claim_date": "2025-10-14"
+          }
+        ]
+      },
+      {
+        "driver": "BiCS technology transitions, yield and product qualification",
+        "why_it_matters": "BiCS8 and BiCS10 density, performance and power improvements affect cost per bit, usable output and product competitiveness. Benefits reach the income statement only after yields stabilize, customers qualify products and older-node inventory is absorbed. BiCS10 sampling and production began in July 2026, but commercial scale remains a key test.",
+        "financial_lines": [
+          "volume",
+          "product_mix",
+          "gross_margin",
+          "operating_cost",
+          "capital_expenditure",
+          "cash_flow",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sandisk.com/company/newsroom/press-releases/2026/2026-07-02-sandisk-announces-bics10-1tb-tlc",
+            "claim_date": "2026-07-02"
+          },
+          {
+            "url": "https://apac.kioxia.com/en-apac/about/news/2026/20260703-2.html",
+            "claim_date": "2026-07-03"
+          }
+        ]
+      },
+      {
+        "driver": "Flash Ventures capacity, utilization and joint-venture cash requirements",
+        "why_it_matters": "Substantially all flash wafers depend on the Kioxia manufacturing relationship. The structure shares R&D and equipment economics but exposes the company to wafer-purchase obligations, utilization charges, partner execution and cash payments that do not map directly to wholly owned capex. Agreements now extend through 2034, with additional manufacturing-service payments scheduled from 2026 through 2029.",
+        "financial_lines": [
+          "gross_margin",
+          "operating_cost",
+          "capital_expenditure",
+          "working_capital",
+          "cash_flow",
+          "balance_sheet",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/2023554/000162828026029401/R17.htm",
+            "claim_date": "2026-05-01"
+          },
+          {
+            "url": "https://www.kioxia.com/en-jp/about/news/2026/20260130-1.html",
+            "claim_date": "2026-01-29"
+          }
+        ]
+      },
+      {
+        "driver": "Multi-year customer commitments and customer concentration",
+        "why_it_matters": "Long-term agreements can improve volume visibility, capacity planning and cash protection, but may constrain supply allocation or create pricing and counterparty risk. At April 3, 2026, three agreements contributed approximately $41.6 billion of remaining performance obligations; management subsequently reported two more agreements. One customer represented more than 10% of fiscal Q3 2026 revenue.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "pricing",
+          "working_capital",
+          "cash_flow",
+          "balance_sheet",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/2023554/000162828026029401/sndk-20260403.htm",
+            "claim_date": "2026-05-01"
+          },
+          {
+            "url": "https://www.sandisk.com/company/newsroom/press-releases/2026/2026-04-30-sandisk-reports-fiscal-third-quarter-2026-financial-results",
+            "claim_date": "2026-04-30"
+          }
+        ]
+      }
+    ],
+    "ecosystem": [
+      {
+        "relationship": "customer_or_end_market",
+        "entities_or_group": "Hyperscalers, cloud and enterprise operators, storage OEMs, AI infrastructure builders, PC and mobile OEMs, automotive and industrial customers, distributors and retailers",
+        "why_it_matters": "The breadth of end markets diversifies unit demand, but each has different qualification, inventory and pricing cycles. Datacenter customers offer higher-value opportunities while also increasing concentration and negotiation risk.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/2023554/000202355425000034/sndk-20250627.htm",
+            "claim_date": "2025-08-21"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/2023554/000162828026029401/sndk-20260403.htm",
+            "claim_date": "2026-05-01"
+          }
+        ]
+      },
+      {
+        "relationship": "supplier",
+        "entities_or_group": "Kioxia and the Flash Ventures manufacturing joint ventures at Yokkaichi and Kitakami",
+        "why_it_matters": "The relationship supplies substantially all flash wafers and combines joint R&D, equipment investment and manufacturing scale. Disruption, disagreement, poor yields or underutilization could impair supply, gross margin and cash flow. The framework is committed through December 2034.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/2023554/000162828026029401/R17.htm",
+            "claim_date": "2026-05-01"
+          },
+          {
+            "url": "https://www.kioxia.com/en-jp/about/news/2026/20260130-1.html",
+            "claim_date": "2026-01-29"
+          },
+          {
+            "url": "https://apac.kioxia.com/en-apac/about/news/2026/20260703-2.html",
+            "claim_date": "2026-07-03"
+          }
+        ]
+      },
+      {
+        "relationship": "partner",
+        "entities_or_group": "SK hynix and the Open Compute Project HBF workstream",
+        "why_it_matters": "Joint standardization could make High Bandwidth Flash interoperable across the AI accelerator ecosystem rather than a proprietary niche. SK hynix is simultaneously a major memory competitor, so technical alignment does not remove commercial rivalry.",
+        "sources": [
+          {
+            "url": "https://www.sandisk.com/company/newsroom/press-releases/2026/2026-02-25-sandisk-and-sk-hynix-begin-global-standardization-of-next-generation-memory-solution-high-bandwidth-flash-hbf",
+            "claim_date": "2026-02-25"
+          }
+        ]
+      },
+      {
+        "relationship": "competitor",
+        "entities_or_group": "Samsung, SK hynix and Solidigm, Micron, Kioxia, YMTC and other NAND, component and SSD suppliers",
+        "why_it_matters": "Competition occurs on cost per bit, density, performance, controllers, firmware, reliability, customer qualification and manufacturing scale. Competitors can redirect capacity between product categories, accelerating price erosion or taking enterprise design wins.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/2023554/000202355425000034/sndk-20250627.htm",
+            "claim_date": "2025-08-21"
+          }
+        ]
+      },
+      {
+        "relationship": "substitute",
+        "entities_or_group": "Nearline hard-disk drives for capacity storage and DRAM/HBM-based architectures for the highest-bandwidth memory tiers",
+        "why_it_matters": "Flash gains where latency, rack density and power justify its premium over disks, but HDD cost per bit can delay displacement. HBF is intended to augment rather than immediately replace HBM; failure to achieve comparable bandwidth, endurance and ecosystem support would preserve DRAM-based architectures.",
+        "sources": [
+          {
+            "url": "https://documents.sandisk.com/content/dam/asset-library/en_us/assets/public/sandisk/product/embedded-flash/brochure/brochure-enterprise-ssd-empowering-ai.pdf",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.sandisk.com/company/newsroom/blogs/2025/memory-centric-ai",
+            "claim_date": null
+          }
+        ]
+      }
+    ],
+    "strategy_and_committed_actions": [
+      {
+        "action": "Shift output and commercial focus toward Datacenter, enterprise SSDs and higher-value customers.",
+        "investment_relevance": "A sustained shift can improve price per bit and gross margin, but the analyst must distinguish genuine enterprise-volume growth from temporary NAND scarcity and spot-price inflation.",
+        "sources": [
+          {
+            "url": "https://www.sandisk.com/company/newsroom/press-releases/2026/2026-04-30-sandisk-reports-fiscal-third-quarter-2026-financial-results",
+            "claim_date": "2026-04-30"
+          },
+          {
+            "url": "https://documents.sandisk.com/content/dam/asset-library/en_us/assets/public/sandisk/product/embedded-flash/brochure/brochure-enterprise-ssd-empowering-ai.pdf",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "action": "Replace part of the traditional short-cycle NAND model with multi-year customer agreements backed by volume and financial commitments.",
+        "investment_relevance": "The agreements may reduce demand volatility and protect utilization, but contract pricing, customer identity, collateral quality and execution over multiple NAND cycles remain critical diligence items.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/2023554/000162828026029401/sndk-20260403.htm",
+            "claim_date": "2026-05-01"
+          },
+          {
+            "url": "https://www.sandisk.com/company/newsroom/press-releases/2026/2026-04-30-sandisk-reports-fiscal-third-quarter-2026-financial-results",
+            "claim_date": "2026-04-30"
+          }
+        ]
+      },
+      {
+        "action": "Extend the Kioxia manufacturing framework through 2034 and scale BiCS8 and BiCS10 production at Kitakami Fab2.",
+        "investment_relevance": "This secures a long-duration manufacturing base and next-node roadmap, while committing the company to substantial partner payments and execution risk. Commercial value depends on yield, cost per bit and disciplined capacity additions.",
+        "sources": [
+          {
+            "url": "https://www.kioxia.com/en-jp/about/news/2026/20260130-1.html",
+            "claim_date": "2026-01-29"
+          },
+          {
+            "url": "https://www.sandisk.com/company/newsroom/press-releases/2026/2026-07-02-sandisk-announces-bics10-1tb-tlc",
+            "claim_date": "2026-07-02"
+          },
+          {
+            "url": "https://apac.kioxia.com/en-apac/about/news/2026/20260703-2.html",
+            "claim_date": "2026-07-03"
+          }
+        ]
+      },
+      {
+        "action": "Develop and standardize High Bandwidth Flash for AI inference, with memory samples targeted for the second half of 2026 and system-level samples targeted for early 2027.",
+        "investment_relevance": "HBF could create a differentiated, high-value use for NAND beyond conventional SSDs. The milestones are management targets rather than proven revenue; technical validation, packaging, controller integration and accelerator support are necessary before assigning material economics.",
+        "sources": [
+          {
+            "url": "https://www.sandisk.com/company/newsroom/press-releases/2026/2026-02-25-sandisk-and-sk-hynix-begin-global-standardization-of-next-generation-memory-solution-high-bandwidth-flash-hbf",
+            "claim_date": "2026-02-25"
+          },
+          {
+            "url": "https://www.sandisk.com/company/newsroom/blogs/2025/memory-centric-ai",
+            "claim_date": null
+          }
+        ]
+      }
+    ],
+    "frontier_ai_transmission_paths": [
+      {
+        "development": "Frontier models increase training corpora, checkpoints, retrieval stores, generated content and inference-serving data.",
+        "company_exposure": "The company sells high-performance compute-class SSDs and high-capacity storage-class SSDs used across the AI data cycle.",
+        "affected_driver": "Datacenter enterprise-SSD exabytes, customer qualifications, product mix and price per bit.",
+        "financial_consequence": "Qualified volume growth could increase revenue and gross margin through more bits sold into higher-value enterprise products.",
+        "direction": "upside",
+        "materiality_condition": "The effect becomes material if named hyperscale and enterprise qualifications convert into sustained production volumes and Datacenter exabytes outgrow total company bit shipments for multiple quarters, rather than revenue rising primarily from spot NAND pricing.",
+        "time_horizon": "near_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Datacenter revenue and exabyte shipments",
+          "Hyperscaler and storage-OEM qualification conversions",
+          "Enterprise SSD mix and capacity points",
+          "Price-versus-volume contribution to revenue growth",
+          "Datacenter share after NAND pricing normalizes"
+        ],
+        "sources": [
+          {
+            "url": "https://documents.sandisk.com/content/dam/asset-library/en_us/assets/public/sandisk/product/embedded-flash/brochure/brochure-enterprise-ssd-empowering-ai.pdf",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.sandisk.com/company/newsroom/press-releases/2025/2025-10-14-sandisk-pcie-gen-5-enterprise-ssd-recognized-as-ocp-inspired-by-open-compute-project",
+            "claim_date": "2025-10-14"
+          },
+          {
+            "url": "https://www.sandisk.com/company/newsroom/press-releases/2026/2026-04-30-sandisk-reports-fiscal-third-quarter-2026-financial-results",
+            "claim_date": "2026-04-30"
+          }
+        ]
+      },
+      {
+        "development": "Inference architectures require much larger memory capacity and bandwidth for model weights, mixture-of-experts routing and long-context workloads.",
+        "company_exposure": "HBF is a NAND-based architecture being developed to augment HBM with greater capacity at targeted comparable read bandwidth and cost.",
+        "affected_driver": "New-product qualification, high-value NAND mix, addressable market and R&D spending.",
+        "financial_consequence": "Successful HBF adoption could create a new premium memory category and improve revenue per bit; failure would leave development costs without material sales and preserve HBM-based architectures.",
+        "direction": "upside",
+        "materiality_condition": "The effect becomes material only if samples meet bandwidth, latency, endurance, power and packaging requirements and at least one accelerator or system customer moves HBF into a production roadmap.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Delivery of HBF memory samples in the second half of 2026",
+          "System-level and controller-integrated samples in 2027",
+          "Published OCP specification and interoperability tests",
+          "Named accelerator, foundry, packaging or customer partners",
+          "Endurance, latency, power and total-cost validation"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sandisk.com/company/newsroom/press-releases/2026/2026-02-25-sandisk-and-sk-hynix-begin-global-standardization-of-next-generation-memory-solution-high-bandwidth-flash-hbf",
+            "claim_date": "2026-02-25"
+          },
+          {
+            "url": "https://www.sandisk.com/company/newsroom/blogs/2025/memory-centric-ai",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "development": "AI data centers prioritize rack density, energy efficiency and fast access to large, frequently read datasets.",
+        "company_exposure": "High-capacity QLC enterprise SSDs can replace or supplement hard disks in selected data-lake, retrieval and content-generation storage tiers.",
+        "affected_driver": "High-capacity enterprise SSD units, NAND bits per drive, product mix and cost per bit.",
+        "financial_consequence": "Flash displacement of disk would increase addressable exabytes and revenue, but aggressive pricing needed to close the cost-per-bit gap could limit gross-margin benefit.",
+        "direction": "mixed",
+        "materiality_condition": "The mechanism is material if qualified 100TB-plus SSDs win recurring nearline or data-lake deployments based on measured power, rack-space and operating-cost savings, not solely temporary disk shortages.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Design wins for 100TB-plus enterprise SSDs",
+          "Flash versus nearline-HDD cost per terabyte",
+          "Power and rack-density benchmarks",
+          "QLC endurance and reliability data",
+          "Enterprise exabyte growth relative to unit growth"
+        ],
+        "sources": [
+          {
+            "url": "https://documents.sandisk.com/content/dam/asset-library/en_us/assets/public/sandisk/product/embedded-flash/brochure/brochure-enterprise-ssd-empowering-ai.pdf",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "development": "On-device multimodal and generative models increase local model files, caches and user-generated data on AI PCs, smartphones and edge devices.",
+        "company_exposure": "The Edge portfolio supplies embedded flash and client SSDs to PC, mobile, automotive, gaming and industrial OEMs.",
+        "affected_driver": "Storage content per device, OEM design wins, Edge product mix and average selling price.",
+        "financial_consequence": "Higher baseline capacities and premium storage configurations could raise revenue per device, partly offset by normal NAND price erosion and device-unit cyclicality.",
+        "direction": "upside",
+        "materiality_condition": "The effect becomes material if major OEMs raise standard storage capacities for AI devices and the company wins qualified sockets without equivalent declines in price per gigabyte.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Baseline storage tiers in AI PCs and flagship phones",
+          "Embedded UFS and client-NVMe design wins",
+          "Average storage content per device",
+          "Edge revenue split between units, content and pricing",
+          "Device-channel inventory"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/2023554/000202355425000034/sndk-20250627.htm",
+            "claim_date": "2025-08-21"
+          },
+          {
+            "url": "https://www.sandisk.com/company/newsroom/blogs/2025/memory-centric-ai",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "development": "Strong AI-storage demand encourages the NAND industry to add wafer capacity and accelerate higher-density nodes.",
+        "company_exposure": "The company and Kioxia are scaling Kitakami Fab2 and BiCS10 while competitors can also expand bit supply.",
+        "affected_driver": "Industry supply-demand balance, utilization, inventory, contract and spot pricing, and cost absorption.",
+        "financial_consequence": "If new bit supply exceeds demand, NAND pricing and gross margin could decline while inventory and underutilization costs rise, even if AI storage demand continues growing.",
+        "direction": "downside",
+        "materiality_condition": "The effect becomes material if industry bit-supply growth exceeds end-demand growth, inventories rise and both contract and spot prices weaken as Kitakami and competing capacity ramp.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Industry wafer starts and bit-supply growth",
+          "Kitakami production ramp and BiCS10 yields",
+          "Competitor NAND capital spending",
+          "Channel and producer inventories",
+          "Contract pricing versus spot pricing and utilization charges"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/2023554/000202355425000034/sndk-20250627.htm",
+            "claim_date": "2025-08-21"
+          },
+          {
+            "url": "https://www.kioxia.com/en-jp/about/news/2026/20260130-1.html",
+            "claim_date": "2026-01-29"
+          },
+          {
+            "url": "https://apac.kioxia.com/en-apac/about/news/2026/20260703-2.html",
+            "claim_date": "2026-07-03"
+          }
+        ]
+      }
+    ],
+    "investment_thesis_and_tests": {
+      "public_bit_view_status": "no_public_view",
+      "attributable_public_thesis": null,
+      "what_would_support_it": [
+        "For any future attributable AI-storage thesis, Datacenter exabyte and revenue growth would need to persist after NAND pricing normalizes and be supported by production qualifications or named customer deployments.",
+        "Enterprise and Datacenter mix, technology cost reductions and multi-year agreements would need to sustain stronger gross margin and cash generation through a full NAND cycle.",
+        "NBM remaining performance obligations and financial guarantees would need to convert into shipments and cash without material customer disputes, adverse fixed pricing or excessive working-capital requirements.",
+        "BiCS8 and BiCS10 would need to deliver competitive yield and cost per bit, while HBF reaches customer-validated samples and production roadmaps."
+      ],
+      "what_would_challenge_it": [
+        "Edge and Consumer weakness or broad NAND oversupply could dominate AI-related enterprise demand and restore commodity-like pricing and margins.",
+        "Datacenter growth driven mainly by price rather than exabytes would weaken evidence for a structural AI-storage demand shift.",
+        "Long-term contracts could reduce flexibility or create counterparty and pricing risk if customer demand, market pricing or technology requirements change.",
+        "HBF delays, poor endurance or latency, lack of accelerator support, or failure to obtain named customers would challenge its value as a differentiated AI-memory platform.",
+        "JV execution problems, unfavorable utilization economics or capital commitments could absorb cash despite revenue growth."
+      ],
+      "sources": [
+        {
+          "url": "https://bitcap.com/en/news/bit-capital-quartalsbericht-equity-q2-2026",
+          "claim_date": null
+        },
+        {
+          "url": "https://bitcap.com/en/fonds/bit-global-technology-leaders",
+          "claim_date": null
+        }
+      ]
+    },
+    "uncertainties_and_research_triggers": [
+      {
+        "uncertainty": "How much recent Datacenter growth reflects durable AI-related exabyte demand versus higher NAND prices and short-term scarcity.",
+        "why_it_matters": "Price-led revenue can reverse rapidly; sustained qualified volume would support a structural product-mix change.",
+        "next_research_trigger": "Disaggregate future Datacenter growth into bits, price and mix; inspect enterprise exabyte shipments, named qualifications and customer production ramps in the next annual report and investor materials.",
+        "sources": [
+          {
+            "url": "https://www.sandisk.com/company/newsroom/press-releases/2026/2026-04-30-sandisk-reports-fiscal-third-quarter-2026-financial-results",
+            "claim_date": "2026-04-30"
+          },
+          {
+            "url": "https://documents.sandisk.com/content/dam/asset-library/en_us/assets/public/sandisk/product/embedded-flash/brochure/brochure-enterprise-ssd-empowering-ai.pdf",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "uncertainty": "The identities, detailed pricing formulas, volume ramps and risk allocation of the multi-year NBM agreements are not fully public.",
+        "why_it_matters": "Large remaining performance obligations improve apparent visibility but do not by themselves establish attractive margins, enforceability or AI-specific demand.",
+        "next_research_trigger": "Track changes in remaining performance obligations, contract liabilities, customer prepayments, percentage of bits committed, recognized revenue and any contract modification or concentration disclosures.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/2023554/000162828026029401/sndk-20260403.htm",
+            "claim_date": "2026-05-01"
+          },
+          {
+            "url": "https://www.sandisk.com/company/newsroom/press-releases/2026/2026-04-30-sandisk-reports-fiscal-third-quarter-2026-financial-results",
+            "claim_date": "2026-04-30"
+          }
+        ]
+      },
+      {
+        "uncertainty": "HBF performance and economics are based mainly on company targets and simulations rather than production customer evidence.",
+        "why_it_matters": "The opportunity could be large, but memory bandwidth, NAND latency, endurance, packaging, controller integration and ecosystem adoption can each block commercialization.",
+        "next_research_trigger": "Inspect HBF sample delivery, third-party benchmarks, OCP specifications, named accelerator partners, customer evaluations and the timing of system-level samples.",
+        "sources": [
+          {
+            "url": "https://www.sandisk.com/company/newsroom/press-releases/2026/2026-02-25-sandisk-and-sk-hynix-begin-global-standardization-of-next-generation-memory-solution-high-bandwidth-flash-hbf",
+            "claim_date": "2026-02-25"
+          },
+          {
+            "url": "https://www.sandisk.com/company/newsroom/blogs/2025/memory-centric-ai",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "uncertainty": "Reported capex does not fully represent the economic investment, purchase obligations and utilization risk embedded in Flash Ventures.",
+        "why_it_matters": "The joint-venture structure can obscure the cash and fixed-cost consequences of capacity expansion or underutilization.",
+        "next_research_trigger": "Reconcile direct capex with payments to Flash Ventures, wafer-purchase obligations, partner investments, utilization charges, BiCS10 yields and scheduled manufacturing-service payments.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/2023554/000162828026029401/R17.htm",
+            "claim_date": "2026-05-01"
+          },
+          {
+            "url": "https://www.kioxia.com/en-jp/about/news/2026/20260130-1.html",
+            "claim_date": "2026-01-29"
+          }
+        ]
+      },
+      {
+        "uncertainty": "Standalone reporting history remains short and fiscal 2026 full-year results were not yet published as of 2026-07-28.",
+        "why_it_matters": "Pre-separation Western Digital figures and early standalone quarters include structural and accounting changes, limiting cycle-to-cycle comparability.",
+        "next_research_trigger": "Review the fiscal 2026 results scheduled for 2026-08-05, the 2026 investor day scheduled for 2026-08-13 and the subsequent Form 10-K for normalized cost structure, end-market definitions, contract disclosures and JV cash requirements.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/2023554/000202355425000034/sndk-20250627.htm",
+            "claim_date": "2025-08-21"
+          },
+          {
+            "url": "https://investor.sandisk.com/news-releases/news-release-details/sandisk-report-fiscal-fourth-quarter-and-fiscal-year-2026",
+            "claim_date": "2026-07-09"
+          }
+        ]
+      }
+    ],
+    "source_ledger": [
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/2023554/000202355425000034/sndk-20250627.htm",
+        "title": "Fiscal 2025 Form 10-K",
+        "publisher": "U.S. Securities and Exchange Commission",
+        "published_at": "2025-08-21",
+        "source_type": "regulator_primary"
+      },
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/2023554/000162828026029401/sndk-20260403.htm",
+        "title": "Fiscal Q3 2026 Form 10-Q",
+        "publisher": "U.S. Securities and Exchange Commission",
+        "published_at": "2026-05-01",
+        "source_type": "regulator_primary"
+      },
+      {
+        "url": "https://www.sandisk.com/company/newsroom/press-releases/2026/2026-04-30-sandisk-reports-fiscal-third-quarter-2026-financial-results",
+        "title": "Fiscal Q3 2026 results release",
+        "publisher": "Corporate newsroom",
+        "published_at": "2026-04-30",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/2023554/000162828026029401/R17.htm",
+        "title": "Related parties and Flash Ventures note",
+        "publisher": "U.S. Securities and Exchange Commission",
+        "published_at": "2026-05-01",
+        "source_type": "regulator_primary"
+      },
+      {
+        "url": "https://www.kioxia.com/en-jp/about/news/2026/20260130-1.html",
+        "title": "Yokkaichi joint-venture extension through 2034",
+        "publisher": "Kioxia Corporation",
+        "published_at": "2026-01-29",
+        "source_type": "counterparty_primary"
+      },
+      {
+        "url": "https://www.sandisk.com/company/newsroom/press-releases/2026/2026-07-02-sandisk-announces-bics10-1tb-tlc",
+        "title": "BiCS10 1Tb TLC sampling announcement",
+        "publisher": "Corporate newsroom",
+        "published_at": "2026-07-02",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://apac.kioxia.com/en-apac/about/news/2026/20260703-2.html",
+        "title": "Kitakami Fab2 10th-generation production announcement",
+        "publisher": "Kioxia Corporation",
+        "published_at": "2026-07-03",
+        "source_type": "counterparty_primary"
+      },
+      {
+        "url": "https://www.sandisk.com/company/newsroom/press-releases/2026/2026-02-25-sandisk-and-sk-hynix-begin-global-standardization-of-next-generation-memory-solution-high-bandwidth-flash-hbf",
+        "title": "HBF standardization kickoff under OCP",
+        "publisher": "Corporate newsroom",
+        "published_at": "2026-02-25",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.sandisk.com/company/newsroom/blogs/2025/memory-centric-ai",
+        "title": "Memory-centric AI and HBF development roadmap",
+        "publisher": "Corporate newsroom",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://documents.sandisk.com/content/dam/asset-library/en_us/assets/public/sandisk/product/embedded-flash/brochure/brochure-enterprise-ssd-empowering-ai.pdf",
+        "title": "Enterprise SSDs for the AI data cycle",
+        "publisher": "Corporate product documentation",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.sandisk.com/company/newsroom/press-releases/2025/2025-10-14-sandisk-pcie-gen-5-enterprise-ssd-recognized-as-ocp-inspired-by-open-compute-project",
+        "title": "PCIe Gen5 enterprise SSD OCP Inspired recognition",
+        "publisher": "Corporate newsroom",
+        "published_at": "2025-10-14",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://bitcap.com/en/news/bit-capital-quartalsbericht-equity-q2-2026",
+        "title": "BIT Capital Equity Quarterly Report Q2 2026",
+        "publisher": "BIT Capital",
+        "published_at": null,
+        "source_type": "bit_primary"
+      },
+      {
+        "url": "https://bitcap.com/en/fonds/bit-global-technology-leaders",
+        "title": "BIT Global Technology Leaders strategy page",
+        "publisher": "BIT Capital",
+        "published_at": null,
+        "source_type": "bit_primary"
+      },
+      {
+        "url": "https://investor.sandisk.com/news-releases/news-release-details/sandisk-report-fiscal-fourth-quarter-and-fiscal-year-2026",
+        "title": "Fiscal Q4 and FY2026 reporting schedule",
+        "publisher": "Investor relations",
+        "published_at": "2026-07-09",
+        "source_type": "company_primary"
+      }
+    ]
+  },
+  "provenance": {
+    "research_date": "2026-07-28",
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "xhigh",
+    "prompt_version": "company-memo-pilot-v1",
+    "prompt_cache_key": "fli:company-memo:company-memo-pilot-v1",
+    "response_id": "resp_Jd4AQNAyOhlNPztdaAJVKS_XVxMTXmCvI3VODYTXLpa7dwSom8rTzumRXi4GJewcvBMkGkCo4l58wkuc34I4FDAsKuKESMY_QnCgq01qewTNh2-PECEbaJ6f9J7mJEHweP1PC_EYheMIqt1j6Sp71E2u2yTr2ls3OwolR9BicdqYeOZvmQBmu1gOgoRc8DSPaUsvJXl4nPqdzOgwwsMXL9pMJE8odQdpFHzUUP99XI_qw0lqnx0sEMo_0lqLl-9jw3wlpJA_eyZp8OQONrlPsPvAs8uLKlEFjeQQpQZKaDItsmGAiuXi7q8MBu7hYLvZU-kY0WZJBg77B_4JS4jKDLMddgea7WNI72ojVanLk_lLrVs8WuZoEjvBIs8MpyyfNQm0IsXk4gi4fr279WG5LnH0FPKaDcit9cDb997WJPKoHr9YVdO0OFKLCU0L5xQ7DODSm2DZm6NZ2ES8JCEMpaGG",
+    "response_model": "gpt-5.6-sol",
+    "input_tokens": 115686,
+    "cached_tokens": 0,
+    "cache_write_tokens": 0,
+    "output_tokens": 83587,
+    "reasoning_tokens": 12387,
+    "reported_cost_usd": null,
+    "web_actions": [
+      {
+        "query": "site:investor.sandisk.com annual report 2025 Sandisk SNDK 10-K revenue product segments Kioxia joint venture",
+        "type": "search",
+        "queries": [
+          "site:investor.sandisk.com annual report 2025 Sandisk SNDK 10-K revenue product segments Kioxia joint venture",
+          "site:investor.sandisk.com quarterly results 2026 Sandisk enterprise SSD AI data center strategy",
+          "site:sandisk.com company products enterprise SSD consumer embedded flash official",
+          "site:bitcap.com Sandisk SNDK BIT Capital"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:sec.gov/Archives/edgar/data/2023554 2026 Sandisk 10-Q April 3 2026",
+        "type": "search",
+        "queries": [
+          "site:sec.gov/Archives/edgar/data/2023554 2026 Sandisk 10-Q April 3 2026",
+          "site:investor.sandisk.com Sandisk Q3 FY26 earnings presentation datacenter percentage revenue BiCS8 BiCS10 capex JV",
+          "site:investor.sandisk.com Sandisk Form 10-Q April 3 2026 Kioxia joint venture customer concentration",
+          "site:sec.gov/Archives/edgar/data/2023554 2025 10-K Sandisk Kioxia customer concentration revenue by end market"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://investor.sandisk.com/news-releases/news-release-details/sandisk-reports-fiscal-second-quarter-2026-financial-results"
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/2023554/000202355425000034/sndk-20250627.htm"
+      },
+      {
+        "query": "\"Sandisk Corporation\" \"April 3, 2026\" \"Form 10-Q\"",
+        "type": "search",
+        "queries": [
+          "\"Sandisk Corporation\" \"April 3, 2026\" \"Form 10-Q\"",
+          "\"Sandisk\" \"New Business Model\" agreements 2026 NAND firm financial commitments",
+          "\"sndk-20260403\"",
+          "\"Sandisk\" 10-Q 2026 \"customer\" \"Kioxia\""
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/2023554/000162828026029401/sndk-20260403.htm"
+      },
+      {
+        "pattern": "End Market",
+        "type": "find_in_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/2023554/000162828026029401/sndk-20260403.htm"
+      },
+      {
+        "query": "site:sec.gov/Archives/edgar/data/2023554/000202355425000034/sndk-20250627.htm Sandisk \"Revenue by end market\"",
+        "type": "search",
+        "queries": [
+          "site:sec.gov/Archives/edgar/data/2023554/000202355425000034/sndk-20250627.htm Sandisk \"Revenue by end market\"",
+          "site:sec.gov/Archives/edgar/data/2023554/000202355425000034/sndk-20250627.htm Sandisk \"Flash Ventures\" Kioxia manufacturing cost",
+          "site:sec.gov/Archives/edgar/data/2023554/000202355425000034/sndk-20250627.htm Sandisk \"customers\" \"10%\" revenue",
+          "site:sec.gov/Archives/edgar/data/2023554/000202355425000034/sndk-20250627.htm Sandisk competition NAND inventory average selling prices"
+        ],
+        "sources": null
+      },
+      {
+        "query": "Sandisk 2025 10-K revenue Datacenter Client Consumer end market",
+        "type": "search",
+        "queries": [
+          "Sandisk 2025 10-K revenue Datacenter Client Consumer end market",
+          "Sandisk 2025 annual report Flash Ventures Kioxia wafer costs joint venture capex",
+          "Sandisk 2025 10-K customer concentration top customers revenue",
+          "Sandisk 2025 10-K competitors NAND flash Samsung SK hynix Micron Kioxia"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/2023554/000202355425000034/sndk-20250627.htm"
+      },
+      {
+        "pattern": "Cloud",
+        "type": "find_in_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/2023554/000162828025044483/sndk014126-arsa.pdf"
+      },
+      {},
+      {
+        "query": "site:bitcap.com/en/news Sandisk OR SanDisk OR SNDK",
+        "type": "search",
+        "queries": [
+          "site:bitcap.com/en/news Sandisk OR SanDisk OR SNDK",
+          "site:bitcap.com Sandisk SNDK",
+          "site:bitcap.com filetype:pdf Sandisk OR SNDK",
+          "site:bitcap.com/en/fonds Sandisk OR SNDK"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:sandisk.com/company/newsroom/press-releases/2026 Sandisk enterprise SSD AI SN655 hyperscale",
+        "type": "search",
+        "queries": [
+          "site:sandisk.com/company/newsroom/press-releases/2026 Sandisk enterprise SSD AI SN655 hyperscale",
+          "site:sandisk.com/company/newsroom/press-releases/2026 Sandisk BiCS10 1Tb TLC density power efficiency",
+          "site:sandisk.com/company/newsroom/press-releases/2025 Sandisk enterprise SSD 122TB AI data center",
+          "site:sandisk.com \"AI Data Cycle\" enterprise SSD Sandisk"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:sandisk.com/company/newsroom/press-releases/2026/2026-07-02 Sandisk BiCS10 TLC",
+        "type": "search",
+        "queries": [
+          "site:sandisk.com/company/newsroom/press-releases/2026/2026-07-02 Sandisk BiCS10 TLC",
+          "\"Sandisk Announces Sampling of BiCS10\"",
+          "site:kioxia-holdings.com BiCS10 1Tb TLC July 2026 Sandisk",
+          "site:kioxia.com BiCS10 Sandisk July 2026 1Tb TLC"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:sec.gov/Archives/edgar/data/2023554/000202355425000034/sndk-20250627.htm \"one reportable segment\"",
+        "type": "search",
+        "queries": [
+          "site:sec.gov/Archives/edgar/data/2023554/000202355425000034/sndk-20250627.htm \"one reportable segment\"",
+          "site:sec.gov/Archives/edgar/data/2023554/000202355425000034/sndk-20250627.htm \"Cloud is comprised\"",
+          "site:sec.gov/Archives/edgar/data/2023554/000202355425000034/sndk-20250627.htm \"Consumer end market\"",
+          "site:sec.gov/Archives/edgar/data/2023554/000202355425000034/sndk-20250627.htm \"Our broad portfolio\" \"flash\""
+        ],
+        "sources": null
+      },
+      {
+        "query": "\"Cloud is comprised primarily of products for datacenters\" Sandisk",
+        "type": "search",
+        "queries": [
+          "\"Cloud is comprised primarily of products for datacenters\" Sandisk",
+          "\"Through the Client end market\" Sandisk",
+          "\"The Consumer end market is highlighted\" Sandisk",
+          "Sandisk 2025 annual report \"one reportable segment\""
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:investor.sandisk.com/static-files/8ea78860-f8e5-4f1c-ada3-c554437d6281 \"one-third\" bits",
+        "type": "search",
+        "queries": [
+          "site:investor.sandisk.com/static-files/8ea78860-f8e5-4f1c-ada3-c554437d6281 \"one-third\" bits",
+          "site:investor.sandisk.com/static-files/8ea78860-f8e5-4f1c-ada3-c554437d6281 \"$11 billion\"",
+          "site:investor.sandisk.com/static-files/8ea78860-f8e5-4f1c-ada3-c554437d6281 \"Datacenter\" \"233%\"",
+          "site:investor.sandisk.com/static-files/8ea78860-f8e5-4f1c-ada3-c554437d6281 \"BiCS8\""
+        ],
+        "sources": null
+      },
+      {
+        "query": "Sandisk Q3 2026 \"one-third\" bits firm commitments",
+        "type": "search",
+        "queries": [
+          "Sandisk Q3 2026 \"one-third\" bits firm commitments",
+          "Sandisk Q3 2026 \"$11 billion\" financial commitments",
+          "Sandisk Q3 FY26 NBM agreements fiscal 2027 bits",
+          "Sandisk Q3 2026 earnings presentation BiCS8 majority bit production"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:sec.gov/Archives/edgar/data/2023554/000162828026029401/sndk-20260403.htm \"$42\" \"remaining performance obligations\"",
+        "type": "search",
+        "queries": [
+          "site:sec.gov/Archives/edgar/data/2023554/000162828026029401/sndk-20260403.htm \"$42\" \"remaining performance obligations\"",
+          "site:sec.gov/Archives/edgar/data/2023554/000162828026029401/sndk-20260403.htm \"financial guarantees\" customers",
+          "site:sec.gov/Archives/edgar/data/2023554/000162828026029401/sndk-20260403.htm \"more than 10%\" revenue customer",
+          "site:sec.gov/Archives/edgar/data/2023554/000162828026029401/sndk-20260403.htm \"purchase obligations\" \"Kioxia\""
+        ],
+        "sources": null
+      },
+      {
+        "query": "\"Sandisk\" \"$42 billion\" \"remaining performance obligations\"",
+        "type": "search",
+        "queries": [
+          "\"Sandisk\" \"$42 billion\" \"remaining performance obligations\"",
+          "\"Sandisk\" \"financial guarantees\" \"April 3, 2026\"",
+          "\"Sandisk\" \"10% of our net revenue\" 2026 customer",
+          "\"Sandisk\" \"purchase obligations\" Kioxia 2026 10-Q"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/2023554/000162828026029401/0001628280-26-029401-index.htm"
+      },
+      {
+        "query": "site:sec.gov/Archives/edgar/data/2023554/000162828026029401/R*.htm Sandisk Revenue",
+        "type": "search",
+        "queries": [
+          "site:sec.gov/Archives/edgar/data/2023554/000162828026029401/R*.htm Sandisk Revenue",
+          "site:sec.gov/Archives/edgar/data/2023554/000162828026029401/R*.htm Sandisk Commitments Contingencies",
+          "site:sec.gov/Archives/edgar/data/2023554/000162828026029401/R*.htm Sandisk Inventories",
+          "site:sec.gov/Archives/edgar/data/2023554/000162828026029401/R*.htm Sandisk Remaining Performance Obligations"
+        ],
+        "sources": null
+      },
+      {
+        "query": "Sandisk 2025 10-K \"10%\" customer revenue",
+        "type": "search",
+        "queries": [
+          "Sandisk 2025 10-K \"10%\" customer revenue",
+          "Sandisk 2026 10-Q \"10%\" customer revenue",
+          "Sandisk customer concentration Apple revenue 2025 10-K",
+          "Sandisk \"customer accounted for\" net revenue"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:sandisk.com/company/newsroom Sandisk High Bandwidth Flash HBF AI inference 2025 2026",
+        "type": "search",
+        "queries": [
+          "site:sandisk.com/company/newsroom Sandisk High Bandwidth Flash HBF AI inference 2025 2026",
+          "site:sandisk.com Sandisk HBF roadmap AI inference controller 2027",
+          "site:sec.gov/Archives/edgar/data/2023554/000202355425000034/sndk-20250627.htm competitors Samsung SK hynix Micron YMTC export controls",
+          "site:sec.gov/Archives/edgar/data/2023554/000202355425000034/sndk-20250627.htm separation Western Digital February 21 2025 transition services"
+        ],
+        "sources": null
+      }
+    ],
+    "consulted_sources": [
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/2023554/000202355425000034/sndk-20250627.htm",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/2023554/000162828026029401/sndk-20260403.htm",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.sandisk.com/company/newsroom/press-releases/2026/2026-04-30-sandisk-reports-fiscal-third-quarter-2026-financial-results",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/2023554/000162828026029401/R17.htm",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.kioxia.com/en-jp/about/news/2026/20260130-1.html",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.sandisk.com/company/newsroom/press-releases/2026/2026-07-02-sandisk-announces-bics10-1tb-tlc",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://apac.kioxia.com/en-apac/about/news/2026/20260703-2.html",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.sandisk.com/company/newsroom/press-releases/2026/2026-02-25-sandisk-and-sk-hynix-begin-global-standardization-of-next-generation-memory-solution-high-bandwidth-flash-hbf",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.sandisk.com/company/newsroom/blogs/2025/memory-centric-ai",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://documents.sandisk.com/content/dam/asset-library/en_us/assets/public/sandisk/product/embedded-flash/brochure/brochure-enterprise-ssd-empowering-ai.pdf",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.sandisk.com/company/newsroom/press-releases/2025/2025-10-14-sandisk-pcie-gen-5-enterprise-ssd-recognized-as-ocp-inspired-by-open-compute-project",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://bitcap.com/en/news/bit-capital-quartalsbericht-equity-q2-2026",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://bitcap.com/en/fonds/bit-global-technology-leaders",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://investor.sandisk.com/news-releases/news-release-details/sandisk-report-fiscal-fourth-quarter-and-fiscal-year-2026",
+        "type": "model_citation"
+      }
+    ],
+    "request_tags": [
+      "app:frontier-lab-intelligence",
+      "pipeline:investment-company-context",
+      "job:company-memo-pilot",
+      "scope:single-company",
+      "prompt:company-memo-pilot-v1",
+      "company:sndk",
+      "model:gpt-5.6-sol",
+      "reasoning:xhigh"
+    ]
+  }
+}

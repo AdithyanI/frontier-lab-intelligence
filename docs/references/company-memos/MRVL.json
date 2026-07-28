@@ -1,0 +1,941 @@
+{
+  "schema_version": "company-memo-pilot-result-v1",
+  "company": {
+    "name": "Marvell",
+    "ticker": "MRVL"
+  },
+  "memo": {
+    "business_and_economics": {
+      "summary": "A fabless data-infrastructure semiconductor supplier whose revenue is primarily product sales into data-center and communications markets. The portfolio combines custom compute silicon with optical/electrical interconnect, Ethernet and scale-up switching, storage controllers, processors and security products. Management said in May 2026 that more than 97% of revenue was tied to data-infrastructure markets; fiscal 2026 growth was led by AI-related custom products and electro-optics.",
+      "revenue_engines": [
+        {
+          "engine": "Custom compute and infrastructure silicon",
+          "who_pays": "Hyperscale cloud operators, data-center customers and OEMs commissioning custom XPUs, CPUs, networking or other application-specific devices.",
+          "economic_logic": "Customers may fund non-recurring engineering, followed by per-unit product revenue when a design enters production. Design wins can produce multi-year ramps because replacing a complex custom device is difficult, but development cycles are long and program economics are concentrated in relatively few customers.",
+          "sources": [
+            {
+              "url": "https://investor.marvell.com/sec-filings/all-sec-filings/content/0001835632-26-000011/mrvl-20260131.htm",
+              "claim_date": "2026-03-11"
+            },
+            {
+              "url": "https://www.marvell.com/products/custom-asic.html",
+              "claim_date": null
+            }
+          ]
+        },
+        {
+          "engine": "High-speed interconnect and switching",
+          "who_pays": "Hyperscalers, cloud operators, networking and server OEMs, optical-module makers and cable vendors.",
+          "economic_logic": "Revenue comes from optical DSPs, silicon-photonics components, active electrical cable silicon, Ethernet switches, PCIe/CXL devices and related connectivity products. Growth depends on port volumes, link-speed transitions and semiconductor content per AI rack, cluster and data-center connection.",
+          "sources": [
+            {
+              "url": "https://investor.marvell.com/news-events/press-releases/detail/1023/marvell-technology-inc-reports-first-quarter-of-fiscal-year-2027-financial-results",
+              "claim_date": "2026-05-27"
+            },
+            {
+              "url": "https://www.marvell.com/company/newsroom/marvell-1-6t-optical-dsp-ai-data-center-connectivity.html",
+              "claim_date": null
+            },
+            {
+              "url": "https://www.marvell.com/company/newsroom/marvell-next-gen-cxl-switch-memory-pooling-breaks-ai-memory-wall.html",
+              "claim_date": "2026-03-17"
+            }
+          ]
+        },
+        {
+          "engine": "Storage and communications semiconductors",
+          "who_pays": "Storage, enterprise-networking and carrier-equipment OEMs, cloud customers and distributors.",
+          "economic_logic": "Product revenue is tied to storage capacity, enterprise and carrier deployment cycles and equipment refreshes. These products diversify revenue beyond accelerated infrastructure but remain exposed to semiconductor inventory and infrastructure spending cycles.",
+          "sources": [
+            {
+              "url": "https://investor.marvell.com/sec-filings/all-sec-filings/content/0001835632-26-000011/mrvl-20260131.htm",
+              "claim_date": "2026-03-11"
+            },
+            {
+              "url": "https://investor.marvell.com/sec-filings/all-sec-filings/content/0001104659-26-060265/0001104659-26-060265.pdf",
+              "claim_date": "2026-05-13"
+            }
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "url": "https://investor.marvell.com/sec-filings/all-sec-filings/content/0001835632-26-000011/mrvl-20260131.htm",
+          "claim_date": "2026-03-11"
+        },
+        {
+          "url": "https://investor.marvell.com/sec-filings/all-sec-filings/content/0001104659-26-060265/0001104659-26-060265.pdf",
+          "claim_date": "2026-05-13"
+        },
+        {
+          "url": "https://investor.marvell.com/news-events/press-releases/detail/1023/marvell-technology-inc-reports-first-quarter-of-fiscal-year-2027-financial-results",
+          "claim_date": "2026-05-27"
+        }
+      ]
+    },
+    "operating_and_financial_drivers": [
+      {
+        "driver": "Custom-program wins, production ramps and customer concentration",
+        "why_it_matters": "A design announcement precedes production revenue, often by several quarters. Revenue can accelerate sharply when a large program ramps but can also fall if a launch is delayed, re-awarded or insourced. The ten largest customers represented 82% of fiscal 2026 revenue, making individual-account execution material.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "working_capital",
+          "cash_flow",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://investor.marvell.com/sec-filings/all-sec-filings/content/0001835632-26-000011/mrvl-20260131.htm",
+            "claim_date": "2026-03-11"
+          },
+          {
+            "url": "https://investor.marvell.com/news-events/press-releases/detail/1011/marvell-technology-inc-reports-fourth-quarter-and-fiscal-year-2026-financial-results",
+            "claim_date": "2026-03-05"
+          }
+        ]
+      },
+      {
+        "driver": "AI data-center infrastructure spending and architecture choices",
+        "why_it_matters": "Demand for custom silicon, optics and switches is governed by hyperscaler cluster construction, accelerator deployments and the split between scale-up, scale-out and data-center-interconnect spending. Fiscal 2026 data-center sales grew 46%, while first-quarter fiscal 2027 data-center sales grew 27% year over year.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "product_mix",
+          "operating_cost",
+          "cash_flow",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://investor.marvell.com/sec-filings/all-sec-filings/content/0001835632-26-000011/mrvl-20260131.htm",
+            "claim_date": "2026-03-11"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1835632/000183563226000019/mrvl-20260502.htm",
+            "claim_date": "2026-05-28"
+          }
+        ]
+      },
+      {
+        "driver": "Transitions to 800G/1.6T optics and higher-radix switching",
+        "why_it_matters": "Faster links and denser clusters can increase port value and semiconductor content, but timing depends on qualification, module availability, power budgets and customer adoption. Product transitions can also create inventory obsolescence or pricing pressure on older generations.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "pricing",
+          "product_mix",
+          "gross_margin",
+          "working_capital",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://investor.marvell.com/news-events/press-releases/detail/1023/marvell-technology-inc-reports-first-quarter-of-fiscal-year-2027-financial-results",
+            "claim_date": "2026-05-27"
+          },
+          {
+            "url": "https://www.marvell.com/company/newsroom/marvell-1-6t-optical-dsp-ai-data-center-connectivity.html",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "driver": "Advanced-node, packaging, substrate and foundry execution",
+        "why_it_matters": "The company depends on external manufacturing and packaging for complex advanced-node products. Yield, capacity, lead times and input costs affect shipment timing, inventory, gross margin and the economics of custom programs. At May 2, 2026, minimum capacity-reservation purchase commitments were estimated at $448.1 million through fiscal 2033.",
+        "financial_lines": [
+          "volume",
+          "gross_margin",
+          "capital_expenditure",
+          "working_capital",
+          "cash_flow",
+          "balance_sheet",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1835632/000183563226000019/mrvl-20260502.htm",
+            "claim_date": "2026-05-28"
+          },
+          {
+            "url": "https://www.marvell.com/company/newsroom/marvell-demonstrates-industry-leading-2nm-silicon-for-accelerated-infrastructure.html",
+            "claim_date": "2025-03-03"
+          }
+        ]
+      },
+      {
+        "driver": "Product mix, manufacturing cost absorption and R&D intensity",
+        "why_it_matters": "Reported profitability depends not only on revenue growth but on the mix of custom versus merchant products, acquisition-related costs, manufacturing utilization and investment in future nodes and connectivity platforms. First-quarter fiscal 2027 GAAP and non-GAAP gross margins were 52.1% and 58.9%, respectively.",
+        "financial_lines": [
+          "product_mix",
+          "gross_margin",
+          "operating_cost",
+          "cash_flow"
+        ],
+        "sources": [
+          {
+            "url": "https://investor.marvell.com/news-events/press-releases/detail/1023/marvell-technology-inc-reports-first-quarter-of-fiscal-year-2027-financial-results",
+            "claim_date": "2026-05-27"
+          },
+          {
+            "url": "https://investor.marvell.com/sec-filings/all-sec-filings/content/0001835632-26-000011/mrvl-20260131.htm",
+            "claim_date": "2026-03-11"
+          }
+        ]
+      }
+    ],
+    "ecosystem": [
+      {
+        "relationship": "customer_or_end_market",
+        "entities_or_group": "Hyperscale cloud operators and AI-infrastructure builders, with AWS publicly identified as a strategic collaborator and customer relationship",
+        "why_it_matters": "A small number of large operators set custom-chip roadmaps, networking architectures and deployment volumes. Their purchasing decisions can create large, long-duration programs but also explain the company's material customer concentration.",
+        "sources": [
+          {
+            "url": "https://www.marvell.com/company/newsroom/marvell-expands-strategic-collaboration-aws-enable-accelerated-infrastructure-ai-cloud.html",
+            "claim_date": null
+          },
+          {
+            "url": "https://investor.marvell.com/sec-filings/all-sec-filings/content/0001835632-26-000011/mrvl-20260131.htm",
+            "claim_date": "2026-03-11"
+          }
+        ]
+      },
+      {
+        "relationship": "supplier",
+        "entities_or_group": "TSMC and third-party foundry, substrate, packaging, assembly and test providers",
+        "why_it_matters": "Access to leading nodes and advanced packaging determines performance, power, yields and launch schedules. The custom platform's working 2nm silicon was produced on TSMC's process, while external-manufacturing dependence creates capacity and geopolitical risk.",
+        "sources": [
+          {
+            "url": "https://www.marvell.com/company/newsroom/marvell-demonstrates-industry-leading-2nm-silicon-for-accelerated-infrastructure.html",
+            "claim_date": "2025-03-03"
+          },
+          {
+            "url": "https://investor.marvell.com/sec-filings/all-sec-filings/content/0001835632-26-000011/mrvl-20260131.htm",
+            "claim_date": "2026-03-11"
+          }
+        ]
+      },
+      {
+        "relationship": "partner",
+        "entities_or_group": "NVIDIA",
+        "why_it_matters": "The NVLink Fusion partnership makes custom XPUs and compatible scale-up networking available within NVIDIA rack-scale infrastructure and includes collaboration on silicon photonics. It potentially expands the addressable market while tying part of the roadmap to NVIDIA qualification and architecture decisions.",
+        "sources": [
+          {
+            "url": "https://nvidianews.nvidia.com/news/nvidia-ai-ecosystem-expands-as-marvell-joins-forces-through-nvlink-fusion",
+            "claim_date": "2026-03-31"
+          }
+        ]
+      },
+      {
+        "relationship": "infrastructure_dependency",
+        "entities_or_group": "Ethernet, NVLink, UALink, PCIe/CXL and optical module or co-packaged-optics ecosystems",
+        "why_it_matters": "The fabric and form factor selected by hyperscalers determines which switches, retimers, DSPs and optical engines attach to each accelerator. Fragmented standards create multiple opportunities but also raise development expense and the risk that content shifts to a proprietary or vertically integrated alternative.",
+        "sources": [
+          {
+            "url": "https://nvidianews.nvidia.com/news/nvidia-ai-ecosystem-expands-as-marvell-joins-forces-through-nvlink-fusion",
+            "claim_date": "2026-03-31"
+          },
+          {
+            "url": "https://www.marvell.com/company/newsroom/marvell-completes-acquisition-of-xconn-technologies.html",
+            "claim_date": "2026-02-10"
+          },
+          {
+            "url": "https://www.marvell.com/company/newsroom/marvell-next-gen-cxl-switch-memory-pooling-breaks-ai-memory-wall.html",
+            "claim_date": "2026-03-17"
+          }
+        ]
+      },
+      {
+        "relationship": "competitor",
+        "entities_or_group": "Other custom-ASIC and networking suppliers, merchant accelerator platforms and hyperscalers' internal silicon teams",
+        "why_it_matters": "Programs can be re-awarded or insourced, while full-stack accelerator vendors can bundle compute, switching and interconnect. Competition therefore affects design-win conversion, pricing, market share and the durability of attach content.",
+        "sources": [
+          {
+            "url": "https://investor.marvell.com/sec-filings/all-sec-filings/content/0001835632-26-000011/mrvl-20260131.htm",
+            "claim_date": "2026-03-11"
+          }
+        ]
+      }
+    ],
+    "strategy_and_committed_actions": [
+      {
+        "action": "Concentrate the portfolio on data infrastructure and AI, including the August 2025 divestiture of the automotive Ethernet business.",
+        "investment_relevance": "The portfolio is more directly exposed to cloud and AI infrastructure growth, but headline results are also more sensitive to hyperscaler spending and customer concentration.",
+        "sources": [
+          {
+            "url": "https://investor.marvell.com/sec-filings/all-sec-filings/content/0001104659-26-060265/0001104659-26-060265.pdf",
+            "claim_date": "2026-05-13"
+          },
+          {
+            "url": "https://investor.marvell.com/sec-filings/all-sec-filings/content/0001835632-26-000011/mrvl-20260131.htm",
+            "claim_date": "2026-03-11"
+          }
+        ]
+      },
+      {
+        "action": "Acquire Celestial AI and XConn to add optical scale-up connectivity and PCIe/CXL switching capabilities.",
+        "investment_relevance": "The acquisitions broaden the addressable scale-up stack from custom compute into optical fabric, memory connectivity and switching. Value depends on customer qualification, integration, revenue timing and whether new products earn an adequate return on acquisition and R&D costs.",
+        "sources": [
+          {
+            "url": "https://www.marvell.com/company/newsroom/marvell-completes-acquisition-of-celestial-ai.html",
+            "claim_date": "2026-02-02"
+          },
+          {
+            "url": "https://www.marvell.com/company/newsroom/marvell-completes-acquisition-of-xconn-technologies.html",
+            "claim_date": "2026-02-10"
+          }
+        ]
+      },
+      {
+        "action": "Integrate custom XPUs and scale-up networking with NVIDIA NVLink Fusion and collaborate on silicon photonics.",
+        "investment_relevance": "This can reduce adoption friction for hyperscalers wanting proprietary accelerators while retaining NVIDIA rack, networking and software investments. It is material only if the partnership produces customer deployments and production revenue.",
+        "sources": [
+          {
+            "url": "https://nvidianews.nvidia.com/news/nvidia-ai-ecosystem-expands-as-marvell-joins-forces-through-nvlink-fusion",
+            "claim_date": "2026-03-31"
+          }
+        ]
+      },
+      {
+        "action": "Develop a reusable advanced-node custom platform, including working 2nm silicon IP for XPUs, CPUs and networking devices.",
+        "investment_relevance": "Reusable IP can lower program risk and improve time to market across multiple custom customers, but requires sustained R&D and dependable foundry and packaging execution.",
+        "sources": [
+          {
+            "url": "https://www.marvell.com/company/newsroom/marvell-demonstrates-industry-leading-2nm-silicon-for-accelerated-infrastructure.html",
+            "claim_date": "2025-03-03"
+          },
+          {
+            "url": "https://www.marvell.com/products/custom-asic.html",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "action": "Advance 1.6T optical DSP, silicon-photonics and co-packaged-optics platforms for scale-out, scale-up and data-center interconnect.",
+        "investment_relevance": "The roadmap targets bandwidth, reach and power bottlenecks that rise as accelerator clusters expand. Revenue impact depends on module qualification, production yields and the speed at which optical links replace or supplement copper.",
+        "sources": [
+          {
+            "url": "https://www.marvell.com/company/newsroom/marvell-1-6t-optical-dsp-ai-data-center-connectivity.html",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.marvell.com/company/newsroom/marvell-co-packaged-optics-architecture-custom-ai-accelerators.html",
+            "claim_date": "2025-01-06"
+          }
+        ]
+      }
+    ],
+    "frontier_ai_transmission_paths": [
+      {
+        "development": "Frontier-model training and inference increasingly shift from merchant accelerators toward hyperscaler-designed XPUs optimized for cost, power and specific workloads.",
+        "company_exposure": "The company supplies custom-silicon IP, design services, advanced packaging expertise and production devices for hyperscale infrastructure.",
+        "affected_driver": "Custom-program design wins, tape-outs, production ramps and customer concentration.",
+        "financial_consequence": "More outsourced XPU programs could raise unit revenue, NRE recovery and long-duration production volume; however, concentration and product mix may increase earnings volatility and pressure gross margin.",
+        "direction": "mixed",
+        "materiality_condition": "The effect becomes material only when additional programs progress beyond announcements into qualified production at sustained volumes, preferably across more than one customer.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "supports",
+        "watchpoints": [
+          "Named or otherwise verifiable XPU production ramps",
+          "Number of customers and programs moving from design to volume",
+          "Customer-concentration disclosures",
+          "Gross-margin and inventory movement as custom revenue scales"
+        ],
+        "sources": [
+          {
+            "url": "https://www.marvell.com/products/custom-asic.html",
+            "claim_date": null
+          },
+          {
+            "url": "https://investor.marvell.com/news-events/press-releases/detail/1011/marvell-technology-inc-reports-fourth-quarter-and-fiscal-year-2026-financial-results",
+            "claim_date": "2026-03-05"
+          },
+          {
+            "url": "https://investor.marvell.com/sec-filings/all-sec-filings/content/0001835632-26-000011/mrvl-20260131.htm",
+            "claim_date": "2026-03-11"
+          }
+        ]
+      },
+      {
+        "development": "Frontier AI clusters become more heterogeneous, combining custom accelerators with NVIDIA rack-scale systems and networking.",
+        "company_exposure": "NVLink Fusion allows company-designed custom XPUs and compatible scale-up networking to connect into NVIDIA infrastructure.",
+        "affected_driver": "Custom-XPU win rate, time to deployment and networking content attached to each custom accelerator program.",
+        "financial_consequence": "Successful deployments could increase custom-silicon and interconnect revenue while reducing customers' perceived integration risk.",
+        "direction": "upside",
+        "materiality_condition": "The partnership must produce qualified customer systems, purchase commitments and production revenue; technical compatibility or an ecosystem announcement alone is insufficient.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "supports",
+        "watchpoints": [
+          "Named NVLink Fusion customer deployments",
+          "Production qualification of custom XPUs and scale-up networking",
+          "Revenue or backlog attributed to compatible solutions",
+          "Whether NVIDIA or hyperscalers internalize overlapping content"
+        ],
+        "sources": [
+          {
+            "url": "https://nvidianews.nvidia.com/news/nvidia-ai-ecosystem-expands-as-marvell-joins-forces-through-nvlink-fusion",
+            "claim_date": "2026-03-31"
+          },
+          {
+            "url": "https://fondswelt.hansainvest.com/uploads/documents/fs_retail/HI_DE000A2N8127_retail_2026_07_20_en.pdf",
+            "claim_date": "2026-06-30"
+          }
+        ]
+      },
+      {
+        "development": "Larger frontier-model clusters push link bandwidth, reach and power beyond the practical limits of existing copper and lower-speed optical connections.",
+        "company_exposure": "The portfolio includes 800G and 1.6T optical DSPs, active electrical cable silicon, silicon-photonics engines, CPO/NPO solutions, Ethernet switches and data-center-interconnect products.",
+        "affected_driver": "Link-speed transitions and optical or switching content per accelerator rack and cluster.",
+        "financial_consequence": "A faster transition to 1.6T and optical scale-up can increase port value, product mix and data-center revenue, subject to yields and customer qualification.",
+        "direction": "upside",
+        "materiality_condition": "Hyperscalers must adopt the new products in volume and the company's content per cluster must rise rather than migrate to an integrated competitor or lower-value architecture.",
+        "time_horizon": "near_term",
+        "thesis_effect": "supports",
+        "watchpoints": [
+          "Mass-volume shipments of 1.6T products",
+          "800G-to-1.6T revenue mix",
+          "CPO/NPO customer qualifications",
+          "Ethernet switch and optical revenue growth",
+          "Power, yield and supply constraints"
+        ],
+        "sources": [
+          {
+            "url": "https://investor.marvell.com/news-events/press-releases/detail/1023/marvell-technology-inc-reports-first-quarter-of-fiscal-year-2027-financial-results",
+            "claim_date": "2026-05-27"
+          },
+          {
+            "url": "https://www.marvell.com/company/newsroom/marvell-1-6t-optical-dsp-ai-data-center-connectivity.html",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.marvell.com/company/newsroom/marvell-co-packaged-optics-architecture-custom-ai-accelerators.html",
+            "claim_date": "2025-01-06"
+          }
+        ]
+      },
+      {
+        "development": "Frontier workloads increase memory capacity and accelerator-to-accelerator communication requirements, encouraging disaggregated memory and open scale-up fabrics.",
+        "company_exposure": "The company owns PCIe/CXL switching products through XConn and is developing CXL and UALink-oriented connectivity alongside its custom platform.",
+        "affected_driver": "Switch, retimer and fabric-controller socket wins per server or rack.",
+        "financial_consequence": "Adoption could add new switching and connectivity revenue and increase platform content; fragmented standards could instead raise R&D without producing sufficient volume.",
+        "direction": "mixed",
+        "materiality_condition": "CXL, UALink or related open fabrics must secure production deployments at major operators, and company devices must win meaningful sockets rather than remain evaluation products.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "supports",
+        "watchpoints": [
+          "Named CXL or UALink deployments",
+          "Switch and retimer design wins entering production",
+          "Memory-pooling adoption in AI systems",
+          "Relative adoption of open versus proprietary scale-up fabrics"
+        ],
+        "sources": [
+          {
+            "url": "https://www.marvell.com/company/newsroom/marvell-completes-acquisition-of-xconn-technologies.html",
+            "claim_date": "2026-02-10"
+          },
+          {
+            "url": "https://www.marvell.com/company/newsroom/marvell-next-gen-cxl-switch-memory-pooling-breaks-ai-memory-wall.html",
+            "claim_date": "2026-03-17"
+          }
+        ]
+      },
+      {
+        "development": "Algorithmic efficiency, smaller models, lower-cost inference or customer insourcing reduces the amount of external accelerator and networking silicon required per unit of AI output.",
+        "company_exposure": "Revenue is increasingly concentrated in data-center products and a small number of large customers that can alter architectures, delay programs or design more silicon internally.",
+        "affected_driver": "Custom-XPU volumes, optical ports per cluster, design-win retention, inventory and capacity utilization.",
+        "financial_consequence": "Lower orders or program losses could reduce revenue, worsen inventory absorption and gross margin, and make capacity commitments more burdensome.",
+        "direction": "downside",
+        "materiality_condition": "Efficiency improvements must translate into lower infrastructure purchases, delayed clusters or insourced programs rather than simply enabling more AI usage and offsetting demand.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "challenges",
+        "watchpoints": [
+          "Data-center bookings and order cancellations",
+          "Hyperscaler capital-spending and cluster plans",
+          "Customer-concentration changes",
+          "Inventory and purchase commitments",
+          "Evidence of customers moving external programs in-house"
+        ],
+        "sources": [
+          {
+            "url": "https://investor.marvell.com/sec-filings/all-sec-filings/content/0001835632-26-000011/mrvl-20260131.htm",
+            "claim_date": "2026-03-11"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1835632/000183563226000019/mrvl-20260502.htm",
+            "claim_date": "2026-05-28"
+          }
+        ]
+      }
+    ],
+    "investment_thesis_and_tests": {
+      "public_bit_view_status": "commentary",
+      "attributable_public_thesis": "BIT's June 2026 monthly commentary described the holding as a positive contributor, citing its role in enabling hyperscalers to connect non-NVIDIA accelerators into NVIDIA networking architecture and expecting further custom-XPU design wins with hyperscalers to support growth. This is dated fund commentary, not a current recommendation or evidence of current position size.",
+      "what_would_support_it": [
+        "Multiple additional custom-XPU programs reach volume production and generate observable revenue, not merely design-win announcements.",
+        "NVLink Fusion produces named customer deployments and attach revenue for both custom silicon and networking.",
+        "1.6T optical, scale-up and scale-out products grow in volume and content per AI cluster.",
+        "Growth broadens across customers while gross margin, inventory and cash generation remain acceptable."
+      ],
+      "what_would_challenge_it": [
+        "A major custom program is delayed, re-awarded or insourced, especially at a top customer.",
+        "NVIDIA or hyperscalers vertically integrate interconnect content that the company expected to supply.",
+        "Optical scale-up, CPO or acquired Photonic Fabric products fail to obtain production qualification on schedule.",
+        "Custom and acquisition mix materially weakens gross margin or cash returns without compensating revenue growth.",
+        "AI infrastructure orders slow because of capex retrenchment or efficiency gains that are not offset by greater usage."
+      ],
+      "sources": [
+        {
+          "url": "https://fondswelt.hansainvest.com/uploads/documents/fs_retail/HI_DE000A2N8127_retail_2026_07_20_en.pdf",
+          "claim_date": "2026-06-30"
+        },
+        {
+          "url": "https://nvidianews.nvidia.com/news/nvidia-ai-ecosystem-expands-as-marvell-joins-forces-through-nvlink-fusion",
+          "claim_date": "2026-03-31"
+        },
+        {
+          "url": "https://investor.marvell.com/sec-filings/all-sec-filings/content/0001835632-26-000011/mrvl-20260131.htm",
+          "claim_date": "2026-03-11"
+        }
+      ]
+    },
+    "uncertainties_and_research_triggers": [
+      {
+        "uncertainty": "The identities, unit economics and production schedules of most custom-XPU programs are not publicly disclosed.",
+        "why_it_matters": "Design-win counts cannot be translated reliably into revenue, margin or concentration without knowing program stage, customer volume and the division of NRE and manufacturing economics.",
+        "next_research_trigger": "Inspect subsequent filings and calls for named production ramps, changes in major-customer concentration, NRE commentary and custom-product margin or inventory effects.",
+        "sources": [
+          {
+            "url": "https://investor.marvell.com/sec-filings/all-sec-filings/content/0001835632-26-000011/mrvl-20260131.htm",
+            "claim_date": "2026-03-11"
+          },
+          {
+            "url": "https://investor.marvell.com/news-events/press-releases/detail/1011/marvell-technology-inc-reports-fourth-quarter-and-fiscal-year-2026-financial-results",
+            "claim_date": "2026-03-05"
+          }
+        ]
+      },
+      {
+        "uncertainty": "Public reporting does not provide a complete product-level split among custom silicon, optics, switching, storage and other communications products.",
+        "why_it_matters": "Strong consolidated data-center revenue can obscure whether the BIT-relevant custom-XPU and interconnect mechanisms are actually strengthening and whether mix is improving or diluting profitability.",
+        "next_research_trigger": "Track disclosed 800G/1.6T shipments, custom-program ramps, switch revenue, segment growth, gross margin and management's product-mix commentary each quarter.",
+        "sources": [
+          {
+            "url": "https://investor.marvell.com/news-events/press-releases/detail/1023/marvell-technology-inc-reports-first-quarter-of-fiscal-year-2027-financial-results",
+            "claim_date": "2026-05-27"
+          },
+          {
+            "url": "https://investor.marvell.com/sec-filings/all-sec-filings/content/0001835632-26-000011/mrvl-20260131.htm",
+            "claim_date": "2026-03-11"
+          }
+        ]
+      },
+      {
+        "uncertainty": "The commercial timing and profitability of Celestial AI and XConn products remain unproven at scale.",
+        "why_it_matters": "The acquisitions add technology and engineering expense before broad production revenue, and their value depends on integration, customer qualification and standards adoption.",
+        "next_research_trigger": "Inspect future disclosures for acquired-business revenue, named design wins, production milestones, incremental operating expense, contingent consideration and gross-margin effects.",
+        "sources": [
+          {
+            "url": "https://www.marvell.com/company/newsroom/marvell-completes-acquisition-of-celestial-ai.html",
+            "claim_date": "2026-02-02"
+          },
+          {
+            "url": "https://www.marvell.com/company/newsroom/marvell-completes-acquisition-of-xconn-technologies.html",
+            "claim_date": "2026-02-10"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1835632/000183563226000019/mrvl-20260502.htm",
+            "claim_date": "2026-05-28"
+          }
+        ]
+      },
+      {
+        "uncertainty": "The long-run split among NVLink, Ethernet, UALink, CXL, copper and optical scale-up architectures is unsettled.",
+        "why_it_matters": "Each architecture carries different company content and competitive intensity; a technically successful product can remain immaterial if hyperscalers standardize elsewhere.",
+        "next_research_trigger": "Look for named volume deployments, ecosystem qualification, rack-level reference designs and customer procurement evidence rather than demonstrations alone.",
+        "sources": [
+          {
+            "url": "https://nvidianews.nvidia.com/news/nvidia-ai-ecosystem-expands-as-marvell-joins-forces-through-nvlink-fusion",
+            "claim_date": "2026-03-31"
+          },
+          {
+            "url": "https://www.marvell.com/company/newsroom/marvell-next-gen-cxl-switch-memory-pooling-breaks-ai-memory-wall.html",
+            "claim_date": "2026-03-17"
+          },
+          {
+            "url": "https://www.marvell.com/company/newsroom/marvell-co-packaged-optics-architecture-custom-ai-accelerators.html",
+            "claim_date": "2025-01-06"
+          }
+        ]
+      },
+      {
+        "uncertainty": "Advanced-node supply, packaging capacity and export or trade restrictions could constrain otherwise strong demand.",
+        "why_it_matters": "The fabless model and long capacity commitments expose shipments, working capital and margins to foundry yields, substrate availability and changing customer eligibility for controlled technology.",
+        "next_research_trigger": "Review inventory, capacity commitments, supplier lead times, 2nm qualification progress and any new export-license, tariff or China-related disclosures.",
+        "sources": [
+          {
+            "url": "https://investor.marvell.com/sec-filings/all-sec-filings/content/0001835632-26-000011/mrvl-20260131.htm",
+            "claim_date": "2026-03-11"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1835632/000183563226000019/mrvl-20260502.htm",
+            "claim_date": "2026-05-28"
+          },
+          {
+            "url": "https://www.marvell.com/company/newsroom/marvell-demonstrates-industry-leading-2nm-silicon-for-accelerated-infrastructure.html",
+            "claim_date": "2025-03-03"
+          }
+        ]
+      }
+    ],
+    "source_ledger": [
+      {
+        "url": "https://investor.marvell.com/sec-filings/all-sec-filings/content/0001835632-26-000011/mrvl-20260131.htm",
+        "title": "Fiscal 2026 Form 10-K",
+        "publisher": "Company investor relations",
+        "published_at": "2026-03-11",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://investor.marvell.com/news-events/press-releases/detail/1023/marvell-technology-inc-reports-first-quarter-of-fiscal-year-2027-financial-results",
+        "title": "First-quarter fiscal 2027 financial results",
+        "publisher": "Company investor relations",
+        "published_at": "2026-05-27",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1835632/000183563226000019/mrvl-20260502.htm",
+        "title": "First-quarter fiscal 2027 Form 10-Q",
+        "publisher": "U.S. Securities and Exchange Commission",
+        "published_at": "2026-05-28",
+        "source_type": "regulator_primary"
+      },
+      {
+        "url": "https://investor.marvell.com/sec-filings/all-sec-filings/content/0001104659-26-060265/0001104659-26-060265.pdf",
+        "title": "Fiscal 2026 annual report to stockholders",
+        "publisher": "Company investor relations",
+        "published_at": "2026-05-13",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.marvell.com/products/custom-asic.html",
+        "title": "Custom ASIC product overview",
+        "publisher": "Company",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.marvell.com/company/newsroom/marvell-1-6t-optical-dsp-ai-data-center-connectivity.html",
+        "title": "Expanded 1.6T optical DSP platform announcement",
+        "publisher": "Company",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.marvell.com/company/newsroom/marvell-co-packaged-optics-architecture-custom-ai-accelerators.html",
+        "title": "Co-packaged-optics architecture for custom AI accelerators",
+        "publisher": "Company",
+        "published_at": "2025-01-06",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.marvell.com/company/newsroom/marvell-completes-acquisition-of-celestial-ai.html",
+        "title": "Celestial AI acquisition completion",
+        "publisher": "Company",
+        "published_at": "2026-02-02",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.marvell.com/company/newsroom/marvell-completes-acquisition-of-xconn-technologies.html",
+        "title": "XConn acquisition completion",
+        "publisher": "Company",
+        "published_at": "2026-02-10",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://nvidianews.nvidia.com/news/nvidia-ai-ecosystem-expands-as-marvell-joins-forces-through-nvlink-fusion",
+        "title": "NVLink Fusion strategic partnership announcement",
+        "publisher": "NVIDIA",
+        "published_at": "2026-03-31",
+        "source_type": "counterparty_primary"
+      },
+      {
+        "url": "https://www.marvell.com/company/newsroom/marvell-expands-strategic-collaboration-aws-enable-accelerated-infrastructure-ai-cloud.html",
+        "title": "Expanded strategic collaboration with AWS",
+        "publisher": "Company",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.marvell.com/company/newsroom/marvell-demonstrates-industry-leading-2nm-silicon-for-accelerated-infrastructure.html",
+        "title": "Working 2nm silicon demonstration on TSMC process",
+        "publisher": "Company",
+        "published_at": "2025-03-03",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.marvell.com/company/newsroom/marvell-next-gen-cxl-switch-memory-pooling-breaks-ai-memory-wall.html",
+        "title": "Next-generation CXL switch announcement",
+        "publisher": "Company",
+        "published_at": "2026-03-17",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://investor.marvell.com/news-events/press-releases/detail/1011/marvell-technology-inc-reports-fourth-quarter-and-fiscal-year-2026-financial-results",
+        "title": "Fourth-quarter and fiscal 2026 financial results",
+        "publisher": "Company investor relations",
+        "published_at": "2026-03-05",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://fondswelt.hansainvest.com/uploads/documents/fs_retail/HI_DE000A2N8127_retail_2026_07_20_en.pdf",
+        "title": "Global Technology Leaders factsheet and June 2026 commentary",
+        "publisher": "BIT Capital and HANSAINVEST",
+        "published_at": "2026-07-20",
+        "source_type": "bit_primary"
+      }
+    ]
+  },
+  "provenance": {
+    "research_date": "2026-07-28",
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "xhigh",
+    "prompt_version": "company-memo-pilot-v1",
+    "prompt_cache_key": "fli:company-memo:company-memo-pilot-v1",
+    "response_id": "resp_yfUEABLJcwnxRv3jqX8obOGJYZMwe6mPSBIivM9_WLvDGIOZbuesm9-jjXSGzGOfd5vN2_FXJUmWfX4ivQvURZ2UHDF-nbeqUqh4ZO4lgx6Hvg0-FAooj06jop-dgxdF-_DkMRV9zsXnfYTmmr5lw1ESacj1o9XRqmnuQiKCM6-gF-Reb-zViB2aQaukOgEbzs85BUDWbH0Fy2ylpUQOu6YwgWcGAz-PUK-Budx7fqwxL7Eo6hGqhN9Ini6CFWKqRCgrD6t8FXKAOB2-anFmA6kr-AApzc9SZ4yE021bOm446UuQuoSfSO5gmQVq7JHCmZ3W4r1u0dvaLVUvTv5jJaD6cpAGRWBOWLyQimrIJrI8ZnPCfdk3QXpkGAwpknrjRBCDQeR0HxrL5YamkGihf5ExLkTI2CTt7O5ZgwbXVPZWInQrOGMIH-12Z9BcXkM4ZPm25dhqAHkdE7E1yc6ixA_k",
+    "response_model": "gpt-5.6-sol",
+    "input_tokens": 104318,
+    "cached_tokens": 0,
+    "cache_write_tokens": 0,
+    "output_tokens": 66177,
+    "reasoning_tokens": 10294,
+    "reported_cost_usd": null,
+    "web_actions": [
+      {
+        "query": "site:investor.marvell.com annual report 2026 Marvell 10-K fiscal 2026",
+        "type": "search",
+        "queries": [
+          "site:investor.marvell.com annual report 2026 Marvell 10-K fiscal 2026",
+          "site:investor.marvell.com Marvell first quarter fiscal 2027 results data center custom silicon revenue",
+          "site:marvell.com AI custom silicon electro-optics 1.6T CPO Marvell hyperscaler official",
+          "site:fondswelt.hansainvest.com/uploads/documents/fs_retail HI_DE000A2N8127_retail_2026_07_20_en.pdf"
+        ],
+        "sources": null
+      },
+      {
+        "pattern": "Data Center",
+        "type": "find_in_page",
+        "url": "https://investor.marvell.com/sec-filings/all-sec-filings/content/0001835632-26-000019/mrvl-20260502.htm"
+      },
+      {
+        "type": "open_page",
+        "url": "https://fondswelt.hansainvest.com/uploads/documents/fs_retail/HI_DE000A2N8127_retail_2026_07_20_en.pdf"
+      },
+      {},
+      {
+        "query": "\"Marvell\" \"non-NVIDIA\" \"networking architecture\" BIT Capital June 2026",
+        "type": "search",
+        "queries": [
+          "\"Marvell\" \"non-NVIDIA\" \"networking architecture\" BIT Capital June 2026",
+          "site:bit-capital.de Marvell June 2026 XPU hyperscalers NVIDIA networking architecture",
+          "\"Marvell\" \"custom XPU\" \"BIT Global Technology Leaders\"",
+          "\"HI_DE000A2N8127_retail_2026_07_20_en.pdf\" Marvell"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:sec.gov/Archives/edgar/data/1835632 2026 Marvell 10-K 20260131",
+        "type": "search",
+        "queries": [
+          "site:sec.gov/Archives/edgar/data/1835632 2026 Marvell 10-K 20260131",
+          "site:sec.gov/Archives/edgar/data/1835632 2026 Marvell 10-Q 20260502",
+          "site:investor.marvell.com \"data center revenue\" \"fiscal 2026\" Marvell PDF",
+          "site:investor.marvell.com \"customer accounted\" Marvell fiscal 2026"
+        ],
+        "sources": null
+      },
+      {
+        "pattern": "customer",
+        "type": "find_in_page",
+        "url": "https://investor.marvell.com/sec-filings/all-sec-filings/content/0001104659-26-060265/0001104659-26-060265.pdf"
+      },
+      {
+        "query": "site:investor.marvell.com/sec-filings/all-sec-filings/content/0001835632-26-000011/mrvl-20260131.htm \"wafer foundries\"",
+        "type": "search",
+        "queries": [
+          "site:investor.marvell.com/sec-filings/all-sec-filings/content/0001835632-26-000011/mrvl-20260131.htm \"wafer foundries\"",
+          "site:investor.marvell.com/sec-filings/all-sec-filings/content/0001835632-26-000011/mrvl-20260131.htm \"accounted for\" \"net revenue\"",
+          "site:investor.marvell.com/sec-filings/all-sec-filings/content/0001835632-26-000011/mrvl-20260131.htm \"Data Center\" \"Communications and Other\"",
+          "site:investor.marvell.com/sec-filings/all-sec-filings/content/0001835632-26-000011/mrvl-20260131.htm \"Taiwan Semiconductor\""
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://investor.marvell.com/sec-filings/annual-reports"
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/1835632/000183563226000019/mrvl-20260502.htm"
+      },
+      {
+        "query": "Marvell 2026 10-K major customers accounted for percentage revenue foundries manufacturing",
+        "type": "search",
+        "queries": [
+          "Marvell 2026 10-K major customers accounted for percentage revenue foundries manufacturing",
+          "Marvell fiscal 2026 customer concentration TSMC revenue 10-K",
+          "Marvell 2026 annual report data center revenue percentage communications other revenue",
+          "Marvell fiscal 2026 inventory purchase commitments wafer capacity supply agreements"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:marvell.com/company/newsroom NVIDIA NVLink Fusion Marvell March 2026",
+        "type": "search",
+        "queries": [
+          "site:marvell.com/company/newsroom NVIDIA NVLink Fusion Marvell March 2026",
+          "site:marvell.com/company/newsroom Celestial AI acquisition Marvell Photonic Fabric December 2025",
+          "site:marvell.com/company/newsroom XConn acquisition Marvell CXL PCIe February 2026",
+          "site:marvell.com/company/newsroom AWS Microsoft custom silicon Marvell hyperscaler XPU"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:aws.amazon.com/about-aws/whats-new Marvell strategic collaboration AI cloud December 2024",
+        "type": "search",
+        "queries": [
+          "site:aws.amazon.com/about-aws/whats-new Marvell strategic collaboration AI cloud December 2024",
+          "site:aws.amazon.com Marvell AWS supplier relationship AI data center connectivity",
+          "site:nvidianews.nvidia.com Marvell NVLink Fusion March 31 2026",
+          "site:tsmc.com Marvell 2nm custom silicon 3nm collaboration"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:investor.marvell.com/sec-filings/all-sec-filings/content/0001835632-26-000011/mrvl-20260131.htm NRE revenue custom products Marvell",
+        "type": "search",
+        "queries": [
+          "site:investor.marvell.com/sec-filings/all-sec-filings/content/0001835632-26-000011/mrvl-20260131.htm NRE revenue custom products Marvell",
+          "Marvell 2026 10-K non-recurring engineering revenue custom products",
+          "site:investor.marvell.com \"custom products\" \"non-recurring engineering\" Marvell",
+          "site:marvell.com custom silicon business model NRE Marvell hyperscaler"
+        ],
+        "sources": null
+      },
+      {
+        "query": "Marvell fiscal 2026 \"82%\" \"ten largest customers\"",
+        "type": "search",
+        "queries": [
+          "Marvell fiscal 2026 \"82%\" \"ten largest customers\"",
+          "Marvell fiscal 2026 \"customer\" \"10%\" net revenue",
+          "site:investor.marvell.com/sec-filings/all-sec-filings/content/0001835632-26-000011 \"82%\"",
+          "site:sec.gov/Archives/edgar/data/1835632/000183563226000011 \"82%\" \"customers\""
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:marvell.com/company/newsroom Marvell TSMC 2nm custom silicon",
+        "type": "search",
+        "queries": [
+          "site:marvell.com/company/newsroom Marvell TSMC 2nm custom silicon",
+          "site:marvell.com/company/newsroom Marvell TSMC 3nm data infrastructure",
+          "site:tsmc.com Marvell Technology 2nm custom SRAM",
+          "site:investor.marvell.com/sec-filings/all-sec-filings/content/0001835632-26-000011/mrvl-20260131.htm \"Taiwan\" foundry"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:investor.marvell.com/sec-filings/all-sec-filings/content/0001835632-26-000011/mrvl-20260131.htm export controls China Marvell",
+        "type": "search",
+        "queries": [
+          "site:investor.marvell.com/sec-filings/all-sec-filings/content/0001835632-26-000011/mrvl-20260131.htm export controls China Marvell",
+          "Marvell 2026 10-K export controls trade restrictions China revenue risk",
+          "site:investor.marvell.com/sec-filings/all-sec-filings/content/0001835632-26-000011 \"export\" \"China\""
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:investor.marvell.com/sec-filings/all-sec-filings/content/0001835632-26-000011/mrvl-20260131.htm Broadcom NVIDIA AMD Intel competition Marvell",
+        "type": "search",
+        "queries": [
+          "site:investor.marvell.com/sec-filings/all-sec-filings/content/0001835632-26-000011/mrvl-20260131.htm Broadcom NVIDIA AMD Intel competition Marvell",
+          "Marvell 2026 10-K competitors Broadcom Nvidia Intel AMD",
+          "site:investor.marvell.com/sec-filings/all-sec-filings/content/0001835632-26-000011 \"Broadcom\"",
+          "site:sec.gov/Archives/edgar/data/1835632/000183563226000011 \"Broadcom\""
+        ],
+        "sources": null
+      }
+    ],
+    "consulted_sources": [
+      {
+        "url": "https://investor.marvell.com/sec-filings/all-sec-filings/content/0001835632-26-000011/mrvl-20260131.htm",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://investor.marvell.com/news-events/press-releases/detail/1023/marvell-technology-inc-reports-first-quarter-of-fiscal-year-2027-financial-results",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1835632/000183563226000019/mrvl-20260502.htm",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://investor.marvell.com/sec-filings/all-sec-filings/content/0001104659-26-060265/0001104659-26-060265.pdf",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.marvell.com/products/custom-asic.html",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.marvell.com/company/newsroom/marvell-1-6t-optical-dsp-ai-data-center-connectivity.html",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.marvell.com/company/newsroom/marvell-co-packaged-optics-architecture-custom-ai-accelerators.html",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.marvell.com/company/newsroom/marvell-completes-acquisition-of-celestial-ai.html",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.marvell.com/company/newsroom/marvell-completes-acquisition-of-xconn-technologies.html",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://nvidianews.nvidia.com/news/nvidia-ai-ecosystem-expands-as-marvell-joins-forces-through-nvlink-fusion",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.marvell.com/company/newsroom/marvell-expands-strategic-collaboration-aws-enable-accelerated-infrastructure-ai-cloud.html",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.marvell.com/company/newsroom/marvell-demonstrates-industry-leading-2nm-silicon-for-accelerated-infrastructure.html",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.marvell.com/company/newsroom/marvell-next-gen-cxl-switch-memory-pooling-breaks-ai-memory-wall.html",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://investor.marvell.com/news-events/press-releases/detail/1011/marvell-technology-inc-reports-fourth-quarter-and-fiscal-year-2026-financial-results",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://fondswelt.hansainvest.com/uploads/documents/fs_retail/HI_DE000A2N8127_retail_2026_07_20_en.pdf",
+        "type": "model_citation"
+      }
+    ],
+    "request_tags": [
+      "app:frontier-lab-intelligence",
+      "pipeline:investment-company-context",
+      "job:company-memo-pilot",
+      "scope:single-company",
+      "prompt:company-memo-pilot-v1",
+      "company:mrvl",
+      "model:gpt-5.6-sol",
+      "reasoning:xhigh"
+    ]
+  }
+}

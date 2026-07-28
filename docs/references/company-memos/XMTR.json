@@ -1,0 +1,949 @@
+{
+  "schema_version": "company-memo-pilot-result-v1",
+  "company": {
+    "name": "Xometry",
+    "ticker": "XMTR"
+  },
+  "memo": {
+    "business_and_economics": {
+      "summary": "The company operates an asset-light, two-sided marketplace for custom-manufactured parts and assemblies. Buyers receive automated pricing, manufacturability feedback and lead-time options; the company selects and manages third-party production suppliers and remains accountable for fulfillment. A smaller services business monetizes industrial discovery, advertising, shop-management software and financial services. Marketplace orders are the dominant revenue and gross-profit engine, while proprietary transaction and production data support pricing, sourcing and delivery models.",
+      "revenue_engines": [
+        {
+          "engine": "Custom-manufacturing marketplace orders",
+          "who_pays": "Engineers, procurement teams and enterprises ordering prototypes, production parts and assemblies across machining, additive manufacturing, sheet metal, molding and related processes.",
+          "economic_logic": "Buyer order value is recorded as marketplace revenue, while supplier production and fulfillment payments form the principal cost base. Economics depend on order volume, pricing accuracy, supplier cost, product mix, quality and delivery execution.",
+          "sources": [
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1657573/0001193125-26-066959-index.htm",
+              "claim_date": "2026-02-24"
+            },
+            {
+              "url": "https://www.xometry.com/machine-learning-for-manufacturing/",
+              "claim_date": null
+            },
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1657573/000119312526065195/xmtr-ex99_1.htm",
+              "claim_date": "2026-02-24"
+            }
+          ]
+        },
+        {
+          "engine": "Industrial supplier and workflow services",
+          "who_pays": "Manufacturers, industrial suppliers and marketers using Thomasnet advertising and marketing products, financial services, and Workcenter software and operating tools.",
+          "economic_logic": "Recurring or usage-based service fees monetize the supplier side and industrial discovery traffic. This is a smaller but generally higher-margin revenue stream than manufacturing transactions.",
+          "sources": [
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1657573/0001193125-26-066959-index.htm",
+              "claim_date": "2026-02-24"
+            },
+            {
+              "url": "https://workcenter.xometry.com/about-us/",
+              "claim_date": null
+            },
+            {
+              "url": "https://investors.xometry.com/news-releases/news-release-details/xometry-reports-record-first-quarter-2026-results/",
+              "claim_date": "2026-05-07"
+            }
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1657573/0001193125-26-066959-index.htm",
+          "claim_date": "2026-02-24"
+        },
+        {
+          "url": "https://www.xometry.com/about-us/",
+          "claim_date": null
+        },
+        {
+          "url": "https://www.xometry.com/machine-learning-for-manufacturing/",
+          "claim_date": null
+        }
+      ]
+    },
+    "operating_and_financial_drivers": [
+      {
+        "driver": "Buyer growth, repeat ordering and enterprise wallet share",
+        "why_it_matters": "Revenue compounds when new buyers convert, existing buyers repeat, and large accounts route more categories and production work through the platform. Active buyers and accounts above annual-spend thresholds are useful scale and engagement indicators.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "product_mix",
+          "cash_flow"
+        ],
+        "sources": [
+          {
+            "url": "https://investors.xometry.com/news-releases/news-release-details/xometry-reports-record-first-quarter-2026-results/",
+            "claim_date": "2026-05-07"
+          },
+          {
+            "url": "https://investors.xometry.com/node/12451/html",
+            "claim_date": "2026-04-29"
+          }
+        ]
+      },
+      {
+        "driver": "Supplier density, capability coverage and execution quality",
+        "why_it_matters": "A broad, qualified supplier network increases available capacity, process coverage and matching options without equivalent company-owned manufacturing capital. Poor quality, late delivery or supplier shortages can instead cause remediation costs, lost margin and buyer attrition.",
+        "financial_lines": [
+          "volume",
+          "product_mix",
+          "gross_margin",
+          "capital_expenditure",
+          "working_capital",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://investors.xometry.com/news-releases/news-release-details/xometrys-marketplace-has-generated-nearly-1-billion-revenue",
+            "claim_date": "2025-04-17"
+          },
+          {
+            "url": "https://www.xometry.com/about-us/",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1657573/0001193125-26-066959-index.htm",
+            "claim_date": "2026-02-24"
+          }
+        ]
+      },
+      {
+        "driver": "Pricing, lead-time and supplier-matching model accuracy",
+        "why_it_matters": "The platform commits to buyer prices and delivery expectations before real-world production is complete. Better predictions can improve conversion, sourcing speed and marketplace gross margin; systematic underquoting or delivery error can create direct fulfillment losses and damage trust.",
+        "financial_lines": [
+          "pricing",
+          "gross_margin",
+          "operating_cost",
+          "cash_flow",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://investors.xometry.com/news-releases/news-release-details/xometry-releases-comprehensive-upgrades-its-ai-model",
+            "claim_date": "2026-07-20"
+          },
+          {
+            "url": "https://investors.xometry.com/news-releases/news-release-details/xometry-reports-record-first-quarter-2026-results/",
+            "claim_date": "2026-05-07"
+          },
+          {
+            "url": "https://investors.xometry.com/node/12451/html",
+            "claim_date": "2026-04-29"
+          }
+        ]
+      },
+      {
+        "driver": "Enterprise workflow penetration, international expansion and process breadth",
+        "why_it_matters": "Native design and procurement integrations reduce purchasing friction, while additional geographies, materials and processes increase the addressable share of customer bills of materials. The benefit depends on local supplier liquidity, compliance and profitable execution.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "product_mix",
+          "gross_margin",
+          "operating_cost",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://news.siemens.com/en-us/siemens-xometry-strategic-partnership/",
+            "claim_date": "2026-05-07"
+          },
+          {
+            "url": "https://investors.xometry.com/news-releases/news-release-details/xometry-marketplace-accelerates-solutions-complex-manufacturing/",
+            "claim_date": "2026-01-08"
+          },
+          {
+            "url": "https://investors.xometry.com/news-releases/news-release-details/xometry-reports-record-first-quarter-2026-results/",
+            "claim_date": "2026-05-07"
+          }
+        ]
+      }
+    ],
+    "ecosystem": [
+      {
+        "relationship": "customer_or_end_market",
+        "entities_or_group": "Engineering and procurement organizations ranging from startups to large enterprises; important end markets include aerospace and defense, electronics and semiconductors, automotive, medical, robotics, energy and general industrial manufacturing.",
+        "why_it_matters": "Demand is diversified but exposed to industrial procurement budgets, product-development cycles and qualification requirements. Enterprise production orders can be larger and more repeatable than prototyping, but also impose stricter quality and delivery standards.",
+        "sources": [
+          {
+            "url": "https://www.xometry.com/",
+            "claim_date": null
+          },
+          {
+            "url": "https://investors.xometry.com/news-releases/news-release-details/xometry-reports-record-first-quarter-2026-results/",
+            "claim_date": "2026-05-07"
+          },
+          {
+            "url": "https://investors.xometry.com/news-releases/news-release-details/xometry-marketplace-accelerates-solutions-complex-manufacturing/",
+            "claim_date": "2026-01-08"
+          }
+        ]
+      },
+      {
+        "relationship": "supplier",
+        "entities_or_group": "A global network of approximately 5,000 active manufacturing suppliers spanning machining, additive manufacturing, sheet metal, molding and other processes.",
+        "why_it_matters": "Supplier capacity, certifications, process coverage, geographic availability and performance history determine what can be quoted and fulfilled. The network supports asset-light scaling but transfers supplier execution risk into the customer experience and marketplace margin.",
+        "sources": [
+          {
+            "url": "https://www.xometry.com/about-us/",
+            "claim_date": null
+          },
+          {
+            "url": "https://investors.xometry.com/news-releases/news-release-details/xometrys-marketplace-has-generated-nearly-1-billion-revenue",
+            "claim_date": "2025-04-17"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1657573/0001193125-26-066959-index.htm",
+            "claim_date": "2026-02-24"
+          }
+        ]
+      },
+      {
+        "relationship": "partner",
+        "entities_or_group": "Siemens Digital Industries Software, Siemens Xcelerator and Supplyframe",
+        "why_it_matters": "The partnership is intended to embed manufacturability, pricing, sourcing and execution intelligence into engineering and lifecycle-management workflows and combine electronic, standard and custom mechanical-part sourcing. It could create lower-friction enterprise distribution if implementation produces attributable orders.",
+        "sources": [
+          {
+            "url": "https://news.siemens.com/en-us/siemens-xometry-strategic-partnership/",
+            "claim_date": "2026-05-07"
+          },
+          {
+            "url": "https://investors.xometry.com/news-releases/news-release-details/xometry-reports-record-first-quarter-2026-results/",
+            "claim_date": "2026-05-07"
+          }
+        ]
+      },
+      {
+        "relationship": "competitor",
+        "entities_or_group": "Direct machine shops, incumbent supplier relationships, other digital manufacturing marketplaces and vertically integrated rapid-manufacturing providers",
+        "why_it_matters": "Buyers can source directly or use competing digital platforms, while suppliers can build their own quoting and customer-acquisition tools. Competition can pressure conversion, pricing, supplier access and customer-acquisition economics.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1657573/0001193125-26-066959-index.htm",
+            "claim_date": "2026-02-24"
+          },
+          {
+            "url": "https://www.xometry.com/machine-learning-for-manufacturing/",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "relationship": "regulatory_dependency",
+        "entities_or_group": "Export-control, cybersecurity, quality-system and industry-certification regimes, including ITAR, CMMC and ISO or sector-specific quality requirements",
+        "why_it_matters": "Access to defense, aerospace, medical and other sensitive work depends on maintaining appropriate controls and routing jobs to qualified suppliers. Compliance failures can restrict available demand, raise operating costs or create liability and reputational risk.",
+        "sources": [
+          {
+            "url": "https://www.xometry.com/machine-learning-for-manufacturing/",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1657573/0001193125-26-066959-index.htm",
+            "claim_date": "2026-02-24"
+          },
+          {
+            "url": "https://www.xometry.com/",
+            "claim_date": null
+          }
+        ]
+      }
+    ],
+    "strategy_and_committed_actions": [
+      {
+        "action": "Embed marketplace intelligence more deeply into enterprise design, engineering and procurement workflows, including the Siemens Xcelerator integration.",
+        "investment_relevance": "Successful native distribution could increase enterprise conversion, wallet share and repeat spend while lowering workflow friction. Materiality requires implementation milestones and attributable transaction volume, not merely partnership announcements.",
+        "sources": [
+          {
+            "url": "https://news.siemens.com/en-us/siemens-xometry-strategic-partnership/",
+            "claim_date": "2026-05-07"
+          },
+          {
+            "url": "https://investors.xometry.com/node/12451/html",
+            "claim_date": "2026-04-29"
+          }
+        ]
+      },
+      {
+        "action": "Continue upgrading interconnected models for process recommendation, manufacturability, cost, supplier capability, sourcing and production outcomes.",
+        "investment_relevance": "Management has tied marketplace gross-margin expansion to proprietary AI pricing and sourcing models. Model improvements matter only if they raise realized conversion, fulfillment reliability or unit economics after supplier costs and remediation.",
+        "sources": [
+          {
+            "url": "https://investors.xometry.com/news-releases/news-release-details/xometry-releases-comprehensive-upgrades-its-ai-model",
+            "claim_date": "2026-07-20"
+          },
+          {
+            "url": "https://investors.xometry.com/node/12451/html",
+            "claim_date": "2026-04-29"
+          }
+        ]
+      },
+      {
+        "action": "Broaden materials, processes and production capabilities for complex and regulated applications.",
+        "investment_relevance": "Expanded capability can move the mix from one-off prototypes toward larger, repeat production orders. It also increases qualification, inspection and supplier-execution demands that can affect gross margin and risk.",
+        "sources": [
+          {
+            "url": "https://investors.xometry.com/news-releases/news-release-details/xometry-marketplace-accelerates-solutions-complex-manufacturing/",
+            "claim_date": "2026-01-08"
+          },
+          {
+            "url": "https://investors.xometry.com/news-releases/news-release-details/xometry-expands-injection-molding-platform-wider-selection",
+            "claim_date": "2026-06-18"
+          }
+        ]
+      },
+      {
+        "action": "Scale buyer and supplier networks internationally while maintaining operating leverage and marketplace gross-margin discipline.",
+        "investment_relevance": "International liquidity and enterprise growth can enlarge the revenue base, while controlled operating-cost growth determines whether marketplace gross-profit gains translate into durable cash generation.",
+        "sources": [
+          {
+            "url": "https://investors.xometry.com/news-releases/news-release-details/xometry-reports-record-first-quarter-2026-results/",
+            "claim_date": "2026-05-07"
+          },
+          {
+            "url": "https://investors.xometry.com/node/12451/html",
+            "claim_date": "2026-04-29"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1657573/000119312526065195/xmtr-ex99_1.htm",
+            "claim_date": "2026-02-24"
+          }
+        ]
+      }
+    ],
+    "frontier_ai_transmission_paths": [
+      {
+        "development": "Advances in multimodal and geometric reasoning improve understanding of CAD geometry, drawings, materials, tolerances and application context.",
+        "company_exposure": "The quoting workflow already analyzes uploaded part files and uses geometry, manufacturability and contextual data to recommend processes and configurations.",
+        "affected_driver": "First-quote conversion, new-buyer activation, recommendation acceptance and sales or engineering intervention per order",
+        "financial_consequence": "Higher successful self-service conversion could increase marketplace order volume and lower support cost; incorrect recommendations could instead produce rework, cancellations or quality losses.",
+        "direction": "upside",
+        "materiality_condition": "The new capability must deliver sustained conversion or support-cost improvement beyond the currently disclosed recommendation-acceptance level, without increasing downstream quality failures or manual review.",
+        "time_horizon": "near_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "First-time-buyer quote conversion",
+          "Recommendation acceptance by process and customer cohort",
+          "Manual engineering interventions per quote",
+          "Cancellation, remake and quality-claim rates"
+        ],
+        "sources": [
+          {
+            "url": "https://investors.xometry.com/news-releases/news-release-details/xometry-releases-comprehensive-upgrades-its-ai-model",
+            "claim_date": "2026-07-20"
+          },
+          {
+            "url": "https://www.xometry.com/machine-learning-for-manufacturing/",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "development": "Stronger predictive and optimization models improve cost estimation, lead-time forecasting and real-time supplier matching.",
+        "company_exposure": "The company quotes prices and delivery options before production, then routes jobs across a distributed supplier network. Forecast errors can therefore flow directly into fulfillment economics and customer experience.",
+        "affected_driver": "Quote accuracy, sourcing speed, supplier utilization, on-time delivery and marketplace gross margin",
+        "financial_consequence": "Better models could expand gross margin and order conversion while reducing sourcing labor; underquoting, poor routing or optimistic lead times could create direct losses and reputational damage.",
+        "direction": "mixed",
+        "materiality_condition": "Reported model-error improvements must translate into realized marketplace gross-margin, delivery and remediation gains across meaningful order volume rather than isolated test sets or one manufacturing process.",
+        "time_horizon": "near_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Realized versus quoted supplier cost",
+          "Marketplace gross margin by process",
+          "Time to place accepted orders with suppliers",
+          "On-time delivery and remake rates",
+          "Frequency of post-quote repricing or cancellation"
+        ],
+        "sources": [
+          {
+            "url": "https://investors.xometry.com/news-releases/news-release-details/xometry-releases-comprehensive-upgrades-its-ai-model",
+            "claim_date": "2026-07-20"
+          },
+          {
+            "url": "https://investors.xometry.com/news-releases/news-release-details/xometry-reports-record-first-quarter-2026-results/",
+            "claim_date": "2026-05-07"
+          },
+          {
+            "url": "https://investors.xometry.com/node/12451/html",
+            "claim_date": "2026-04-29"
+          }
+        ]
+      },
+      {
+        "development": "Engineering and procurement agents become capable of iterating designs, evaluating manufacturability and initiating sourcing inside CAD and product-lifecycle workflows.",
+        "company_exposure": "The company distributes quoting through CAD integrations and plans native design-to-source integration with Siemens. Platform owners or agents could either route more orders to the marketplace or compare multiple providers and commoditize access.",
+        "affected_driver": "Enterprise lead generation, workflow attach rate, wallet share, customer-acquisition cost and pricing power",
+        "financial_consequence": "Preferred execution-layer status could increase enterprise revenue and repeat spend; multi-provider routing or platform-controlled economics could pressure conversion and marketplace margin.",
+        "direction": "mixed",
+        "materiality_condition": "The mechanism becomes material only when native integrations generate measurable, attributable order volume or alter commercial terms and provider selection at scale.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Siemens integration launch and product milestones",
+          "Orders and revenue attributed to embedded workflows",
+          "Enterprise account spend and retention",
+          "Commercial or revenue-sharing terms",
+          "Additional CAD, PLM and procurement integrations"
+        ],
+        "sources": [
+          {
+            "url": "https://news.siemens.com/en-us/siemens-xometry-strategic-partnership/",
+            "claim_date": "2026-05-07"
+          },
+          {
+            "url": "https://www.xometry.com/cad-add-ins/",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "development": "Frontier-model scaling and inference growth drive data-center construction, hardware iteration and demand for custom mechanical components.",
+        "company_exposure": "The supplier network supports machining, sheet metal, additive manufacturing and molding used across electronics, semiconductor and data-center applications, but publicly disclosed data-center exposure is not quantified.",
+        "affected_driver": "Order volume, average order value, repeat production mix, supplier certification coverage and capacity utilization",
+        "financial_consequence": "Qualified recurring infrastructure work could lift marketplace revenue and gross profit; large or exacting programs could create quality, concentration and delivery risk if supplier execution is insufficient.",
+        "direction": "upside",
+        "materiality_condition": "The channel is material only if disclosures show sustained growth in data-center or related electronics orders, repeat production volumes and acceptable realized margins—not merely prototype activity or broad end-market eligibility.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Data-center and electronics order growth",
+          "Average order size and repeat-order rate",
+          "Production versus prototype mix",
+          "Relevant supplier certifications and capacity",
+          "Quality and on-time delivery for large programs"
+        ],
+        "sources": [
+          {
+            "url": "https://investors.xometry.com/news-releases/news-release-details/xometry-expands-injection-molding-platform-wider-selection",
+            "claim_date": "2026-06-18"
+          },
+          {
+            "url": "https://www.xometry.com/",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "development": "Widely available foundation models, coding agents and manufacturing software reduce the cost of building digital quoting, estimation and supplier-matching tools.",
+        "company_exposure": "The company's differentiation depends on proprietary transaction and production data, network liquidity, workflow integration and execution—not solely access to machine-learning techniques. Competitors and suppliers can adopt improved digital tools.",
+        "affected_driver": "Buyer retention, quote conversion, supplier exclusivity, customer-acquisition cost, pricing and marketplace gross margin",
+        "financial_consequence": "If rivals replicate buyer-facing functionality without comparable fulfillment infrastructure, differentiation may persist; if they also achieve adequate execution and data scale, growth and margin could face pressure.",
+        "direction": "downside",
+        "materiality_condition": "The risk becomes material if competitors or direct suppliers demonstrate comparable quote reliability and fulfillment while buyer repeat rates, pricing spreads or supplier participation deteriorate.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Competitive quote speed and accuracy",
+          "Buyer repeat and retention trends",
+          "Sales and marketing cost per incremental buyer",
+          "Supplier participation and direct-selling tools",
+          "Marketplace gross-margin pressure"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1657573/0001193125-26-066959-index.htm",
+            "claim_date": "2026-02-24"
+          },
+          {
+            "url": "https://investors.xometry.com/news-releases/news-release-details/xometry-releases-comprehensive-upgrades-its-ai-model",
+            "claim_date": "2026-07-20"
+          },
+          {
+            "url": "https://www.xometry.com/machine-learning-for-manufacturing/",
+            "claim_date": null
+          }
+        ]
+      }
+    ],
+    "investment_thesis_and_tests": {
+      "public_bit_view_status": "no_public_view",
+      "attributable_public_thesis": null,
+      "what_would_support_it": [],
+      "what_would_challenge_it": [],
+      "sources": [
+        {
+          "url": "https://bitcap.com/en/fonds/bit-global-technology-leaders",
+          "claim_date": null
+        },
+        {
+          "url": "https://bitcap.com/beckers-bets-podcast",
+          "claim_date": null
+        }
+      ]
+    },
+    "uncertainties_and_research_triggers": [
+      {
+        "uncertainty": "Public disclosures provide limited standardized evidence on quote error, supplier-cost variance, on-time delivery, remakes and quality claims.",
+        "why_it_matters": "These variables determine whether stated model improvements create real marketplace gross profit or merely improve offline accuracy measures.",
+        "next_research_trigger": "Inspect subsequent filings and earnings materials for realized pricing variance, delivery, sourcing-speed or quality metrics following the March and July 2026 model releases.",
+        "sources": [
+          {
+            "url": "https://investors.xometry.com/news-releases/news-release-details/xometry-releases-comprehensive-upgrades-its-ai-model",
+            "claim_date": "2026-07-20"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1657573/0001193125-26-066959-index.htm",
+            "claim_date": "2026-02-24"
+          }
+        ]
+      },
+      {
+        "uncertainty": "The launch schedule, commercial structure and attributable transaction economics of the Siemens integration are not yet sufficiently disclosed.",
+        "why_it_matters": "The partnership could be a major enterprise distribution channel, but integration activity does not automatically produce revenue, favorable unit economics or preferred-provider status.",
+        "next_research_trigger": "Look for generally available product launches, customer deployments, sourced order volume, revenue-sharing terms and measurable enterprise spend linked to the integration.",
+        "sources": [
+          {
+            "url": "https://news.siemens.com/en-us/siemens-xometry-strategic-partnership/",
+            "claim_date": "2026-05-07"
+          },
+          {
+            "url": "https://investors.xometry.com/news-releases/news-release-details/xometry-reports-record-first-quarter-2026-results/",
+            "claim_date": "2026-05-07"
+          }
+        ]
+      },
+      {
+        "uncertainty": "Revenue and order exposure to specific end markets—including AI and data-center infrastructure—is not quantified in durable public reporting.",
+        "why_it_matters": "Without vertical mix, order size and repeat-production data, broad eligibility to manufacture components cannot establish material financial exposure to an AI infrastructure cycle.",
+        "next_research_trigger": "Seek vertical revenue commentary, named customer evidence, production-order case studies and supplier-capacity disclosures tied specifically to data-center or semiconductor infrastructure.",
+        "sources": [
+          {
+            "url": "https://investors.xometry.com/news-releases/news-release-details/xometry-expands-injection-molding-platform-wider-selection",
+            "claim_date": "2026-06-18"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1657573/0001193125-26-066959-index.htm",
+            "claim_date": "2026-02-24"
+          }
+        ]
+      },
+      {
+        "uncertainty": "The durability of the proprietary-data advantage relative to improving general-purpose models and competing marketplaces remains unproven.",
+        "why_it_matters": "Model techniques can diffuse quickly; the moat must ultimately appear in superior conversion, fulfillment, supplier liquidity and unit economics rather than AI branding or isolated accuracy claims.",
+        "next_research_trigger": "Compare sustained buyer growth, repeat ordering, supplier participation, fulfillment outcomes and marketplace gross margin against competitors as comparable AI capabilities become widely available.",
+        "sources": [
+          {
+            "url": "https://investors.xometry.com/news-releases/news-release-details/xometry-releases-comprehensive-upgrades-its-ai-model",
+            "claim_date": "2026-07-20"
+          },
+          {
+            "url": "https://www.xometry.com/machine-learning-for-manufacturing/",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1657573/0001193125-26-066959-index.htm",
+            "claim_date": "2026-02-24"
+          }
+        ]
+      }
+    ],
+    "source_ledger": [
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1657573/0001193125-26-066959-index.htm",
+        "title": "2025 Annual Report on Form 10-K",
+        "publisher": "U.S. Securities and Exchange Commission",
+        "published_at": "2026-02-24",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://investors.xometry.com/node/12451/html",
+        "title": "2026 Proxy Statement and Stockholder Letter",
+        "publisher": "Company investor relations",
+        "published_at": "2026-04-29",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1657573/000119312526065195/xmtr-ex99_1.htm",
+        "title": "Fourth Quarter and Full Year 2025 Results",
+        "publisher": "U.S. Securities and Exchange Commission",
+        "published_at": "2026-02-24",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://investors.xometry.com/news-releases/news-release-details/xometry-reports-record-first-quarter-2026-results/",
+        "title": "First Quarter 2026 Results",
+        "publisher": "Company investor relations",
+        "published_at": "2026-05-07",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://investors.xometry.com/news-releases/news-release-details/xometry-releases-comprehensive-upgrades-its-ai-model",
+        "title": "Comprehensive Upgrades to AI Model Architecture",
+        "publisher": "Company investor relations",
+        "published_at": "2026-07-20",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.xometry.com/about-us/",
+        "title": "About Us",
+        "publisher": "Company website",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.xometry.com/machine-learning-for-manufacturing/",
+        "title": "Instant Quoting Engine and Machine Learning for Manufacturing",
+        "publisher": "Company website",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://workcenter.xometry.com/about-us/",
+        "title": "Workcenter Product Overview",
+        "publisher": "Company website",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://investors.xometry.com/news-releases/news-release-details/xometrys-marketplace-has-generated-nearly-1-billion-revenue",
+        "title": "Marketplace Supplier-Network Economic Impact",
+        "publisher": "Company investor relations",
+        "published_at": "2025-04-17",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://news.siemens.com/en-us/siemens-xometry-strategic-partnership/",
+        "title": "Strategic Partnership for AI-Native Supply-Chain Intelligence",
+        "publisher": "Siemens",
+        "published_at": "2026-05-07",
+        "source_type": "counterparty_primary"
+      },
+      {
+        "url": "https://investors.xometry.com/news-releases/news-release-details/xometry-marketplace-accelerates-solutions-complex-manufacturing/",
+        "title": "Marketplace Expansion for Complex Manufacturing",
+        "publisher": "Company investor relations",
+        "published_at": "2026-01-08",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://investors.xometry.com/news-releases/news-release-details/xometry-expands-injection-molding-platform-wider-selection",
+        "title": "Injection Molding Platform Expansion",
+        "publisher": "Company investor relations",
+        "published_at": "2026-06-18",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.xometry.com/",
+        "title": "Custom Manufacturing Marketplace and Capabilities",
+        "publisher": "Company website",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.xometry.com/cad-add-ins/",
+        "title": "CAD Add-Ins and Embedded Quoting",
+        "publisher": "Company website",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://bitcap.com/en/fonds/bit-global-technology-leaders",
+        "title": "BIT Global Technology Leaders Public Fund Page",
+        "publisher": "BIT Capital",
+        "published_at": null,
+        "source_type": "bit_primary"
+      },
+      {
+        "url": "https://bitcap.com/beckers-bets-podcast",
+        "title": "Beckers Bets Public Podcast Archive",
+        "publisher": "BIT Capital",
+        "published_at": null,
+        "source_type": "bit_primary"
+      }
+    ]
+  },
+  "provenance": {
+    "research_date": "2026-07-28",
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "xhigh",
+    "prompt_version": "company-memo-pilot-v1",
+    "prompt_cache_key": "fli:company-memo:company-memo-pilot-v1",
+    "response_id": "resp_ov9uLuIREI-4lb6Z-Az31g6hd4JmyJ29Upl1XwrJJt0GUbg3sEsf6RGuQIBjxvg6r8GFrhVG3tD4DIZEFMlYdsTBD58Q471syHoVmCIGPH5ErSsoyxcP9K1GbzeeUkCOCgd2b07A8Imk7CJAjxjKQq3bIk-4aKIuTfVqrXGWGsgN0fkgP5YmIdjYDKAFP1CVnXWu5u89YT_WuOOVh96YtSQuBDMpttr-8ZT6PItNjTeKu10UDwuXjVsIzOC-tjHFD-998TqkmzG0FaFTDE8FCl-iGJ7kxsTxaToEn5PdUqNX7KEyRU1h3tWpJ7weqtfYlA--MGvbXhLQ6pdn7lt6iV-t3P5R_l4PR8YVNQPwUp8gp3u5xEGiJg2am0UQCimbCfEiPGnBlTrmiLC3GNqxBHXNNEG2JQ1HmWWUhcYEPALgVJJ2KehSmT9TDIZFUtn1wPlBQJAkSMfr8w8jwl0HRI-g",
+    "response_model": "gpt-5.6-sol",
+    "input_tokens": 114562,
+    "cached_tokens": 0,
+    "cache_write_tokens": 0,
+    "output_tokens": 31717,
+    "reasoning_tokens": 8793,
+    "reported_cost_usd": null,
+    "web_actions": [
+      {
+        "query": "site:investors.xometry.com annual report 2025 Xometry 10-K",
+        "type": "search",
+        "queries": [
+          "site:investors.xometry.com annual report 2025 Xometry 10-K",
+          "site:sec.gov/Archives/edgar/data Xometry 2025 10-K XMTR",
+          "site:investors.xometry.com Xometry AI-native marketplace enterprise lead-time models",
+          "site:bitcap.com Xometry OR XMTR"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://investors.xometry.com/news-releases/news-release-details/xometrys-marketplace-has-generated-nearly-1-billion-revenue"
+      },
+      {
+        "query": "0001193125-26-066959 Xometry 10-K sec.gov ixviewer",
+        "type": "search",
+        "queries": [
+          "0001193125-26-066959 Xometry 10-K sec.gov ixviewer",
+          "site:sec.gov/Archives/edgar/data/1657573 2025 Xometry 10-K 2026",
+          "Xometry 2025 annual report revenue marketplace services gross margin active buyers suppliers risk factors",
+          "Xometry 2025 10-k competitors Protolabs Fictiv Thomasnet"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/1657573/0001193125-26-066959-index.htm"
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/1657573/000119312526066959/0001193125-26-066959.txt"
+      },
+      {},
+      {
+        "type": "open_page",
+        "url": "https://companiesmarketcap.com/xometry/sec-reports-10k/0001193125-26-066959/"
+      },
+      {
+        "pattern": "Our Business",
+        "type": "find_in_page",
+        "url": "https://companiesmarketcap.com/xometry/sec-reports-10k/0001193125-26-066959/"
+      },
+      {
+        "type": "open_page",
+        "url": "https://data.sec.gov/submissions/CIK0001657573.json"
+      },
+      {
+        "query": "site:investors.xometry.com/news-releases \"Record Fourth Quarter\" \"2025\" Xometry",
+        "type": "search",
+        "queries": [
+          "site:investors.xometry.com/news-releases \"Record Fourth Quarter\" \"2025\" Xometry",
+          "site:investors.xometry.com/static-files Xometry Q4 2025 earnings presentation pdf",
+          "site:investors.xometry.com \"2025 revenue\" \"Active Suppliers\" Xometry",
+          "site:investors.xometry.com \"accounts with at least $500,000\" Xometry 2025"
+        ],
+        "sources": null
+      },
+      {
+        "query": "\"Xometry Reports Record Fourth Quarter and Strong Full Year 2025 Results\"",
+        "type": "search",
+        "queries": [
+          "\"Xometry Reports Record Fourth Quarter and Strong Full Year 2025 Results\"",
+          "\"Full Year 2025 Results\" site:investors.xometry.com/news-releases/news-release-details/xometry",
+          "site:globenewswire.com Xometry February 24 2026 full year 2025 results",
+          "site:xometry.com \"Record Fourth Quarter\" \"2025 Results\""
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://investors.xometry.com/financials/quarterly-results/"
+      },
+      {
+        "type": "open_page",
+        "url": "https://investors.xometry.com/static-files/50fc1f53-d253-4cfb-bc18-c6b4bdad42dc"
+      },
+      {
+        "pattern": "Siemens",
+        "type": "find_in_page",
+        "url": "https://investors.xometry.com/static-files/50fc1f53-d253-4cfb-bc18-c6b4bdad42dc"
+      },
+      {
+        "query": "site:xometry.com/about-us Xometry marketplace how it works buyers suppliers Thomasnet Workcenter official",
+        "type": "search",
+        "queries": [
+          "site:xometry.com/about-us Xometry marketplace how it works buyers suppliers Thomasnet Workcenter official",
+          "site:xometry.com \"Instant Quoting Engine\" \"Thomasnet\" Xometry official",
+          "site:xometry.com/supplier-services Workcenter Xometry official",
+          "site:xometry.com \"Marketplace\" \"buyers\" \"suppliers\" custom manufacturing Xometry"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:sec.gov/Archives/edgar/data/1657573/000119312526066959 Xometry \"Marketplace revenue\" \"services revenue\"",
+        "type": "search",
+        "queries": [
+          "site:sec.gov/Archives/edgar/data/1657573/000119312526066959 Xometry \"Marketplace revenue\" \"services revenue\"",
+          "site:sec.gov/Archives/edgar/data/1657573 \"Xometry recognizes revenue\" marketplace suppliers buyers 2025",
+          "Xometry 2025 10-K services revenue Thomasnet advertising Workcenter subscriptions",
+          "Xometry marketplace revenue recognized gross pays suppliers 10-k"
+        ],
+        "sources": null
+      },
+      {
+        "pattern": "Marketplace revenue consists",
+        "type": "find_in_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/1657573/000095017025026655/xmtr-20241231.htm"
+      },
+      {
+        "query": "site:sec.gov/Archives/edgar/data/1657573/000095017025026655/xmtr-20241231.htm \"marketplace revenue\"",
+        "type": "search",
+        "queries": [
+          "site:sec.gov/Archives/edgar/data/1657573/000095017025026655/xmtr-20241231.htm \"marketplace revenue\"",
+          "site:sec.gov/Archives/edgar/data/1657573/000095017025026655/xmtr-20241231.htm \"services revenue\"",
+          "site:sec.gov/Archives/edgar/data/1657573/000095017025026655/xmtr-20241231.htm \"principal\" \"supplier\"",
+          "site:sec.gov/Archives/edgar/data/1657573/000095017025026655/xmtr-20241231.htm \"competition\""
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://last10k.com/sec-filings/xmtr/0001193125-26-066959.htm"
+      },
+      {
+        "pattern": "These services include advertising",
+        "type": "find_in_page",
+        "url": "https://last10k.com/sec-filings/xmtr/0001193125-26-066959.htm"
+      },
+      {
+        "query": "\"These services include advertising and marketing services\" Xometry",
+        "type": "search",
+        "queries": [
+          "\"These services include advertising and marketing services\" Xometry",
+          "\"The Xometry marketplace is an AI powered online marketplace\" \"revenue\"",
+          "\"We act as the principal\" Xometry marketplace suppliers revenue",
+          "\"cost of marketplace revenue\" Xometry"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://investors.xometry.com/events/event-details/xometry-inc-q4-2025-earnings-call"
+      },
+      {
+        "query": "\"Xometry, Inc. Q1 2026 Earnings Presentation\" pdf",
+        "type": "search",
+        "queries": [
+          "\"Xometry, Inc. Q1 2026 Earnings Presentation\" pdf",
+          "\"Q1 2026 Earnings Presentation\" Xometry static-files",
+          "\"Xometry, Inc. Q4 2025 Earnings Presentation\" pdf",
+          "\"2026 Investor Overview\" Xometry PDF"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:siemens.com Xometry partnership Xcelerator May 2026",
+        "type": "search",
+        "queries": [
+          "site:siemens.com Xometry partnership Xcelerator May 2026",
+          "site:press.siemens.com Xometry Siemens Xcelerator manufacturing May 2026",
+          "site:blogs.sw.siemens.com Xometry Siemens Xcelerator partnership",
+          "site:xometry.com Siemens Xcelerator Xometry partnership 2026"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:investors.xometry.com/news-releases/news-release-details/xometry-releases-comprehensive-upgrades-its-ai-model \"adaptive sourcing\"",
+        "type": "search",
+        "queries": [
+          "site:investors.xometry.com/news-releases/news-release-details/xometry-releases-comprehensive-upgrades-its-ai-model \"adaptive sourcing\"",
+          "site:investors.xometry.com/news-releases/news-release-details/xometry-releases-comprehensive-upgrades-its-ai-model \"lead time\"",
+          "site:investors.xometry.com/news-releases/news-release-details/xometry-releases-comprehensive-upgrades-its-ai-model \"15% improvement\"",
+          "site:investors.xometry.com/news-releases/news-release-details/xometry-releases-comprehensive-upgrades-its-ai-model \"85%\""
+        ],
+        "sources": null
+      },
+      {
+        "query": "\"Xometry Releases Comprehensive Upgrades to Its AI Model Architecture\" adaptive sourcing",
+        "type": "search",
+        "queries": [
+          "\"Xometry Releases Comprehensive Upgrades to Its AI Model Architecture\" adaptive sourcing",
+          "\"Xometry Releases Comprehensive Upgrades to Its AI Model Architecture\" lead time",
+          "\"approximately 15% improvement in CNC cost-prediction accuracy\"",
+          "\"automated recommendation acceptance to more than 85%\" Xometry"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:bitcap.com Xometry",
+        "type": "search",
+        "queries": [
+          "site:bitcap.com Xometry",
+          "site:bitcap.com XMTR",
+          "site:bitcap.com/en Xometry OR XMTR",
+          "site:bitcap.com/de Xometry OR XMTR"
+        ],
+        "sources": null
+      }
+    ],
+    "consulted_sources": [
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1657573/0001193125-26-066959-index.htm",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://investors.xometry.com/node/12451/html",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1657573/000119312526065195/xmtr-ex99_1.htm",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://investors.xometry.com/news-releases/news-release-details/xometry-reports-record-first-quarter-2026-results/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://investors.xometry.com/news-releases/news-release-details/xometry-releases-comprehensive-upgrades-its-ai-model",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.xometry.com/about-us/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.xometry.com/machine-learning-for-manufacturing/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://workcenter.xometry.com/about-us/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://investors.xometry.com/news-releases/news-release-details/xometrys-marketplace-has-generated-nearly-1-billion-revenue",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://news.siemens.com/en-us/siemens-xometry-strategic-partnership/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://investors.xometry.com/news-releases/news-release-details/xometry-marketplace-accelerates-solutions-complex-manufacturing/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://investors.xometry.com/news-releases/news-release-details/xometry-expands-injection-molding-platform-wider-selection",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.xometry.com/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.xometry.com/cad-add-ins/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://bitcap.com/en/fonds/bit-global-technology-leaders",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://bitcap.com/beckers-bets-podcast",
+        "type": "model_citation"
+      }
+    ],
+    "request_tags": [
+      "app:frontier-lab-intelligence",
+      "pipeline:investment-company-context",
+      "job:company-memo-pilot",
+      "scope:single-company",
+      "prompt:company-memo-pilot-v1",
+      "company:xmtr",
+      "model:gpt-5.6-sol",
+      "reasoning:xhigh"
+    ]
+  }
+}

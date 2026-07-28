@@ -1,0 +1,884 @@
+{
+  "schema_version": "company-memo-pilot-result-v1",
+  "company": {
+    "name": "Intel",
+    "ticker": "INTC"
+  },
+  "memo": {
+    "business_and_economics": {
+      "summary": "The core model combines semiconductor product design with owned manufacturing. Client and data-center businesses monetize processor platforms, while the foundry segment fabricates and packages chips for internal product groups and external customers. Because most foundry segment revenue is intersegment, consolidated value creation depends on competitive product costs plus growth in external wafer and packaging revenue—not foundry segment revenue alone.",
+      "revenue_engines": [
+        {
+          "engine": "Client compute platforms",
+          "who_pays": "PC OEMs and ODMs, distributors, retailers, and enterprise buyers purchasing systems through OEM channels.",
+          "economic_logic": "Revenue is driven by processor and platform units, average selling prices, notebook-versus-desktop and commercial-versus-consumer mix, and design-win share. Gross margin also depends on process cost, yield and the mix of internally and externally manufactured components.",
+          "sources": [
+            {
+              "url": "https://www.intc.com/filings-reports/all-sec-filings/content/0000050863-26-000011/intc-20251227.htm",
+              "claim_date": "2026-01-23"
+            }
+          ]
+        },
+        {
+          "engine": "Data-center and AI platforms",
+          "who_pays": "Cloud service providers, enterprise and government customers through server OEMs and ODMs, and communications service providers.",
+          "economic_logic": "Revenue depends on server CPU units, core and platform content per system, product mix, pricing and competitive share. AI infrastructure can increase demand for host and general-purpose compute, but AMD, Arm-based custom CPUs and tighter accelerator integration can reduce the company's content.",
+          "sources": [
+            {
+              "url": "https://www.intc.com/filings-reports/all-sec-filings/content/0000050863-26-000011/intc-20251227.htm",
+              "claim_date": "2026-01-23"
+            },
+            {
+              "url": "https://download.intel.com/newsroom/2026/earnings/Intel-Q22026-Earnings-Call.pdf",
+              "claim_date": "2026-07-23"
+            }
+          ]
+        },
+        {
+          "engine": "Wafer foundry and advanced packaging",
+          "who_pays": "Internal product groups under the company's transfer-pricing model and external semiconductor designers purchasing wafer fabrication, substrates, assembly or advanced packaging.",
+          "economic_logic": "Economics are governed by wafer starts, node and packaging mix, pricing, yield, cycle time and factory utilization. Internal activity affects product manufacturing cost, while consolidated revenue growth requires external customers to progress from test chips and tape-outs to sustained production volume.",
+          "sources": [
+            {
+              "url": "https://www.intc.com/filings-reports/all-sec-filings/content/0000050863-26-000011/intc-20251227.htm",
+              "claim_date": "2026-01-23"
+            },
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/50863/000005086326000157/intc-20260627.htm",
+              "claim_date": "2026-07-24"
+            }
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "url": "https://www.intc.com/filings-reports/all-sec-filings/content/0000050863-26-000011/intc-20251227.htm",
+          "claim_date": "2026-01-23"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/50863/000005086326000157/intc-20260627.htm",
+          "claim_date": "2026-07-24"
+        }
+      ]
+    },
+    "operating_and_financial_drivers": [
+      {
+        "driver": "Client and server product competitiveness, pricing and market share",
+        "why_it_matters": "Processor performance, power efficiency, software compatibility and launch timing determine OEM and cloud design wins. Share losses or price concessions can offset end-market growth, while differentiated products can improve units, mix and gross margin.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "pricing",
+          "product_mix",
+          "gross_margin",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.intc.com/filings-reports/all-sec-filings/content/0000050863-26-000011/intc-20251227.htm",
+            "claim_date": "2026-01-23"
+          }
+        ]
+      },
+      {
+        "driver": "CPU content in AI infrastructure",
+        "why_it_matters": "Training, inference and agentic systems require general-purpose processors for orchestration, data services and non-accelerated workloads. The financial opportunity depends on CPU density and attach rates growing without disproportionate displacement by AMD or custom Arm designs.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "pricing",
+          "product_mix",
+          "gross_margin"
+        ],
+        "sources": [
+          {
+            "url": "https://download.intel.com/newsroom/2026/earnings/Intel-Q22026-Earnings-Call.pdf",
+            "claim_date": "2026-07-23"
+          },
+          {
+            "url": "https://www.intc.com/filings-reports/all-sec-filings/content/0000050863-26-000011/intc-20251227.htm",
+            "claim_date": "2026-01-23"
+          }
+        ]
+      },
+      {
+        "driver": "Process-node yield, cycle time and factory utilization",
+        "why_it_matters": "Yield and cycle-time improvements directly increase available units and lower cost per good die. Weak ramps create shortages, underutilization charges or expensive product transitions; successful 18A-family ramps improve product supply and foundry credibility.",
+        "financial_lines": [
+          "volume",
+          "gross_margin",
+          "capital_expenditure",
+          "working_capital",
+          "cash_flow",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.intc.com/news-events/press-releases/detail/1776/intel-reports-second-quarter-2026-financial-results",
+            "claim_date": "2026-07-23"
+          },
+          {
+            "url": "https://www.intc.com/news-events/press-releases/detail/1772/intel-foundry-details-process-milestones-and-future",
+            "claim_date": "2026-06-16"
+          }
+        ]
+      },
+      {
+        "driver": "External foundry design-win conversion",
+        "why_it_matters": "Test chips, PDK engagement and announced frameworks do not create material consolidated revenue until designs enter repeat production. Customer volume is needed to diversify foundry demand, raise utilization and absorb the fixed cost of leading-edge fabs and packaging facilities.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "product_mix",
+          "gross_margin",
+          "capital_expenditure",
+          "cash_flow",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.intc.com/news-events/press-releases/detail/1739/intel-foundry-gathers-customers-and-partners-outlines",
+            "claim_date": "2025-04-29"
+          },
+          {
+            "url": "https://press.aboutamazon.com/aws/2024/9/intel-and-aws-expand-strategic-collaboration-helping-advance-u-s-based-chip-manufacturing",
+            "claim_date": "2024-09-16"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/50863/000005086326000157/intc-20260627.htm",
+            "claim_date": "2026-07-24"
+          }
+        ]
+      },
+      {
+        "driver": "Capital intensity, supply availability and operating discipline",
+        "why_it_matters": "Fabs, clean rooms, lithography tools, substrates and packaging capacity require spending before revenue is certain. Management is increasing investment in response to demand, so returns depend on disciplined capacity phasing, supply-chain availability and sustained utilization.",
+        "financial_lines": [
+          "operating_cost",
+          "capital_expenditure",
+          "working_capital",
+          "cash_flow",
+          "balance_sheet",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.intc.com/news-events/press-releases/detail/1776/intel-reports-second-quarter-2026-financial-results",
+            "claim_date": "2026-07-23"
+          },
+          {
+            "url": "https://download.intel.com/newsroom/2026/earnings/Intel-Q22026-Earnings-Call.pdf",
+            "claim_date": "2026-07-23"
+          }
+        ]
+      }
+    ],
+    "ecosystem": [
+      {
+        "relationship": "customer_or_end_market",
+        "entities_or_group": "PC OEMs and ODMs, cloud service providers, enterprise and government buyers, and communications-equipment customers",
+        "why_it_matters": "These customers control platform design wins, deployment volumes and purchasing cycles. Concentrated OEM and hyperscaler procurement can amplify changes in market share, pricing and product qualification timing.",
+        "sources": [
+          {
+            "url": "https://www.intc.com/filings-reports/all-sec-filings/content/0000050863-26-000011/intc-20251227.htm",
+            "claim_date": "2026-01-23"
+          }
+        ]
+      },
+      {
+        "relationship": "partner",
+        "entities_or_group": "Amazon Web Services",
+        "why_it_matters": "A multi-year framework covers a custom Xeon product on Intel 3 and an AI-fabric chip on 18A. Successful execution would validate both the product and external-foundry propositions; delays or low production volume would weaken that validation.",
+        "sources": [
+          {
+            "url": "https://press.aboutamazon.com/aws/2024/9/intel-and-aws-expand-strategic-collaboration-helping-advance-u-s-based-chip-manufacturing",
+            "claim_date": "2024-09-16"
+          }
+        ]
+      },
+      {
+        "relationship": "supplier",
+        "entities_or_group": "ASML and the advanced lithography equipment ecosystem",
+        "why_it_matters": "Leading-edge manufacturing depends on EUV tool availability, productivity and uptime. The companies have used High-NA EUV on selected 18A product layers, making equipment maturity and process integration relevant to yield, cycle time and future-node economics.",
+        "sources": [
+          {
+            "url": "https://www.asml.com/en/news/press-releases/2026/high-na-euv-reaches-new-readiness-milestone",
+            "claim_date": "2026-07-15"
+          },
+          {
+            "url": "https://www.intc.com/news-events/press-releases/detail/1776/intel-reports-second-quarter-2026-financial-results",
+            "claim_date": "2026-07-23"
+          }
+        ]
+      },
+      {
+        "relationship": "competitor",
+        "entities_or_group": "AMD and Arm-based custom CPUs in compute; TSMC and Samsung in foundry and advanced packaging; specialized accelerators and ASICs as substitutes for general-purpose compute",
+        "why_it_matters": "The company must compete simultaneously for processor sockets, manufacturing customers and capital. Better performance per watt, software ecosystems or manufacturing economics elsewhere can reduce units, pricing, utilization and returns on invested capital.",
+        "sources": [
+          {
+            "url": "https://www.intc.com/filings-reports/all-sec-filings/content/0000050863-26-000011/intc-20251227.htm",
+            "claim_date": "2026-01-23"
+          }
+        ]
+      },
+      {
+        "relationship": "regulatory_dependency",
+        "entities_or_group": "United States government, export-control authorities and industrial-policy programs",
+        "why_it_matters": "The U.S. government became a passive shareholder through an agreement funded by previously awarded CHIPS and Secure Enclave amounts, while the company retained secure-semiconductor obligations. Government support, export controls and domestic-manufacturing commitments can affect capital availability, customer access and strategic flexibility.",
+        "sources": [
+          {
+            "url": "https://www.intc.com/news-events/press-releases/detail/1748/intel-and-trump-administration-reach-historic-agreement-to",
+            "claim_date": "2025-08-22"
+          },
+          {
+            "url": "https://www.intc.com/filings-reports/all-sec-filings/content/0000050863-26-000011/intc-20251227.htm",
+            "claim_date": "2026-01-23"
+          }
+        ]
+      }
+    ],
+    "strategy_and_committed_actions": [
+      {
+        "action": "Use the x86 CPU franchise, advanced packaging and wafer-fab network to address inference and agentic AI, while adding purpose-built ASIC and rackscale options.",
+        "investment_relevance": "This broadens the potential AI revenue pool beyond standalone accelerators but requires evidence that the company wins economically attractive CPU, ASIC or system content rather than merely participating in a growing market.",
+        "sources": [
+          {
+            "url": "https://download.intel.com/newsroom/2026/earnings/Intel-Q22026-Earnings-Call.pdf",
+            "claim_date": "2026-07-23"
+          },
+          {
+            "url": "https://www.intc.com/news-events/press-releases/detail/1771/intel-announces-new-ai-innovations-at-computex-chip-to",
+            "claim_date": "2026-06-02"
+          }
+        ]
+      },
+      {
+        "action": "Ramp the 18A process family and extend the roadmap through 18A-P and 14A.",
+        "investment_relevance": "18A product volume is the first proof point for manufacturing execution. 18A-P risk production and 14A customer test-chip activity are precursors, but material value requires competitive yield, cost, design enablement and repeat external production.",
+        "sources": [
+          {
+            "url": "https://www.intc.com/news-events/press-releases/detail/1776/intel-reports-second-quarter-2026-financial-results",
+            "claim_date": "2026-07-23"
+          },
+          {
+            "url": "https://www.intc.com/news-events/press-releases/detail/1772/intel-foundry-details-process-milestones-and-future",
+            "claim_date": "2026-06-16"
+          },
+          {
+            "url": "https://www.intc.com/news-events/press-releases/detail/1739/intel-foundry-gathers-customers-and-partners-outlines",
+            "claim_date": "2025-04-29"
+          }
+        ]
+      },
+      {
+        "action": "Develop an external systems-foundry business using leading-edge wafers, advanced packaging and an EDA/IP partner ecosystem.",
+        "investment_relevance": "External scale could improve utilization and diversify revenue, but the strategy remains dependent on customer trust, PDK maturity, IP availability, schedule reliability and competitive economics against established foundries.",
+        "sources": [
+          {
+            "url": "https://www.intc.com/news-events/press-releases/detail/1739/intel-foundry-gathers-customers-and-partners-outlines",
+            "claim_date": "2025-04-29"
+          },
+          {
+            "url": "https://press.aboutamazon.com/aws/2024/9/intel-and-aws-expand-strategic-collaboration-helping-advance-u-s-based-chip-manufacturing",
+            "claim_date": "2024-09-16"
+          }
+        ]
+      },
+      {
+        "action": "Increase equipment, clean-room, substrate and packaging investment where customer demand supports additional supply, while maintaining execution and cost discipline.",
+        "investment_relevance": "Incremental capacity can unlock constrained product revenue, but premature or poorly utilized additions would increase depreciation, cash consumption and balance-sheet risk.",
+        "sources": [
+          {
+            "url": "https://www.intc.com/news-events/press-releases/detail/1776/intel-reports-second-quarter-2026-financial-results",
+            "claim_date": "2026-07-23"
+          },
+          {
+            "url": "https://download.intel.com/newsroom/2026/earnings/Intel-Q22026-Earnings-Call.pdf",
+            "claim_date": "2026-07-23"
+          }
+        ]
+      }
+    ],
+    "frontier_ai_transmission_paths": [
+      {
+        "development": "Frontier-model deployment shifts toward large-scale inference, reasoning and multi-agent workloads.",
+        "company_exposure": "The company supplies x86 server CPUs used for orchestration, data processing and general-purpose workloads around accelerators; management reports rising general-purpose CPU density as AI deployment expands.",
+        "affected_driver": "Xeon units, cores and platform content per server, average selling price and data-center market share.",
+        "financial_consequence": "Potentially higher data-center revenue and product mix, with gross-margin improvement if incremental volume absorbs manufacturing costs.",
+        "direction": "upside",
+        "materiality_condition": "The effect becomes material only if CPU demand per AI system grows and the company's share and pricing do not decline enough to offset that system growth.",
+        "time_horizon": "near_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Data Center and AI revenue and operating margin",
+          "Xeon unit, core-density and average-selling-price commentary",
+          "Hyperscaler and OEM design wins",
+          "Server CPU share and Arm-based instance adoption"
+        ],
+        "sources": [
+          {
+            "url": "https://download.intel.com/newsroom/2026/earnings/Intel-Q22026-Earnings-Call.pdf",
+            "claim_date": "2026-07-23"
+          },
+          {
+            "url": "https://www.intc.com/filings-reports/all-sec-filings/content/0000050863-26-000011/intc-20251227.htm",
+            "claim_date": "2026-01-23"
+          }
+        ]
+      },
+      {
+        "development": "Hyperscalers deepen adoption of custom Arm CPUs and tightly integrated accelerator-host architectures.",
+        "company_exposure": "The x86 server franchise competes for sockets and platform content against AMD and customer-designed processors optimized for cloud and AI workloads.",
+        "affected_driver": "Server CPU market share, socket content, pricing and product mix.",
+        "financial_consequence": "Lower data-center revenue and gross margin if custom designs displace Xeon units or reduce the value of the host CPU in AI systems.",
+        "direction": "downside",
+        "materiality_condition": "The effect becomes material if major cloud customers move a sustained and growing share of general-purpose or inference-support workloads away from x86.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Cloud instance mix by CPU architecture",
+          "Custom Arm CPU deployment announcements",
+          "Xeon share and pricing",
+          "Data Center and AI gross margin"
+        ],
+        "sources": [
+          {
+            "url": "https://www.intc.com/filings-reports/all-sec-filings/content/0000050863-26-000011/intc-20251227.htm",
+            "claim_date": "2026-01-23"
+          },
+          {
+            "url": "https://download.intel.com/newsroom/2026/earnings/Intel-Q22026-Earnings-Call.pdf",
+            "claim_date": "2026-07-23"
+          }
+        ]
+      },
+      {
+        "development": "Frontier AI increases demand for leading-edge logic, chiplets and advanced packaging, while customers seek geographically diversified manufacturing.",
+        "company_exposure": "The foundry roadmap offers 18A-family processes, advanced packaging and U.S.-based manufacturing; AWS has announced custom designs under a multi-year framework.",
+        "affected_driver": "External tape-outs, production wafer starts, packaging volume, yield and factory utilization.",
+        "financial_consequence": "External revenue and fixed-cost absorption could improve, but the same opportunity requires substantial capital and can deepen losses if customer volume or yields disappoint.",
+        "direction": "mixed",
+        "materiality_condition": "The path is material only if multiple external designs reach sustained production at competitive yield, price and return on capital rather than remaining test chips or non-binding pipeline activity.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "External foundry and packaging revenue",
+          "Named customer tape-outs and production starts",
+          "18A and 18A-P yield and cycle-time milestones",
+          "14A PDK and test-chip progress",
+          "Foundry operating loss, utilization and capital spending"
+        ],
+        "sources": [
+          {
+            "url": "https://www.intc.com/news-events/press-releases/detail/1739/intel-foundry-gathers-customers-and-partners-outlines",
+            "claim_date": "2025-04-29"
+          },
+          {
+            "url": "https://www.intc.com/news-events/press-releases/detail/1772/intel-foundry-details-process-milestones-and-future",
+            "claim_date": "2026-06-16"
+          },
+          {
+            "url": "https://press.aboutamazon.com/aws/2024/9/intel-and-aws-expand-strategic-collaboration-helping-advance-u-s-based-chip-manufacturing",
+            "claim_date": "2024-09-16"
+          }
+        ]
+      },
+      {
+        "development": "More capable local models and agents make on-device AI a meaningful PC purchase criterion.",
+        "company_exposure": "Client platforms combine x86 CPUs, integrated graphics and NPUs and are sold through a large OEM and software ecosystem.",
+        "affected_driver": "OEM design wins, replacement-cycle volume, premium product mix, average selling price and client market share.",
+        "financial_consequence": "AI-enabled refreshes could raise client revenue and mix; benefits could be offset if users do not pay for local AI or Arm-based systems gain share.",
+        "direction": "mixed",
+        "materiality_condition": "The effect becomes material if widely used enterprise or consumer applications run locally, create measurable replacement demand and sustain pricing premiums.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "AI-PC OEM design counts and sell-through",
+          "Enterprise deployment and software-compatibility evidence",
+          "Client Computing revenue, unit volume and average selling price",
+          "Arm-based PC share"
+        ],
+        "sources": [
+          {
+            "url": "https://www.intc.com/filings-reports/all-sec-filings/content/0000050863-26-000011/intc-20251227.htm",
+            "claim_date": "2026-01-23"
+          },
+          {
+            "url": "https://www.intc.com/news-events/press-releases/detail/1771/intel-announces-new-ai-innovations-at-computex-chip-to",
+            "claim_date": "2026-06-02"
+          }
+        ]
+      },
+      {
+        "development": "Frontier labs and hyperscalers move more workloads to custom AI ASICs and specialized inference systems.",
+        "company_exposure": "The company is pursuing ASICs, external manufacturing and advanced packaging, including an announced AWS AI-fabric design, but custom silicon can also reduce demand for standard x86 products.",
+        "affected_driver": "ASIC design wins, external foundry and packaging mix, and CPU attach or displacement.",
+        "financial_consequence": "Foundry and custom-product revenue could rise while standard CPU content falls; the net effect depends on captured value and the margins of each activity.",
+        "direction": "mixed",
+        "materiality_condition": "The path is material only if the company captures repeat, production-scale ASIC or manufacturing awards with economics that exceed any lost standard-processor contribution.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "no_public_thesis",
+        "watchpoints": [
+          "Disclosed ASIC and custom-silicon awards",
+          "AWS AI-fabric production milestones",
+          "External foundry and packaging revenue",
+          "CPU content per specialized AI system",
+          "Gross margin by product and foundry mix"
+        ],
+        "sources": [
+          {
+            "url": "https://press.aboutamazon.com/aws/2024/9/intel-and-aws-expand-strategic-collaboration-helping-advance-u-s-based-chip-manufacturing",
+            "claim_date": "2024-09-16"
+          },
+          {
+            "url": "https://www.intc.com/news-events/press-releases/detail/1776/intel-reports-second-quarter-2026-financial-results",
+            "claim_date": "2026-07-23"
+          }
+        ]
+      }
+    ],
+    "investment_thesis_and_tests": {
+      "public_bit_view_status": "no_public_view",
+      "attributable_public_thesis": null,
+      "what_would_support_it": [
+        "An attributable BIT Capital publication explicitly naming the company and connecting AI-compute growth to a company-specific x86, foundry or packaging mechanism.",
+        "Sustained data-center growth tied to AI inference alongside stable or improving server CPU share and gross margin.",
+        "Multiple external foundry designs reaching production with rising external revenue, utilization and improving economics."
+      ],
+      "what_would_challenge_it": [
+        "Evidence that AI infrastructure value accrues primarily to accelerators, memory and networking while the company's CPU share or content declines.",
+        "Foundry activity remaining predominantly internal, capital intensive and loss-making without repeat external production customers.",
+        "A future attributable BIT Capital statement explicitly preferring alternative AI-infrastructure beneficiaries or rejecting the company's execution case."
+      ],
+      "sources": [
+        {
+          "url": "https://bitcap.com/en/news/bit-capital-ki-whitepaper-infrastruktur-des-ki-zeitalters",
+          "claim_date": "2023-09-15"
+        },
+        {
+          "url": "https://bitcap.com/en/news/bit-capital-quartalsbericht-equity-q1-2026-2",
+          "claim_date": "2026-03-31"
+        },
+        {
+          "url": "https://download.intel.com/newsroom/2026/earnings/Intel-Q22026-Earnings-Call.pdf",
+          "claim_date": "2026-07-23"
+        }
+      ]
+    },
+    "uncertainties_and_research_triggers": [
+      {
+        "uncertainty": "The scale and economic quality of the external foundry pipeline are not established by test-chip interest or framework announcements.",
+        "why_it_matters": "External production volume is required for consolidated revenue, utilization and fixed-cost absorption; internal foundry transfers alone do not validate a merchant-foundry business.",
+        "next_research_trigger": "Inspect each quarterly filing for external foundry revenue, customer prepayments, named production starts, wafer-volume commitments and changes in foundry operating loss.",
+        "sources": [
+          {
+            "url": "https://www.intc.com/news-events/press-releases/detail/1739/intel-foundry-gathers-customers-and-partners-outlines",
+            "claim_date": "2025-04-29"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/50863/000005086326000157/intc-20260627.htm",
+            "claim_date": "2026-07-24"
+          }
+        ]
+      },
+      {
+        "uncertainty": "18A-family technical milestones do not yet fully reveal cost per good die or parity with competing foundries.",
+        "why_it_matters": "A node can meet performance targets but still produce weak financial returns if yield, cycle time, tool productivity or defect density are uncompetitive.",
+        "next_research_trigger": "Look for quantified yield progression, cycle-time improvement, product availability, gross-margin effects and customer qualification results for 18A and 18A-P.",
+        "sources": [
+          {
+            "url": "https://www.intc.com/news-events/press-releases/detail/1772/intel-foundry-details-process-milestones-and-future",
+            "claim_date": "2026-06-16"
+          },
+          {
+            "url": "https://www.asml.com/en/news/press-releases/2026/high-na-euv-reaches-new-readiness-milestone",
+            "claim_date": "2026-07-15"
+          }
+        ]
+      },
+      {
+        "uncertainty": "The net CPU content of frontier-AI systems remains architecture-dependent.",
+        "why_it_matters": "More AI servers can benefit the company while custom Arm CPUs, AMD share gains or tighter accelerator integration simultaneously reduce company content per system.",
+        "next_research_trigger": "Compare server CPU share, cloud instance launches, CPU-to-accelerator ratios, core density and DCAI pricing or margin commentary.",
+        "sources": [
+          {
+            "url": "https://download.intel.com/newsroom/2026/earnings/Intel-Q22026-Earnings-Call.pdf",
+            "claim_date": "2026-07-23"
+          },
+          {
+            "url": "https://www.intc.com/filings-reports/all-sec-filings/content/0000050863-26-000011/intc-20251227.htm",
+            "claim_date": "2026-01-23"
+          }
+        ]
+      },
+      {
+        "uncertainty": "Demand-driven capacity additions may precede proof of durable utilization and returns.",
+        "why_it_matters": "Equipment, clean-room, substrate and packaging commitments can raise depreciation and cash requirements if AI demand, customer awards or manufacturing execution fall short.",
+        "next_research_trigger": "Review gross and net capital expenditure, capacity-commitment disclosures, utilization charges, operating cash flow and management's return thresholds.",
+        "sources": [
+          {
+            "url": "https://www.intc.com/news-events/press-releases/detail/1776/intel-reports-second-quarter-2026-financial-results",
+            "claim_date": "2026-07-23"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/50863/000005086326000157/intc-20260627.htm",
+            "claim_date": "2026-07-24"
+          }
+        ]
+      },
+      {
+        "uncertainty": "AI-PC design counts may not translate into incremental end demand or pricing.",
+        "why_it_matters": "If local AI applications remain optional or cloud-based, AI functionality may become a standard feature rather than a monetizable replacement-cycle catalyst.",
+        "next_research_trigger": "Inspect OEM sell-through, enterprise deployments, software usage, client average selling prices and replacement-cycle data rather than relying on announced design counts.",
+        "sources": [
+          {
+            "url": "https://www.intc.com/news-events/press-releases/detail/1771/intel-announces-new-ai-innovations-at-computex-chip-to",
+            "claim_date": "2026-06-02"
+          },
+          {
+            "url": "https://www.intc.com/filings-reports/all-sec-filings/content/0000050863-26-000011/intc-20251227.htm",
+            "claim_date": "2026-01-23"
+          }
+        ]
+      }
+    ],
+    "source_ledger": [
+      {
+        "url": "https://www.intc.com/filings-reports/all-sec-filings/content/0000050863-26-000011/intc-20251227.htm",
+        "title": "2025 Form 10-K",
+        "publisher": "Intel Corporation",
+        "published_at": "2026-01-23",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/50863/000005086326000157/intc-20260627.htm",
+        "title": "Quarterly Report for the Quarter Ended June 27, 2026",
+        "publisher": "Intel Corporation / U.S. Securities and Exchange Commission",
+        "published_at": "2026-07-24",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.intc.com/news-events/press-releases/detail/1776/intel-reports-second-quarter-2026-financial-results",
+        "title": "Intel Reports Second-Quarter 2026 Financial Results",
+        "publisher": "Intel Corporation",
+        "published_at": "2026-07-23",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://download.intel.com/newsroom/2026/earnings/Intel-Q22026-Earnings-Call.pdf",
+        "title": "Q2 2026 Earnings Conference Call Prepared Remarks",
+        "publisher": "Intel Corporation",
+        "published_at": "2026-07-23",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.intc.com/news-events/press-releases/detail/1739/intel-foundry-gathers-customers-and-partners-outlines",
+        "title": "Intel Foundry Gathers Customers and Partners, Outlines Priorities",
+        "publisher": "Intel Corporation",
+        "published_at": "2025-04-29",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.intc.com/news-events/press-releases/detail/1772/intel-foundry-details-process-milestones-and-future",
+        "title": "Intel Foundry Details Process Milestones and Future Innovation at VLSI Symposium",
+        "publisher": "Intel Corporation",
+        "published_at": "2026-06-16",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://press.aboutamazon.com/aws/2024/9/intel-and-aws-expand-strategic-collaboration-helping-advance-u-s-based-chip-manufacturing",
+        "title": "Intel and AWS Expand Strategic Collaboration, Helping Advance U.S.-Based Chip Manufacturing",
+        "publisher": "Amazon Web Services",
+        "published_at": "2024-09-16",
+        "source_type": "counterparty_primary"
+      },
+      {
+        "url": "https://www.asml.com/en/news/press-releases/2026/high-na-euv-reaches-new-readiness-milestone",
+        "title": "High NA EUV Reaches New Readiness Milestone with First High-Volume Logic Product",
+        "publisher": "ASML",
+        "published_at": "2026-07-15",
+        "source_type": "counterparty_primary"
+      },
+      {
+        "url": "https://www.intc.com/news-events/press-releases/detail/1748/intel-and-trump-administration-reach-historic-agreement-to",
+        "title": "Intel and Trump Administration Reach Historic Agreement to Accelerate American Technology and Manufacturing Leadership",
+        "publisher": "Intel Corporation",
+        "published_at": "2025-08-22",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.intc.com/news-events/press-releases/detail/1771/intel-announces-new-ai-innovations-at-computex-chip-to",
+        "title": "Intel Announces New AI Innovations at Computex — Chip to Rackscale AI Solutions Delivered with Strategic Partners",
+        "publisher": "Intel Corporation",
+        "published_at": "2026-06-02",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://bitcap.com/en/news/bit-capital-ki-whitepaper-infrastruktur-des-ki-zeitalters",
+        "title": "BIT Capital AI Whitepaper: Infrastructure of the AI Era",
+        "publisher": "BIT Capital",
+        "published_at": "2023-09-15",
+        "source_type": "bit_primary"
+      },
+      {
+        "url": "https://bitcap.com/en/news/bit-capital-quartalsbericht-equity-q1-2026-2",
+        "title": "BIT Capital Quarterly Report Equity Q1 2026",
+        "publisher": "BIT Capital",
+        "published_at": "2026-03-31",
+        "source_type": "bit_primary"
+      }
+    ]
+  },
+  "provenance": {
+    "research_date": "2026-07-28",
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "xhigh",
+    "prompt_version": "company-memo-pilot-v1",
+    "prompt_cache_key": "fli:company-memo:company-memo-pilot-v1",
+    "response_id": "resp_VX6G0FZKavalejXQEm9Q4mNwWU-4Fk4Ag0wveQZ31kI2hyHCyLKa-GkmyLgE61SvI7tXtxYRDxVH89dg8p50or9vkCEX12bhuU_7SEves5cI4Ja3otq-tjS21ZEefkIdYscCfMA6v1n-ypJ5H9_Ou-g2SlRYyXsxq1baX9gYbTajyu_iBiGql8FZl7Fk2hVnDW_I7GmIP5IYLhqr3C_NBHO3SWxrToXIP-noskSmYcSfL0It2smE0bchwBy9wXyJIcVoo7vvbTt0_KDrlK4lbda1uK0rp4U0m5KnJX3sxeB9BLt58U6QK-fZKuUVoqGwOhisfA6je9caxL96DZI-v7IVGr8nRZ_gbNwB6BPratrZA1nRitBqUL6lNowuDitYHqPYYaxk9mKuJijPCPanAEsFic9w0dXeCRHUOpw-D49HphtoKryxjUAi3VwT1wag5M1bv2aiMv20fRy3lDZIW7eu",
+    "response_model": "gpt-5.6-sol",
+    "input_tokens": 105716,
+    "cached_tokens": 0,
+    "cache_write_tokens": 0,
+    "output_tokens": 51313,
+    "reasoning_tokens": 14406,
+    "reported_cost_usd": null,
+    "web_actions": [
+      {
+        "query": "site:intc.com Intel 2026 quarterly results Q2 2026",
+        "type": "search",
+        "queries": [
+          "site:intc.com Intel 2026 quarterly results Q2 2026",
+          "site:intc.com Intel annual report 2025 foundry 18A 14A customers",
+          "site:bitcap.com Intel BIT Capital thesis Intel"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:sec.gov/Archives/edgar/data/50863 2025 Intel 10-K 2026 accession 0000050863-26-000011",
+        "type": "search",
+        "queries": [
+          "site:sec.gov/Archives/edgar/data/50863 2025 Intel 10-K 2026 accession 0000050863-26-000011",
+          "site:sec.gov/Archives/edgar/data/50863 Intel 2026 Q2 10-Q 2026 07 24",
+          "site:intc.com Q2 2026 earnings presentation Intel Foundry operating loss 18A Panther Lake Xeon",
+          "site:intc.com 2025 annual report Intel customers revenue cloud service providers OEMs China Taiwan"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://bitcap.com/en/news/bit-capital-quartalsbericht-equity-q1-2026-2"
+      },
+      {
+        "query": "site:bitcap.com Intel \"BIT Capital\"",
+        "type": "search",
+        "queries": [
+          "site:bitcap.com Intel \"BIT Capital\"",
+          "site:bitcap.com \"Intel\" \"Jan Beckers\"",
+          "site:bitcap.com filetype:pdf Intel BIT Capital",
+          "site:bitcap.com/en/news Intel semiconductors CPU foundry"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.intc.com/financial-info/financial-results"
+      },
+      {
+        "query": "site:intc.com/filings-reports/all-sec-filings/content/ 2026 \"June 27, 2026\" Intel 10-Q",
+        "type": "search",
+        "queries": [
+          "site:intc.com/filings-reports/all-sec-filings/content/ 2026 \"June 27, 2026\" Intel 10-Q",
+          "site:intc.com/filings-reports/all-sec-filings/content/ intc-20260627 Intel",
+          "site:sec.gov/Archives/edgar/data/50863 intc-20260627",
+          "Intel 10-Q June 27 2026 accession number"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/50863/000005086326000011/intc-20251227.htm"
+      },
+      {
+        "query": "site:sec.gov/Archives/edgar/data/50863/000005086326000011 Intel 2025 10-K \"Client Computing Group\" revenue",
+        "type": "search",
+        "queries": [
+          "site:sec.gov/Archives/edgar/data/50863/000005086326000011 Intel 2025 10-K \"Client Computing Group\" revenue",
+          "site:sec.gov/Archives/edgar/data/50863/000005086326000011 Intel 2025 10-K \"Intel Foundry\" operating loss",
+          "site:sec.gov/Archives/edgar/data/50863/000005086326000011 Intel 2025 10-K \"Data Center and AI\"",
+          "site:sec.gov/Archives/edgar/data/50863/000005086326000011 Intel 2025 10-K \"capital expenditures\""
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:intc.com/filings-reports/all-sec-filings/content/0000050863-26-000011/intc-20251227.htm \"Client Computing Group\"",
+        "type": "search",
+        "queries": [
+          "site:intc.com/filings-reports/all-sec-filings/content/0000050863-26-000011/intc-20251227.htm \"Client Computing Group\"",
+          "site:intc.com/filings-reports/all-sec-filings/content/0000050863-26-000011/intc-20251227.htm \"Data Center and AI\"",
+          "site:intc.com/filings-reports/all-sec-filings/content/0000050863-26-000011/intc-20251227.htm \"Intel Foundry\"",
+          "site:intc.com/filings-reports/all-sec-filings/content/0000050863-26-000011/intc-20251227.htm \"capital expenditures\""
+        ],
+        "sources": null
+      },
+      {
+        "query": "Intel 2025 10-K Client Computing Group revenue 2025 Data Center AI Intel Foundry revenue operating loss",
+        "type": "search",
+        "queries": [
+          "Intel 2025 10-K Client Computing Group revenue 2025 Data Center AI Intel Foundry revenue operating loss",
+          "Intel 2025 annual report Intel Products Foundry intersegment revenue 2025",
+          "Intel 2025 10-K capital expenditures gross margin factory utilization yield",
+          "Intel 2025 annual report customer concentration Dell HP Lenovo"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:intc.com Intel AWS 18A advanced packaging foundry agreement",
+        "type": "search",
+        "queries": [
+          "site:intc.com Intel AWS 18A advanced packaging foundry agreement",
+          "site:aboutamazon.com Intel Foundry 18A AWS custom chip 2024",
+          "site:blogs.microsoft.com Intel Foundry 18A chip manufacturing agreement",
+          "site:intc.com Microsoft Intel 18A foundry customer"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:sec.gov/Archives/edgar/data/50863/000005086326000011 Intel competitors AMD Arm TSMC Samsung 2025 10-K",
+        "type": "search",
+        "queries": [
+          "site:sec.gov/Archives/edgar/data/50863/000005086326000011 Intel competitors AMD Arm TSMC Samsung 2025 10-K",
+          "Intel 2025 10-K competitors AMD Arm Nvidia TSMC Samsung",
+          "site:intc.com/filings-reports/all-sec-filings/content/0000050863-26-000011 \"AMD\" \"ARM\"",
+          "site:intc.com/filings-reports/all-sec-filings/content/0000050863-26-000011 \"TSMC\" \"Samsung\""
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:asml.com Intel High NA EUV Intel first customer official",
+        "type": "search",
+        "queries": [
+          "site:asml.com Intel High NA EUV Intel first customer official",
+          "site:intel.com ASML High NA Intel first system official",
+          "site:intc.com ASML EXE High NA EUV Panther Lake 2026",
+          "site:asml.com Intel 18A high NA 2026"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:commerce.gov Intel CHIPS award final 2024 official",
+        "type": "search",
+        "queries": [
+          "site:commerce.gov Intel CHIPS award final 2024 official",
+          "site:intc.com Intel U.S. government CHIPS Act final award 2024",
+          "site:commerce.gov Intel Secure Enclave award official",
+          "site:intc.com 2025 10-K CHIPS Act restrictions Intel"
+        ],
+        "sources": null
+      },
+      {
+        "query": "Intel 2025 10-K U.S. government equity stake 9.9% voting passive stake",
+        "type": "search",
+        "queries": [
+          "Intel 2025 10-K U.S. government equity stake 9.9% voting passive stake",
+          "site:intc.com 2025 annual report U.S. government stake Intel 2025",
+          "site:sec.gov/Archives/edgar/data/50863 2025 Intel government common stock 9.9%",
+          "site:intc.com \"US government\" \"9.9%\" Intel"
+        ],
+        "sources": null
+      },
+      {
+        "query": "Intel Q2 2026 prepared remarks PDF",
+        "type": "search",
+        "queries": [
+          "Intel Q2 2026 prepared remarks PDF",
+          "Intel Q2 2026 earnings presentation PDF July 23 2026",
+          "site:download.intel.com Q2 2026 earnings presentation Intel",
+          "site:download.intel.com newsroom 2026 corporate Intel Q2 2026 earnings"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://download.intel.com/newsroom/2026/earnings/Intel-Q22026-Earnings-Call.pdf"
+      },
+      {
+        "query": "site:intc.com/filings-reports/all-sec-filings/content/0000050863-26-000157/intc-20260627.htm \"external customers\" Intel Foundry",
+        "type": "search",
+        "queries": [
+          "site:intc.com/filings-reports/all-sec-filings/content/0000050863-26-000157/intc-20260627.htm \"external customers\" Intel Foundry",
+          "site:intc.com/filings-reports/all-sec-filings/content/0000050863-26-000157/intc-20260627.htm \"gross capital expenditures\"",
+          "site:intc.com/filings-reports/all-sec-filings/content/0000050863-26-000157/intc-20260627.htm \"operating income\" \"Intel Foundry\"",
+          "site:intc.com/filings-reports/all-sec-filings/content/0000050863-26-000011/intc-20251227.htm \"10% or more\" customer"
+        ],
+        "sources": null
+      },
+      {
+        "pattern": "capital expenditures",
+        "type": "find_in_page",
+        "url": "https://download.intel.com/newsroom/2026/earnings/Intel-Q22026-Earnings-Call.pdf"
+      }
+    ],
+    "consulted_sources": [
+      {
+        "url": "https://www.intc.com/filings-reports/all-sec-filings/content/0000050863-26-000011/intc-20251227.htm",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/50863/000005086326000157/intc-20260627.htm",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.intc.com/news-events/press-releases/detail/1776/intel-reports-second-quarter-2026-financial-results",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://download.intel.com/newsroom/2026/earnings/Intel-Q22026-Earnings-Call.pdf",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.intc.com/news-events/press-releases/detail/1739/intel-foundry-gathers-customers-and-partners-outlines",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.intc.com/news-events/press-releases/detail/1772/intel-foundry-details-process-milestones-and-future",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://press.aboutamazon.com/aws/2024/9/intel-and-aws-expand-strategic-collaboration-helping-advance-u-s-based-chip-manufacturing",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.asml.com/en/news/press-releases/2026/high-na-euv-reaches-new-readiness-milestone",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.intc.com/news-events/press-releases/detail/1748/intel-and-trump-administration-reach-historic-agreement-to",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.intc.com/news-events/press-releases/detail/1771/intel-announces-new-ai-innovations-at-computex-chip-to",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://bitcap.com/en/news/bit-capital-ki-whitepaper-infrastruktur-des-ki-zeitalters",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://bitcap.com/en/news/bit-capital-quartalsbericht-equity-q1-2026-2",
+        "type": "model_citation"
+      }
+    ],
+    "request_tags": [
+      "app:frontier-lab-intelligence",
+      "pipeline:investment-company-context",
+      "job:company-memo-pilot",
+      "scope:single-company",
+      "prompt:company-memo-pilot-v1",
+      "company:intc",
+      "model:gpt-5.6-sol",
+      "reasoning:xhigh"
+    ]
+  }
+}

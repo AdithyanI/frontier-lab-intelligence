@@ -1315,6 +1315,9 @@ def test_company_context_lookup_is_exact_and_machine_readable(capsys):
 
 def test_investment_company_universe_payload_is_complete_and_dated():
     payload = editorial_runs.investment_company_universe_payload()
+    research_memos = sum(
+        company["research_memo"] is not None for company in payload["companies"]
+    )
 
     assert payload["schema_version"] == "investment-company-universe-v5"
     assert payload["mapping_policy"]["candidate_universe"] == "all_profiles"
@@ -1323,7 +1326,7 @@ def test_investment_company_universe_payload_is_complete_and_dated():
         "current_top_ten": 10,
         "audited_baseline": 34,
         "later_top_ten_additions": 3,
-        "research_memos": 2,
+        "research_memos": research_memos,
         "frontier_ai_channels": 63,
         "bit_public_views": 14,
         "bit_public_view_grades": {

@@ -1,0 +1,1089 @@
+{
+  "schema_version": "company-memo-pilot-result-v1",
+  "company": {
+    "name": "Reddit",
+    "ticker": "RDDT"
+  },
+  "memo": {
+    "business_and_economics": {
+      "summary": "A community platform monetized overwhelmingly through advertising. Commercial access to its archive of public conversations, plus smaller consumer subscriptions and services, is reported as other revenue. For 2025, advertising revenue was $2.1 billion and other revenue was $140 million; in Q1 2026 they were $625 million and $39 million, respectively.",
+      "revenue_engines": [
+        {
+          "engine": "Advertising",
+          "who_pays": "Brands, performance marketers, small and medium-sized businesses, and advertising agencies.",
+          "economic_logic": "Advertisers buy access to interest- and context-rich audiences through auction-based campaigns optimized for impressions, clicks, conversions, or other objectives. Economics depend on audience scale, ad inventory, auction demand, targeting and measurement quality, advertiser returns, and average revenue per unique.",
+          "sources": [
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1713445/000171344526000022/rddt-20251231.htm",
+              "claim_date": "2026-02-06"
+            },
+            {
+              "url": "https://investor.redditinc.com/news-events/news-releases/news-details/2026/Reddit-Reports-First-Quarter-2026-Results/default.aspx",
+              "claim_date": "2026-04-30"
+            },
+            {
+              "url": "https://redditinc.com/news/now-in-beta-max-campaigns-for-ai-powered-ad-performance-and-unique-audience-insights",
+              "claim_date": "2026-01-05"
+            }
+          ]
+        },
+        {
+          "engine": "Commercial data, API, and intelligence access",
+          "who_pays": "AI model developers, search providers, social-listening vendors, and other enterprises seeking approved access to public conversations.",
+          "economic_logic": "Partners pay for structured, current access to a difficult-to-replicate archive of human discussion. Revenue depends on contract renewals, permitted use cases, corpus freshness and quality, usage or fixed pricing, and the company's ability to prevent unlicensed substitutes.",
+          "sources": [
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1713445/000171344526000022/rddt-20251231.htm",
+              "claim_date": "2026-02-06"
+            },
+            {
+              "url": "https://redditinc.com/news/reddit-and-google-expand-partnership",
+              "claim_date": "2024-02-22"
+            },
+            {
+              "url": "https://redditinc.com/news/reddit-and-oai-partner",
+              "claim_date": "2024-05-16"
+            }
+          ]
+        },
+        {
+          "engine": "Premium subscriptions and smaller services",
+          "who_pays": "Individual users and customers of ancillary platform services.",
+          "economic_logic": "Recurring subscriptions and smaller services contribute to other revenue but remain economically secondary to advertising and commercial data arrangements.",
+          "sources": [
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1713445/000171344526000022/rddt-20251231.htm",
+              "claim_date": "2026-02-06"
+            }
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1713445/000171344526000022/rddt-20251231.htm",
+          "claim_date": "2026-02-06"
+        },
+        {
+          "url": "https://investor.redditinc.com/news-events/news-releases/news-details/2026/Reddit-Reports-Fourth-Quarter-and-Full-Year-2025-Results-Announces-1-Billion-Share-Repurchase-Program/default.aspx",
+          "claim_date": "2026-02-05"
+        },
+        {
+          "url": "https://investor.redditinc.com/news-events/news-releases/news-details/2026/Reddit-Reports-First-Quarter-2026-Results/default.aspx",
+          "claim_date": "2026-04-30"
+        }
+      ]
+    },
+    "operating_and_financial_drivers": [
+      {
+        "driver": "Audience scale, participation, and community health",
+        "why_it_matters": "DAUq, WAUq, logged-in usage, contribution rates, retention, and the supply of healthy active communities determine available ad inventory and the freshness and breadth of the commercial data asset. Logged-in growth is especially useful because it can improve personalization, retention, and monetization visibility.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "pricing",
+          "product_mix",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1713445/000171344526000022/rddt-20251231.htm",
+            "claim_date": "2026-02-06"
+          },
+          {
+            "url": "https://investor.redditinc.com/news-events/news-releases/news-details/2026/Reddit-Reports-First-Quarter-2026-Results/default.aspx",
+            "claim_date": "2026-04-30"
+          },
+          {
+            "url": "https://redditinc.com/transparency",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "driver": "Advertising yield and advertiser returns",
+        "why_it_matters": "Advertiser breadth, auction density, ad load, targeting, creative quality, conversion measurement, and campaign automation determine ARPU and whether audience growth converts into advertising revenue. Model inference and third-party measurement costs can affect incremental margins.",
+        "financial_lines": [
+          "revenue",
+          "pricing",
+          "product_mix",
+          "gross_margin",
+          "operating_cost"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1713445/000171344526000022/rddt-20251231.htm",
+            "claim_date": "2026-02-06"
+          },
+          {
+            "url": "https://redditinc.com/news/now-in-beta-max-campaigns-for-ai-powered-ad-performance-and-unique-audience-insights",
+            "claim_date": "2026-01-05"
+          },
+          {
+            "url": "https://redditinc.com/news/live-from-cannes-lions-2025-introducing-reddit-community-intelligence",
+            "claim_date": "2025-06-16"
+          }
+        ]
+      },
+      {
+        "driver": "Discovery mix, native search, and international accessibility",
+        "why_it_matters": "External search referrals can deliver large volumes of logged-out traffic but leave acquisition exposed to third-party ranking and answer-layer changes. Native search, Reddit Answers, and machine translation can increase direct usage, repeat visits, logged-in conversion, and international monetization if they preserve community context.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "pricing",
+          "operating_cost",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1713445/000171344526000022/rddt-20251231.htm",
+            "claim_date": "2026-02-06"
+          },
+          {
+            "url": "https://redditinc.com/news/introducing-reddit-answers",
+            "claim_date": "2026-05-26"
+          },
+          {
+            "url": "https://redditinc.com/news/bringing-reddit-to-more-people-around-the-world-machine-learning-powered-localization-and-translation-launching-in-more-than-35-new-countries",
+            "claim_date": "2025-04-28"
+          }
+        ]
+      },
+      {
+        "driver": "Licensing scope, pricing, concentration, and enforcement",
+        "why_it_matters": "Other revenue can move materially when large data agreements begin, renew, expand, or lapse. Bargaining power depends on freshness, structure, rights controls, customer alternatives, and the ability to stop unauthorized scraping; limited product and customer disclosure makes concentration an important research issue.",
+        "financial_lines": [
+          "revenue",
+          "pricing",
+          "product_mix",
+          "gross_margin",
+          "cash_flow",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1713445/000171344526000022/rddt-20251231.htm",
+            "claim_date": "2026-02-06"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1713445/000171344526000069/rddt-20260331.htm",
+            "claim_date": "2026-05-01"
+          },
+          {
+            "url": "https://redditinc.com/news/robot-txt-update",
+            "claim_date": "2024-06-25"
+          },
+          {
+            "url": "https://redditinc.com/hubfs/Reddit%20Inc/Content/Reddit%20v.%20SerpApi.pdf",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "driver": "Authenticity, moderation, and platform integrity",
+        "why_it_matters": "The platform's differentiation and data value rely on genuine human participation. Volunteer moderators, community voting, company safety systems, and automated defenses must contain spam, manipulation, harmful content, and synthetic engagement without suppressing legitimate participation. Failure can reduce user retention, brand safety, licensing value, or increase enforcement costs.",
+        "financial_lines": [
+          "revenue",
+          "gross_margin",
+          "operating_cost",
+          "cash_flow",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://redditinc.com/transparency",
+            "claim_date": null
+          },
+          {
+            "url": "https://redditinc.com/news/how-were-keeping-reddit-real-and-safe-in-the-ai-era",
+            "claim_date": "2026-07-06"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1713445/000171344526000022/rddt-20251231.htm",
+            "claim_date": "2026-02-06"
+          }
+        ]
+      }
+    ],
+    "ecosystem": [
+      {
+        "relationship": "customer_or_end_market",
+        "entities_or_group": "Advertisers, agencies, AI model providers, search platforms, and enterprise data customers",
+        "why_it_matters": "Advertising customers fund the dominant revenue stream, while a smaller number of commercial data customers can have disproportionate influence on other-revenue growth and renewal risk.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1713445/000171344526000022/rddt-20251231.htm",
+            "claim_date": "2026-02-06"
+          },
+          {
+            "url": "https://redditinc.com/news/reddit-and-google-expand-partnership",
+            "claim_date": "2024-02-22"
+          },
+          {
+            "url": "https://redditinc.com/news/reddit-and-oai-partner",
+            "claim_date": "2024-05-16"
+          }
+        ]
+      },
+      {
+        "relationship": "partner",
+        "entities_or_group": "Google and OpenAI",
+        "why_it_matters": "Both have approved access to structured, real-time content. The relationships combine data supply with distribution or product collaboration; OpenAI also became an advertising partner, while Google's arrangement includes search-display, model-training, and cloud dimensions.",
+        "sources": [
+          {
+            "url": "https://blog.google/company-news/inside-google/company-announcements/expanded-reddit-partnership/",
+            "claim_date": "2024-02-22"
+          },
+          {
+            "url": "https://openai.com/index/openai-and-reddit-partnership/",
+            "claim_date": "2024-05-16"
+          },
+          {
+            "url": "https://redditinc.com/news/reddit-and-google-expand-partnership",
+            "claim_date": "2024-02-22"
+          },
+          {
+            "url": "https://redditinc.com/news/reddit-and-oai-partner",
+            "claim_date": "2024-05-16"
+          }
+        ]
+      },
+      {
+        "relationship": "infrastructure_dependency",
+        "entities_or_group": "External search engines, cloud and model infrastructure, and specialized AI compute",
+        "why_it_matters": "External search affects discovery, while frontier-model APIs, cloud services, and GPU access support search, translation, advertising, and safety products. Changes in referral treatment, model access, latency, reliability, or inference cost can affect traffic and margins.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1713445/000171344526000022/rddt-20251231.htm",
+            "claim_date": "2026-02-06"
+          },
+          {
+            "url": "https://redditinc.com/news/reddit-and-google-expand-partnership",
+            "claim_date": "2024-02-22"
+          },
+          {
+            "url": "https://redditinc.com/news/reddit-and-oai-partner",
+            "claim_date": "2024-05-16"
+          }
+        ]
+      },
+      {
+        "relationship": "competitor",
+        "entities_or_group": "Google, Meta properties, YouTube, TikTok, X, Pinterest, Snap, Discord, Wikipedia, Roblox, and Twitch",
+        "why_it_matters": "These services compete for user attention, content creation, search and discovery behavior, advertiser budgets, and—in some cases—AI-training or grounding demand. Larger competitors can subsidize AI product and advertising investments at greater scale.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1713445/000171344526000022/rddt-20251231.htm",
+            "claim_date": "2026-02-06"
+          }
+        ]
+      },
+      {
+        "relationship": "regulatory_dependency",
+        "entities_or_group": "Privacy, copyright, platform-safety, data-protection, competition, and AI-governance regimes",
+        "why_it_matters": "Rules and court outcomes can affect the company's ability to process and license public content, personalize advertising, moderate communities, block scraping, and assign responsibility among users, moderators, platforms, and model developers.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1713445/000171344526000022/rddt-20251231.htm",
+            "claim_date": "2026-02-06"
+          },
+          {
+            "url": "https://redditinc.com/news/robot-txt-update",
+            "claim_date": "2024-06-25"
+          },
+          {
+            "url": "https://redditinc.com/hubfs/Reddit%20Inc/Content/Reddit%20v.%20SerpApi.pdf",
+            "claim_date": null
+          }
+        ]
+      }
+    ],
+    "strategy_and_committed_actions": [
+      {
+        "action": "Merge generative answers with core platform search rather than operate a separate AI destination.",
+        "investment_relevance": "The unified search experience is intended to shorten the path from a question to relevant conversations and increase direct discovery. It is strategically important because successful native search can reduce dependence on external search while creating additional engagement and commercial-intent inventory.",
+        "sources": [
+          {
+            "url": "https://redditinc.com/news/introducing-reddit-answers",
+            "claim_date": "2026-05-26"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1713445/000171344526000022/rddt-20251231.htm",
+            "claim_date": "2026-02-06"
+          }
+        ]
+      },
+      {
+        "action": "Use machine-learning translation and localization to open existing conversations to additional languages and markets.",
+        "investment_relevance": "Translation can expand addressable audience without requiring each market to begin with a fully mature local content base. The investment case depends on translated users retaining, contributing, and eventually monetizing rather than only generating low-value visits.",
+        "sources": [
+          {
+            "url": "https://redditinc.com/news/bringing-reddit-to-more-people-around-the-world-machine-learning-powered-localization-and-translation-launching-in-more-than-35-new-countries",
+            "claim_date": "2025-04-28"
+          }
+        ]
+      },
+      {
+        "action": "Apply AI to campaign automation, audience intelligence, social listening, and creative development.",
+        "investment_relevance": "Max Campaigns and Community Intelligence seek to convert proprietary conversational context into better advertiser performance and lower campaign-management friction. Success should appear in advertiser breadth, conversion volume, auction demand, and ARPU rather than product announcements alone.",
+        "sources": [
+          {
+            "url": "https://redditinc.com/news/now-in-beta-max-campaigns-for-ai-powered-ad-performance-and-unique-audience-insights",
+            "claim_date": "2026-01-05"
+          },
+          {
+            "url": "https://redditinc.com/news/live-from-cannes-lions-2025-introducing-reddit-community-intelligence",
+            "claim_date": "2025-06-16"
+          }
+        ]
+      },
+      {
+        "action": "Monetize approved API access while tightening technical and legal controls against unauthorized commercial collection.",
+        "investment_relevance": "The company has paired Google and OpenAI agreements with API terms, robots.txt restrictions, cease-and-desist activity, and litigation. This is necessary to preserve scarcity and pricing power, but enforcement costs and adverse legal outcomes could reduce the value of the licensing model.",
+        "sources": [
+          {
+            "url": "https://redditinc.com/news/reddit-and-google-expand-partnership",
+            "claim_date": "2024-02-22"
+          },
+          {
+            "url": "https://redditinc.com/news/reddit-and-oai-partner",
+            "claim_date": "2024-05-16"
+          },
+          {
+            "url": "https://redditinc.com/news/robot-txt-update",
+            "claim_date": "2024-06-25"
+          },
+          {
+            "url": "https://redditinc.com/hubfs/Reddit%20Inc/Content/Reddit%20v.%20SerpApi.pdf",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "action": "Deploy AI-based defenses against spam, fake votes, coordinated abuse, hate, and violent content.",
+        "investment_relevance": "Automated defenses are a committed response to the risk that generative AI floods the platform with inauthentic material. Their value lies in protecting community trust and the quality of both advertising inventory and licensed data while containing human-review and moderator workload.",
+        "sources": [
+          {
+            "url": "https://redditinc.com/news/how-were-keeping-reddit-real-and-safe-in-the-ai-era",
+            "claim_date": "2026-07-06"
+          },
+          {
+            "url": "https://redditinc.com/transparency",
+            "claim_date": null
+          }
+        ]
+      }
+    ],
+    "frontier_ai_transmission_paths": [
+      {
+        "development": "Frontier models and answer engines place greater value on fresh, structured human conversations for training, evaluation, grounding, and retrieval.",
+        "company_exposure": "The company controls approved API access to a large, continually refreshed archive and already supplies leading model and search providers.",
+        "affected_driver": "Licensing demand, contract scope, renewal pricing, usage, and customer concentration.",
+        "financial_consequence": "Expanded or higher-priced agreements could increase other revenue and product mix toward high-gross-margin commercial data; cheaper synthetic substitutes, narrower data requirements, or concentrated buyer power could limit the upside.",
+        "direction": "mixed",
+        "materiality_condition": "Material if renewed or new agreements change annual other revenue by an amount large enough to affect consolidated growth or margins, rather than merely replacing expiring contracts.",
+        "time_horizon": "near_term",
+        "thesis_effect": "mixed",
+        "watchpoints": [
+          "New, expanded, or renewed model-provider contracts",
+          "Other-revenue growth and deferred-revenue disclosures",
+          "Customer or contract concentration",
+          "Pricing structure: fixed, usage-based, or value-sharing",
+          "Evidence that synthetic or alternative datasets reduce demand"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1713445/000171344526000022/rddt-20251231.htm",
+            "claim_date": "2026-02-06"
+          },
+          {
+            "url": "https://redditinc.com/news/reddit-and-google-expand-partnership",
+            "claim_date": "2024-02-22"
+          },
+          {
+            "url": "https://redditinc.com/news/reddit-and-oai-partner",
+            "claim_date": "2024-05-16"
+          }
+        ]
+      },
+      {
+        "development": "AI answer products increasingly satisfy user questions without sending users to the underlying discussion pages.",
+        "company_exposure": "A meaningful portion of discovery can originate with external search engines, while the advertising model requires visits, engagement, and ad impressions on the company's own surfaces.",
+        "affected_driver": "External referrals, logged-out DAUq, session depth, ad impressions, and direct-visit conversion.",
+        "financial_consequence": "Reduced referral traffic could lower advertising inventory and user-acquisition efficiency; licensing fees would only offset this if they capture sufficient value from the displaced traffic.",
+        "direction": "downside",
+        "materiality_condition": "Material if sustained declines in search-referred users or ad impressions are not offset by direct traffic, logged-in growth, native search, or incremental licensing revenue.",
+        "time_horizon": "near_term",
+        "thesis_effect": "challenges",
+        "watchpoints": [
+          "External-search versus direct traffic",
+          "Logged-out and logged-in DAUq growth",
+          "Search-result and AI-answer citation or linking treatment",
+          "Ad impressions and revenue relative to DAUq",
+          "Management commentary following major search algorithm changes"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1713445/000171344526000022/rddt-20251231.htm",
+            "claim_date": "2026-02-06"
+          },
+          {
+            "url": "https://blog.google/company-news/inside-google/company-announcements/expanded-reddit-partnership/",
+            "claim_date": "2024-02-22"
+          },
+          {
+            "url": "https://redditinc.com/news/introducing-reddit-answers",
+            "claim_date": "2026-05-26"
+          }
+        ]
+      },
+      {
+        "development": "Improved reasoning, retrieval, and multilingual models raise the quality of native search, answers, recommendations, and translation.",
+        "company_exposure": "The company has merged AI answers into search and deployed machine-learning localization across many countries.",
+        "affected_driver": "Search success, direct visits, retention, logged-in conversion, contribution, international DAUq, and international ARPU.",
+        "financial_consequence": "Higher repeat usage and better discovery could expand ad inventory and improve international monetization, partly offset by inference costs or reduced page exploration if summaries replace community participation.",
+        "direction": "upside",
+        "materiality_condition": "Material if users exposed to the features show sustained gains in retention, contribution, or monetizable sessions after accounting for model-serving costs.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "supports",
+        "watchpoints": [
+          "Native-search and answer-query adoption",
+          "Direct versus external acquisition",
+          "International DAUq and ARPU",
+          "Logged-in conversion and retention",
+          "Posts, comments, and community contribution following answer adoption"
+        ],
+        "sources": [
+          {
+            "url": "https://redditinc.com/news/introducing-reddit-answers",
+            "claim_date": "2026-05-26"
+          },
+          {
+            "url": "https://redditinc.com/news/bringing-reddit-to-more-people-around-the-world-machine-learning-powered-localization-and-translation-launching-in-more-than-35-new-countries",
+            "claim_date": "2025-04-28"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1713445/000171344526000022/rddt-20251231.htm",
+            "claim_date": "2026-02-06"
+          }
+        ]
+      },
+      {
+        "development": "Frontier models improve automated campaign construction, contextual targeting, creative generation, conversion prediction, and advertiser insight extraction.",
+        "company_exposure": "Advertising products increasingly use the conversational corpus and AI automation through Max Campaigns and Community Intelligence.",
+        "affected_driver": "Advertiser acquisition and retention, conversion performance, auction demand, campaign-management friction, ARPU, and model-serving cost.",
+        "financial_consequence": "Better advertiser returns could raise spend and pricing while supporting operating leverage; weak measurement, privacy restrictions, or high inference costs could reduce incremental margins.",
+        "direction": "upside",
+        "materiality_condition": "Material if automated products deliver repeatable conversion or return improvements that increase advertiser spend and ARPU net of incentives, support, and inference costs.",
+        "time_horizon": "near_term",
+        "thesis_effect": "supports",
+        "watchpoints": [
+          "Max Campaign adoption and budget retention",
+          "Advertiser count and mix",
+          "Conversions, cost per action, and return on ad spend",
+          "ARPU and ad-revenue growth versus DAUq",
+          "Cost of revenue and AI infrastructure spending"
+        ],
+        "sources": [
+          {
+            "url": "https://redditinc.com/news/now-in-beta-max-campaigns-for-ai-powered-ad-performance-and-unique-audience-insights",
+            "claim_date": "2026-01-05"
+          },
+          {
+            "url": "https://redditinc.com/news/live-from-cannes-lions-2025-introducing-reddit-community-intelligence",
+            "claim_date": "2025-06-16"
+          },
+          {
+            "url": "https://investor.redditinc.com/news-events/news-releases/news-details/2026/Reddit-Reports-First-Quarter-2026-Results/default.aspx",
+            "claim_date": "2026-04-30"
+          }
+        ]
+      },
+      {
+        "development": "Generative AI lowers the cost of producing spam, astroturfing, fake engagement, and superficially plausible but inauthentic content, while also improving automated detection.",
+        "company_exposure": "The core product and licensable corpus depend on authentic human participation; the company and volunteer moderators operate a layered moderation system augmented by LLMs and other automated tools.",
+        "affected_driver": "Content quality, user trust, moderator workload, brand safety, engagement, data quality, and safety-system operating cost.",
+        "financial_consequence": "Effective detection can protect retention, advertising demand, and licensing value while limiting review costs; an unfavorable arms race could increase expense and erode the platform's differentiation.",
+        "direction": "mixed",
+        "materiality_condition": "Material if synthetic abuse measurably changes spam exposure, legitimate contribution, moderator participation, advertiser brand-safety behavior, or the perceived reliability of licensed data.",
+        "time_horizon": "near_term",
+        "thesis_effect": "mixed",
+        "watchpoints": [
+          "Spam views and spam-account exposure",
+          "Fake-vote removals and coordinated-behavior detections",
+          "Moderator activity and community closures",
+          "Brand-safety incidents and advertiser controls",
+          "Content creation and retention among established users"
+        ],
+        "sources": [
+          {
+            "url": "https://redditinc.com/news/how-were-keeping-reddit-real-and-safe-in-the-ai-era",
+            "claim_date": "2026-07-06"
+          },
+          {
+            "url": "https://redditinc.com/transparency",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1713445/000171344526000022/rddt-20251231.htm",
+            "claim_date": "2026-02-06"
+          }
+        ]
+      }
+    ],
+    "investment_thesis_and_tests": {
+      "public_bit_view_status": "explicit_thesis",
+      "attributable_public_thesis": "BIT Capital argues that the platform's difficult-to-replicate archive of authentic human opinions is valuable both for advertising and as training material for large language models. BIT believed the market initially misclassified the business as only a social-media advertising platform, identified data licensing before it entered consensus models, and expected deeper Google integration to reinforce search-driven acquisition.",
+      "what_would_support_it": [
+        "New or renewed agreements with leading model and search providers expand other revenue at attractive incremental margins.",
+        "Logged-in users, DAUq, and WAUq grow while the archive continues to gain fresh, authentic contributions.",
+        "Advertising revenue grows faster than audience volume because targeting, measurement, and advertiser returns improve.",
+        "Google and other AI integrations continue to link users into relevant communities rather than substituting for visits.",
+        "Native search and translation convert externally acquired or international visitors into recurring users and contributors."
+      ],
+      "what_would_challenge_it": [
+        "Other revenue stalls because contracts are not renewed, buyers resist pricing, or alternative datasets reduce demand.",
+        "Unauthorized scraping or adverse legal outcomes weaken the company's ability to charge for access.",
+        "AI search and answer layers reduce referral traffic and advertising inventory faster than licensing revenue grows.",
+        "Synthetic content, privacy disputes, or moderator dissatisfaction erode the authenticity and defensibility of the archive.",
+        "User growth fails to translate into advertising demand, ARPU, or repeat logged-in participation."
+      ],
+      "sources": [
+        {
+          "url": "https://bitcap.com/en",
+          "claim_date": null
+        },
+        {
+          "url": "https://redditinc.com/news/reddit-and-google-expand-partnership",
+          "claim_date": "2024-02-22"
+        },
+        {
+          "url": "https://redditinc.com/news/reddit-and-oai-partner",
+          "claim_date": "2024-05-16"
+        },
+        {
+          "url": "https://investor.redditinc.com/news-events/news-releases/news-details/2026/Reddit-Reports-Fourth-Quarter-and-Full-Year-2025-Results-Announces-1-Billion-Share-Repurchase-Program/default.aspx",
+          "claim_date": "2026-02-05"
+        }
+      ]
+    },
+    "uncertainties_and_research_triggers": [
+      {
+        "uncertainty": "Public reporting does not provide enough product- and customer-level detail to cleanly separate data licensing, subscriptions, and other services within other revenue.",
+        "why_it_matters": "Contract concentration, renewal timing, and true licensing growth cannot be inferred reliably from the consolidated other-revenue line alone.",
+        "next_research_trigger": "Inspect future 10-K and 10-Q disclosures, contract announcements, deferred-revenue changes, and management commentary around major renewals.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1713445/000171344526000022/rddt-20251231.htm",
+            "claim_date": "2026-02-06"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1713445/000171344526000069/rddt-20260331.htm",
+            "claim_date": "2026-05-01"
+          }
+        ]
+      },
+      {
+        "uncertainty": "The durable dependence of user growth on external search versus direct, paid, or product-led acquisition remains difficult to quantify publicly.",
+        "why_it_matters": "AI changes at search providers could be either a distribution benefit or a traffic substitute, producing opposite effects on advertising revenue.",
+        "next_research_trigger": "Compare traffic-source disclosures, logged-in versus logged-out DAUq, direct-search adoption, and management commentary after major search-ranking or AI-answer changes.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1713445/000171344526000022/rddt-20251231.htm",
+            "claim_date": "2026-02-06"
+          },
+          {
+            "url": "https://redditinc.com/news/introducing-reddit-answers",
+            "claim_date": "2026-05-26"
+          },
+          {
+            "url": "https://blog.google/company-news/inside-google/company-announcements/expanded-reddit-partnership/",
+            "claim_date": "2024-02-22"
+          }
+        ]
+      },
+      {
+        "uncertainty": "The legal enforceability and practical effectiveness of restrictions on scraping and downstream commercialization are unresolved.",
+        "why_it_matters": "Weak enforcement would reduce scarcity and licensing leverage; strong enforcement could improve pricing power but may involve substantial litigation and technical costs.",
+        "next_research_trigger": "Review rulings, settlements, contract changes, crawler-policy updates, and evidence that model providers shift from unlicensed collection to paid API access.",
+        "sources": [
+          {
+            "url": "https://redditinc.com/news/robot-txt-update",
+            "claim_date": "2024-06-25"
+          },
+          {
+            "url": "https://redditinc.com/hubfs/Reddit%20Inc/Content/Reddit%20v.%20SerpApi.pdf",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1713445/000171344526000022/rddt-20251231.htm",
+            "claim_date": "2026-02-06"
+          }
+        ]
+      },
+      {
+        "uncertainty": "The company has not fully disclosed the incremental engagement, advertising yield, or serving cost attributable to Reddit Answers, translation, and AI advertising products.",
+        "why_it_matters": "High adoption is not sufficient if summaries reduce contribution, translated users do not retain, or inference expenses absorb monetization gains.",
+        "next_research_trigger": "Look for cohort retention, contribution, search-adoption, international ARPU, advertiser-spend, conversion, and cost-of-revenue disclosures.",
+        "sources": [
+          {
+            "url": "https://redditinc.com/news/introducing-reddit-answers",
+            "claim_date": "2026-05-26"
+          },
+          {
+            "url": "https://redditinc.com/news/bringing-reddit-to-more-people-around-the-world-machine-learning-powered-localization-and-translation-launching-in-more-than-35-new-countries",
+            "claim_date": "2025-04-28"
+          },
+          {
+            "url": "https://redditinc.com/news/now-in-beta-max-campaigns-for-ai-powered-ad-performance-and-unique-audience-insights",
+            "claim_date": "2026-01-05"
+          }
+        ]
+      },
+      {
+        "uncertainty": "It is unclear whether automated defenses can sustainably outpace increasingly capable synthetic-content and manipulation systems without damaging legitimate participation.",
+        "why_it_matters": "Authenticity is simultaneously a user proposition, an advertising input, and the core of the BIT data-asset thesis.",
+        "next_research_trigger": "Monitor spam exposure, fake-engagement removals, moderator participation, established-user retention, advertiser brand-safety behavior, and changes to verification policies.",
+        "sources": [
+          {
+            "url": "https://redditinc.com/news/how-were-keeping-reddit-real-and-safe-in-the-ai-era",
+            "claim_date": "2026-07-06"
+          },
+          {
+            "url": "https://redditinc.com/transparency",
+            "claim_date": null
+          }
+        ]
+      }
+    ],
+    "source_ledger": [
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1713445/000171344526000022/rddt-20251231.htm",
+        "title": "FY2025 Form 10-K",
+        "publisher": "U.S. Securities and Exchange Commission",
+        "published_at": "2026-02-06",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1713445/000171344526000069/rddt-20260331.htm",
+        "title": "Q1 2026 Form 10-Q",
+        "publisher": "U.S. Securities and Exchange Commission",
+        "published_at": "2026-05-01",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://investor.redditinc.com/news-events/news-releases/news-details/2026/Reddit-Reports-Fourth-Quarter-and-Full-Year-2025-Results-Announces-1-Billion-Share-Repurchase-Program/default.aspx",
+        "title": "Fourth-quarter and full-year 2025 results",
+        "publisher": "Company investor relations",
+        "published_at": "2026-02-05",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://investor.redditinc.com/news-events/news-releases/news-details/2026/Reddit-Reports-First-Quarter-2026-Results/default.aspx",
+        "title": "First-quarter 2026 results",
+        "publisher": "Company investor relations",
+        "published_at": "2026-04-30",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://redditinc.com/news/reddit-and-google-expand-partnership",
+        "title": "Expanded Google partnership",
+        "publisher": "Company newsroom",
+        "published_at": "2024-02-22",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://redditinc.com/news/reddit-and-oai-partner",
+        "title": "OpenAI partnership announcement",
+        "publisher": "Company newsroom",
+        "published_at": "2024-05-16",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://blog.google/company-news/inside-google/company-announcements/expanded-reddit-partnership/",
+        "title": "Google confirmation of expanded partnership",
+        "publisher": "Google",
+        "published_at": "2024-02-22",
+        "source_type": "counterparty_primary"
+      },
+      {
+        "url": "https://openai.com/index/openai-and-reddit-partnership/",
+        "title": "OpenAI confirmation of partnership",
+        "publisher": "OpenAI",
+        "published_at": "2024-05-16",
+        "source_type": "counterparty_primary"
+      },
+      {
+        "url": "https://redditinc.com/news/introducing-reddit-answers",
+        "title": "Generative answers and unified search product update",
+        "publisher": "Company newsroom",
+        "published_at": "2026-05-26",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://redditinc.com/news/bringing-reddit-to-more-people-around-the-world-machine-learning-powered-localization-and-translation-launching-in-more-than-35-new-countries",
+        "title": "Machine-learning localization and translation update",
+        "publisher": "Company newsroom",
+        "published_at": "2025-04-28",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://redditinc.com/news/now-in-beta-max-campaigns-for-ai-powered-ad-performance-and-unique-audience-insights",
+        "title": "Max Campaigns beta announcement",
+        "publisher": "Company newsroom",
+        "published_at": "2026-01-05",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://redditinc.com/news/live-from-cannes-lions-2025-introducing-reddit-community-intelligence",
+        "title": "Community Intelligence announcement",
+        "publisher": "Company newsroom",
+        "published_at": "2025-06-16",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://redditinc.com/news/how-were-keeping-reddit-real-and-safe-in-the-ai-era",
+        "title": "AI-era platform-safety update",
+        "publisher": "Company newsroom",
+        "published_at": "2026-07-06",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://redditinc.com/transparency",
+        "title": "Transparency center and moderation model",
+        "publisher": "Company transparency center",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://redditinc.com/news/robot-txt-update",
+        "title": "Public-content policy and robots.txt update",
+        "publisher": "Company newsroom",
+        "published_at": "2024-06-25",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://redditinc.com/hubfs/Reddit%20Inc/Content/Reddit%20v.%20SerpApi.pdf",
+        "title": "Complaint concerning scraping and AI answer-engine use",
+        "publisher": "Company legal filing",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://bitcap.com/en",
+        "title": "Public firm material supporting the supplied investment thesis",
+        "publisher": "BIT Capital",
+        "published_at": null,
+        "source_type": "bit_primary"
+      }
+    ]
+  },
+  "provenance": {
+    "research_date": "2026-07-28",
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "xhigh",
+    "prompt_version": "company-memo-pilot-v1",
+    "prompt_cache_key": "fli:company-memo:company-memo-pilot-v1",
+    "response_id": "resp_9CG3huQxfV8KP6ZpSemflseyLyIlsIj5W4DVpLt3IQpfyhOM0wkpj14iXgb3jUOnxfsnV4JBuocftkC1ATuxpzdHXZNqZ8G3XnhqmZyu5TiGvPXYounG8hOuPkzVBOGFzRs0NV6yUAFaI7Brjl-N8pDz2cNjJ-Q9k6xxjC1yxozNuRNWFIuTeolSJ-CslUkIE0Ew83nhE4r55jXs30Jv7xbYAb4OB_BotDOOBjJ4DPVjwS345gUxY7-ZcfgaBuGJn8J9t7AVmZLLUSxR154bUc6QddY0cqwultb-luPEiv6gEBB1JnO5AwH4szNvfOBuUieGS1A9Fn54kJQ8VAiZ_NESL6D-PkDZ-iD-w3rTxeUNN6VRnd9lHiaTO_w6C9ISN5zAgEKgcC_d3HmEn3DXdFkWWmTAuvUKLgxu_ETr9U2SbCJAazCMMehqKMedOdE0NF37FMoCfSFGnKq2ZinXOVf4",
+    "response_model": "gpt-5.6-sol",
+    "input_tokens": 115382,
+    "cached_tokens": 0,
+    "cache_write_tokens": 0,
+    "output_tokens": 39756,
+    "reasoning_tokens": 8129,
+    "reported_cost_usd": null,
+    "web_actions": [
+      {
+        "query": "site:investor.redditinc.com annual report 2025 Reddit 10-K 2026",
+        "type": "search",
+        "queries": [
+          "site:investor.redditinc.com annual report 2025 Reddit 10-K 2026",
+          "site:investor.redditinc.com Reddit Q1 2026 results",
+          "site:bitcap.com/en Reddit BIT Capital investment thesis",
+          "site:sec.gov/Archives/edgar/data Reddit 2025 10-k"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://bitcap.com/en/investmentansatz"
+      },
+      {
+        "query": "site:s203.q4cdn.com/380862485/files/doc_financials/2025/ar Reddit 2025 annual report pdf",
+        "type": "search",
+        "queries": [
+          "site:s203.q4cdn.com/380862485/files/doc_financials/2025/ar Reddit 2025 annual report pdf",
+          "site:s203.q4cdn.com/380862485 \"2025 Annual Report\" Reddit PDF",
+          "Reddit 2025 10-K pdf revenue data licensing Google customer concentration",
+          "site:sec.gov/Archives/edgar/data/1713445 2026 Reddit 10-k"
+        ],
+        "sources": null
+      },
+      {
+        "query": "Reddit Inc CIK SEC 2025 annual report filed 2026",
+        "type": "search",
+        "queries": [
+          "Reddit Inc CIK SEC 2025 annual report filed 2026",
+          "Reddit 2025 10-K filed February 2026 SEC RDDT",
+          "\"rddt-20251231\"",
+          "site:sec.gov/Archives/edgar/data/1713445/ \"2025\" \"Reddit, Inc.\""
+        ],
+        "sources": null
+      },
+      {
+        "pattern": "data licensing",
+        "type": "find_in_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/1713445/000171344526000022/rddt-20251231.htm"
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/1713445/000171344526000022/rddt-20251231.htm"
+      },
+      {
+        "pattern": "data licensing",
+        "type": "find_in_page",
+        "url": "https://d18rn0p25nwr6d.cloudfront.net/CIK-0001713445/a8e1ae31-e61c-4a09-97be-33e01420abb2.pdf"
+      },
+      {
+        "type": "open_page",
+        "url": "https://s203.q4cdn.com/380862485/files/doc_financials/2026/q1/Q1-26-Shareholder-Letter.pdf"
+      },
+      {
+        "query": "site:sec.gov/Archives/edgar/data/1713445/000171344526000022 Reddit advertising revenue third parties data licensing 2025",
+        "type": "search",
+        "queries": [
+          "site:sec.gov/Archives/edgar/data/1713445/000171344526000022 Reddit advertising revenue third parties data licensing 2025",
+          "site:investor.redditinc.com 2025 shareholder letter Reddit Answers data licensing translation 2026",
+          "site:s203.q4cdn.com/380862485/files/doc_financials/2026/q1 Reddit Answers translation shareholder letter",
+          "site:redditinc.com/blog Google OpenAI data licensing Reddit official"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:sec.gov/Archives/edgar/data/1713445 Reddit \"search engines\" \"DAUq\"",
+        "type": "search",
+        "queries": [
+          "site:sec.gov/Archives/edgar/data/1713445 Reddit \"search engines\" \"DAUq\"",
+          "site:sec.gov/Archives/edgar/data/1713445 Reddit \"logged-out\" \"search\"",
+          "site:sec.gov/Archives/edgar/data/1713445 Reddit \"volunteer moderators\" risk",
+          "site:sec.gov/Archives/edgar/data/1713445 Reddit \"cloud\" \"hosting\" risk"
+        ],
+        "sources": null
+      },
+      {
+        "query": "rddt-20241231 sec Reddit",
+        "type": "search",
+        "queries": [
+          "rddt-20241231 sec Reddit",
+          "site:sec.gov/Archives/edgar/data/1713445 \"volunteer moderators\" Reddit",
+          "site:sec.gov/Archives/edgar/data/1713445 \"search engine\" Reddit users",
+          "site:sec.gov/Archives/edgar/data/1713445 \"cloud services\" Reddit"
+        ],
+        "sources": null
+      },
+      {
+        "pattern": "data licensing",
+        "type": "find_in_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/1713445/000171344525000018/rddt-20241231.htm"
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/1713445/000171344526000022/0001713445-26-000022.txt"
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/1713445/000171344526000022/rddt-20251231.htm?output=1"
+      },
+      {
+        "query": "Reddit 2025 10-k \"Our revenue is primarily generated\" advertising other revenue",
+        "type": "search",
+        "queries": [
+          "Reddit 2025 10-k \"Our revenue is primarily generated\" advertising other revenue",
+          "Reddit 2025 10-k \"content licensing\"",
+          "Reddit 2025 annual report \"search engines\" users",
+          "Reddit 2025 annual report \"volunteer moderators\""
+        ],
+        "sources": null
+      },
+      {
+        "pattern": "data licensing",
+        "type": "find_in_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/1713445/000171344526000062/redditinc10-k2025.pdf"
+      },
+      {
+        "type": "open_page",
+        "url": "https://companiesmarketcap.com/reddit/sec-reports-10k/0001713445-26-000022/"
+      },
+      {
+        "pattern": "content licensing",
+        "type": "find_in_page",
+        "url": "https://companiesmarketcap.com/reddit/sec-reports-10k/0001713445-26-000022/"
+      },
+      {
+        "query": "site:bitcap.com Reddit Jan Beckers BIT Capital data licensing Google",
+        "type": "search",
+        "queries": [
+          "site:bitcap.com Reddit Jan Beckers BIT Capital data licensing Google",
+          "site:bitcap.com/en Reddit investment thesis BIT Capital",
+          "site:bitcap.com/de Reddit Datenlizenzierung Reddit BIT Capital",
+          "BIT Capital Reddit Google data licensing thesis"
+        ],
+        "sources": null
+      },
+      {
+        "pattern": "Reddit",
+        "type": "find_in_page",
+        "url": "https://bitcap.com/en/fonds/bit-global-technology-leaders"
+      },
+      {
+        "query": "site:redditinc.com/blog Reddit Google partnership AI API official February 2024",
+        "type": "search",
+        "queries": [
+          "site:redditinc.com/blog Reddit Google partnership AI API official February 2024",
+          "site:openai.com Reddit partnership May 2024 official",
+          "site:redditinc.com/blog OpenAI Reddit partnership official",
+          "site:blog.google Reddit partnership data API February 2024"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:redditinc.com \"Data API\" Google \"expanded partnership\" Reddit",
+        "type": "search",
+        "queries": [
+          "site:redditinc.com \"Data API\" Google \"expanded partnership\" Reddit",
+          "site:redditinc.com \"Reddit and Google\" Data API",
+          "site:redditinc.com \"OpenAI and Reddit Partnership\"",
+          "site:redditinc.com \"AI-powered features\" \"moderators\" OpenAI"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://redditinc.com/hubfs/Reddit%20Inc/Content/Reddit%20v.%20SerpApi.pdf"
+      },
+      {
+        "query": "site:redditinc.com/news \"How We’re Keeping Reddit Real and Safe in the AI Era\"",
+        "type": "search",
+        "queries": [
+          "site:redditinc.com/news \"How We’re Keeping Reddit Real and Safe in the AI Era\"",
+          "site:redditinc.com \"Keeping Reddit Real and Safe\" AI Era July 6 2026",
+          "\"How We’re Keeping Reddit Real and Safe in the AI Era\""
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:redditinc.com/news Reddit Answers 2026 search official",
+        "type": "search",
+        "queries": [
+          "site:redditinc.com/news Reddit Answers 2026 search official",
+          "site:redditinc.com/news Reddit Answers 2025 weekly users official",
+          "site:investor.redditinc.com Reddit Answers translation Q1 2026 shareholder letter",
+          "site:redditinc.com/news machine translation Reddit languages official 2025"
+        ],
+        "sources": null
+      },
+      {
+        "query": "Reddit 2025 10-k competitors Meta TikTok YouTube Discord Google",
+        "type": "search",
+        "queries": [
+          "Reddit 2025 10-k competitors Meta TikTok YouTube Discord Google",
+          "site:sec.gov/Archives/edgar/data/1713445/000171344526000062 redditannualreport2025 competitors",
+          "Reddit annual report 2025 competition \"Meta\" \"TikTok\"",
+          "Reddit 2025 10-k \"We compete\""
+        ],
+        "sources": null
+      },
+      {
+        "query": "Reddit 2025 10-k \"10%\" customer revenue other revenue",
+        "type": "search",
+        "queries": [
+          "Reddit 2025 10-k \"10%\" customer revenue other revenue",
+          "Reddit 2025 10-k AWS cloud infrastructure dependence",
+          "rddt-20260331 SEC 10-q Reddit",
+          "site:redditinc.com/news Reddit Anthropic lawsuit June 2025 official"
+        ],
+        "sources": null
+      }
+    ],
+    "consulted_sources": [
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1713445/000171344526000022/rddt-20251231.htm",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1713445/000171344526000069/rddt-20260331.htm",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://investor.redditinc.com/news-events/news-releases/news-details/2026/Reddit-Reports-Fourth-Quarter-and-Full-Year-2025-Results-Announces-1-Billion-Share-Repurchase-Program/default.aspx",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://investor.redditinc.com/news-events/news-releases/news-details/2026/Reddit-Reports-First-Quarter-2026-Results/default.aspx",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://redditinc.com/news/reddit-and-google-expand-partnership",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://redditinc.com/news/reddit-and-oai-partner",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://blog.google/company-news/inside-google/company-announcements/expanded-reddit-partnership/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://openai.com/index/openai-and-reddit-partnership/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://redditinc.com/news/introducing-reddit-answers",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://redditinc.com/news/bringing-reddit-to-more-people-around-the-world-machine-learning-powered-localization-and-translation-launching-in-more-than-35-new-countries",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://redditinc.com/news/now-in-beta-max-campaigns-for-ai-powered-ad-performance-and-unique-audience-insights",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://redditinc.com/news/live-from-cannes-lions-2025-introducing-reddit-community-intelligence",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://redditinc.com/news/how-were-keeping-reddit-real-and-safe-in-the-ai-era",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://redditinc.com/transparency",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://redditinc.com/news/robot-txt-update",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://redditinc.com/hubfs/Reddit%20Inc/Content/Reddit%20v.%20SerpApi.pdf",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://bitcap.com/en",
+        "type": "model_citation"
+      }
+    ],
+    "request_tags": [
+      "app:frontier-lab-intelligence",
+      "pipeline:investment-company-context",
+      "job:company-memo-pilot",
+      "scope:single-company",
+      "prompt:company-memo-pilot-v1",
+      "company:rddt",
+      "model:gpt-5.6-sol",
+      "reasoning:xhigh"
+    ]
+  }
+}

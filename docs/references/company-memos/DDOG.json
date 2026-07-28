@@ -1,0 +1,945 @@
+{
+  "schema_version": "company-memo-pilot-result-v1",
+  "company": {
+    "name": "Datadog",
+    "ticker": "DDOG"
+  },
+  "memo": {
+    "business_and_economics": {
+      "summary": "The company sells a multi-tenant SaaS platform to development, operations, security and business teams. Revenue is subscription-based, with primarily monthly or annual terms and many fees calculated from metered monthly usage. The durable model is land-and-expand: customers begin with selected workloads or products, then spend more as cloud resources, telemetry volume and attached modules increase. Large accounts dominate the economics: at 2025-12-31, about 4,310 customers with at least $100,000 of ARR represented roughly 90% of ARR; the customer count reached about 4,550 at 2026-03-31.",
+      "revenue_engines": [
+        {
+          "engine": "Metered observability consumption",
+          "who_pays": "Cloud-platform, SRE, DevOps and application teams monitoring infrastructure, applications, logs, traces, user experiences and related workloads.",
+          "economic_logic": "Billing units include monitored hosts, containers, logs, traces, metrics, tests and other product-specific usage. More production workloads and denser instrumentation can increase revenue, while telemetry optimization or cloud-spend reductions can reduce consumption.",
+          "sources": [
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1561550/000162828026008819/ddog-20251231.htm",
+              "claim_date": "2025-12-31"
+            },
+            {
+              "url": "https://docs.datadoghq.com/account_management/billing/pricing/",
+              "claim_date": null
+            }
+          ]
+        },
+        {
+          "engine": "Multi-product platform expansion",
+          "who_pays": "Existing customers' security, incident response, software-delivery, product, data and AI engineering teams.",
+          "economic_logic": "A shared data model and workflow support cross-selling additional modules into an installed observability account. Revenue growth depends on product attach, renewal and expansion exceeding churn and usage optimization.",
+          "sources": [
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1561550/000162828026008819/ddog-20251231.htm",
+              "claim_date": "2025-12-31"
+            },
+            {
+              "url": "https://investors.datadoghq.com/news-releases/news-release-details/datadog-announces-fourth-quarter-and-fiscal-year-2025-financial",
+              "claim_date": "2026-02-10"
+            }
+          ]
+        },
+        {
+          "engine": "Enterprise commitments and on-demand expansion",
+          "who_pays": "Large enterprises and rapidly scaling cloud-native or AI-native customers, generally through centralized platform, engineering or procurement organizations.",
+          "economic_logic": "Committed usage provides a revenue base, while workloads above commitments create on-demand revenue. Large deployments can expand rapidly but also create cohort concentration and quarter-to-quarter consumption volatility.",
+          "sources": [
+            {
+              "url": "https://docs.datadoghq.com/account_management/billing/pricing/",
+              "claim_date": null
+            },
+            {
+              "url": "https://investors.datadoghq.com/news-releases/news-release-details/datadog-announces-first-quarter-2026-financial-results",
+              "claim_date": "2026-03-31"
+            },
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1561550/000162828026008819/ddog-20251231.htm",
+              "claim_date": "2025-12-31"
+            }
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1561550/000162828026008819/ddog-20251231.htm",
+          "claim_date": "2025-12-31"
+        },
+        {
+          "url": "https://docs.datadoghq.com/account_management/billing/pricing/",
+          "claim_date": null
+        },
+        {
+          "url": "https://investors.datadoghq.com/news-releases/news-release-details/datadog-announces-first-quarter-2026-financial-results",
+          "claim_date": "2026-05-07"
+        }
+      ]
+    },
+    "operating_and_financial_drivers": [
+      {
+        "driver": "Cloud workload scale and telemetry density",
+        "why_it_matters": "Revenue rises or falls with monitored infrastructure, application activity and the volume of logs, traces, metrics and related data. Customer cloud optimization, sampling, retention changes and workload migrations can therefore affect consumption even when customer counts are stable.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "pricing",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://docs.datadoghq.com/account_management/billing/pricing/",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1561550/000162828026008819/ddog-20251231.htm",
+            "claim_date": "2025-12-31"
+          }
+        ]
+      },
+      {
+        "driver": "Product attach and platform consolidation",
+        "why_it_matters": "Expansion from an initial monitoring use case into security, software delivery, incident response, product analytics and AI observability raises revenue per customer and strengthens retention. Weak attach would leave growth more dependent on new logos and raw telemetry inflation.",
+        "financial_lines": [
+          "revenue",
+          "product_mix",
+          "gross_margin",
+          "cash_flow"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1561550/000162828026008819/ddog-20251231.htm",
+            "claim_date": "2025-12-31"
+          },
+          {
+            "url": "https://investors.datadoghq.com/news-releases/news-release-details/datadog-announces-fourth-quarter-and-fiscal-year-2025-financial",
+            "claim_date": "2026-02-10"
+          }
+        ]
+      },
+      {
+        "driver": "Large-customer acquisition, retention and concentration",
+        "why_it_matters": "Customers above $100,000 of ARR represented roughly 90% of ARR at 2025 year-end, making enterprise wins, renewals and expansions central to growth. Rapidly scaling AI-native customers can provide exceptional upside but can also create concentration and difficult comparisons if their usage normalizes.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "working_capital",
+          "cash_flow",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1561550/000162828026008819/ddog-20251231.htm",
+            "claim_date": "2025-12-31"
+          },
+          {
+            "url": "https://investors.datadoghq.com/news-releases/news-release-details/datadog-announces-first-quarter-2026-financial-results",
+            "claim_date": "2026-03-31"
+          }
+        ]
+      },
+      {
+        "driver": "Telemetry and inference unit economics",
+        "why_it_matters": "Cost of revenue depends materially on third-party cloud infrastructure used to ingest, process, store and query telemetry. In Q1 2026, gross margin was flat year over year because revenue and cloud-infrastructure costs grew proportionally. AI inference and richer traces add another cost layer that pricing must recover.",
+        "financial_lines": [
+          "gross_margin",
+          "operating_cost",
+          "cash_flow",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1561550/000162828026032328/ddog-20260331.htm",
+            "claim_date": "2026-03-31"
+          },
+          {
+            "url": "https://docs.datadoghq.com/account_management/billing/pricing/",
+            "claim_date": null
+          }
+        ]
+      },
+      {
+        "driver": "Platform reliability, security, compliance and integration coverage",
+        "why_it_matters": "The platform sits in critical production and security workflows. Outages, breaches, inaccurate automated actions or inadequate compliance can slow enterprise adoption and increase liability, while broad integrations and certifications reduce adoption friction in complex environments.",
+        "financial_lines": [
+          "revenue",
+          "operating_cost",
+          "cash_flow",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1561550/000162828026008819/ddog-20251231.htm",
+            "claim_date": "2025-12-31"
+          },
+          {
+            "url": "https://investors.datadoghq.com/news-releases/news-release-details/datadog-announces-first-quarter-2026-financial-results",
+            "claim_date": "2026-05-07"
+          },
+          {
+            "url": "https://www.datadoghq.com/product/ai/bits-ai-agents/",
+            "claim_date": null
+          }
+        ]
+      }
+    ],
+    "ecosystem": [
+      {
+        "relationship": "customer_or_end_market",
+        "entities_or_group": "Cloud-native and AI-native companies, large enterprises and public-sector organizations; primary users include development, operations, security, data and business teams.",
+        "why_it_matters": "Demand depends on cloud migration, software complexity, production AI adoption and customers' willingness to consolidate tools. Large enterprises provide most ARR, while AI-native customers can produce unusually rapid consumption growth and concentration.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1561550/000162828026008819/ddog-20251231.htm",
+            "claim_date": "2025-12-31"
+          },
+          {
+            "url": "https://investors.datadoghq.com/news-releases/news-release-details/datadog-announces-first-quarter-2026-financial-results",
+            "claim_date": "2026-05-07"
+          }
+        ]
+      },
+      {
+        "relationship": "infrastructure_dependency",
+        "entities_or_group": "Third-party cloud infrastructure providers, including AWS.",
+        "why_it_matters": "Cloud-provider availability, pricing and capacity affect service reliability and gross margin. The expanded AWS collaboration also supports integrations and joint go-to-market activity, creating both strategic value and dependency.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1561550/000162828026032328/ddog-20260331.htm",
+            "claim_date": "2026-03-31"
+          },
+          {
+            "url": "https://investors.datadoghq.com/news-releases/news-release-details/datadog-announces-fourth-quarter-and-fiscal-year-2025-financial",
+            "claim_date": "2026-02-10"
+          }
+        ]
+      },
+      {
+        "relationship": "partner",
+        "entities_or_group": "Model providers, agent frameworks, AI coding tools and the OpenTelemetry ecosystem.",
+        "why_it_matters": "Native tracing, evaluation and agent interfaces reduce instrumentation friction and keep the platform relevant as engineers move into IDE, CLI and agent-driven workflows. Integration coverage must follow rapidly changing models and frameworks.",
+        "sources": [
+          {
+            "url": "https://www.datadoghq.com/blog/openai-agents-llm-observability/",
+            "claim_date": "2025-06-10"
+          },
+          {
+            "url": "https://www.datadoghq.com/about/latest-news/press-releases/datadog-launches-mcp-server/",
+            "claim_date": "2026-03-09"
+          },
+          {
+            "url": "https://www.datadoghq.com/blog/dash-2026-new-feature-roundup-observability/",
+            "claim_date": "2026-06-09"
+          }
+        ]
+      },
+      {
+        "relationship": "competitor",
+        "entities_or_group": "Hyperscaler-native monitoring products, independent observability and security platforms, and open-source monitoring stacks.",
+        "why_it_matters": "Competitors can bundle monitoring with infrastructure, undercut pricing, specialize in individual workflows or use open standards to reduce switching costs. The company must justify a paid unified platform through breadth, correlation, usability and automation.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1561550/000162828026008819/ddog-20251231.htm",
+            "claim_date": "2025-12-31"
+          },
+          {
+            "url": "https://www.datadoghq.com/blog/dash-2026-new-feature-roundup-observability/",
+            "claim_date": "2026-06-09"
+          }
+        ]
+      },
+      {
+        "relationship": "regulatory_dependency",
+        "entities_or_group": "Data privacy, cybersecurity, data-residency and government-cloud certification regimes.",
+        "why_it_matters": "Customers send sensitive operational and security data to the platform. Compliance requirements determine which workloads and geographies can be served and raise the importance of access controls, auditability, retention policies and regional hosting.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1561550/000162828026008819/ddog-20251231.htm",
+            "claim_date": "2025-12-31"
+          },
+          {
+            "url": "https://investors.datadoghq.com/news-releases/news-release-details/datadog-announces-first-quarter-2026-financial-results",
+            "claim_date": "2026-05-07"
+          }
+        ]
+      }
+    ],
+    "strategy_and_committed_actions": [
+      {
+        "action": "Pursue a dual AI strategy: provide observability and security for customers' AI systems while embedding AI throughout the platform.",
+        "investment_relevance": "This creates two potential growth routes—incremental telemetry from production AI and higher-value automation within existing workflows—but requires the company to keep pace with both model ecosystems and frontier-agent capabilities.",
+        "sources": [
+          {
+            "url": "https://www.datadoghq.com/blog/datadog-ai-innovation/",
+            "claim_date": "2025-12-02"
+          },
+          {
+            "url": "https://www.datadoghq.com/about/latest-news/press-releases/datadog-launches-100-plus-capabilities-to-help-customers-drive-autonomy-and-manage-growing-ai-and-security-complexity/",
+            "claim_date": "2026-06-09"
+          }
+        ]
+      },
+      {
+        "action": "Expand Bits from conversational access and investigation into code generation, security triage, remediation and customer-built agents.",
+        "investment_relevance": "Moving from dashboards and alerts toward completed work could support new monetization and stronger retention. It also increases execution risk around permissions, explainability, erroneous actions and liability.",
+        "sources": [
+          {
+            "url": "https://www.datadoghq.com/product/ai/bits-ai-agents/",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.datadoghq.com/about/latest-news/press-releases/datadog-launches-100-plus-capabilities-to-help-customers-drive-autonomy-and-manage-growing-ai-and-security-complexity/",
+            "claim_date": "2026-06-09"
+          }
+        ]
+      },
+      {
+        "action": "Expose real-time telemetry to external AI agents through MCP and related interfaces while supporting OpenTelemetry-native pipelines.",
+        "investment_relevance": "This can embed the data plane inside coding-agent and operational workflows even when users interact outside the company's interface. Open standards broaden distribution but also reduce instrumentation lock-in.",
+        "sources": [
+          {
+            "url": "https://www.datadoghq.com/about/latest-news/press-releases/datadog-launches-mcp-server/",
+            "claim_date": "2026-03-09"
+          },
+          {
+            "url": "https://www.datadoghq.com/blog/dash-2026-new-feature-roundup-observability/",
+            "claim_date": "2026-06-09"
+          }
+        ]
+      },
+      {
+        "action": "Invest in domain-specialized AI research, time-series models and agentic post-training, including the acquisition of Adaptive ML.",
+        "investment_relevance": "First-party models could improve detection, forecasting and autonomous operations while reducing dependence on generic frontier models. Financial value requires research advances to become differentiated, reliable products with acceptable inference costs.",
+        "sources": [
+          {
+            "url": "https://www.datadoghq.com/blog/datadog-ai-innovation/",
+            "claim_date": "2025-12-02"
+          },
+          {
+            "url": "https://www.datadoghq.com/about/latest-news/press-releases/datadog-acquires-adaptive-ml-to-accelerate-its-investment-in-ai-research-and-development/",
+            "claim_date": "2026-06-30"
+          }
+        ]
+      }
+    ],
+    "frontier_ai_transmission_paths": [
+      {
+        "development": "Production adoption of multi-model, tool-using AI agents increases.",
+        "company_exposure": "Agent and LLM observability can capture model generations, tool calls, handoffs, guardrail checks, errors, latency, token usage, cost and quality or safety evaluations alongside application telemetry.",
+        "affected_driver": "AI-workload telemetry volume and attach of agent observability, GPU monitoring and security products.",
+        "financial_consequence": "Potentially higher consumption revenue and a richer product mix; gross-margin upside occurs only if pricing exceeds incremental processing and storage costs.",
+        "direction": "upside",
+        "materiality_condition": "The effect becomes material if monitored production AI workloads generate incremental paid usage and cross-sell rather than merely relabeling existing APM traffic, and if unit revenue remains above cloud-infrastructure costs.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "supports",
+        "watchpoints": [
+          "Paid adoption and usage of Agent or LLM Observability",
+          "AI-related telemetry growth relative to overall usage",
+          "Coverage of leading model providers and agent frameworks",
+          "Token-cost, latency, quality and safety evaluation usage",
+          "AI product gross-margin or pricing disclosures"
+        ],
+        "sources": [
+          {
+            "url": "https://www.datadoghq.com/blog/openai-agents-llm-observability/",
+            "claim_date": "2025-06-10"
+          },
+          {
+            "url": "https://investors.datadoghq.com/news-releases/news-release-details/datadog-announces-first-quarter-2026-financial-results",
+            "claim_date": "2026-05-07"
+          }
+        ]
+      },
+      {
+        "development": "Frontier models improve at reasoning, long-context analysis, tool use and code generation.",
+        "company_exposure": "Bits agents use unified telemetry and organizational context to investigate incidents, triage security signals, generate fixes and execute governed remediation workflows.",
+        "affected_driver": "AI-product attach, customer retention, engineering productivity, inference cost and operational-risk controls.",
+        "financial_consequence": "Successful agents could create new revenue and deepen platform dependence; unreliable or over-privileged actions could cause support costs, incidents, liability and adoption delays.",
+        "direction": "mixed",
+        "materiality_condition": "The effect becomes material only if paid production usage is broad and repeated, measurable resolution gains persist, privileged actions have low incident rates, and incremental inference and engineering costs remain below revenue.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "mixed",
+        "watchpoints": [
+          "Conversion from preview or trial to paid usage",
+          "Mean-time-to-diagnosis and mean-time-to-resolution improvements",
+          "Human review and recommendation-acceptance rates",
+          "Permissions, audit logs, rollback and approval controls",
+          "Customer or platform incidents caused by automated actions"
+        ],
+        "sources": [
+          {
+            "url": "https://www.datadoghq.com/product/ai/bits-ai-agents/",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.datadoghq.com/about/latest-news/press-releases/datadog-launches-100-plus-capabilities-to-help-customers-drive-autonomy-and-manage-growing-ai-and-security-complexity/",
+            "claim_date": "2026-06-09"
+          },
+          {
+            "url": "https://www.datadoghq.com/about/latest-news/press-releases/datadog-acquires-adaptive-ml-to-accelerate-its-investment-in-ai-research-and-development/",
+            "claim_date": "2026-06-30"
+          }
+        ]
+      },
+      {
+        "development": "AI coding agents increase software-change frequency and move troubleshooting into IDE and CLI workflows.",
+        "company_exposure": "The MCP interface supplies live logs, metrics, traces and incidents to external coding agents, while faster releases create additional monitoring, testing, incident and security requirements.",
+        "affected_driver": "Telemetry consumption, developer-workflow penetration, integration usage and platform retention.",
+        "financial_consequence": "More releases and embedded access can increase usage and cross-sell, provided external agents keep the platform as their trusted production-data layer.",
+        "direction": "upside",
+        "materiality_condition": "The effect becomes material if AI-assisted development produces sustained incremental paid telemetry and module adoption without the user interface or data plane being displaced by bundled alternatives.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "supports",
+        "watchpoints": [
+          "MCP-connected organizations and active agents",
+          "Telemetry queries or investigations initiated through agents",
+          "Incremental APM, testing, security and incident-response adoption",
+          "Customer evidence linking AI coding to higher deployment frequency",
+          "Pricing or limits for agent-driven data access"
+        ],
+        "sources": [
+          {
+            "url": "https://www.datadoghq.com/about/latest-news/press-releases/datadog-launches-mcp-server/",
+            "claim_date": "2026-03-09"
+          },
+          {
+            "url": "https://www.datadoghq.com/about/latest-news/press-releases/datadog-launches-100-plus-capabilities-to-help-customers-drive-autonomy-and-manage-growing-ai-and-security-complexity/",
+            "claim_date": "2026-06-09"
+          }
+        ]
+      },
+      {
+        "development": "Hyperscalers, model providers and AI development platforms bundle observability while open standards make telemetry more portable.",
+        "company_exposure": "The company competes against cloud-native, commercial and open-source tools and is making its own platform OpenTelemetry-native.",
+        "affected_driver": "Win rates, price realization, retention, sales efficiency and the share of customer telemetry retained on the platform.",
+        "financial_consequence": "Adequate lower-cost bundled or open alternatives could pressure revenue growth, pricing and sales efficiency; interoperability can partly offset this by lowering migration friction into the platform.",
+        "direction": "downside",
+        "materiality_condition": "The effect becomes material if customers can replace the unified platform at acceptable operational quality and materially lower total cost, producing sustained losses or weaker expansion.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "challenges",
+        "watchpoints": [
+          "Competitive replacement wins and losses",
+          "Price concessions and consumption-optimization pressure",
+          "Share of ingestion through OpenTelemetry pipelines",
+          "Hyperscaler and model-vendor observability launches",
+          "Retention and expansion among cost-sensitive customers"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1561550/000162828026008819/ddog-20251231.htm",
+            "claim_date": "2025-12-31"
+          },
+          {
+            "url": "https://www.datadoghq.com/blog/dash-2026-new-feature-roundup-observability/",
+            "claim_date": "2026-06-09"
+          }
+        ]
+      },
+      {
+        "development": "Longer-context and multimodal agents generate richer traces and more inference, while model-efficiency advances lower compute cost per task.",
+        "company_exposure": "The platform must process and store growing AI telemetry and run its own specialized agents and models on third-party cloud infrastructure.",
+        "affected_driver": "Cost of revenue, AI-product pricing, retention policies, model selection and gross margin.",
+        "financial_consequence": "Higher data and inference intensity can compress gross margin; smaller or more efficient models, selective retention and better pricing can expand it.",
+        "direction": "mixed",
+        "materiality_condition": "The effect becomes material if AI-related cloud and inference costs grow materially faster or slower than monetized AI usage for multiple reporting periods.",
+        "time_horizon": "near_term",
+        "thesis_effect": "mixed",
+        "watchpoints": [
+          "Third-party cloud-infrastructure cost growth",
+          "GAAP and non-GAAP gross-margin trends",
+          "AI telemetry retention, sampling and pricing changes",
+          "Use of smaller first-party or domain-specialized models",
+          "Inference cost per investigation or remediation"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1561550/000162828026032328/ddog-20260331.htm",
+            "claim_date": "2026-03-31"
+          },
+          {
+            "url": "https://www.datadoghq.com/about/latest-news/press-releases/datadog-acquires-adaptive-ml-to-accelerate-its-investment-in-ai-research-and-development/",
+            "claim_date": "2026-06-30"
+          }
+        ]
+      }
+    ],
+    "investment_thesis_and_tests": {
+      "public_bit_view_status": "commentary",
+      "attributable_public_thesis": "A BIT-hosted podcast summary dated 2025-11-06 says Jan Beckers discussed it, alongside Snowflake, as one of the second- or third-line winners of the AI cycle and framed selloffs as potential entry opportunities. This is positive company-specific commentary, but it is not a published operating, financial or valuation thesis.",
+      "what_would_support_it": [
+        "Production AI adoption creates incremental paid observability and security consumption rather than only shifting existing workloads.",
+        "Multi-product expansion and large-customer growth remain strong without excessive dependence on one AI-native customer or cohort.",
+        "Bits and agent-observability products achieve paid adoption and measurable customer outcomes without reducing gross margin or creating material operational incidents."
+      ],
+      "what_would_challenge_it": [
+        "AI-driven coding pressure on conventional software business models grows faster than new observability, security and agent revenue opportunities.",
+        "Hyperscaler, model-vendor or open-source bundling weakens pricing, expansion or competitive win rates.",
+        "AI-native customer concentration, telemetry costs or agent reliability problems make growth less durable than the positive commentary implies."
+      ],
+      "sources": [
+        {
+          "url": "https://bitcap.com/en/news/warum-fondsmanager-jan-beckers-keine-gruende-fuer-eine-ki-blase-sieht",
+          "claim_date": "2025-11-06"
+        },
+        {
+          "url": "https://bitcap.com/en/news/international-leader-schweiz-entre-disruption-et-rejet-ce-que-la-crise-du-logiciel-revele-sur-le-cycle-dinvestissement-dans-lia",
+          "claim_date": "2026-03-11"
+        },
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1561550/000162828026008819/ddog-20251231.htm",
+          "claim_date": "2025-12-31"
+        },
+        {
+          "url": "https://www.datadoghq.com/blog/datadog-ai-innovation/",
+          "claim_date": "2025-12-02"
+        }
+      ]
+    },
+    "uncertainties_and_research_triggers": [
+      {
+        "uncertainty": "AI products are not separately disclosed as revenue, ARR or paid-customer cohorts.",
+        "why_it_matters": "Product launches do not establish financial materiality. Agent observability, Bits and MCP could be strategic features, paid products or adoption aids with very different economics.",
+        "next_research_trigger": "Inspect future earnings materials, pricing pages and investor presentations for paid usage, ARR, customer counts, attach rates or revenue attributed to AI observability and Bits agents.",
+        "sources": [
+          {
+            "url": "https://www.datadoghq.com/product/ai/bits-ai-agents/",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.datadoghq.com/about/latest-news/press-releases/datadog-launches-mcp-server/",
+            "claim_date": "2026-03-09"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1561550/000162828026008819/ddog-20251231.htm",
+            "claim_date": "2025-12-31"
+          }
+        ]
+      },
+      {
+        "uncertainty": "The durability and concentration of AI-native customer growth are unclear.",
+        "why_it_matters": "A small number of rapidly scaling customers can materially accelerate reported growth but may create volatility if usage normalizes, customers internalize tooling or model economics change.",
+        "next_research_trigger": "Review subsequent filings and calls for customer-concentration disclosures, growth excluding the largest customer or AI-native cohort, and changes in net retention or committed usage.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1561550/000162828026008819/ddog-20251231.htm",
+            "claim_date": "2025-12-31"
+          },
+          {
+            "url": "https://investors.datadoghq.com/news-releases/news-release-details/datadog-announces-first-quarter-2026-financial-results",
+            "claim_date": "2026-03-31"
+          }
+        ]
+      },
+      {
+        "uncertainty": "The unit economics of high-volume AI telemetry and first-party agent inference are not disclosed.",
+        "why_it_matters": "Revenue growth can be offset if traces, evaluations, GPU data and agent inference consume disproportionate cloud resources.",
+        "next_research_trigger": "Track gross margin, third-party cloud-infrastructure costs, AI-product pricing and any disclosure on model selection, retention, sampling or inference efficiency.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1561550/000162828026032328/ddog-20260331.htm",
+            "claim_date": "2026-03-31"
+          },
+          {
+            "url": "https://docs.datadoghq.com/account_management/billing/pricing/",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.datadoghq.com/about/latest-news/press-releases/datadog-acquires-adaptive-ml-to-accelerate-its-investment-in-ai-research-and-development/",
+            "claim_date": "2026-06-30"
+          }
+        ]
+      },
+      {
+        "uncertainty": "Autonomous remediation safety and buyer willingness to delegate privileged actions remain unproven at scale.",
+        "why_it_matters": "Incorrect code, security verdicts or production changes could create incidents and liability, limiting adoption even if investigation quality is high.",
+        "next_research_trigger": "Inspect general-availability terms, permission scopes, approval and rollback controls, audit trails, human-review rates and any disclosed customer or platform incidents.",
+        "sources": [
+          {
+            "url": "https://www.datadoghq.com/product/ai/bits-ai-agents/",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.datadoghq.com/about/latest-news/press-releases/datadog-launches-100-plus-capabilities-to-help-customers-drive-autonomy-and-manage-growing-ai-and-security-complexity/",
+            "claim_date": "2026-06-09"
+          }
+        ]
+      },
+      {
+        "uncertainty": "The boundary between distribution through open standards and commoditization by open or bundled alternatives is unresolved.",
+        "why_it_matters": "OpenTelemetry and agent interfaces can expand reach, but they can also reduce switching costs and move user interaction to third-party agents or hyperscaler tools.",
+        "next_research_trigger": "Monitor OpenTelemetry-based migrations, competitive replacement commentary, MCP usage, price realization and new bundled observability offerings from cloud, model and coding-agent vendors.",
+        "sources": [
+          {
+            "url": "https://www.datadoghq.com/blog/dash-2026-new-feature-roundup-observability/",
+            "claim_date": "2026-06-09"
+          },
+          {
+            "url": "https://www.datadoghq.com/about/latest-news/press-releases/datadog-launches-mcp-server/",
+            "claim_date": "2026-03-09"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1561550/000162828026008819/ddog-20251231.htm",
+            "claim_date": "2025-12-31"
+          }
+        ]
+      }
+    ],
+    "source_ledger": [
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1561550/000162828026008819/ddog-20251231.htm",
+        "title": "FY2025 Form 10-K",
+        "publisher": "U.S. Securities and Exchange Commission",
+        "published_at": "2026-02-18",
+        "source_type": "regulator_primary"
+      },
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1561550/000162828026032328/ddog-20260331.htm",
+        "title": "Q1 FY2026 Form 10-Q",
+        "publisher": "U.S. Securities and Exchange Commission",
+        "published_at": "2026-05-07",
+        "source_type": "regulator_primary"
+      },
+      {
+        "url": "https://investors.datadoghq.com/news-releases/news-release-details/datadog-announces-fourth-quarter-and-fiscal-year-2025-financial",
+        "title": "Fourth-Quarter and Fiscal-Year 2025 Results",
+        "publisher": "Company investor relations",
+        "published_at": "2026-02-10",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://investors.datadoghq.com/news-releases/news-release-details/datadog-announces-first-quarter-2026-financial-results",
+        "title": "First-Quarter 2026 Results",
+        "publisher": "Company investor relations",
+        "published_at": "2026-05-07",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://docs.datadoghq.com/account_management/billing/pricing/",
+        "title": "Billing and Pricing Documentation",
+        "publisher": "Company documentation",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.datadoghq.com/blog/datadog-ai-innovation/",
+        "title": "Observability in the AI Age: Company Approach",
+        "publisher": "Company blog",
+        "published_at": "2025-12-02",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.datadoghq.com/product/ai/bits-ai-agents/",
+        "title": "Bits AI Agents Product Page",
+        "publisher": "Company product site",
+        "published_at": null,
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.datadoghq.com/blog/openai-agents-llm-observability/",
+        "title": "Monitoring OpenAI Agents with Agent Observability",
+        "publisher": "Company blog",
+        "published_at": "2025-06-10",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.datadoghq.com/about/latest-news/press-releases/datadog-launches-mcp-server/",
+        "title": "MCP Server Launch",
+        "publisher": "Company newsroom",
+        "published_at": "2026-03-09",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.datadoghq.com/about/latest-news/press-releases/datadog-launches-100-plus-capabilities-to-help-customers-drive-autonomy-and-manage-growing-ai-and-security-complexity/",
+        "title": "DASH 2026 Product and Autonomy Announcements",
+        "publisher": "Company newsroom",
+        "published_at": "2026-06-09",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.datadoghq.com/about/latest-news/press-releases/datadog-acquires-adaptive-ml-to-accelerate-its-investment-in-ai-research-and-development/",
+        "title": "Adaptive ML Acquisition",
+        "publisher": "Company newsroom",
+        "published_at": "2026-06-30",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://www.datadoghq.com/blog/dash-2026-new-feature-roundup-observability/",
+        "title": "DASH 2026 End-to-End Observability Announcements",
+        "publisher": "Company blog",
+        "published_at": "2026-06-09",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://bitcap.com/en/news/warum-fondsmanager-jan-beckers-keine-gruende-fuer-eine-ki-blase-sieht",
+        "title": "Why Fund Manager Jan Beckers Sees No Reasons for an AI Bubble",
+        "publisher": "BIT Capital",
+        "published_at": "2025-11-06",
+        "source_type": "bit_primary"
+      },
+      {
+        "url": "https://bitcap.com/en/news/international-leader-schweiz-entre-disruption-et-rejet-ce-que-la-crise-du-logiciel-revele-sur-le-cycle-dinvestissement-dans-lia",
+        "title": "Software Disruption and the AI Investment Cycle",
+        "publisher": "BIT Capital",
+        "published_at": "2026-03-11",
+        "source_type": "bit_primary"
+      }
+    ]
+  },
+  "provenance": {
+    "research_date": "2026-07-28",
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "xhigh",
+    "prompt_version": "company-memo-pilot-v1",
+    "prompt_cache_key": "fli:company-memo:company-memo-pilot-v1",
+    "response_id": "resp_jGwFre_GkzHlmYInyXaYENAAdLfVKBB4s-CJwbXJ6cQMV6uUJmUnWT4Psd0EZxohIlWLlberTXoBJOw1VVMWGUCQJblEmim56sy5ZkGP12ANarrH1vvUS-dFH8B5bRgUycVJzhp-C4yHLsuTBDDe-Sbh7EjvYjdM4taGoVonnB5T6iCHzUWseo8MTZHxgXuMxZapuDiSNfHX6wUCdcmRSfrknwA8nLMfIMm3EHI-IB08tgVYE2-MxevkD5R_0_65aTztvUdy8a23nzM5tXAJW2SpT0W_mD1tkL1d2OWjjc_YcsZRx7E7KQfQijlP1nyO21tGvTw6Oh4kqvLD7rFI07m7D12RXACPeicMgjwEZVoOeAD0gcJtxp9mICROb6tmhanYEpeZLxNoX3p1I0XLJvu3aCff8a3rw3mcw3l1D1H8XCRR3CSUzinzd8aFk79hxf3uNoVsXDqKy7ciNmC0izSn",
+    "response_model": "gpt-5.6-sol",
+    "input_tokens": 108023,
+    "cached_tokens": 0,
+    "cache_write_tokens": 0,
+    "output_tokens": 69052,
+    "reasoning_tokens": 21519,
+    "reported_cost_usd": null,
+    "web_actions": [
+      {
+        "query": "site:investors.datadoghq.com Datadog 2025 annual report revenue customers products 2026",
+        "type": "search",
+        "queries": [
+          "site:investors.datadoghq.com Datadog 2025 annual report revenue customers products 2026",
+          "site:datadoghq.com/product/ai Datadog LLM Observability Agent Observability official",
+          "site:bitcap.com Datadog BIT Capital",
+          "site:datadoghq.com blog OpenAI Datadog partnership AI observability official"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.datadoghq.com/product/ai/bits-agent-builder/"
+      },
+      {
+        "query": "0001628280-26-008819 Datadog 10-k sec 2025 html",
+        "type": "search",
+        "queries": [
+          "0001628280-26-008819 Datadog 10-k sec 2025 html",
+          "site:sec.gov/Archives/edgar/data/1561550 2026 Datadog 10-k 2025",
+          "Datadog 2026 investor day presentation May 2026 PDF customers products gross margin infrastructure costs",
+          "Datadog Q1 2026 earnings results customers AI 2026 investor presentation"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://investors.datadoghq.com/events/event-details/investor-day-2026"
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/1561550/000162828026008819/ddog-20251231.htm"
+      },
+      {
+        "pattern": "substantially all of our revenue",
+        "type": "find_in_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/1561550/000162828026028194/dd_annualxreportx2025.pdf"
+      },
+      {
+        "query": "site:sec.gov/Archives/edgar/data/1561550/000162828026008819/ddog-20251231.htm Datadog revenue customers pricing subscription usage 2025",
+        "type": "search",
+        "queries": [
+          "site:sec.gov/Archives/edgar/data/1561550/000162828026008819/ddog-20251231.htm Datadog revenue customers pricing subscription usage 2025",
+          "site:sec.gov/Archives/edgar/data/1561550/000162828026008819/ddog-20251231.htm Datadog cost of revenue third-party cloud hosting 2025",
+          "site:sec.gov/Archives/edgar/data/1561550/000162828026008819/ddog-20251231.htm Datadog competition AWS Microsoft Google Dynatrace Splunk Elastic",
+          "site:sec.gov/Archives/edgar/data/1561550/000162828026008819/ddog-20251231.htm Datadog revenue product subscriptions committed usage billed monthly"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.sec.gov/ixviewer/doc/action?doc=%2FArchives%2Fedgar%2Fdata%2F1561550%2F000162828026008819%2Fddog-20251231.htm"
+      },
+      {
+        "type": "open_page",
+        "url": "https://companiesmarketcap.com/datadog/sec-reports-10k/0001628280-26-008819/"
+      },
+      {
+        "pattern": "usage-based",
+        "type": "find_in_page",
+        "url": "https://companiesmarketcap.com/datadog/sec-reports-10k/0001628280-26-008819/"
+      },
+      {},
+      {
+        "query": "Datadog 2025 10-K subscriptions revenue recognized ratably usage customers additional products cost third-party hosting",
+        "type": "search",
+        "queries": [
+          "Datadog 2025 10-K subscriptions revenue recognized ratably usage customers additional products cost third-party hosting",
+          "Datadog 2025 annual report customer subscriptions usage-based pricing cloud hosting costs",
+          "site:datadoghq.com/pricing Datadog pricing hosts logs APM security official",
+          "site:docs.datadoghq.com/account_management/billing Datadog billing usage official"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:sec.gov/Archives/edgar/data/1561550 Datadog 10-Q March 31 2026",
+        "type": "search",
+        "queries": [
+          "site:sec.gov/Archives/edgar/data/1561550 Datadog 10-Q March 31 2026",
+          "site:investors.datadoghq.com sec filing 10-q Datadog May 2026",
+          "Datadog Q1 2026 gross margin cloud hosting costs 10-q",
+          "Datadog Q1 2026 earnings call AI customers revenue usage optimization transcript official"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/1561550/000162828026032328/ddog-20260331.htm"
+      },
+      {
+        "pattern": "Our gross margin remained flat",
+        "type": "find_in_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/1561550/000162828026032328/ddog-20260331.htm"
+      },
+      {
+        "query": "site:datadoghq.com/about/latest-news/ 2026 Datadog DASH 100 capabilities autonomy AI security complexity",
+        "type": "search",
+        "queries": [
+          "site:datadoghq.com/about/latest-news/ 2026 Datadog DASH 100 capabilities autonomy AI security complexity",
+          "site:datadoghq.com/about/latest-news/ Datadog acquires Adaptive ML June 2026",
+          "site:datadoghq.com/about/latest-news/ Datadog Investor Day 2026 AI strategy platform",
+          "site:datadoghq.com/blog 2026 Datadog AI research Adaptive ML Toto agent observability"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:investors.datadoghq.com/static-files 14 of top 20 AI-native companies Datadog 2026 investor day",
+        "type": "search",
+        "queries": [
+          "site:investors.datadoghq.com/static-files 14 of top 20 AI-native companies Datadog 2026 investor day",
+          "site:datadoghq.com 14 of top 20 AI native companies customers Datadog",
+          "Datadog Investor Day 2026 14 top 20 AI native companies official PDF",
+          "Datadog 2025 10-K top 100 customers industries no customer 10 percent revenue"
+        ],
+        "sources": null
+      },
+      {
+        "query": "Datadog 2025 10-K competition cloud monitoring AWS Azure Google Dynatrace Elastic Splunk New Relic open source",
+        "type": "search",
+        "queries": [
+          "Datadog 2025 10-K competition cloud monitoring AWS Azure Google Dynatrace Elastic Splunk New Relic open source",
+          "site:sec.gov/Archives/edgar/data/1561550 Datadog competition Splunk Dynatrace New Relic Elastic 2026",
+          "Datadog annual report 2025 competitors open source cloud providers",
+          "Datadog 10-K 2025 third-party cloud infrastructure providers AWS dependence"
+        ],
+        "sources": null
+      },
+      {
+        "pattern": "with respect to Cloud monitoring",
+        "type": "find_in_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/1561550/000156155025000025/ddog-20241231.htm"
+      },
+      {
+        "query": "site:sec.gov/Archives/edgar/data/1561550/000162828026008819 \"seven percentage points\" \"AI-native cohort\"",
+        "type": "search",
+        "queries": [
+          "site:sec.gov/Archives/edgar/data/1561550/000162828026008819 \"seven percentage points\" \"AI-native cohort\"",
+          "site:sec.gov/Archives/edgar/data/1561550/000162828026008819 \"largest customer\" Datadog",
+          "\"represented approximately seven percentage points\" Datadog",
+          "\"larger customers in our AI-native cohort\" Datadog"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:investors.datadoghq.com \"84%\" customers \"two or more products\" 2025 Datadog",
+        "type": "search",
+        "queries": [
+          "site:investors.datadoghq.com \"84%\" customers \"two or more products\" 2025 Datadog",
+          "site:datadoghq.com \"55%\" \"four or more products\" Datadog 2025",
+          "Datadog 2025 84% 2+ products 55% 4+ official",
+          "site:sec.gov Datadog \"84%\" \"four or more products\""
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:bitcap.com/en/news Datadog",
+        "type": "search",
+        "queries": [
+          "site:bitcap.com/en/news Datadog",
+          "site:bitcap.com Datadog DDOG",
+          "site:bitcap.com/en \"Datadog\"",
+          "site:bitcap.com/en/news observability Datadog"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://bitcap.com/en/news/international-leader-schweiz-entre-disruption-et-rejet-ce-que-la-crise-du-logiciel-revele-sur-le-cycle-dinvestissement-dans-lia"
+      },
+      {
+        "pattern": "Datadog",
+        "type": "find_in_page",
+        "url": "https://bitcap.com/en/news/warum-fondsmanager-jan-beckers-keine-gruende-fuer-eine-ki-blase-sieht"
+      }
+    ],
+    "consulted_sources": [
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1561550/000162828026008819/ddog-20251231.htm",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1561550/000162828026032328/ddog-20260331.htm",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://investors.datadoghq.com/news-releases/news-release-details/datadog-announces-fourth-quarter-and-fiscal-year-2025-financial",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://investors.datadoghq.com/news-releases/news-release-details/datadog-announces-first-quarter-2026-financial-results",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://docs.datadoghq.com/account_management/billing/pricing/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.datadoghq.com/blog/datadog-ai-innovation/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.datadoghq.com/product/ai/bits-ai-agents/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.datadoghq.com/blog/openai-agents-llm-observability/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.datadoghq.com/about/latest-news/press-releases/datadog-launches-mcp-server/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.datadoghq.com/about/latest-news/press-releases/datadog-launches-100-plus-capabilities-to-help-customers-drive-autonomy-and-manage-growing-ai-and-security-complexity/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.datadoghq.com/about/latest-news/press-releases/datadog-acquires-adaptive-ml-to-accelerate-its-investment-in-ai-research-and-development/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://www.datadoghq.com/blog/dash-2026-new-feature-roundup-observability/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://bitcap.com/en/news/warum-fondsmanager-jan-beckers-keine-gruende-fuer-eine-ki-blase-sieht",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://bitcap.com/en/news/international-leader-schweiz-entre-disruption-et-rejet-ce-que-la-crise-du-logiciel-revele-sur-le-cycle-dinvestissement-dans-lia",
+        "type": "model_citation"
+      }
+    ],
+    "request_tags": [
+      "app:frontier-lab-intelligence",
+      "pipeline:investment-company-context",
+      "job:company-memo-pilot",
+      "scope:single-company",
+      "prompt:company-memo-pilot-v1",
+      "company:ddog",
+      "model:gpt-5.6-sol",
+      "reasoning:xhigh"
+    ]
+  }
+}

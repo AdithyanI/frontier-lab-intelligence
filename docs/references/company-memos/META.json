@@ -1,0 +1,1078 @@
+{
+  "schema_version": "company-memo-pilot-result-v1",
+  "company": {
+    "name": "Meta",
+    "ticker": "META"
+  },
+  "memo": {
+    "business_and_economics": {
+      "summary": "Family of Apps converts user and creator activity across Facebook, Instagram, Messenger, WhatsApp, Threads, and related services into advertising inventory and business interactions. Reality Labs develops immersive hardware, software, and content. Advertising dominates the economics: 2025 revenue was $200.97 billion, with full-year ad impressions up 12% and average price per ad up 9%. That cash engine funds an increasingly infrastructure-intensive AI and wearables strategy; capital expenditures including finance-lease principal were $72.22 billion in 2025 and $19.84 billion in Q1 2026.",
+      "revenue_engines": [
+        {
+          "engine": "Auction-based personalized advertising across Family of Apps",
+          "who_pays": "Large brands, agencies, small businesses, app developers, merchants, and other advertisers.",
+          "economic_logic": "Revenue is principally a function of ad impressions and average price per ad. Engagement and ad load determine available inventory; conversion performance, targeting, attribution, creative quality, advertiser demand, and auction competition influence bids and pricing.",
+          "sources": [
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026003942/meta-20251231.htm",
+              "claim_date": "2026-01-29"
+            },
+            {
+              "url": "https://investor.atmeta.com/investor-news/press-release-details/2026/Meta-Reports-Fourth-Quarter-and-Full-Year-2025-Results/default.aspx",
+              "claim_date": "2026-01-28"
+            },
+            {
+              "url": "https://investor.atmeta.com/investor-news/press-release-details/2026/Meta-Reports-First-Quarter-2026-Results/default.aspx",
+              "claim_date": "2026-04-29"
+            }
+          ]
+        },
+        {
+          "engine": "Paid business messaging and consumer subscriptions",
+          "who_pays": "Businesses purchasing messaging services and consumers purchasing verification or other subscription features.",
+          "economic_logic": "Revenue grows with the number of paid business conversations, participating businesses, subscriber count, and revenue per account. This is currently much smaller than advertising but provides a route to monetize messaging surfaces more directly.",
+          "sources": [
+            {
+              "url": "https://s21.q4cdn.com/399680738/files/doc_financials/2025/q4/META-Q4-2025-Prepared-Remarks.pdf",
+              "claim_date": "2026-01-28"
+            },
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026003942/meta-20251231.htm",
+              "claim_date": "2026-01-29"
+            }
+          ]
+        },
+        {
+          "engine": "Reality Labs hardware, software, and content",
+          "who_pays": "Consumers purchasing Quest devices and related software or content; AI-glasses economics also depend on arrangements with eyewear partners.",
+          "economic_logic": "Revenue depends on device volume, pricing and product mix, software or service attachment, and geographic distribution. Profitability additionally depends on hardware bill of materials, partner economics, research spending, and ecosystem scale.",
+          "sources": [
+            {
+              "url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026003942/meta-20251231.htm",
+              "claim_date": "2026-01-29"
+            },
+            {
+              "url": "https://about.fb.com/news/2026/06/meta-essilorluxottica-partner-launch-meta-glasses/",
+              "claim_date": "2026-06-23"
+            }
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026003942/meta-20251231.htm",
+          "claim_date": "2026-01-29"
+        },
+        {
+          "url": "https://investor.atmeta.com/investor-news/press-release-details/2026/Meta-Reports-Fourth-Quarter-and-Full-Year-2025-Results/default.aspx",
+          "claim_date": "2026-01-28"
+        },
+        {
+          "url": "https://investor.atmeta.com/investor-news/press-release-details/2026/Meta-Reports-First-Quarter-2026-Results/default.aspx",
+          "claim_date": "2026-04-29"
+        }
+      ]
+    },
+    "operating_and_financial_drivers": [
+      {
+        "driver": "User reach, time spent, content supply, and recommendation quality",
+        "why_it_matters": "More users and time spent create additional opportunities to show ads. AI ranking, translation, originality detection, and recommendation systems can expand relevant content supply, but low-quality synthetic content or excessive ad load can damage retention and trust.",
+        "financial_lines": [
+          "volume",
+          "revenue",
+          "product_mix",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://investor.atmeta.com/investor-news/press-release-details/2026/Meta-Reports-First-Quarter-2026-Results/default.aspx",
+            "claim_date": "2026-04-29"
+          },
+          {
+            "url": "https://about.fb.com/news/2026/01/2026-ai-drives-performance/",
+            "claim_date": "2026-01-28"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026003942/meta-20251231.htm",
+            "claim_date": "2026-01-29"
+          }
+        ]
+      },
+      {
+        "driver": "Advertiser outcomes and auction demand",
+        "why_it_matters": "Conversion lift, return on ad spend, creative quality, targeting, and measurement determine advertiser budgets and bids. Better outcomes can raise average price per ad and market share without requiring proportional increases in ad load.",
+        "financial_lines": [
+          "revenue",
+          "pricing",
+          "operating_cost",
+          "cash_flow"
+        ],
+        "sources": [
+          {
+            "url": "https://about.fb.com/news/2026/01/2026-ai-drives-performance/",
+            "claim_date": "2026-01-28"
+          },
+          {
+            "url": "https://s21.q4cdn.com/399680738/files/doc_financials/2025/q4/META-Q4-2025-Prepared-Remarks.pdf",
+            "claim_date": "2026-01-28"
+          },
+          {
+            "url": "https://investor.atmeta.com/investor-news/press-release-details/2026/Meta-Reports-Fourth-Quarter-and-Full-Year-2025-Results/default.aspx",
+            "claim_date": "2026-01-28"
+          }
+        ]
+      },
+      {
+        "driver": "AI compute capacity and unit economics",
+        "why_it_matters": "Training, recommendations, ad ranking, content generation, and assistant inference require large data-center, silicon, networking, and power investment. Utilization and performance per dollar or watt determine whether AI-linked revenue gains translate into operating profit and free cash flow rather than depreciation and infrastructure-cost pressure.",
+        "financial_lines": [
+          "capital_expenditure",
+          "operating_cost",
+          "cash_flow",
+          "balance_sheet",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://investor.atmeta.com/investor-news/press-release-details/2026/Meta-Reports-Fourth-Quarter-and-Full-Year-2025-Results/default.aspx",
+            "claim_date": "2026-01-28"
+          },
+          {
+            "url": "https://investor.atmeta.com/investor-news/press-release-details/2026/Meta-Reports-First-Quarter-2026-Results/default.aspx",
+            "claim_date": "2026-04-29"
+          },
+          {
+            "url": "https://about.fb.com/news/2026/03/expanding-metas-custom-silicon-to-power-our-ai-workloads/",
+            "claim_date": "2026-03-11"
+          },
+          {
+            "url": "https://about.fb.com/news/2026/02/meta-amd-partner-longterm-ai-infrastructure-agreement/",
+            "claim_date": "2026-02-24"
+          }
+        ]
+      },
+      {
+        "driver": "AI-glasses and Reality Labs adoption economics",
+        "why_it_matters": "Daily use, device shipments, geographic expansion, pricing, service attachment, and partner execution govern the revenue opportunity. Hardware costs, product-development spending, and privacy acceptance determine whether adoption can narrow Reality Labs losses.",
+        "financial_lines": [
+          "revenue",
+          "volume",
+          "pricing",
+          "product_mix",
+          "gross_margin",
+          "operating_cost",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026003942/meta-20251231.htm",
+            "claim_date": "2026-01-29"
+          },
+          {
+            "url": "https://about.fb.com/news/2026/06/meta-essilorluxottica-partner-launch-meta-glasses/",
+            "claim_date": "2026-06-23"
+          },
+          {
+            "url": "https://about.fb.com/news/2026/07/metas-ai-glasses-your-questions-answered/",
+            "claim_date": "2026-07-07"
+          }
+        ]
+      },
+      {
+        "driver": "Data access, app-platform rules, and regulation of personalization and recommender design",
+        "why_it_matters": "Mobile-platform privacy rules and government requirements can limit cross-app measurement, data combination, personalized advertising, and engagement features. Compliance can reduce monetization, require product redesign, add operating cost, or create fines and litigation exposure.",
+        "financial_lines": [
+          "revenue",
+          "pricing",
+          "operating_cost",
+          "risk"
+        ],
+        "sources": [
+          {
+            "url": "https://developer.apple.com/app-store/user-privacy-and-data-use/",
+            "claim_date": null
+          },
+          {
+            "url": "https://digital-markets-act.ec.europa.eu/meta-commits-give-eu-users-choice-personalised-ads-under-digital-markets-act-2025-12-08_en",
+            "claim_date": "2025-12-08"
+          },
+          {
+            "url": "https://ec.europa.eu/commission/presscorner/api/files/document/print/en/ip_26_1579/IP_26_1579_EN.pdf",
+            "claim_date": "2026-07-10"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026003942/meta-20251231.htm",
+            "claim_date": "2026-01-29"
+          }
+        ]
+      }
+    ],
+    "ecosystem": [
+      {
+        "relationship": "customer_or_end_market",
+        "entities_or_group": "Advertisers, merchants, app developers, business-messaging customers, consumers, users, and creators",
+        "why_it_matters": "Advertisers fund the core business, while users and creators supply attention and content. Business adoption and consumer engagement jointly determine impressions, auction demand, messaging volume, and subscription or hardware opportunities.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026003942/meta-20251231.htm",
+            "claim_date": "2026-01-29"
+          },
+          {
+            "url": "https://s21.q4cdn.com/399680738/files/doc_financials/2025/q4/META-Q4-2025-Prepared-Remarks.pdf",
+            "claim_date": "2026-01-28"
+          }
+        ]
+      },
+      {
+        "relationship": "infrastructure_dependency",
+        "entities_or_group": "Apple and Google mobile operating systems, app stores, privacy frameworks, and device distribution",
+        "why_it_matters": "Access to mobile users and advertising-measurement signals depends partly on policies controlled by external platform owners. Apple's ATT framework requires permission for cross-company tracking, making first-party data and privacy-preserving optimization strategically important.",
+        "sources": [
+          {
+            "url": "https://developer.apple.com/app-store/user-privacy-and-data-use/",
+            "claim_date": null
+          },
+          {
+            "url": "https://bitcap.com/en/news/ki-roi-research-memo-ist-es-das-alles-wert-2",
+            "claim_date": "2024-10-15"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026003942/meta-20251231.htm",
+            "claim_date": "2026-01-29"
+          }
+        ]
+      },
+      {
+        "relationship": "supplier",
+        "entities_or_group": "AMD and other accelerator, CPU, networking, data-center, and power suppliers; internal MTIA silicon complements external supply",
+        "why_it_matters": "Frontier-model capacity, deployment timing, energy efficiency, and capital cost depend on component availability and supplier roadmaps. A diversified portfolio and custom silicon can reduce bottlenecks but create execution and commitment risk.",
+        "sources": [
+          {
+            "url": "https://about.fb.com/news/2026/02/meta-amd-partner-longterm-ai-infrastructure-agreement/",
+            "claim_date": "2026-02-24"
+          },
+          {
+            "url": "https://about.fb.com/news/2026/03/expanding-metas-custom-silicon-to-power-our-ai-workloads/",
+            "claim_date": "2026-03-11"
+          }
+        ]
+      },
+      {
+        "relationship": "partner",
+        "entities_or_group": "EssilorLuxottica",
+        "why_it_matters": "Eyewear design, manufacturing, brands, prescription support, retail distribution, and international expansion are central to turning AI glasses from a technology product into a mass-market consumer category.",
+        "sources": [
+          {
+            "url": "https://about.fb.com/news/2026/06/meta-essilorluxottica-partner-launch-meta-glasses/",
+            "claim_date": "2026-06-23"
+          },
+          {
+            "url": "https://about.fb.com/news/2026/07/metas-ai-glasses-your-questions-answered/",
+            "claim_date": "2026-07-07"
+          }
+        ]
+      },
+      {
+        "relationship": "competitor",
+        "entities_or_group": "TikTok and other social, video, messaging, advertising, creator, and AI-assistant platforms",
+        "why_it_matters": "These services compete for user time, creator output, advertiser budgets, talent, and AI distribution. The annual report specifically identifies TikTok as having reduced engagement with some products and services.",
+        "sources": [
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026003942/meta-20251231.htm",
+            "claim_date": "2026-01-29"
+          }
+        ]
+      },
+      {
+        "relationship": "regulatory_dependency",
+        "entities_or_group": "European Commission and other privacy, competition, content-safety, consumer-protection, and youth-safety authorities",
+        "why_it_matters": "Regulators can constrain personalized advertising and recommender-system design. The EU has required a less-personalized advertising choice and, as of July 10, 2026, preliminarily found aspects of Facebook and Instagram's engagement design non-compliant with the Digital Services Act.",
+        "sources": [
+          {
+            "url": "https://digital-markets-act.ec.europa.eu/meta-commits-give-eu-users-choice-personalised-ads-under-digital-markets-act-2025-12-08_en",
+            "claim_date": "2025-12-08"
+          },
+          {
+            "url": "https://ec.europa.eu/commission/presscorner/api/files/document/print/en/ip_26_1579/IP_26_1579_EN.pdf",
+            "claim_date": "2026-07-10"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026003942/meta-20251231.htm",
+            "claim_date": "2026-01-29"
+          }
+        ]
+      }
+    ],
+    "strategy_and_committed_actions": [
+      {
+        "action": "Continue applying larger AI systems to recommendations, ad ranking, campaign automation, creative generation, and attribution.",
+        "investment_relevance": "This is the most direct path from AI capability to current revenue. Management has reported engagement lifts from ranking improvements, large-scale adoption of generative ad tools, and improved incremental-conversion measurement.",
+        "sources": [
+          {
+            "url": "https://about.fb.com/news/2026/01/2026-ai-drives-performance/",
+            "claim_date": "2026-01-28"
+          },
+          {
+            "url": "https://about.fb.com/news/2026/03/expanding-metas-custom-silicon-to-power-our-ai-workloads/",
+            "claim_date": "2026-03-11"
+          }
+        ]
+      },
+      {
+        "action": "Develop a personal, increasingly agentic AI assistant capable of planning, research, creation, and acting through connected applications.",
+        "investment_relevance": "The assistant could deepen engagement and open commerce or business-messaging revenue, but current public evidence emphasizes capability and distribution rather than a mature monetization model.",
+        "sources": [
+          {
+            "url": "https://about.fb.com/news/2026/07/meta-ai-muse-spark-doesnt-just-think-it-acts/",
+            "claim_date": "2026-07-24"
+          },
+          {
+            "url": "https://investor.atmeta.com/investor-news/press-release-details/2026/Meta-Reports-First-Quarter-2026-Results/default.aspx",
+            "claim_date": "2026-04-29"
+          }
+        ]
+      },
+      {
+        "action": "Scale and diversify AI infrastructure through external accelerators and an accelerated internal MTIA roadmap.",
+        "investment_relevance": "The company committed to an AMD agreement supporting up to 6GW of GPUs and plans four new MTIA generations within two years. Execution affects capacity availability, cost per inference, capital intensity, and infrastructure resilience.",
+        "sources": [
+          {
+            "url": "https://about.fb.com/news/2026/02/meta-amd-partner-longterm-ai-infrastructure-agreement/",
+            "claim_date": "2026-02-24"
+          },
+          {
+            "url": "https://about.fb.com/news/2026/03/expanding-metas-custom-silicon-to-power-our-ai-workloads/",
+            "claim_date": "2026-03-11"
+          },
+          {
+            "url": "https://investor.atmeta.com/investor-news/press-release-details/2026/Meta-Reports-First-Quarter-2026-Results/default.aspx",
+            "claim_date": "2026-04-29"
+          }
+        ]
+      },
+      {
+        "action": "Expand AI glasses with EssilorLuxottica across styles, prescriptions, features, and geographies.",
+        "investment_relevance": "AI glasses provide a potential new computing interface and assistant-distribution surface. Material financial relevance requires sustained hardware demand, favorable partner economics, service attachment, and eventual improvement in Reality Labs profitability.",
+        "sources": [
+          {
+            "url": "https://about.fb.com/news/2026/06/meta-essilorluxottica-partner-launch-meta-glasses/",
+            "claim_date": "2026-06-23"
+          },
+          {
+            "url": "https://about.fb.com/news/2026/07/metas-ai-glasses-your-questions-answered/",
+            "claim_date": "2026-07-07"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026003942/meta-20251231.htm",
+            "claim_date": "2026-01-29"
+          }
+        ]
+      }
+    ],
+    "frontier_ai_transmission_paths": [
+      {
+        "development": "More capable multimodal recommendation, translation, and content-understanding models",
+        "company_exposure": "Feeds, Reels, Threads, and other discovery surfaces rely on AI systems to match users with relevant content and advertisements.",
+        "affected_driver": "Recommendation quality, time spent, content supply, and ad-impression volume",
+        "financial_consequence": "Sustained incremental engagement can increase ad inventory and revenue; higher inference demand or lower-quality synthetic content can offset part of the benefit through cost or trust deterioration.",
+        "direction": "upside",
+        "materiality_condition": "The effect becomes material if model upgrades produce sustained incremental time spent or content satisfaction across large surfaces and convert into additional impressions without equivalent declines in retention, trust, or regulatory permission.",
+        "time_horizon": "near_term",
+        "thesis_effect": "supports",
+        "watchpoints": [
+          "Time spent and video consumption by app",
+          "Family daily active people",
+          "Ad-impression growth versus ad-load changes",
+          "Share and performance of original or translated recommendations",
+          "Regulatory outcomes affecting highly personalized recommenders"
+        ],
+        "sources": [
+          {
+            "url": "https://about.fb.com/news/2026/01/2026-ai-drives-performance/",
+            "claim_date": "2026-01-28"
+          },
+          {
+            "url": "https://investor.atmeta.com/investor-news/press-release-details/2026/Meta-Reports-First-Quarter-2026-Results/default.aspx",
+            "claim_date": "2026-04-29"
+          },
+          {
+            "url": "https://ec.europa.eu/commission/presscorner/api/files/document/print/en/ip_26_1579/IP_26_1579_EN.pdf",
+            "claim_date": "2026-07-10"
+          }
+        ]
+      },
+      {
+        "development": "Generative creative, campaign agents, improved attribution, and larger ad-ranking models",
+        "company_exposure": "The advertising stack directly uses AI for campaign setup, asset generation, audience and ad selection, optimization, and conversion measurement.",
+        "affected_driver": "Advertiser conversion performance, return on ad spend, demand, and average price per ad",
+        "financial_consequence": "Better advertiser outcomes can increase budgets, auction bids, average price per ad, and advertising share; revenue gains flow to profit only if incremental inference and support costs remain lower than incremental monetization.",
+        "direction": "upside",
+        "materiality_condition": "The effect becomes material if adoption is broad, measured conversion or return-on-spend improvements are incremental rather than substitutional, and higher advertiser demand exceeds the compute cost of generating and ranking ads.",
+        "time_horizon": "near_term",
+        "thesis_effect": "supports",
+        "watchpoints": [
+          "Adoption of automated campaigns and generative creative",
+          "Incremental conversions and advertiser return on ad spend",
+          "Average price per ad and advertising revenue growth",
+          "Advertiser retention and budget expansion",
+          "Revenue associated with AI tools versus inference cost"
+        ],
+        "sources": [
+          {
+            "url": "https://about.fb.com/news/2026/01/2026-ai-drives-performance/",
+            "claim_date": "2026-01-28"
+          },
+          {
+            "url": "https://s21.q4cdn.com/399680738/files/doc_financials/2025/q4/META-Q4-2025-Prepared-Remarks.pdf",
+            "claim_date": "2026-01-28"
+          },
+          {
+            "url": "https://bitcap.com/en/news/ki-roi-research-memo-ist-es-das-alles-wert-2",
+            "claim_date": "2024-10-15"
+          }
+        ]
+      },
+      {
+        "development": "Rapid progress in accelerator efficiency and custom silicon, offset by increasingly compute-intensive frontier-model scaling",
+        "company_exposure": "The company operates large internal training and inference fleets and has committed to external accelerator capacity while accelerating its MTIA roadmap.",
+        "affected_driver": "Compute cost per workload, infrastructure utilization, capital intensity, and deployment capacity",
+        "financial_consequence": "Efficiency gains can reduce operating cost per recommendation or inference and improve cash returns; escalating model size, component prices, and capacity commitments can increase capex, depreciation, energy cost, and free-cash-flow pressure.",
+        "direction": "mixed",
+        "materiality_condition": "The upside becomes material if performance per dollar and watt, utilization, and custom-silicon deployment improve faster than workload growth. The downside becomes material if infrastructure spending and depreciation grow persistently faster than AI-linked revenue.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "mixed",
+        "watchpoints": [
+          "Capital expenditures and contractual infrastructure commitments",
+          "Depreciation and infrastructure operating costs",
+          "Free cash flow and return on invested capital",
+          "MTIA production deployment and workload coverage",
+          "Accelerator delivery schedules, utilization, and performance per watt"
+        ],
+        "sources": [
+          {
+            "url": "https://investor.atmeta.com/investor-news/press-release-details/2026/Meta-Reports-Fourth-Quarter-and-Full-Year-2025-Results/default.aspx",
+            "claim_date": "2026-01-28"
+          },
+          {
+            "url": "https://investor.atmeta.com/investor-news/press-release-details/2026/Meta-Reports-First-Quarter-2026-Results/default.aspx",
+            "claim_date": "2026-04-29"
+          },
+          {
+            "url": "https://about.fb.com/news/2026/03/expanding-metas-custom-silicon-to-power-our-ai-workloads/",
+            "claim_date": "2026-03-11"
+          },
+          {
+            "url": "https://about.fb.com/news/2026/02/meta-amd-partner-longterm-ai-infrastructure-agreement/",
+            "claim_date": "2026-02-24"
+          },
+          {
+            "url": "https://bitcap.com/en/news/ki-roi-research-memo-ist-es-das-alles-wert",
+            "claim_date": "2025-10-15"
+          }
+        ]
+      },
+      {
+        "development": "Agentic assistants that can plan, research, create, and act through connected services",
+        "company_exposure": "The AI assistant can leverage consumer distribution, social context, Marketplace, messaging, and connected applications, while paid business messaging provides a possible commercial channel.",
+        "affected_driver": "Assistant repeat usage and monetizable business-messaging, discovery, or commerce activity",
+        "financial_consequence": "Successful commercial integration could create messaging, transaction, or advertising revenue and increase engagement; weak retention, high cost per task, privacy failures, or cannibalization of existing surfaces could raise expense without durable revenue.",
+        "direction": "mixed",
+        "materiality_condition": "The path becomes material if repeat agentic usage reaches broad scale, businesses or consumers pay for measurable value, and cost per completed task declines sufficiently while privacy and safety controls remain acceptable.",
+        "time_horizon": "medium_term",
+        "thesis_effect": "unclear",
+        "watchpoints": [
+          "Assistant daily and monthly active usage",
+          "Repeat task completion and user retention",
+          "Business-agent and messaging integrations",
+          "Paid messaging or other-revenue growth",
+          "Inference cost per completed task and privacy incidents"
+        ],
+        "sources": [
+          {
+            "url": "https://about.fb.com/news/2026/07/meta-ai-muse-spark-doesnt-just-think-it-acts/",
+            "claim_date": "2026-07-24"
+          },
+          {
+            "url": "https://s21.q4cdn.com/399680738/files/doc_financials/2025/q4/META-Q4-2025-Prepared-Remarks.pdf",
+            "claim_date": "2026-01-28"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026003942/meta-20251231.htm",
+            "claim_date": "2026-01-29"
+          }
+        ]
+      },
+      {
+        "development": "Smaller, faster multimodal models enabling useful always-available AI glasses",
+        "company_exposure": "AI glasses combine cameras, audio, an assistant, social applications, and EssilorLuxottica's eyewear brands and distribution.",
+        "affected_driver": "AI-glasses unit volume, product mix, service attachment, and Reality Labs operating losses",
+        "financial_consequence": "Category adoption could increase Reality Labs revenue and establish a new assistant-distribution surface; hardware costs, partner economics, privacy concerns, and continued research spending may delay profitability.",
+        "direction": "mixed",
+        "materiality_condition": "The path becomes material if daily usage converts into sustained shipments and upgrades, broader geographic and prescription availability, and positive hardware or service contribution at a scale sufficient to narrow segment losses.",
+        "time_horizon": "long_term",
+        "thesis_effect": "unclear",
+        "watchpoints": [
+          "Disclosed unit shipments and daily active use",
+          "Reality Labs revenue, gross margin, and operating loss",
+          "Assistant usage and service attachment on glasses",
+          "Geographic, prescription, and retail expansion",
+          "Privacy incidents, returns, and capture-indicator acceptance"
+        ],
+        "sources": [
+          {
+            "url": "https://about.fb.com/news/2026/06/meta-essilorluxottica-partner-launch-meta-glasses/",
+            "claim_date": "2026-06-23"
+          },
+          {
+            "url": "https://about.fb.com/news/2026/07/metas-ai-glasses-your-questions-answered/",
+            "claim_date": "2026-07-07"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026003942/meta-20251231.htm",
+            "claim_date": "2026-01-29"
+          }
+        ]
+      }
+    ],
+    "investment_thesis_and_tests": {
+      "public_bit_view_status": "commentary",
+      "attributable_public_thesis": "BIT Capital identifies generative-AI ad optimization as one of the clearest commercial AI levers, helping rebuild advertising revenue after Apple's App Tracking Transparency shock. Its subsequent commentary notes that the company maintained or improved return on invested capital despite heavy capex, while preserving the broader question of whether AI demand and monetization will justify the investment cycle.",
+      "what_would_support_it": [
+        "Broad adoption of AI campaign and creative tools produces independently measurable incremental conversions and advertiser return on spend.",
+        "Advertising revenue, average price per ad, and advertiser budgets improve without dependence primarily on higher ad load.",
+        "AI-linked revenue and operating income grow faster than inference cost, depreciation, and infrastructure spending.",
+        "Return on invested capital and free cash flow remain resilient as committed AI capacity enters service."
+      ],
+      "what_would_challenge_it": [
+        "Reported performance gains are substitutional, difficult to attribute, or fail to increase advertiser budgets and pricing.",
+        "Privacy, mobile-platform, or regulatory restrictions materially reduce personalized-ad effectiveness or measurement access.",
+        "Capital expenditures, depreciation, and energy costs grow faster than AI-enabled revenue for a sustained period.",
+        "Assistant and frontier-model investment remains largely unmonetized while competition erodes user attention or advertiser share."
+      ],
+      "sources": [
+        {
+          "url": "https://bitcap.com/en/news/ki-roi-research-memo-ist-es-das-alles-wert-2",
+          "claim_date": "2024-10-15"
+        },
+        {
+          "url": "https://bitcap.com/en/news/ki-roi-research-memo-ist-es-das-alles-wert",
+          "claim_date": "2025-10-15"
+        },
+        {
+          "url": "https://about.fb.com/news/2026/01/2026-ai-drives-performance/",
+          "claim_date": "2026-01-28"
+        },
+        {
+          "url": "https://investor.atmeta.com/investor-news/press-release-details/2026/Meta-Reports-Fourth-Quarter-and-Full-Year-2025-Results/default.aspx",
+          "claim_date": "2026-01-28"
+        },
+        {
+          "url": "https://investor.atmeta.com/investor-news/press-release-details/2026/Meta-Reports-First-Quarter-2026-Results/default.aspx",
+          "claim_date": "2026-04-29"
+        }
+      ]
+    },
+    "uncertainties_and_research_triggers": [
+      {
+        "uncertainty": "The incremental advertising revenue attributable specifically to AI optimization is not reported as a separate financial line.",
+        "why_it_matters": "BIT's central causal claim can otherwise be confused with macroeconomic recovery, engagement growth, ad load, currency, or auction effects.",
+        "next_research_trigger": "Inspect future earnings disclosures, advertiser experiments, controlled conversion-lift studies, and revenue associated with specific ranking, attribution, or creative products.",
+        "sources": [
+          {
+            "url": "https://bitcap.com/en/news/ki-roi-research-memo-ist-es-das-alles-wert-2",
+            "claim_date": "2024-10-15"
+          },
+          {
+            "url": "https://about.fb.com/news/2026/01/2026-ai-drives-performance/",
+            "claim_date": "2026-01-28"
+          },
+          {
+            "url": "https://investor.atmeta.com/investor-news/press-release-details/2026/Meta-Reports-Fourth-Quarter-and-Full-Year-2025-Results/default.aspx",
+            "claim_date": "2026-01-28"
+          }
+        ]
+      },
+      {
+        "uncertainty": "The long-run return on the current infrastructure build-out remains unproven.",
+        "why_it_matters": "Large capacity commitments may create a durable cost advantage, but they can also compress free cash flow and returns if utilization or monetization disappoints.",
+        "next_research_trigger": "Track capex, depreciation, infrastructure expenses, utilization commentary, custom-chip deployment, performance per watt, free cash flow, and return on invested capital as new capacity enters service.",
+        "sources": [
+          {
+            "url": "https://investor.atmeta.com/investor-news/press-release-details/2026/Meta-Reports-Fourth-Quarter-and-Full-Year-2025-Results/default.aspx",
+            "claim_date": "2026-01-28"
+          },
+          {
+            "url": "https://investor.atmeta.com/investor-news/press-release-details/2026/Meta-Reports-First-Quarter-2026-Results/default.aspx",
+            "claim_date": "2026-04-29"
+          },
+          {
+            "url": "https://about.fb.com/news/2026/03/expanding-metas-custom-silicon-to-power-our-ai-workloads/",
+            "claim_date": "2026-03-11"
+          },
+          {
+            "url": "https://about.fb.com/news/2026/02/meta-amd-partner-longterm-ai-infrastructure-agreement/",
+            "claim_date": "2026-02-24"
+          },
+          {
+            "url": "https://bitcap.com/en/news/ki-roi-research-memo-ist-es-das-alles-wert",
+            "claim_date": "2025-10-15"
+          }
+        ]
+      },
+      {
+        "uncertainty": "The AI assistant has substantial capability and distribution potential but no clearly disclosed mature revenue model.",
+        "why_it_matters": "High repeat usage could strengthen the ecosystem, while expensive agentic workloads without payments, ads, commerce, or messaging revenue could dilute returns.",
+        "next_research_trigger": "Look for paid tiers, sponsored or commercial discovery, transaction integrations, business-agent pricing, revenue disaggregation, and cost-per-task disclosure.",
+        "sources": [
+          {
+            "url": "https://about.fb.com/news/2026/07/meta-ai-muse-spark-doesnt-just-think-it-acts/",
+            "claim_date": "2026-07-24"
+          },
+          {
+            "url": "https://s21.q4cdn.com/399680738/files/doc_financials/2025/q4/META-Q4-2025-Prepared-Remarks.pdf",
+            "claim_date": "2026-01-28"
+          }
+        ]
+      },
+      {
+        "uncertainty": "Public disclosures do not fully expose AI-glasses shipment economics, partner revenue sharing, or service attachment.",
+        "why_it_matters": "Daily users and unit momentum do not by themselves establish meaningful consolidated profit or an improvement in Reality Labs losses.",
+        "next_research_trigger": "Inspect shipment or active-device disclosures, partner commentary, Reality Labs revenue and gross margin, returns, upgrade behavior, and any recurring-service monetization.",
+        "sources": [
+          {
+            "url": "https://about.fb.com/news/2026/06/meta-essilorluxottica-partner-launch-meta-glasses/",
+            "claim_date": "2026-06-23"
+          },
+          {
+            "url": "https://about.fb.com/news/2026/07/metas-ai-glasses-your-questions-answered/",
+            "claim_date": "2026-07-07"
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026003942/meta-20251231.htm",
+            "claim_date": "2026-01-29"
+          }
+        ]
+      },
+      {
+        "uncertainty": "The eventual scope and economic effect of rules governing personalized ads and recommender design remain unsettled.",
+        "why_it_matters": "Remedies could alter data use, ranking features, engagement, ad effectiveness, compliance cost, or product availability in important markets.",
+        "next_research_trigger": "Monitor final EU decisions, appeals, mandated product changes, adoption of less-personalized ads, regional engagement and monetization, and similar rules in other jurisdictions.",
+        "sources": [
+          {
+            "url": "https://digital-markets-act.ec.europa.eu/meta-commits-give-eu-users-choice-personalised-ads-under-digital-markets-act-2025-12-08_en",
+            "claim_date": "2025-12-08"
+          },
+          {
+            "url": "https://ec.europa.eu/commission/presscorner/api/files/document/print/en/ip_26_1579/IP_26_1579_EN.pdf",
+            "claim_date": "2026-07-10"
+          },
+          {
+            "url": "https://developer.apple.com/app-store/user-privacy-and-data-use/",
+            "claim_date": null
+          },
+          {
+            "url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026003942/meta-20251231.htm",
+            "claim_date": "2026-01-29"
+          }
+        ]
+      }
+    ],
+    "source_ledger": [
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026003942/meta-20251231.htm",
+        "title": "2025 Annual Report on Form 10-K",
+        "publisher": "Meta Platforms, Inc. / U.S. Securities and Exchange Commission",
+        "published_at": "2026-01-29",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://investor.atmeta.com/investor-news/press-release-details/2026/Meta-Reports-Fourth-Quarter-and-Full-Year-2025-Results/default.aspx",
+        "title": "Meta Reports Fourth Quarter and Full Year 2025 Results",
+        "publisher": "Meta Platforms, Inc.",
+        "published_at": "2026-01-28",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://investor.atmeta.com/investor-news/press-release-details/2026/Meta-Reports-First-Quarter-2026-Results/default.aspx",
+        "title": "Meta Reports First Quarter 2026 Results",
+        "publisher": "Meta Platforms, Inc.",
+        "published_at": "2026-04-29",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://s21.q4cdn.com/399680738/files/doc_financials/2025/q4/META-Q4-2025-Prepared-Remarks.pdf",
+        "title": "Q4 2025 Earnings Conference Call Prepared Remarks",
+        "publisher": "Meta Platforms, Inc.",
+        "published_at": "2026-01-28",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://about.fb.com/news/2026/01/2026-ai-drives-performance/",
+        "title": "2026: AI Drives Performance",
+        "publisher": "Meta Platforms, Inc.",
+        "published_at": "2026-01-28",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://about.fb.com/news/2026/07/meta-ai-muse-spark-doesnt-just-think-it-acts/",
+        "title": "Meta AI Doesn't Just Think, It Acts",
+        "publisher": "Meta Platforms, Inc.",
+        "published_at": "2026-07-24",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://about.fb.com/news/2026/03/expanding-metas-custom-silicon-to-power-our-ai-workloads/",
+        "title": "Expanding Meta's Custom Silicon to Power Our AI Workloads",
+        "publisher": "Meta Platforms, Inc.",
+        "published_at": "2026-03-11",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://about.fb.com/news/2026/02/meta-amd-partner-longterm-ai-infrastructure-agreement/",
+        "title": "Meta and AMD Partner for Longterm AI Infrastructure Agreement",
+        "publisher": "Meta Platforms, Inc.",
+        "published_at": "2026-02-24",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://about.fb.com/news/2026/06/meta-essilorluxottica-partner-launch-meta-glasses/",
+        "title": "We're Partnering With EssilorLuxottica to Launch Meta Glasses",
+        "publisher": "Meta Platforms, Inc.",
+        "published_at": "2026-06-23",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://about.fb.com/news/2026/07/metas-ai-glasses-your-questions-answered/",
+        "title": "Meta's AI Glasses: Your Questions Answered",
+        "publisher": "Meta Platforms, Inc.",
+        "published_at": "2026-07-07",
+        "source_type": "company_primary"
+      },
+      {
+        "url": "https://developer.apple.com/app-store/user-privacy-and-data-use/",
+        "title": "User Privacy and Data Use",
+        "publisher": "Apple Inc.",
+        "published_at": null,
+        "source_type": "counterparty_primary"
+      },
+      {
+        "url": "https://digital-markets-act.ec.europa.eu/meta-commits-give-eu-users-choice-personalised-ads-under-digital-markets-act-2025-12-08_en",
+        "title": "Meta Commits to Give EU Users Choice on Personalised Ads Under Digital Markets Act",
+        "publisher": "European Commission",
+        "published_at": "2025-12-08",
+        "source_type": "regulator_primary"
+      },
+      {
+        "url": "https://ec.europa.eu/commission/presscorner/api/files/document/print/en/ip_26_1579/IP_26_1579_EN.pdf",
+        "title": "Commission Preliminarily Finds the Addictive Design of Instagram and Facebook in Breach of the Digital Services Act",
+        "publisher": "European Commission",
+        "published_at": "2026-07-10",
+        "source_type": "regulator_primary"
+      },
+      {
+        "url": "https://bitcap.com/en/news/ki-roi-research-memo-ist-es-das-alles-wert-2",
+        "title": "BIT Capital AI ROI Research Memo: Is It All Worth It?",
+        "publisher": "BIT Capital",
+        "published_at": "2024-10-15",
+        "source_type": "bit_primary"
+      },
+      {
+        "url": "https://bitcap.com/en/news/ki-roi-research-memo-ist-es-das-alles-wert",
+        "title": "BIT Capital AI ROI Research Memo: Is It All Worth It? One Year Later",
+        "publisher": "BIT Capital",
+        "published_at": "2025-10-15",
+        "source_type": "bit_primary"
+      }
+    ]
+  },
+  "provenance": {
+    "research_date": "2026-07-28",
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "xhigh",
+    "prompt_version": "company-memo-pilot-v1",
+    "prompt_cache_key": "fli:company-memo:company-memo-pilot-v1",
+    "response_id": "resp_VY5RZdfpwQqVWvG7zMIlJY5pUq3uP_FdeZSVrojq9X88SpGxD0oRQt-8fNNdxJBdH3SuKjHDSgMwmDinTIlyN5R7yEthCd3erOIWSr4PHQM-EwI4zEidtUZ8kSyECLCrkpRJnl3neW0HQE17UvzSeDtrN5DXBqf1ji9jkMtG-I1XKrjOQABWez2-GX_b-JuKMJqN2jZN_gPtRUmzF0GlmcoaT4GsnnrNrHeV0GGX8IRRidMAA_XDeSsEKaC4lHZ6WPK2mUHFE5o5u8ldfTZyeyrOZ1XFDTaPTdgAZze-dkemj85EnAwDozyToDfDYIc-_5ZmXeKDP-rlg_E0T9s2mqoAV0tucUbfuBkYrNrKw15ua8UYCnPiMm22oQtQ5zphjb6socWCRa79fygs8_TYfyFmDwThqgkkDfr0t3EBQErErIXb-h4pOmiltE_wfkxq9OGFpU2W7DAsbAYRxoySjl94",
+    "response_model": "gpt-5.6-sol",
+    "input_tokens": 109221,
+    "cached_tokens": 0,
+    "cache_write_tokens": 0,
+    "output_tokens": 62436,
+    "reasoning_tokens": 13779,
+    "reported_cost_usd": null,
+    "web_actions": [
+      {
+        "query": "site:investor.atmeta.com Meta 2025 annual report 10-k 2026 revenue advertising Reality Labs capex AI",
+        "type": "search",
+        "queries": [
+          "site:investor.atmeta.com Meta 2025 annual report 10-k 2026 revenue advertising Reality Labs capex AI",
+          "site:investor.atmeta.com Meta quarterly results 2026 AI capital expenditures Family daily active people ad impressions price per ad",
+          "site:bitcap.com/en/news \"AI ROI Research Memo\" Meta advertising generative AI",
+          "site:about.fb.com/news Meta AI advertising Advantage+ generative AI 2025 official"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://investor.atmeta.com/annual-meeting/default.aspx"
+      },
+      {
+        "type": "open_page",
+        "url": null
+      },
+      {
+        "query": "site:sec.gov/Archives/edgar/data/1326801 2025 10-k Meta Platforms 2026 annual report",
+        "type": "search",
+        "queries": [
+          "site:sec.gov/Archives/edgar/data/1326801 2025 10-k Meta Platforms 2026 annual report",
+          "site:investor.atmeta.com/static-files 2025 annual report Meta pdf 2026",
+          "site:investor.atmeta.com/static-files \"Q1 2026\" \"Earnings Call Transcript\" Meta",
+          "site:investor.atmeta.com/static-files \"Q1 2026\" Meta presentation pdf"
+        ],
+        "sources": null
+      },
+      {
+        "query": "Meta Platforms 2025 10-K filed January 29 2026 sec",
+        "type": "search",
+        "queries": [
+          "Meta Platforms 2025 10-K filed January 29 2026 sec",
+          "Meta Platforms 2025 annual report pdf",
+          "Meta Q1 2026 earnings transcript PDF",
+          "Meta 2025 form 10-k advertising revenue Reality Labs revenue capex 2026"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026028364/meta-03312026xexhibit991.htm"
+      },
+      {
+        "pattern": "Advertising revenue represented",
+        "type": "find_in_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026003942/meta-20251231.htm"
+      },
+      {
+        "query": "site:sec.gov/Archives/edgar/data/1326801/000162828026003942/meta-20251231.htm \"Advertising\" \"2025\"",
+        "type": "search",
+        "queries": [
+          "site:sec.gov/Archives/edgar/data/1326801/000162828026003942/meta-20251231.htm \"Advertising\" \"2025\"",
+          "site:sec.gov/Archives/edgar/data/1326801/000162828026003942/meta-20251231.htm \"Family of Apps\" \"Reality Labs\"",
+          "site:sec.gov/Archives/edgar/data/1326801/000162828026003942/meta-20251231.htm \"third-party\" \"data centers\"",
+          "site:sec.gov/Archives/edgar/data/1326801/000162828026003942/meta-20251231.htm \"Apple\" \"ATT\""
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026003942/meta-20251231.htm?output=txt"
+      },
+      {
+        "query": "site:sec.gov/Archives/edgar/data/1326801 Meta 2025 10-K compete Google YouTube TikTok Apple Microsoft Amazon",
+        "type": "search",
+        "queries": [
+          "site:sec.gov/Archives/edgar/data/1326801 Meta 2025 10-K compete Google YouTube TikTok Apple Microsoft Amazon",
+          "site:about.fb.com EssilorLuxottica Meta AI glasses partnership official 2026",
+          "site:about.fb.com/news Meta data center AI infrastructure power compute official 2026",
+          "site:investor.atmeta.com Meta Q1 2026 capex guidance AI infrastructure supply constraints"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:ec.europa.eu/commission/presscorner Meta DMA advertising consent 2025 official",
+        "type": "search",
+        "queries": [
+          "site:ec.europa.eu/commission/presscorner Meta DMA advertising consent 2025 official",
+          "site:digital-markets-act.ec.europa.eu Meta 2025 consent advertising official",
+          "site:ftc.gov Meta privacy youth advertising official 2025 2026",
+          "site:sec.gov/Archives/edgar/data/1326801/000162828026003942 \"government investigations\" Meta 2025"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:sec.gov/Archives/edgar/data/1326801 Meta \"App Tracking Transparency\" 2025 10-K",
+        "type": "search",
+        "queries": [
+          "site:sec.gov/Archives/edgar/data/1326801 Meta \"App Tracking Transparency\" 2025 10-K",
+          "site:investor.atmeta.com Meta \"App Tracking Transparency\" 2025",
+          "site:developer.apple.com AppTrackingTransparency framework official",
+          "site:sec.gov/Archives/edgar/data/1326801 Meta \"operating system\" \"Apple\" \"Google\" annual report 2025"
+        ],
+        "sources": null
+      },
+      {
+        "query": "Meta 2025 Family of Apps revenue advertising revenue 2025 Reality Labs revenue official",
+        "type": "search",
+        "queries": [
+          "Meta 2025 Family of Apps revenue advertising revenue 2025 Reality Labs revenue official",
+          "site:investor.atmeta.com 2025 Family of Apps revenue advertising Reality Labs revenue",
+          "site:sec.gov/Archives/edgar/data/1326801/000162828026003942 \"Advertising\" \"Reality Labs\"",
+          "site:s21.q4cdn.com/399680738 2025 Meta revenue by user geography advertising revenue PDF"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:s21.q4cdn.com/399680738/files/doc_financials/2026/q1 META Q1 2026 prepared remarks advertising revenue infrastructure costs capex",
+        "type": "search",
+        "queries": [
+          "site:s21.q4cdn.com/399680738/files/doc_financials/2026/q1 META Q1 2026 prepared remarks advertising revenue infrastructure costs capex",
+          "site:s21.q4cdn.com/399680738/files/doc_financials/2026/q1 \"Family of Apps ad revenue\"",
+          "site:s21.q4cdn.com/399680738/files/doc_financials/2026/q1 \"capital expenditures\" Meta 2026 guidance",
+          "site:s21.q4cdn.com/399680738/files/doc_financials/2026/q1 \"Meta AI\" \"ads\" transcript"
+        ],
+        "sources": null
+      },
+      {
+        "query": "\"META Q1 2026 Prepared Remarks\"",
+        "type": "search",
+        "queries": [
+          "\"META Q1 2026 Prepared Remarks\"",
+          "\"Q1 2026 Prepared Remarks\" \"Meta\" advertising",
+          "\"Meta Q1 2026\" \"Prepared Remarks\" PDF",
+          "\"2026 capital expenditures\" \"Meta\" \"Q1\" AI infrastructure"
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:s21.q4cdn.com/399680738/files/doc_financials/2026/q1/META-Q1-2026-Earnings-Call-Transcript.pdf \"capital expenditures\"",
+        "type": "search",
+        "queries": [
+          "site:s21.q4cdn.com/399680738/files/doc_financials/2026/q1/META-Q1-2026-Earnings-Call-Transcript.pdf \"capital expenditures\"",
+          "site:s21.q4cdn.com/399680738/files/doc_financials/2026/q1/META-Q1-2026-Earnings-Call-Transcript.pdf \"ad performance\"",
+          "site:s21.q4cdn.com/399680738/files/doc_financials/2026/q1/META-Q1-2026-Earnings-Call-Transcript.pdf \"Meta AI\"",
+          "site:s21.q4cdn.com/399680738/files/doc_financials/2026/q1/META-Q1-2026-Earnings-Call-Transcript.pdf \"Reality Labs\""
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:investor.atmeta.com/investor-news/press-release-details/2026/Meta-Reports-First-Quarter-2026-Results \"125-145\"",
+        "type": "search",
+        "queries": [
+          "site:investor.atmeta.com/investor-news/press-release-details/2026/Meta-Reports-First-Quarter-2026-Results \"125-145\"",
+          "site:investor.atmeta.com/investor-news/press-release-details/2026/Meta-Reports-First-Quarter-2026-Results \"capital expenditures\" \"2026\"",
+          "site:investor.atmeta.com/investor-news/press-release-details/2026/Meta-Reports-First-Quarter-2026-Results \"infrastructure costs\"",
+          "site:investor.atmeta.com/investor-news/press-release-details/2026/Meta-Reports-First-Quarter-2026-Results \"Reality Labs\""
+        ],
+        "sources": null
+      },
+      {
+        "query": "site:s21.q4cdn.com/399680738/files/doc_financials/2026/q1/ \"Meta Reports First Quarter 2026 Results\"",
+        "type": "search",
+        "queries": [
+          "site:s21.q4cdn.com/399680738/files/doc_financials/2026/q1/ \"Meta Reports First Quarter 2026 Results\"",
+          "site:s21.q4cdn.com/399680738/files/doc_financials/2026/q1/ \"125-145 billion\"",
+          "site:s21.q4cdn.com/399680738/files/doc_financials/2026/q1/ \"Q1 2026\" \"capital expenditures\" Meta",
+          "site:s21.q4cdn.com/399680738/files/doc_financials/2026/q1/ Meta-03-31-2026"
+        ],
+        "sources": null
+      },
+      {
+        "type": "open_page",
+        "url": "https://about.fb.com/news/2026/04/meta-partners-with-broadcom-to-co-develop-custom-ai-silicon/"
+      },
+      {
+        "query": "\"Meta\" \"2025\" \"We compete with\" Google TikTok YouTube 10-K",
+        "type": "search",
+        "queries": [
+          "\"Meta\" \"2025\" \"We compete with\" Google TikTok YouTube 10-K",
+          "\"meta-20251231\" \"TikTok\"",
+          "\"Meta Platforms\" \"TikTok\" \"2025 annual report\"",
+          "\"Meta Platforms\" \"Apple\" \"Google\" \"competition\" \"2025\" 10-K"
+        ],
+        "sources": null
+      },
+      {
+        "query": "\"Meta\" \"No customer represented\" 2025 10-K",
+        "type": "search",
+        "queries": [
+          "\"Meta\" \"No customer represented\" 2025 10-K",
+          "\"Meta Platforms\" \"10% of revenue\" customer 2025 annual report",
+          "site:sec.gov/Archives/edgar/data/1326801/000162828026003942 customer revenue 10%",
+          "site:sec.gov/Archives/edgar/data/1326801/000162828026003942 advertisers revenue"
+        ],
+        "sources": null
+      },
+      {
+        "query": "\"2025\" \"advertising revenue\" \"$\" \"Meta Platforms\" 200.97",
+        "type": "search",
+        "queries": [
+          "\"2025\" \"advertising revenue\" \"$\" \"Meta Platforms\" 200.97",
+          "site:sec.gov/Archives/edgar/data/1326801/000162828026003942 \"Advertising revenue\"",
+          "site:s21.q4cdn.com/399680738/files/doc_financials/2025/q4 \"advertising revenue\" \"2025\" Meta",
+          "\"Meta\" \"full year 2025\" \"advertising revenue\""
+        ],
+        "sources": null
+      }
+    ],
+    "consulted_sources": [
+      {
+        "url": "https://www.sec.gov/Archives/edgar/data/1326801/000162828026003942/meta-20251231.htm",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://investor.atmeta.com/investor-news/press-release-details/2026/Meta-Reports-Fourth-Quarter-and-Full-Year-2025-Results/default.aspx",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://investor.atmeta.com/investor-news/press-release-details/2026/Meta-Reports-First-Quarter-2026-Results/default.aspx",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://s21.q4cdn.com/399680738/files/doc_financials/2025/q4/META-Q4-2025-Prepared-Remarks.pdf",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://about.fb.com/news/2026/01/2026-ai-drives-performance/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://about.fb.com/news/2026/07/meta-ai-muse-spark-doesnt-just-think-it-acts/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://about.fb.com/news/2026/03/expanding-metas-custom-silicon-to-power-our-ai-workloads/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://about.fb.com/news/2026/02/meta-amd-partner-longterm-ai-infrastructure-agreement/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://about.fb.com/news/2026/06/meta-essilorluxottica-partner-launch-meta-glasses/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://about.fb.com/news/2026/07/metas-ai-glasses-your-questions-answered/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://developer.apple.com/app-store/user-privacy-and-data-use/",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://digital-markets-act.ec.europa.eu/meta-commits-give-eu-users-choice-personalised-ads-under-digital-markets-act-2025-12-08_en",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://ec.europa.eu/commission/presscorner/api/files/document/print/en/ip_26_1579/IP_26_1579_EN.pdf",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://bitcap.com/en/news/ki-roi-research-memo-ist-es-das-alles-wert-2",
+        "type": "model_citation"
+      },
+      {
+        "url": "https://bitcap.com/en/news/ki-roi-research-memo-ist-es-das-alles-wert",
+        "type": "model_citation"
+      }
+    ],
+    "request_tags": [
+      "app:frontier-lab-intelligence",
+      "pipeline:investment-company-context",
+      "job:company-memo-pilot",
+      "scope:single-company",
+      "prompt:company-memo-pilot-v1",
+      "company:meta",
+      "model:gpt-5.6-sol",
+      "reasoning:xhigh"
+    ]
+  }
+}
