@@ -15,7 +15,7 @@ DEFAULT_DB = (
     REPO_ROOT / "data" / "derived" / "insights" / "investment-agent.db"
 )
 STORE_SCHEMA_VERSION = "investment-agent-store-v1"
-READ_SCHEMA_VERSION = "investment-agent-read-v2"
+READ_SCHEMA_VERSION = "investment-agent-read-v3"
 TRACE_SCHEMA_VERSIONS = {"investment-insight-loop-pilot-trace-v1"}
 STATUSES = {"kept", "suppressed", "all"}
 ASSESSMENT_FIELDS = {
@@ -123,6 +123,9 @@ def _validate_trace(trace: dict[str, Any]) -> None:
     final = trace.get("final_result")
     if not isinstance(final, dict):
         raise ValueError("Investment agent trace has no validated final result")
+    headline = str(final.get("investment_headline") or "").strip()
+    if not headline or "\n" in headline or len(headline.split()) > 18:
+        raise ValueError("Investment agent result has an invalid headline")
     decision = final.get("decision")
     if decision not in {"surface", "suppress"}:
         raise ValueError("Investment agent result has an invalid decision")
@@ -426,6 +429,7 @@ def insights_payload(
                 "development_id": str(row["development_id"]),
                 "daily_rank": int(row["daily_rank"]),
                 "decision": str(row["decision"]),
+                "investment_headline": str(final["investment_headline"]),
                 "development_summary": str(final["development_summary"]),
                 "portfolio_readthrough": str(final["portfolio_readthrough"]),
                 "company_assessments": final["company_assessments"],

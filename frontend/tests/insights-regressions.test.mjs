@@ -59,6 +59,7 @@ test('Insights uses the durable successor API and guards status-specific respons
 
 test('Investment Insights expose a minimal company judgment and memo audit', () => {
   assert.match(apiSource, /export interface InvestmentAgentCompanyAssessment/)
+  assert.match(apiSource, /investment_headline: string/)
   assert.match(apiSource, /bottom_line: string/)
   assert.match(apiSource, /main_uncertainty: string/)
   assert.match(apiSource, /next_check: string/)
@@ -68,6 +69,8 @@ test('Investment Insights expose a minimal company judgment and memo audit', () 
   assert.match(apiSource, /rejected_after_memo:/)
   assert.match(apiSource, /why_memo_is_needed: string/)
   assert.match(insightSource, /function InvestmentAgentInsight/)
+  assert.match(insightSource, /decodeTextEntities\(item\.investment_headline\)/)
+  assert.doesNotMatch(insightSource, /item\.source\?\.title \|\|/)
   assert.match(insightSource, /Company read-throughs/)
   assert.match(insightSource, /Why this company/)
   assert.match(insightSource, /What could move/)

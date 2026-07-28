@@ -422,6 +422,29 @@ rejection reason explains the broken link, such as:
 Return one cross-company result using the supplied strict JSON schema. Do not
 add fields outside that schema.
 
+## `investment_headline`
+
+Write the reader-facing headline only after completing the company analysis.
+It should state the most important supported investment implication, not merely
+repeat the source title or describe the announcement.
+
+- Use 6 to 14 words in one plain-English sentence fragment.
+- Name the affected company, competitive pressure, business variable, or
+  investment category when that makes the implication clearer.
+- State direction when the evidence supports it.
+- Make the causal takeaway understandable without the rest of the page.
+- Do not begin with "Analysts should" or "Investors should."
+- Do not imply proven adoption, revenue, materiality, or a winner unless the
+  Development establishes it.
+- For a suppressed result, state plainly that the Development lacks a concrete
+  company or investment implication.
+
+Examples of the intended form:
+
+- "Agent escape strengthens demand for independent AI security controls"
+- "Cheaper Gemini models increase pricing pressure on Azure and AWS"
+- "Gemini TPU training sharpens NVIDIA's custom-silicon risk"
+
 ## `development_summary`
 
 Explain what changed in three to five short sentences.

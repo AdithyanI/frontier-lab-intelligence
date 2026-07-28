@@ -14,6 +14,7 @@ DEVELOPMENT_ID = "d" * 64
 
 def _trace() -> dict:
     result = {
+        "investment_headline": "Agent risk strengthens demand for independent controls",
         "development_summary": "The Development establishes a new control risk.",
         "decision": "surface",
         "portfolio_readthrough": "Security demand may move before revenue does.",
@@ -102,6 +103,9 @@ def test_import_trace_preserves_company_assessments_rejections_and_telemetry(
     assert payload["content_kind"] == "investment_agent"
     assert payload["run"]["cached_tokens"] == 8_000
     assert payload["run"]["reported_cost_usd"] == 0.12
+    assert payload["items"][0]["investment_headline"] == (
+        "Agent risk strengthens demand for independent controls"
+    )
     assert payload["items"][0]["company_assessments"][0]["ticker"] == "PANW"
     assert payload["items"][0]["company_assessments"][0]["direction"] == "positive"
     assert payload["items"][0]["rejected_after_memo"] == [
@@ -116,6 +120,19 @@ def test_import_trace_requires_every_opened_memo_to_be_resolved(tmp_path: Path):
     trace_path.write_text(json.dumps(trace), encoding="utf-8")
 
     with pytest.raises(ValueError, match="every opened memo"):
+        investment_agent_runs.import_trace(
+            trace_path,
+            db_path=tmp_path / "investment-agent.db",
+        )
+
+
+def test_import_trace_requires_a_concise_investment_headline(tmp_path: Path):
+    trace = _trace()
+    trace["final_result"]["investment_headline"] = ""
+    trace_path = tmp_path / "trace.json"
+    trace_path.write_text(json.dumps(trace), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="invalid headline"):
         investment_agent_runs.import_trace(
             trace_path,
             db_path=tmp_path / "investment-agent.db",

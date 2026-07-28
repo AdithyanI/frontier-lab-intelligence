@@ -1148,7 +1148,6 @@ function InvestmentAgentProcess({ item }: { item: InvestmentAgentItem }) {
 function InvestmentAgentInsight({ item }: { item: InvestmentAgentItem }) {
   const titleId = `investment-agent-${item.development_id}-title`
   const feedPath = `/evidence/feed?date=${item.day}&event_id=${encodeURIComponent(item.development_id)}`
-  const sourceTitle = item.source?.title || 'Company-aware Investment read-through'
   return (
     <article
       className="insight-row investment-agent-row"
@@ -1163,7 +1162,7 @@ function InvestmentAgentInsight({ item }: { item: InvestmentAgentItem }) {
       </div>
       <div className="insight-body investment-agent-body">
         <header className="insight-head investment-agent-head">
-          <h2 id={titleId}>{decodeTextEntities(sourceTitle)}</h2>
+          <h2 id={titleId}>{decodeTextEntities(item.investment_headline)}</h2>
           {item.source?.url && (
             <a href={item.source.url} target="_blank" rel="noreferrer">
               Primary source ↗

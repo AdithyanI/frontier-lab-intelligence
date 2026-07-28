@@ -106,7 +106,9 @@ composition.
    a concrete causal path may it call the local memo tool for a company. It then
    either rejects that candidate after inspection or emits one minimal
    assessment: bottom line, mechanism, affected business driver, direction,
-   main uncertainty, and one next check. Application code supplies the exact
+   main uncertainty, and one next check. The final result also carries one
+   concise, investment-facing headline written after company analysis.
+   Application code supplies the exact
    Feed Development and company-memo links; the model does not generate URLs or
    restate the source ledger. The durable run binds evidence and universe
    hashes, exact memo calls, prompt/model identity, and token/cache/cost

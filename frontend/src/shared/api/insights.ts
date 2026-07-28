@@ -245,6 +245,7 @@ export interface InvestmentAgentItem {
   development_id: string
   daily_rank: number
   decision: InsightDecision
+  investment_headline: string
   development_summary: string
   portfolio_readthrough: string
   company_assessments: InvestmentAgentCompanyAssessment[]
