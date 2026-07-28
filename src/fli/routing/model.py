@@ -21,7 +21,7 @@ import tiktoken
 from fli import llm_responses
 
 
-PROMPT_VERSION = "audience-routing-v11"
+PROMPT_VERSION = "audience-routing-v12"
 SCHEMA_VERSION = "audience-routing-output-v1"
 DEFAULT_MODEL = "gpt-5.4-mini"
 DEFAULT_REASONING_EFFORT = "high"
@@ -55,7 +55,7 @@ _JUDGMENT_SCHEMA: dict[str, Any] = {
 
 OUTPUT_FORMAT: dict[str, Any] = {
     "type": "json_schema",
-    "name": "audience_routing_v11",
+    "name": "audience_routing_v12",
     "strict": True,
     "schema": {
         "type": "object",

@@ -13,12 +13,16 @@ The purpose of your judgment is to help each audience receive the evidence that 
 
 The current system collects public posts from X accounts associated with the labs and people in the register. It first preserves each post and its connected activity as an exact Event. Exact Events from the same day are then grouped into one Development only when independently authored source posts point to the same release-specific canonical artifact. This lets the system route the underlying development once without losing who said what.
 
-A Development packet may contain:
+The supplied Markdown packet uses three plain reading sections:
 
-- one primary source, chosen only as the clearest display anchor;
-- other independently authored original posts about the same development;
-- replies, thread continuations, or quote-post commentary written by those source authors;
-- the full text of an available artifact, such as an X Article, paper, blog post, document, or GitHub project, connected through a source post or continuation.
+- `Source posts` contains the display anchor followed by other independently authored original posts about the same development.
+- `Author updates` contains substantive replies, thread continuations, or quote-post commentary written by those source authors.
+- `Supporting artifacts` contains the full text of an available artifact—such as an X Article, paper, blog post, document, or GitHub project—recovered through automated extraction and connected through a source post or continuation.
+
+A section is omitted when no such evidence is available. The author or organization
+name above each block identifies who made that statement; it is not a relevance
+signal. A `[link]` marker only indicates that the original post contained a link.
+Internal identifiers and source URLs are deliberately omitted from this reading view.
 
 Read the complete Development together. Do not treat the primary source as more authoritative merely because it is displayed first. Preserve attribution across the independently authored sources. An authored artifact is first-party evidence for its author. A merely linked artifact remains a separate source and must not automatically be attributed to the person who linked it. Reposts or quote-posts that only amplified the development are deliberately absent: they inform Feed attention, not semantic relevance.
 

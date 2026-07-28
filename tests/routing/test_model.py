@@ -123,7 +123,7 @@ def test_schema_requires_only_two_exact_audience_judgments():
 def test_v11_prompt_uses_soft_reason_word_guidance_without_truncation():
     prompt = routing_model.instructions()
 
-    assert routing_model.PROMPT_VERSION == "audience-routing-v11"
+    assert routing_model.PROMPT_VERSION == "audience-routing-v12"
     assert "Aim for roughly 40 to 50 words" in prompt
     assert "guidance, not a hard limit" in prompt
     assert "never truncate, reject, or add filler" in prompt
@@ -357,7 +357,7 @@ def test_request_uses_mini_high_minimal_cache_tags_and_telemetry():
         "pipeline:audience-routing",
         "job:audience-routing",
         "scope:day-2026-07-12",
-        "prompt:audience-routing-v11",
+        "prompt:audience-routing-v12",
         "run:first-cohort",
     ]
     assert result["ai_engineering"]["relevant"] is True
