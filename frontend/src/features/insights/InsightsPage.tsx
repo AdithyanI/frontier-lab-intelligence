@@ -1069,6 +1069,7 @@ function InvestmentAgentMechanism({
   assessment: InvestmentAgentCompanyAssessment
   companyNames: Record<string, string>
 }) {
+  const ranked = assessment.exposures.length > 1
   return (
     <details className="investment-agent-mechanism" open>
       <summary>
@@ -1122,24 +1123,23 @@ function InvestmentAgentMechanism({
                   {INVESTMENT_AGENT_MATERIALITY[exposure.materiality]}
                 </span>
               </div>
-              <p>{decodeTextEntities(exposure.note)}</p>
               <p className="investment-agent-exposure-driver">
-                <span className="mono">Driver</span>
-                {' '}{decodeTextEntities(exposure.affected_driver)}
+                {decodeTextEntities(exposure.affected_driver)}
               </p>
+              {ranked && <p className="investment-agent-exposure-note">{decodeTextEntities(exposure.note)}</p>}
             </li>
           ))}
         </ol>
-        <div className="investment-agent-mechanism-footer">
-          <section>
-            <h4 className="mono">What remains unproven</h4>
-            <p>{decodeTextEntities(assessment.main_uncertainty)}</p>
-          </section>
-          <section>
-            <h4 className="mono">What to check next</h4>
-            <p>{decodeTextEntities(assessment.next_check)}</p>
-          </section>
-        </div>
+        <dl className="investment-agent-mechanism-footer">
+          <div>
+            <dt className="mono">Unproven</dt>
+            <dd>{decodeTextEntities(assessment.main_uncertainty)}</dd>
+          </div>
+          <div>
+            <dt className="mono">Watch</dt>
+            <dd>{decodeTextEntities(assessment.next_check)}</dd>
+          </div>
+        </dl>
       </div>
     </details>
   )
@@ -1203,10 +1203,6 @@ function InvestmentAgentInsight({ item }: { item: InvestmentAgentItem }) {
           <section>
             <h3 className="mono">What changed</h3>
             <p>{decodeTextEntities(item.development_summary)}</p>
-          </section>
-          <section>
-            <h3 className="mono">Portfolio read-through</h3>
-            <p>{decodeTextEntities(item.portfolio_readthrough)}</p>
           </section>
         </div>
 
