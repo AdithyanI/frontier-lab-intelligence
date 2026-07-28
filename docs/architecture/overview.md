@@ -110,8 +110,9 @@ composition.
    Feed Development and company-memo links; the model does not generate URLs or
    restate the source ledger. The durable run binds evidence and universe
    hashes, exact memo calls, prompt/model identity, and token/cache/cost
-   telemetry. The July 21 rank-1 run is the first persisted proof of this
-   successor boundary; full-day calibration remains future work.
+   telemetry. A July 21 Sol/xhigh pass across the top ten is the current
+   persisted calibration proof of this successor boundary; full-day replay
+   remains future work.
 10. A daily editorial agent reviews the complete routed-positive cohort, reads
    the skill-owned BIT thesis, audited 2025 portfolio, and source-graded company
    profiles for Investment. Its compact index keeps all 37 profiles eligible.
