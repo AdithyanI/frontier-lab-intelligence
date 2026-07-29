@@ -472,6 +472,31 @@
   border-top: 1px solid var(--border-strong);
 }
 
+.how-showcase-group {
+  margin-top: 34px;
+}
+
+.how-showcase-group h4 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.how-showcase-blurb {
+  max-width: 68ch;
+  margin: 8px 0 0;
+  color: var(--ink-soft);
+  font-size: 14px;
+  line-height: 1.6;
+  text-wrap: pretty;
+}
+
+.how-showcase-group ol {
+  margin-top: 16px;
+}
+
 .how-showcase li {
   counter-increment: showcase;
   display: grid;
@@ -480,6 +505,15 @@
   align-items: baseline;
   padding: 16px 0;
   border-bottom: 1px solid var(--border);
+}
+
+.how-showcase-body p {
+  max-width: 62ch;
+  margin: 6px 0 0;
+  color: var(--ink-soft);
+  font-size: 13.5px;
+  line-height: 1.6;
+  text-wrap: pretty;
 }
 
 .how-showcase li::before {
@@ -727,8 +761,7 @@
   }
   .how-showcase li > span {
     grid-column: 2;
-  }
-  .how-technical-appendix > summary {
+  }  .how-technical-appendix > summary {
     min-height: 66px;
   }
   .how-technical-appendix-body h3 {

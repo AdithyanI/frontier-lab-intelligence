@@ -141,11 +141,23 @@ test('An Insight deep link scrolls to and focuses the exact audience row', () =>
   )
 })
 
-test('How it works showcases five Insights from the coherent July 27–28 cohorts', () => {
+test('How it works showcases five published Insights per audience, each with a reason', () => {
   const showcaseLinks = [...howContentSource.matchAll(
-    /to: '(\/insights\?audience=(?:investment|ai_engineering)&status=kept&date=2026-07-(?:27|28)&insight=[a-f0-9]{64})'/g,
+    /to: '\/insights\?audience=(investment|ai_engineering)&status=kept&date=(2026-07-\d{2})&insight=([a-f0-9]{64})'/g,
   )]
-  assert.equal(showcaseLinks.length, 5)
+  const investment = showcaseLinks.filter((m) => m[1] === 'investment')
+  const engineering = showcaseLinks.filter((m) => m[1] === 'ai_engineering')
+  assert.equal(investment.length, 5)
+  assert.equal(engineering.length, 5)
+
+  // Every pick carries a stated reason so the page argues, not just links.
+  const whyLines = [...howContentSource.matchAll(/\n\s{8}why: '/g)]
+  assert.equal(whyLines.length, showcaseLinks.length)
+
+  // At least one Development is read by both audiences: one core, two personas.
+  const investmentDevs = new Set(investment.map((m) => m[3]))
+  const shared = engineering.filter((m) => investmentDevs.has(m[3]))
+  assert.ok(shared.length >= 1)
 })
 
 test('Insights reuses the Feed week strip without explanatory reader clutter', () => {

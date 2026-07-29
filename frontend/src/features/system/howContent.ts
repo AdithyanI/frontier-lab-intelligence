@@ -51,31 +51,96 @@ export const HOW_BEATS: HowBeat[] = [
   },
 ]
 
-export const SHOWCASE_INSIGHTS = [
+export type ShowcaseInsight = {
+  title: string
+  meta: string
+  why: string
+  to: string
+}
+
+export type ShowcaseGroup = {
+  id: string
+  heading: string
+  blurb: string
+  items: ShowcaseInsight[]
+}
+
+export const SHOWCASE_GROUPS: ShowcaseGroup[] = [
   {
-    title: 'Kimi K3 tests AI hardware demand from both directions',
-    meta: '27 July \u00b7 Investment',
-    to: '/insights?audience=investment&status=kept&date=2026-07-27&insight=830eb0ef3a12ac2d9f72e3853d0ebf5e73421affbb5c66798dc566b14962e174',
+    id: 'investment',
+    heading: 'Five for the investment team',
+    blurb:
+      'Chosen from the 64 Investment Insights the system published across 24 days. Every link opens the exact Insight with its sources, the memos the agent opened, and the pre-registered bet it cited.',
+    items: [
+      {
+        title: 'Agentic training may create a new high-throughput storage workload',
+        meta: '27 July \u00b7 PSTG',
+        why: 'Two hops from a lab release to a company nobody would have guessed: Moonshot open-sources its RL sandbox, the sandbox implies constant snapshot and metadata traffic, that traffic implies storage. Pure Storage appears in one of the 64 published Insights.',
+        to: '/insights?audience=investment&status=kept&date=2026-07-27&insight=84a2092be2343b029edc7aa91d3dc449573bf74bbfc609b7843aa2bd2e3ce9d0',
+      },
+      {
+        title: 'OpenAI code scanner raises benchmark for Alphabet\u2019s Wiz security stack',
+        meta: '28 July \u00b7 GOOGL \u00b7 3 memos opened, 1 kept',
+        why: 'The clearest picture of the agent discarding. It opened company memos for Palo Alto, Microsoft and Alphabet, then published only Alphabet \u2014 the link running through its ownership of Wiz. The two rejected candidates stay visible in the trace.',
+        to: '/insights?audience=investment&status=kept&date=2026-07-28&insight=341168a68c039437e8c44ea89b41fb10830f8acbea055025f59c4d0af3b19e4e',
+      },
+      {
+        title: 'OKLS could reduce GPU needs, but frontier-scale proof is absent',
+        meta: '28 July \u00b7 IREN, NVDA, TSM \u00b7 downside',
+        why: 'A bear case assembled out of an optimizer paper. One mechanism \u2014 fewer GPU-hours for a fixed target \u2014 carried to a neocloud, a chipmaker and a foundry, with TSMC labelled as the indirect, one-step-removed link. The headline states its own limit.',
+        to: '/insights?audience=investment&status=kept&date=2026-07-28&insight=ce3100e1aabd9b478f18bde17fa73778a84245083c62875dd5e9e722dcb32655',
+      },
+      {
+        title: 'OpenAI\u2019s native prompt defenses raise AI-security vendors\u2019 competitive bar',
+        meta: '15 July \u00b7 PANW, NTSK \u00b7 downside',
+        why: 'The answer to \u201cdoes it just repeat itself?\u201d. AI-security news usually reads as demand for Palo Alto. Here the same theme reads as a threat to it, because the lab shipped the defense itself. Microsoft was opened and dropped.',
+        to: '/insights?audience=investment&status=kept&date=2026-07-15&insight=25f93358a5bee7672c6a354cb45867771cc4b449ff75da633a430c7aed4a7cf0',
+      },
+      {
+        title: 'Treasury warning raises China sales risk for NVIDIA and AMD',
+        meta: '22 July \u00b7 NVDA, AMD \u00b7 downside',
+        why: 'The Treasury Secretary is not in the Registry. This arrived because 18 people who are quoted or reposted him within a day. The Insight then separates a stated warning from an enacted restriction, and drops TSMC after opening its memo.',
+        to: '/insights?audience=investment&status=kept&date=2026-07-22&insight=329ab2a4edc09b7a3e8cd78737f31f7736020f1a2ce1615a64b669110559f07b',
+      },
+    ],
   },
   {
-    title: 'Moonshot\u2019s open-weight Kimi K3 imposes preserved-history harness constraints',
-    meta: '27 July \u00b7 AI Engineering',
-    to: '/insights?audience=ai_engineering&status=kept&date=2026-07-27&insight=830eb0ef3a12ac2d9f72e3853d0ebf5e73421affbb5c66798dc566b14962e174',
-  },
-  {
-    title: 'Autonomous agent intrusion strengthens demand for machine-speed cyber defense',
-    meta: '28 July \u00b7 Investment',
-    to: '/insights?audience=investment&status=kept&date=2026-07-28&insight=a6252033a0fb5a6755eff4d8bc029291109eb638d0d600103f9e03b20c1579e6',
-  },
-  {
-    title: 'MCP stateless requests remove session affinity from remote tool serving',
-    meta: '28 July \u00b7 AI Engineering',
-    to: '/insights?audience=ai_engineering&status=kept&date=2026-07-28&insight=c5302a6e6844cbb7ec42751e2cfce417c96e26c5e88a15435d06eabfe32fcb2d',
-  },
-  {
-    title: 'Gemini controls move Google Cloud agents closer to recurring deployment',
-    meta: '28 July \u00b7 Investment',
-    to: '/insights?audience=investment&status=kept&date=2026-07-28&insight=069268a39cd024d1e3214490e94fbb81b44832c7d916761137b5da53e3e03887',
+    id: 'ai_engineering',
+    heading: 'Five for the engineering team',
+    blurb:
+      'Chosen from the 27 AI Engineering Insights published over the same window. Each one lands on the surfaces of a reference AI platform and says what the team would test or adopt.',
+    items: [
+      {
+        title: 'Open-source AgentENV claims sub-100 ms snapshotting for agent sandboxes',
+        meta: '27 July \u00b7 Operations, Agents',
+        why: 'The same Development as the first Investment Insight above, read for a different reader. No shared prose, no shared agent: one sees a storage demand signal, the other sees a Firecracker sandbox runtime \u2014 and flags that it ships without authorization.',
+        to: '/insights?audience=ai_engineering&status=kept&date=2026-07-27&insight=84a2092be2343b029edc7aa91d3dc449573bf74bbfc609b7843aa2bd2e3ce9d0',
+      },
+      {
+        title: 'Vercel quantifies model cost and recall tradeoffs for vulnerability scans',
+        meta: '27 July \u00b7 Operations, Models and cost',
+        why: 'A routing decision with prices attached. The top score cost $55.98 and ran 3 hours 39 minutes; two cheaper models reached about half the score for $12.38 and $5.60. That is the frequent-scan versus deep-audit question stated in numbers.',
+        to: '/insights?audience=ai_engineering&status=kept&date=2026-07-27&insight=e3ff253226a99db0b7246e805bd3823ffe7f231d74d7eb9ebe79d5a47e8d147d',
+      },
+      {
+        title: 'camelAI replaces persistent agent VMs with scoped edge isolates',
+        meta: '28 July \u00b7 Agents, Operations',
+        why: 'An architecture to copy rather than a headline to read: agent state in a Durable Object, generated code in fresh V8 isolates with no credentials in reach, short-lived containers only where Linux is unavoidable. The Investment agent kept nothing here.',
+        to: '/insights?audience=ai_engineering&status=kept&date=2026-07-28&insight=f29b09bdb24794ead0847e94ddf9938ae6f8b4211f928ceb77804792d21ee834',
+      },
+      {
+        title: 'PACE predicts agent benchmark results from selected non-agentic tests',
+        meta: '6 July \u00b7 Evaluation',
+        why: 'Agentic evaluation at roughly a hundredth of the cost, by predicting agent scores from cheap non-agentic instances. The Insight keeps the terms of the trade on screen: 0.81 rank correlation and 3.80% mean absolute error, not yet replicated independently.',
+        to: '/insights?audience=ai_engineering&status=kept&date=2026-07-06&insight=98c1b1ce20ddc0b82e359fc59b83146648244da24744cca669c2ad1471cbb428',
+      },
+      {
+        title: 'Hashimoto\u2019s invoice agent uses token-enforced limits on outbound email',
+        meta: '14 July \u00b7 Operations',
+        why: 'A least-privilege pattern worth stealing: read-only access to the evidence, a recipient allowlist enforced by the API token rather than by the prompt, and a human verifying before anything irreversible. It found about $45,000 in bad invoices.',
+        to: '/insights?audience=ai_engineering&status=kept&date=2026-07-14&insight=8f09b80e043048917dc720bac4e2820b9d152d757c78c6c2e182147049a61e4b',
+      },
+    ],
   },
 ]
 

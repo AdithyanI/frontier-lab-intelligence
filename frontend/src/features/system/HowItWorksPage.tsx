@@ -9,7 +9,7 @@ import {
   SystemOverview,
 } from '../architecture/ArchitecturePage'
 import {
-  SHOWCASE_INSIGHTS,
+  SHOWCASE_GROUPS,
   VIDEO_WALKTHROUGH_URL,
   createReviewRubric,
 } from './howContent'
@@ -80,21 +80,31 @@ export default function HowItWorks() {
       />
 
       <section className="how-showcase" aria-labelledby="how-showcase-title">
-        <h3 id="how-showcase-title">Five Insights I would hand to the teams</h3>
+        <h3 id="how-showcase-title">Ten Insights I would hand to the teams</h3>
         <p>
-          Three for the investment team, two for the engineering team. Each
-          link opens the exact Insight with its sources and reasoning. The
-          first two are the same Development, ranked first on the same day for
-          both audiences, read two different ways.
+          Five per audience, picked from everything the system published. They
+          are here because each one is hard to argue with: a named company or
+          surface, a mechanism, and the discarded candidates still visible
+          underneath. One Development appears on both lists, read two entirely
+          different ways.
         </p>
-        <ol>
-          {SHOWCASE_INSIGHTS.map((insight) => (
-            <li key={insight.to}>
-              <Link to={insight.to}>{insight.title}</Link>
-              <span className="mono">{insight.meta}</span>
-            </li>
-          ))}
-        </ol>
+        {SHOWCASE_GROUPS.map((group) => (
+          <div className="how-showcase-group" key={group.id}>
+            <h4>{group.heading}</h4>
+            <p className="how-showcase-blurb">{group.blurb}</p>
+            <ol>
+              {group.items.map((insight) => (
+                <li key={insight.to}>
+                  <div className="how-showcase-body">
+                    <Link to={insight.to}>{insight.title}</Link>
+                    <p>{insight.why}</p>
+                  </div>
+                  <span className="mono">{insight.meta}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+        ))}
       </section>
 
       <section className="how-map" aria-labelledby="how-map-title">
