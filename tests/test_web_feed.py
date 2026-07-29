@@ -118,6 +118,74 @@ def test_feed_api_is_unranked_and_emits_positioned_amplifiers(
     assert searched_target["amplifiers"] == target["amplifiers"]
 
 
+def test_feed_dates_cache_the_complete_summary(tmp_path, monkeypatch):
+    _feed_fixture(tmp_path, monkeypatch)
+    original_dates_payload = feed_store._dates_payload_uncached
+    calls = 0
+
+    def counted_dates_payload(*args, **kwargs):
+        nonlocal calls
+        calls += 1
+        return original_dates_payload(*args, **kwargs)
+
+    monkeypatch.setattr(
+        feed_store,
+        "_dates_payload_uncached",
+        counted_dates_payload,
+    )
+    feed_store._dates_payload_cached.cache_clear()
+
+    first = feed_store.dates_payload()
+    second = feed_store.dates_payload()
+
+    assert first == second
+    assert calls == 1
+
+
+def test_feed_dates_cache_invalidates_when_feed_store_changes(
+    tmp_path, monkeypatch
+):
+    _feed_fixture(tmp_path, monkeypatch)
+    feed_store._dates_payload_cached.cache_clear()
+
+    before = feed_store.dates_payload()
+    before_count = before["dates"][0]["item_count"]
+
+    conn = sqlite3.connect(feed_store.DEFAULT_FEED_DB)
+    conn.row_factory = sqlite3.Row
+    source = conn.execute(
+        "SELECT * FROM feed_post WHERE post_id = '1'"
+    ).fetchone()
+    columns = list(source.keys())
+    values = [source[column] for column in columns]
+    for column, value in {
+        "post_id": "new-direct",
+        "published_at": "2026-07-11T11:00:00+00:00",
+        "text": "A second model result",
+        "url": "https://x.com/alice/status/new-direct",
+        "raw_sha256": "new-direct-raw",
+        "raw_json": '{"id":"new-direct"}',
+        "disclosure_post_id": "new-direct",
+    }.items():
+        values[columns.index(column)] = value
+    conn.execute(
+        f"INSERT INTO feed_post ({', '.join(columns)}) "
+        f"VALUES ({', '.join('?' for _ in columns)})",
+        values,
+    )
+    conn.execute(
+        """INSERT INTO feed_run_post (run_id, provider, post_id, role)
+           VALUES (?, ?, 'new-direct', 'direct')""",
+        (source["run_id"], source["provider"]),
+    )
+    conn.commit()
+    conn.close()
+
+    after = feed_store.dates_payload()
+
+    assert after["dates"][0]["item_count"] == before_count + 1
+
+
 @pytest.mark.parametrize("sort", ["rank", "attention", "score"])
 def test_feed_api_rejects_rank_sorts(sort):
     response = client.get(f"/api/feed?date=2026-07-11&sort={sort}")

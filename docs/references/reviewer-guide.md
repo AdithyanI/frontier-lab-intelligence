@@ -37,27 +37,26 @@ exact object, checksum, included data, and clean-checkout proof.
    network position, the strongest one-post public interaction total, and the
    limitations. These are ordered tiebreak layers, not a weighted score.
 3. **Scoring + validation (20%)** — change Feed Status to compare Relevant,
-   Not relevant, and Not evaluated Events. Open `View reasons` to inspect the
+   Not relevant, and Not evaluated Developments. Open `View reasons` to inspect the
    independent AI Engineering and Investment judgments. Ranking is an
    ordering aid; routing and final Investment selection are separate
    decisions.
-4. **Actionable delivery (15%)** — inspect the Investment view in Insights.
-   Imported days show the newest complete published company-aware cohort.
-   Each source link opens the exact Feed Development; company links open the
-   complete memo used by the agent. Suppressed rows remain auditable. The
-   top-right actions download the selected PDF or show delivery options. Slack
-   and email are real operator actions. Inspect the delivery flow, but do not
-   confirm a send during passive review. AI Engineering is explicitly
-   unavailable rather than served from a retired fallback.
+4. **Actionable delivery (15%)** — inspect both audience views in Insights.
+   Investment connects each Development to exact company bets and memos; AI
+   Engineering maps the same evidence to concrete Aion implementation
+   surfaces. Suppressed rows and their reasons remain auditable in both views.
+   The top-right PDF and delivery actions are intentionally Investment-only.
+   Slack and email are real operator actions; inspect the flow, but do not
+   confirm a send during passive review.
 5. **Ingestion (10%)** and **extraction (10%)** — inspect Artifacts for
    canonical source links disclosed by first-party Event evidence, retrieval
    state, normalized text snapshots, and the exact originating Event. X is the
    implemented discovery source; artifacts add papers, repositories, articles,
    documents, and videos without pretending they are independent discovery.
-6. **Web interface (5%)** — use How it works for the complete reviewer path,
-   System → Architecture for the actual dependency order, and System → Status
-   for the checkpoint composed from live product APIs. There is
-   deliberately no second static backend status model.
+6. **Web interface (5%)** — use How it works for the complete reviewer path.
+   Its closed Technical appendix contains the deployed dependency order,
+   current model boundaries, and auditable account-intake figure without
+   adding a separate System workspace.
 
 ## Evidence to check
 
@@ -89,7 +88,8 @@ exact object, checksum, included data, and clean-checkout proof.
 - The artifact fetcher records access failures rather than bypassing robots,
   authentication, or publisher controls. Only inspectable evidence can support
   a shipped citation.
-- The final five submission Insights were human-adjudicated and locked. They
-  are a proof set, not an unbiased estimate of unattended Insight precision.
+- The five linked showcase Insights were editorially selected from complete
+  model-generated cohorts. They are a proof set, not an unbiased estimate of
+  unattended Insight precision.
   Opening the application does not trigger Registry intake or delivery; both
   remain explicit operator actions.

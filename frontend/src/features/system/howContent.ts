@@ -58,29 +58,24 @@ export const SHOWCASE_INSIGHTS = [
     to: '/insights?audience=investment&status=kept&date=2026-07-27&insight=830eb0ef3a12ac2d9f72e3853d0ebf5e73421affbb5c66798dc566b14962e174',
   },
   {
-    title: 'Kimi K3 imposes preserved-history constraints on agent harnesses',
+    title: 'Moonshot\u2019s open-weight Kimi K3 imposes preserved-history harness constraints',
     meta: '27 July \u00b7 AI Engineering',
     to: '/insights?audience=ai_engineering&status=kept&date=2026-07-27&insight=830eb0ef3a12ac2d9f72e3853d0ebf5e73421affbb5c66798dc566b14962e174',
   },
   {
-    title: 'FLUX-mimic\u2019s Audi deployment strengthens Infineon\u2019s industrial robotics demand case',
-    meta: '23 July \u00b7 Investment',
-    to: '/insights?audience=investment&status=kept&date=2026-07-23&insight=c0acf4b35b55f843a3d7db72c4e2bf51141a3d633de4d04c09a06d7d34b644b3',
+    title: 'Autonomous agent intrusion strengthens demand for machine-speed cyber defense',
+    meta: '28 July \u00b7 Investment',
+    to: '/insights?audience=investment&status=kept&date=2026-07-28&insight=a6252033a0fb5a6755eff4d8bc029291109eb638d0d600103f9e03b20c1579e6',
   },
   {
-    title: 'OpenAI reports eval agents escaped containment and compromised Hugging Face',
-    meta: '21 July \u00b7 AI Engineering',
-    to: '/insights?audience=ai_engineering&status=kept&date=2026-07-21&insight=90ba2385d73b01b553b60e778a0255435acb694359a664c4f2fb5a21bf2be029',
+    title: 'MCP stateless requests remove session affinity from remote tool serving',
+    meta: '28 July \u00b7 AI Engineering',
+    to: '/insights?audience=ai_engineering&status=kept&date=2026-07-28&insight=c5302a6e6844cbb7ec42751e2cfce417c96e26c5e88a15435d06eabfe32fcb2d',
   },
   {
-    title: 'Poke\u2019s engagement sharpens AI-companion substitution risk for Grindr',
-    meta: '23 July \u00b7 Investment',
-    to: '/insights?audience=investment&status=kept&date=2026-07-23&insight=d0ab683d0e80e2d9236bc0b22f5dd2723d09c237e19ae4459a3f65ffb060ad19',
-  },
-  {
-    title: 'Anthropic reports Claude 5 agents tolerate much leaner system prompts',
-    meta: '24 July \u00b7 AI Engineering',
-    to: '/insights?audience=ai_engineering&status=kept&date=2026-07-24&insight=1baf77df8074db2ae4cb962af661533f0581950e82ef596a2ea318012819acbe',
+    title: 'Gemini controls move Google Cloud agents closer to recurring deployment',
+    meta: '28 July \u00b7 Investment',
+    to: '/insights?audience=investment&status=kept&date=2026-07-28&insight=069268a39cd024d1e3214490e94fbb81b44832c7d916761137b5da53e3e03887',
   },
 ]
 

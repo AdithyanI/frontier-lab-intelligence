@@ -7,6 +7,7 @@ from collections import defaultdict
 from datetime import date
 from functools import lru_cache
 from pathlib import Path
+from threading import Lock
 from typing import Any
 
 from fli.evidence import events as signal_events
@@ -20,6 +21,8 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_FEED_DB = signal_feed.DEFAULT_FEED_DB
 DEFAULT_REGISTRY_DB = REPO_ROOT / "data" / "fli.db"
 DEFAULT_DERIVED_ROOT = following_rankings.DEFAULT_DERIVED_ROOT
+_dates_payload_lock = Lock()
+
 
 def _open_readonly(path: Path) -> sqlite3.Connection:
     conn = sqlite3.connect(f"file:{path.resolve().as_posix()}?mode=ro", uri=True)
@@ -242,7 +245,42 @@ def _iso_day(value: str) -> str:
     return date.fromisoformat(value).isoformat()
 
 
+def _dates_cache_token() -> tuple[tuple[str, int, int, int, int], ...]:
+    """Invalidate date counts when evidence, publication, or Registry changes."""
+    versions = (
+        _db_version(path)
+        for path in (
+            DEFAULT_FEED_DB,
+            signal_events.DEFAULT_EVENTS_DB,
+            DEFAULT_REGISTRY_DB,
+        )
+    )
+    # A read can create or remove an empty SQLite WAL. Its mtime carries no
+    # database state, so normalizing it avoids one false miss after a cold read.
+    return tuple(
+        (path, main_mtime, main_size, wal_mtime if wal_size else 0, wal_size)
+        for path, main_mtime, main_size, wal_mtime, wal_size in versions
+    )
+
+
+@lru_cache(maxsize=8)
+def _dates_payload_cached(
+    *,
+    run_id: str | None,
+    cache_token: tuple[tuple[str, int, int, int, int], ...],
+) -> dict[str, Any]:
+    del cache_token
+    return _dates_payload_uncached(run_id=run_id)
+
+
 def dates_payload(*, run_id: str | None = None) -> dict[str, Any]:
+    """Expose complete Feed-day counts without repeating the full projection."""
+    cache_token = _dates_cache_token()
+    with _dates_payload_lock:
+        return _dates_payload_cached(run_id=run_id, cache_token=cache_token)
+
+
+def _dates_payload_uncached(*, run_id: str | None = None) -> dict[str, Any]:
     if not DEFAULT_FEED_DB.is_file():
         return {
             "available": False,

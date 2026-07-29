@@ -16,6 +16,7 @@ export function EngineeringAgentInsight({ item }: { item: EngineeringAgentItem }
     <article
       className="insight-row engineering-agent-row"
       id={`engineering-agent-${item.development_id}`}
+      tabIndex={-1}
       aria-labelledby={titleId}
     >
       <div className="insight-rank engineering-agent-rank mono">

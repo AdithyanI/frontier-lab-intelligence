@@ -35,8 +35,9 @@ Registry and trusted network
   -> same-artifact, same-day Developments
   -> transparent daily rank
   -> independent audience routing
-  -> company-aware Investment analysis
-  -> web brief, PDF, and explicit delivery
+  -> audience-specific Investment and AI Engineering analysis
+  -> cited web briefs
+  -> Investment PDF and explicit delivery
 ```
 
 The current Investment agent screens every routed Development against the full
@@ -44,9 +45,10 @@ company universe. It opens detailed company memos only for plausible matches,
 records why a candidate was kept or rejected, and publishes a day only when the
 complete requested cohort succeeds.
 
-AI Engineering still has an independent routing decision, but it has no current
-Insight generator. The product says this directly instead of showing output
-from a retired fallback.
+The AI Engineering agent independently maps each selected Development onto the
+seven explicit surfaces of a reference AI system. It publishes concrete,
+source-linked implementation implications while keeping suppressed candidates
+and their reasons auditable.
 
 ## Run it locally
 
@@ -77,6 +79,8 @@ reason, and frozen run provenance.
   Investment relevance.
 - Company-aware Investment runs produce ranked, cited web briefs and
   deterministic PDF reports.
+- Surface-linked AI Engineering runs produce an independent ranked, cited web
+  brief over the same Development evidence.
 - Real Slack and email delivery adapters have been validated. They remain
   operator actions rather than part of the passive reviewer walkthrough.
 
@@ -105,9 +109,9 @@ without becoming an empty demo.
 X is the implemented discovery source. Artifacts add papers, repositories,
 articles, documents, and videos when first-party evidence points to them. Event
 grouping follows exact provider relationships rather than semantic topic
-clustering. AI Engineering routing exists, but its current last-mile Insight
-generator is still unbuilt. The release is a bounded case-study proof, not a
-production alert service.
+clustering. PDF export and Slack/email delivery currently serve Investment
+briefs only; AI Engineering is web-only. The release is a bounded case-study
+proof, not a scheduled production alert service.
 
 Adithyan Ilangovan  
 [adi@aipodcast.ing](mailto:adi@aipodcast.ing)

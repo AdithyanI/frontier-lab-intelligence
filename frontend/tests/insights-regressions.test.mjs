@@ -8,6 +8,14 @@ const insightSource = await readFile(
   new URL('../src/features/insights/InsightsPage.tsx', import.meta.url),
   'utf8',
 )
+const engineeringInsightSource = await readFile(
+  new URL('../src/features/insights/EngineeringAgentInsight.tsx', import.meta.url),
+  'utf8',
+)
+const howContentSource = await readFile(
+  new URL('../src/features/system/howContent.ts', import.meta.url),
+  'utf8',
+)
 const appSource = await readFile(new URL('../src/app/App.tsx', import.meta.url), 'utf8')
 const apiSource = await readFile(new URL('../src/shared/api/insights.ts', import.meta.url), 'utf8')
 const appStyles = readStyles()
@@ -119,6 +127,25 @@ test('A directly linked brief loads in parallel with the date index', () => {
     insightSource,
     /`\/api\/insights\?audience=\$\{audience\}&date=\$\{selectedDate\}&status=\$\{status\}`/,
   )
+})
+
+test('An Insight deep link scrolls to and focuses the exact audience row', () => {
+  assert.match(insightSource, /const selectedInsight = searchParams\.get\('insight'\) \?\? ''/)
+  assert.match(insightSource, /document\.getElementById\(`\$\{rowPrefix\}-\$\{selectedInsight\}`\)/)
+  assert.match(insightSource, /target\.scrollIntoView\(\{ block: 'start' \}\)/)
+  assert.match(insightSource, /target\.focus\(\{ preventScroll: true \}\)/)
+  assert.match(insightSource, /id=\{`investment-agent-\$\{item\.development_id\}`\}[\s\S]*?tabIndex=\{-1\}/)
+  assert.match(
+    engineeringInsightSource,
+    /id=\{`engineering-agent-\$\{item\.development_id\}`\}[\s\S]*?tabIndex=\{-1\}/,
+  )
+})
+
+test('How it works showcases five Insights from the coherent July 27–28 cohorts', () => {
+  const showcaseLinks = [...howContentSource.matchAll(
+    /to: '(\/insights\?audience=(?:investment|ai_engineering)&status=kept&date=2026-07-(?:27|28)&insight=[a-f0-9]{64})'/g,
+  )]
+  assert.equal(showcaseLinks.length, 5)
 })
 
 test('Insights reuses the Feed week strip without explanatory reader clutter', () => {

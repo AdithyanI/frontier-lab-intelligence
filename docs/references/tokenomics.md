@@ -9,17 +9,16 @@ price guarantees.
 
 ## Current Development Routing
 
-The July 5–21 `audience-routing-v15` top-100 pass used `gpt-5.6-luna` at medium
-reasoning. A deterministic evidence-readiness gate handled 325 weak or
-unavailable packets without an LLM call.
+The July 5–26 `audience-routing-v15` top-100 stores contain 2,141 completed
+Developments with zero unresolved failures: 774 both audiences, 278
+AI-Engineering-only, 116 Investment-only, and 973 neither. The deterministic
+evidence-readiness gate handled 433 weak or unavailable packets without an LLM
+call; the remaining judgments use `gpt-5.6-luna` at medium reasoning.
 
-| Scope | Developments | Model requests | Cached tokens | Cache-hit requests | Measured cost |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| Seventeen complete days | 1,647 | 1,322 | 759,808 | 424 | $7.762206 |
-
-The pass completed with zero terminal failures: 618 both audiences, 200
-AI-Engineering-only, 88 Investment-only, and 741 neither. It reused stored X
-and artifact evidence and made no provider collection calls.
+The latest refresh reused all but 14 exact stored judgments. Those incremental
+calls cost $0.083892; complete stored run telemetry reports $9.988445. The
+refresh reused stored X and artifact evidence and made no provider collection
+calls.
 
 ## Current Investment Agent
 
@@ -27,13 +26,12 @@ The company-aware agent uses `gpt-5.6-sol` at xhigh reasoning. Each Development
 screens the compact 37-company universe, then opens only the complete memos
 needed to test causal matches.
 
-| Checkpoint | Developments | Input tokens | Cached tokens | Output tokens | Measured cost |
+| Published checkpoint | Developments | Input tokens | Cached tokens | Output tokens | Measured cost |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| Published July 19–21 top tens, v8/v9 | 30 | 1,386,679 | 472,576 | 97,796 | $7.740683 |
-| Unpublished v11 proof rows | 2 | 99,184 | 23,040 | 8,384 | $0.643760 |
+| July 5–28 top tens, v15 | 240 | 8,825,740 | 3,064,839 | 711,167 | $51.671934 |
 
-The active prompt is v11. The visible July 19–21 cohorts still use v8/v9 and
-must be refreshed before presenting the v11 contract as the live result.
+All 24 visible daily cohorts use `investment-agent-v15`: 142 Developments were
+surfaced and 98 were suppressed.
 
 The runner warms one request before bounded parallel fan-out. Every turn stores
 its request, response ID, tool calls, retry history, usage, and reported cost.
@@ -42,6 +40,22 @@ remains the safe planning bound.
 
 PDF generation, UI projection, and delivery preview are deterministic local
 work over the published cohort and add no model cost.
+
+## Current AI Engineering Agent
+
+The surface-linked agent uses `gpt-5.6-sol` at high reasoning. Each Development
+is judged in one call against the seven versioned Aion surfaces; it has no
+company-memo tool loop or Investment materiality gate.
+
+| Published checkpoint | Developments | Input tokens | Cached tokens | Output tokens | Measured cost |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| July 19–28 top tens, v2 | 99 | 556,224 | 0 | 66,772 | $4.784280 |
+
+All ten visible daily cohorts use `engineering-agent-v2`: 39 Developments were
+surfaced and 60 were suppressed. July 22 contains nine rather than ten rows
+because the current store prevents one Development from being published on two
+different days. Engineering web projection is local and adds no model cost;
+PDF and delivery are intentionally Investment-only.
 
 ## What a Normal Refresh Pays For
 
@@ -52,17 +66,23 @@ The marginal cost depends on the boundary that changed:
   Developments in the selected ranked cohort.
 - An Investment prompt or company-packet change pays for every selected
   Investment-routed Development that is run again.
+- An Engineering prompt or surface-map change pays for every selected
+  Engineering-routed Development that is run again.
 - A new complete day normally pays for new X timeline pages, new artifact
   bodies, routing for up to the top 100 Developments, and the selected
-  Investment cohort.
+  Investment and Engineering cohorts.
 - Extending the Registry or following graph is a separate operation and is not
   required for a normal daily brief.
 - PDF rendering and the web read models remain local.
 
-Use the Investment dry-run before paid analysis:
+Use each audience dry-run before paid analysis:
 
 ```bash
 .venv/bin/fli insights run-investment-agent \
+  --through YYYY-MM-DD --days N --top-ranked 10 \
+  --dry-run --json --no-input
+
+.venv/bin/fli insights run-engineering-agent \
   --through YYYY-MM-DD --days N --top-ranked 10 \
   --dry-run --json --no-input
 ```

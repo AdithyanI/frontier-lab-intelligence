@@ -637,6 +637,13 @@
 .investment-agent-row,
 .engineering-agent-row {
   grid-template-columns: 112px minmax(0, 1fr);
+  scroll-margin-top: 88px;
+}
+
+.investment-agent-row:focus,
+.engineering-agent-row:focus {
+  outline: 2px solid var(--blue-mid);
+  outline-offset: 4px;
 }
 
 .investment-agent-rank a,

@@ -715,6 +715,7 @@ function InvestmentAgentInsight({
     <article
       className="insight-row investment-agent-row"
       id={`investment-agent-${item.development_id}`}
+      tabIndex={-1}
       aria-labelledby={titleId}
     >
       <div className="insight-rank investment-agent-rank mono">
@@ -828,6 +829,7 @@ export default function Insights() {
   const audience = parseAudience(searchParams.get('audience'))
   const status = parseStatus(searchParams.get('status'))
   const selectedDate = searchParams.get('date') ?? ''
+  const selectedInsight = searchParams.get('insight') ?? ''
   const [dates, setDates] = useState<InsightDates | null>(null)
   const [dateWindowEnd, setDateWindowEnd] = useState(0)
   const [dataView, setDataView] = useState<{
@@ -971,6 +973,15 @@ export default function Insights() {
       })
     return () => { live = false }
   }, [audience, copy.noun, currentDates, dataRetryKey, selectedDate, status])
+
+  useEffect(() => {
+    if (!selectedInsight || !currentData?.available) return
+    const rowPrefix = audience === 'investment' ? 'investment-agent' : 'engineering-agent'
+    const target = document.getElementById(`${rowPrefix}-${selectedInsight}`)
+    if (!target) return
+    target.scrollIntoView({ block: 'start' })
+    target.focus({ preventScroll: true })
+  }, [audience, currentData, selectedInsight])
 
   const setView = (
     nextAudience: InsightAudience,
