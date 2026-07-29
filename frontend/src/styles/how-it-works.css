@@ -567,6 +567,29 @@
   list-style: none;
 }
 
+/* ---- Next: what I would build next ---- */
+
+.how-next {
+  margin-top: 24px;
+  padding-top: 40px;
+  border-top: 1px solid var(--border-strong);
+}
+
+.how-next-list {
+  margin: 28px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.how-next-list li {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  gap: 8px 28px;
+  align-items: baseline;
+  padding: 18px 0;
+  border-top: 1px solid var(--border);
+}
+
 .how-map-list li {
   display: grid;
   grid-template-columns: 64px minmax(0, 1fr) auto;
@@ -612,8 +635,7 @@
   margin: 26px 0 0;
   color: var(--muted);
   font-size: 13.5px;
-  line-height: 1.65;
-}
+  line-height: 1.65;}
 
 /* ---- Technical appendix: selected figures, closed until requested ---- */
 
@@ -733,6 +755,9 @@
   .how-beat-intro { border-top: 0; }
   .how-scroll-hint { display: none; }
   .how-map-list li {
+    grid-template-columns: 48px minmax(0, 1fr);
+  }
+  .how-next-list li {
     grid-template-columns: 48px minmax(0, 1fr);
   }
   .how-map-link {

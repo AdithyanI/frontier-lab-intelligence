@@ -195,7 +195,9 @@ function DailyBriefDownload({
   const disabledReason = loading
     ? 'The daily brief is still loading.'
     : !available
-      ? 'PDF export is available for complete kept daily briefs.'
+      ? audience !== 'investment'
+        ? 'PDF export is only available for the Investment brief.'
+        : 'PDF export is available for complete kept daily briefs.'
       : ''
 
   return (
@@ -374,7 +376,13 @@ function DailyBriefDelivery({
         disabled={disabled}
         aria-expanded={open}
         aria-controls={open ? panelId : undefined}
-        title={disabled ? 'Send is available for complete kept daily briefs.' : 'Send this Daily Brief'}
+        title={
+          disabled
+            ? audience !== 'investment'
+              ? 'Send is only available for the Investment brief.'
+              : 'Send is available for complete kept daily briefs.'
+            : 'Send this Daily Brief'
+        }
         ref={buttonRef}
       >
         <svg aria-hidden="true" viewBox="0 0 20 20">
@@ -1043,7 +1051,7 @@ export default function Insights() {
         <DailyBriefActions
           audience={audience}
           day={selectedDate}
-          available={Boolean(investmentAgentData?.available)}
+          available={audience === 'investment' && Boolean(investmentAgentData?.available)}
           loading={datesLoading || dataLoading}
         />
       </header>

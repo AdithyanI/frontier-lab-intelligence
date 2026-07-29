@@ -215,3 +215,57 @@ export function createReviewRubric({
     },
   ]
 }
+
+export type NextStep = {
+  label: string
+  title: string
+  text: string
+}
+
+export const NEXT_STEPS: NextStep[] = [
+  {
+    label: '01',
+    title: 'Write the bets with your analysts',
+    text: 'The 37 company memos and the bets inside them are my reading of BIT\u2019s public positions. The version that matters is written with the analyst who owns the name: their thesis, their trigger, the number that would change their mind. Then the system is measuring against your playbook instead of my reconstruction of it.',
+  },
+  {
+    label: '02',
+    title: 'Let a threshold actually fire',
+    text: 'Across 24 days the agent published 95 company links and marked every one of them below its threshold. For a two-week window that is the honest answer, but nothing yet carries an open bet forward. The next build revisits live bets as new evidence arrives, so a threshold can clear, or be retired for being unreachable.',
+  },
+  {
+    label: '03',
+    title: 'Keep a record of what turned out to be right',
+    text: 'The system never scores itself. The cheapest start is a useful or not-useful mark from the reader on every published Insight. After a few weeks that becomes real ground truth, and the ranking and the suppression gate can be tuned against it rather than against my judgment.',
+  },
+  {
+    label: '04',
+    title: 'Rank the Insight, not only the Development',
+    text: 'The day\u2019s Insights are shown in attention-rank order \u2014 how strongly the Registry reacted to the underlying Development. That rank is computed before the Insight exists, so it cannot see what the agent found. Across the 64 published it barely tracks how far an Insight reaches (rank correlation +0.05 with the number of companies), and the item at the top of the page reaches the most companies on 8 of 17 days. A second rank, applied after writing, could use what is only knowable then: how many positions it touches, whether a threshold cleared, and whether the company is new rather than the twenty-third note on the same name.',
+  },
+  {
+    label: '05',
+    title: 'Read the channels the Registry already resolved',
+    text: 'Entities in the Registry already carry more than an X handle \u2014 GitHub organisations, lab sites and blogs are catalogued next to it. Only X is collected today. Papers, repositories and lab posts move on slower clocks than a timeline, so each needs its own collection rhythm and a dedup step that recognises one paper announced in three places.',
+  },
+  {
+    label: '06',
+    title: 'Let a story run across days',
+    text: 'A Development lives inside a single day. Real narratives run for weeks: a model ships, gets benchmarked, gets rebutted, gets priced. The next build keeps a durable thread across those days so a reader sees one arc rather than five disconnected entries.',
+  },
+  {
+    label: '07',
+    title: 'Spend more on the few that deserve it',
+    text: 'Every Development gets the same budget today. A small number are worth an hour of real research instead of a minute \u2014 pulling the paper, the filings, the competing claims, the history of the people involved. The rank already says which ones, so the system knows where to spend before it spends.',
+  },
+  {
+    label: '08',
+    title: 'Look wider than the ticker',
+    text: 'The Investment agent can only land on the companies it was handed. Some developments matter to a theme, to a private company, or to a position the fund does not hold yet, and today those have nowhere to go. They are currently recorded as a rejection when they should be a different kind of finding.',
+  },
+  {
+    label: '09',
+    title: 'Widen the cohort',
+    text: 'The Registry is a deliberately screened cohort, which is why the noise stays low. Growing it \u2014 further into the layer below the obvious names \u2014 is mostly a question of collection cost and admission precision, and the follow graph already ranks the candidates worth adding.',
+  },
+]

@@ -9,6 +9,7 @@ import {
   SystemOverview,
 } from '../architecture/ArchitecturePage'
 import {
+  NEXT_STEPS,
   SHOWCASE_GROUPS,
   VIDEO_WALKTHROUGH_URL,
   createReviewRubric,
@@ -70,6 +71,7 @@ export default function HowItWorks() {
         <a href="#how-read-title">In words</a>
         <a href="#how-showcase-title">Example Insights</a>
         <a href="#how-map-title">Assignment map</a>
+        <a href="#how-next-title">What is next</a>
         <a href="#technical-appendix">Technical appendix</a>
       </nav>
 
@@ -137,6 +139,30 @@ export default function HowItWorks() {
             repository
           </a>.
         </p>
+      </section>
+
+      <section className="how-next" aria-labelledby="how-next-title">
+        <header className="how-map-head">
+          <p className="how-beat-kicker mono">Next</p>
+          <h3 id="how-next-title">What I would build next</h3>
+          <p>
+            Two weeks bought a narrow system that works end to end. These are
+            the things I would do next, in the order I would do them. The first
+            three are the ones I care about most, and all three need someone at
+            BIT rather than more code.
+          </p>
+        </header>
+        <ul className="how-next-list">
+          {NEXT_STEPS.map((step) => (
+            <li key={step.title}>
+              <span className="how-map-weight mono">{step.label}</span>
+              <div className="how-map-body">
+                <h4>{step.title}</h4>
+                <p>{step.text}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
       </section>
 
       <details className="how-technical-appendix" id="technical-appendix">
