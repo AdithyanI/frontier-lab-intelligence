@@ -249,28 +249,31 @@ Rules:
   catalogued-only rows do not imply that content was retrieved. Do not add
   summaries, cards, or additional filters until a cited-insight consumer proves
   the need.
-- **Audience Insights:** one URL-backed company-aware Investment reader.
-  Investment is the only current Insight generator. The AI Engineering tab
-  remains visible because routing exists for that audience, but it shows an
-  explicit unavailable state instead of legacy content. Each date reads one
+- **Audience Insights:** two URL-backed audience readers over the same
+  deterministic Development evidence. Investment renders bet-linked company
+  transmission paths. AI Engineering renders links to the seven explicit Aion
+  surfaces. Each audience owns one generator, store, schema, and renderer; the
+  SPA never combines them or falls back to legacy content. Each date reads one
   complete published cohort from the backend. `Kept`, `Suppressed`, and `All`
-  are views over that same current store; the SPA never combines old and new
-  schemas.
+  are views over that audience's current store.
 
   Each Development keeps its application-owned Feed rank and leads with the
-  agent-written investment headline, `What changed`, and `Portfolio
-  read-through`. Company read-throughs are collapsed by default. Their summary
-  exposes the company, ticker, direction, and concise impact. Expansion reveals
-  the causal mechanism, affected business driver, size basis, what remains
-  unproven, and what to check next. `How the agent got here` separately shows
-  the company screening and memo-opening decisions. It is audit detail, not
-  permanent reading chrome.
+  agent-written headline and `What changed`. Investment mechanisms are
+  collapsed by default. Their summary names the connected tickers and causal
+  path; expansion shows each company, memo-owned upside/downside direction,
+  exact bet title, concise impact, and whether the pre-registered materiality
+  threshold cleared. `How the agent got here` separately shows company
+  screening and memo-opening decisions. The Engineering reader instead lists
+  at most two concrete surface landings with one decision-changing reason each.
+  Both readers keep process telemetry and suppression reasons inspectable
+  without turning them into permanent reading chrome.
 
   Sources are deterministic application links, not model-authored URLs. The
-  source disclosure links to the exact Feed Development, original post, each
-  available artifact, and company memo. It also exposes a quiet `Copy ID`
-  control for precise review. Honest zero/thin cohorts remain available and are
-  never padded.
+  source disclosure links to the exact Feed Development, original post, and
+  each available artifact. Investment adds exact company memo and bet links;
+  Engineering adds exact Aion surface links. Both expose a quiet `Copy ID`
+  control for precise review. Honest zero/thin cohorts remain available and
+  are never padded.
 
   A 44px hairline `Download PDF` action sits at the top-right of the page header
   and follows the selected date and audience. It is enabled only for a complete

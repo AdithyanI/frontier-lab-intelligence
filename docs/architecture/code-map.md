@@ -18,8 +18,10 @@ flowchart TD
     A --> U["Audience routing"]
     V --> U
     S --> U
-    U --> I["Company-aware Investment agent<br/>ranked cited Insights"]
+    U --> I["Company-aware Investment agent<br/>bet-linked Insights"]
+    U --> G["AI Engineering agent<br/>surface-linked Insights"]
     I --> W["Web and CLI adapters"]
+    G --> W
     I --> D["Manual Slack/email delivery"]
 ```
 
@@ -37,7 +39,7 @@ the Event read model moves out of `web`, not through new aliases.
 | Ingestion | `fli.ingestion` | Public-source adapters, conference imports, raw X evidence, and date-complete collection. |
 | Registry | `fli.registry.store`, `fli.registry.view`, and the other `fli.registry` workflows | Entity/channel mutation and curation stay in `store`; the API-facing read projection stays in `view`; admission, classification, evaluation, and seeds own their workflows. |
 | Trusted network | `fli.network` | Immutable outgoing-follow snapshots, derived support/ranking analysis, and its read model. `provenance` owns the canonical JSON, file hash, checkpoint, and UTC identity shared by those frozen data products. |
-| Evidence | `fli.evidence` | Deterministic Feed materialization, exact structural Events, artifact-anchored Development projection, and the end-to-end refresh client. Exact Events remain the immutable provenance unit. |
+| Evidence | `fli.evidence` | Deterministic Feed materialization, exact structural Events, artifact-anchored Development projection, and the end-to-end refresh client. Exact Events remain the immutable provenance unit. An artifact-based Development belongs to the artifact's earliest accepted Event day, so later disclosures cannot republish the same Development ID. |
 | Artifacts | `fli.evidence.artifacts.store`, `.fetch`, and `.cli` | Catalog/provenance persistence, retrieval/extraction, and the machine command adapter are separate boundaries. |
 | Daily Development rank | `fli.scoring.development_attention` | Versioned lexicographic Development ordering. Production uses `daily-development-rank-v1`; the earlier exact-Event `daily-rank-v2` remains historical lineage only. |
 | Audience routing | `fli.routing` | Independent Engineering/Investment relevance decisions, durable runs, audit view, and active prompt. |
@@ -87,9 +89,9 @@ do not recreate generic `pages/` or `components/` buckets.
 | Development read model | No independent writer | Feed, routing, artifact UI | Deterministic projection over exact Events plus accepted canonical artifacts. It is cached in process and rebuilt when either source store changes; there is deliberately no separate Development database yet. |
 | `data/derived/audience-routing/*/routing.db` | `fli audience-routing` | Feed, Insights, rank evaluation | Immutable per-day runs. Current-compatible runs bind their source Feed/Event publication and full-day Development rank-input SHA. |
 | `data/derived/insights/investment-agent-traces/<day>/*.json` | `fli insights run-investment-agent` | Investment import, operator audit | Durable exact request/response envelopes for every model turn, plus response IDs, retryable and terminal request failures, memo calls and packets, usage, cost, and the validated final result. |
-| `data/derived/insights/investment-agent.db` | `fli insights run-investment-agent` / `import-investment-trace` | Investment Insights API/UI | Durable company-aware successor runs. Each row binds the Development, prompt/model identity, compact-universe and evidence hashes, exact memo calls, token/cache/cost telemetry, and validated result. A per-day publication records the complete current Investment-routed cohort. Publication and readers require the current prompt version, so historical rows remain auditable but cannot satisfy the v14 product boundary. |
+| `data/derived/insights/investment-agent.db` | `fli insights run-investment-agent` / `import-investment-trace` | Investment Insights API/UI | Durable company-aware successor runs. Each row binds the Development, prompt/model identity, compact-universe and evidence hashes, exact memo calls, token/cache/cost telemetry, and validated result. A per-day publication records the complete current Investment-routed cohort and rejects cross-day reuse of a Development ID. Publication and readers require the current prompt version, so historical rows remain auditable but cannot satisfy the v14 product boundary. |
 | `data/derived/insights/engineering-agent-traces/<day>/*.json` | `fli insights run-engineering-agent` | Engineering import, operator audit | Durable exact request/response envelope for the single model call, plus response ID, retryable and terminal request failures, the surface map hash, usage, cost, and the validated final result. |
-| `data/derived/insights/engineering-agent.db` | `fli insights run-engineering-agent` / `import-engineering-trace` | AI Engineering Insights API/UI | Durable surface-linked runs. Each row binds the Development, prompt/model identity, surface-map and evidence hashes, token/cache/cost telemetry, and validated result. A per-day publication records the complete current AI Engineering-routed cohort under the same all-or-nothing contract as Investment. |
+| `data/derived/insights/engineering-agent.db` | `fli insights run-engineering-agent` / `import-engineering-trace` | AI Engineering Insights API/UI | Durable surface-linked runs. Each row binds the Development, prompt/model identity, surface-map and evidence hashes, token/cache/cost telemetry, and validated result. A per-day publication records the complete current AI Engineering-routed cohort under the same all-or-nothing and cross-day uniqueness contracts as Investment. |
 | `data/derived/insights/pdf-cache/` | `GET /api/insights/report.pdf` | Daily Insight PDF downloads | Rebuildable content-addressed PDFs keyed by report schema, read schema, date, audience, and published-cohort result hash; atomic writes make concurrent first requests safe. |
 | `data/derived/web-event-cache/` | Event API read model | Event API and Feed UI | Optional compressed exact-view cache, automatically invalidated by source database versions and projection code. Safe to delete; source stores remain authoritative. |
 

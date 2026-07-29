@@ -438,6 +438,29 @@ export default function HowNarrative({
             faster briefs. A longer wait gives the network more time. For now,
             I am keeping the simpler rule.
           </p>
+
+          <p className="how-read-sub mono">
+            Fold one story back together
+          </p>
+          <p>
+            Two posts become one Development only when they point to the exact
+            same link. That rule is deliberate. It means the system can never
+            invent a connection between two things that merely look related.
+          </p>
+          <p>
+            The cost appears when one event is covered widely. On 24 July,
+            TIME, the Guardian and the Wall Street Journal each published their
+            own article about the same OpenAI agent incident, so each one
+            arrived as a separate Development and the brief carried four
+            versions of a single story, pointing at the same companies.
+          </p>
+          <p>
+            The fix belongs at the end rather than the start. Once a day&rsquo;s
+            Insights are written, they can be compared and the repeats folded
+            together. I would rather show a duplicate a reader can see than
+            silently merge two stories that were never the same, so the
+            grouping rule stays exact until that pass exists.
+          </p>
         </article>
 
         <article className="how-read-block">
