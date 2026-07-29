@@ -283,11 +283,25 @@ Rules:
   Provider secrets and delivery metadata never enter the reading surface.
 
   The exported A4 workbook uses the same paper-white, ink, capital-blue,
-  flat-rule language. Its opening combines the report title, audience/date, and
-  a ranked list of clickable Insight titles. Each title jumps to one
-  decision-analysis page followed by a deterministic source ledger. PDF text
-  remains vector and selectable, with an embedded mixed-script fallback for
-  citation titles outside WinAnsi.
+  flat-rule language, translated to print by an explicit label rail. Every page
+  is a 25 mm mono label rail plus a 7 mm gutter beside a ~137 mm body measure;
+  the rail carries the rank, `WHAT HAPPENED`, `MECHANISM n OF m`, and the
+  provenance labels so the reading column keeps a book measure instead of
+  running the full page width. Display is Times, prose is the working
+  grotesque, and every identifier, count, label, and provenance line is mono.
+  The cover states the title, audience/date, a four-cell numeral band
+  (surfaced, read-throughs, screened, memos), one `METHOD` note carrying the
+  model/effort/prompt signature exactly once, and the ranked clickable index
+  with each Insight's tickers. Each Insight opens its own page: title, mono
+  provenance line, capital-blue rule, what happened, then one card per company
+  read-through — direction-coloured accent rule and badge, mono ticker, the
+  linked standing bet, and the model's impact — closing with the inline
+  `Sources and audit trail` section whose right-hand note is the screening
+  funnel. Section rules, mechanisms with their first card, and the complete
+  audit trail are kept together so no page carries chrome, a stray rule, or a
+  single orphaned row. Per-Insight telemetry never appears in the body. PDF
+  text remains vector and selectable, with an embedded mixed-script fallback
+  for citation titles outside WinAnsi.
 - **BIT Lens:** two ruled views of one public client-context workspace. The
   **Research brief** remains a text-first public-research briefing without
   diagrams, dashboards, or collapsed holding detail. It preserves the full

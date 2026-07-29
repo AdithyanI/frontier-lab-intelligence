@@ -90,18 +90,29 @@ Out of scope: a new UI page, a new database engine, PDF and Slack delivery
 (add only if the day allows), regenerating anything on the Investment side,
 restoring any deleted editorial code.
 
+## Resolved questions
+
+1. **Store.** Answered: a thin sibling store. `engineering_agent_runs.py`
+   mirrors the Investment run/publication contract without memo calls or a
+   two-stage trace, so the published Investment cohort was never at risk.
+2. **How many land?** Answered on real data: 4 of 10 on 2026-07-21, with 6
+   surface landings. The estimate was 3-5. High enough to demo, low enough to
+   prove the filter works.
+3. **Same page or its own?** Answered: reuse. `/insights?audience=ai_engineering`
+   dispatches on `content_kind`.
+
 ## Open questions
 
-1. **Store.** Copy the shape of `investment_agent_runs.py` or generalize it?
-   Recommendation: a thin sibling store. The Engineering run has no memo
-   calls and no two-stage trace, so generalizing now buys nothing and risks
-   the published Investment cohort.
-2. **How many decisions?** Ten is a guess. Write them first, then check how
-   many of the 2026-07-21 Engineering-positive Developments hit at least one.
-   From the routing reasons, expect roughly 3-5 of 10 to hit — high enough to
-   demo, low enough to prove the filter works.
-3. **Same page or its own?** The Insights page is already audience-parameterized
-   (`?audience=ai_engineering`). Reuse it.
+1. **Sol/high versus Luna.** Untested. The Investment boundary uses Sol/xhigh;
+   Engineering uses Sol/high on the argument that it is taste plus one sentence
+   of technical writing, not retrieval or a multi-hop causal chain. Running the
+   same day on Luna/medium would settle it for about $0.10.
+2. **One day only.** 2026-07-21 is the only cohort. The surface distribution
+   (OPS, MODEL, AGENT used; DATA, RETR, EXTR, EVAL unused) is a one-day sample
+   and may simply reflect what frontier labs published that day.
+3. **Suppression calibration.** 6 of 10 suppressed. Every suppression reads
+   correct on inspection, but nobody has checked the inverse: whether anything
+   suppressed should have surfaced.
 
 ## Decisions
 
@@ -113,8 +124,9 @@ restoring any deleted editorial code.
 
 ## Next step
 
-The tab is live at `/bit-lens/aion`. Once the seven surfaces read right, the
-daily agent is small: one call returning a surface id and a sentence.
+The path is live end to end. The remaining work is calibration, not
+construction: run a second day, and run one day on Luna to test the model
+choice.
 
 ## Progress log
 
@@ -130,3 +142,48 @@ daily agent is small: one call returning a surface id and a sentence.
   `aionStack.ts`, `AionStackPage.tsx`, tab and route wiring, `bit-lens.css`.
   Build clean; BIT Lens routes 200. No backend, no agent, no change to the
   Investment path.
+- 2026-07-29: [DONE] Backend spine and full wiring, built independently of the
+  in-flight Investment work.
+  - `docs/references/aion-surfaces.json` is the canonical surface map, read by
+    the Python prompt builder and the store. It carries the public sources it
+    was inferred from and an explicit boundary line stating it is not knowledge
+    of BIT's private architecture.
+  - `prompts/engineering_surface_analysis.txt`: long stable context (who BIT
+    is, what Aion is, who the reader is, the seven surfaces, where evidence
+    comes from, what to surface, what to suppress, transfer discipline), tiny
+    output. Direct instructions and delimiters, zero-shot, no chain-of-thought
+    scaffolding, per OpenAI reasoning-model guidance.
+  - `engineering_agent.py`: one Responses call, no tool loop. Rejects any
+    `surface_id` outside the map, more than two landings, a repeated surface, a
+    surfaced result with no landing, and a suppression with no reason.
+  - `engineering_agent_runs.py`: sibling store, atomic day publication, read
+    projection that resolves `surface_name` from the map so the model never
+    restates it.
+  - `cli.py`: `run-engineering-agent`, `import-engineering-trace`,
+    `engineering-summary`, `aion-surfaces`; `contract` now reports both
+    boundaries.
+  - `app.py`: `/api/insights` and `/api/insights/dates` dispatch on audience.
+    PDF and delivery stay Investment-only and say so.
+  - `EngineeringAgentInsight.tsx` (new file, to stay clear of the other
+    agent's `InsightsPage.tsx` edits) plus three surgical edits to
+    `InsightsPage.tsx`, the union type in `shared/api/insights.ts`, and a
+    scoped `.engineering-agent-*` block in `insights.css`.
+- 2026-07-29: [MEASURED] 2026-07-21 top ten. 4 surfaced, 6 suppressed, 6
+  landings, 0 failures, $0.531415 — about a sixth of the Investment cohort's
+  $2.78. The field does not collapse, which is the failure this project was
+  designed to avoid. The strongest evidence is ranks 3 and 14: both are Gemini
+  3.6 Flash, the documented release surfaced on MODEL and AGENT, and the bare
+  announcement was suppressed for carrying no measured price-performance data.
+  Same subject, opposite decisions, both correct.
+- 2026-07-29: [FIXED] The first cohort lost 3 of 10 runs to a 22-word headline
+  cap invented without measurement. The rejected headlines were 23 words and
+  good. A technical headline naming a lab, a model, and a measured change needs
+  more words than an investment one. The prompt now states a 28-word budget and
+  the validator rejects at 30. This is the same mistake as the collapsed
+  enums — a number chosen before looking at the data.
+- 2026-07-29: [MEASURED] Cross-run prompt caching does not happen at this
+  endpoint. Engineering reports 0 cached tokens, but so does turn 1 of every
+  Investment run; Investment's 28% is entirely within-run reuse via
+  `previous_response_id`. A single-turn design therefore cannot cache here, and
+  0% is expected rather than a defect. The serial warm-up call was kept for
+  fail-fast, not for cache.
