@@ -1137,13 +1137,18 @@ function InvestmentAgentMechanism({
 
 function InvestmentAgentProcess({ item }: { item: InvestmentAgentItem }) {
   const rejectedCount = item.rejected_after_memo.length
+  const retainedCount = new Set(
+    item.company_assessments.flatMap((assessment) =>
+      assessment.exposures.map((exposure) => exposure.ticker),
+    ),
+  ).size
   return (
     <details className="investment-agent-process">
       <summary>
         <span>How the agent got here</span>
         <span className="mono">
           {item.telemetry.company_universe_count} screened → {item.telemetry.memo_count} memos opened
-          {' '}→ {item.company_assessments.length} retained
+          {' '}→ {retainedCount} retained
           {rejectedCount > 0 ? ` → ${rejectedCount} rejected` : ''}
         </span>
       </summary>
