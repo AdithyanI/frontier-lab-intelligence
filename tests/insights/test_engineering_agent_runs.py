@@ -160,3 +160,26 @@ def test_publication_rejects_cross_day_development_reuse(tmp_path: Path):
             db_path=db_path,
         )
 
+    conn = engineering_agent_runs.connect(db_path)
+    with conn:
+        conn.execute(
+            """INSERT INTO engineering_agent_day_publication (
+                   day, audience, selection_kind, selection_limit,
+                   selection_sha256, candidate_count, published_at
+               ) VALUES (
+                   ?, 'ai_engineering', 'top_engineering_routed', 1, ?, 1, ?
+               )""",
+            (next_day, "legacy-selection", "2026-07-22T12:00:00+00:00"),
+        )
+        conn.execute(
+            """INSERT INTO engineering_agent_day_publication_item (
+                   day, development_id, daily_rank
+               ) VALUES (?, ?, 2)""",
+            (next_day, DEVELOPMENT_ID),
+        )
+    conn.close()
+
+    assert [
+        item["day"]
+        for item in engineering_agent_runs.dates_payload(db_path=db_path)["dates"]
+    ] == [DAY]

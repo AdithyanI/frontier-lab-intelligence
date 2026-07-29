@@ -200,6 +200,28 @@ def test_publication_rejects_cross_day_development_reuse(tmp_path: Path):
             db_path=db_path,
         )
 
+    conn = investment_agent_runs.connect(db_path)
+    with conn:
+        conn.execute(
+            """INSERT INTO investment_agent_day_publication (
+                   day, audience, selection_kind, selection_limit,
+                   selection_sha256, candidate_count, published_at
+               ) VALUES (?, 'investment', 'top_investment_routed', 1, ?, 1, ?)""",
+            (next_day, "legacy-selection", "2026-07-22T12:00:00+00:00"),
+        )
+        conn.execute(
+            """INSERT INTO investment_agent_day_publication_item (
+                   day, development_id, daily_rank
+               ) VALUES (?, ?, 2)""",
+            (next_day, DEVELOPMENT_ID),
+        )
+    conn.close()
+
+    assert [
+        item["day"]
+        for item in investment_agent_runs.dates_payload(db_path=db_path)["dates"]
+    ] == [DAY]
+
 
 def test_import_trace_requires_every_retained_company_to_have_an_opened_memo(
     tmp_path: Path,

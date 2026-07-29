@@ -419,14 +419,23 @@ def _latest_rows(conn: sqlite3.Connection) -> list[sqlite3.Row]:
                       ) AS recency_order
                FROM engineering_agent_run AS run
                WHERE run.prompt_version = ?
+           ),
+           canonical_publication AS (
+               SELECT publication.*,
+                      ROW_NUMBER() OVER (
+                          PARTITION BY development_id
+                          ORDER BY day, daily_rank
+                      ) AS publication_order
+               FROM engineering_agent_day_publication_item AS publication
            )
            SELECT current.*
            FROM current
-           JOIN engineering_agent_day_publication_item AS publication
+           JOIN canonical_publication AS publication
              ON publication.day = current.day
             AND publication.development_id = current.development_id
             AND publication.daily_rank = current.daily_rank
            WHERE current.recency_order = 1
+             AND publication.publication_order = 1
            ORDER BY current.day, current.daily_rank, current.development_id""",
         (CURRENT_PROMPT_VERSION,),
     ).fetchall()
