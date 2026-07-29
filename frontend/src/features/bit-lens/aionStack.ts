@@ -16,6 +16,12 @@ export interface AionSurface {
   scope: string
 }
 
+export interface AionSource {
+  title: string
+  url: string
+  publisher: string
+}
+
 export const AION_SURFACES: readonly AionSurface[] = [
   {
     id: 'DATA',
@@ -72,5 +78,28 @@ export const AION_SURFACES: readonly AionSurface[] = [
       'Running it safely in production — what an agent may touch, plus tracing, monitoring and failure recovery.',
     scope:
       'Permissions and entitlements over sensitive or licensed data, scoped tool access and sandboxing for agents, audit trails, tracing across multi-step runs, latency and error monitoring, and incident recovery for scheduled jobs.',
+  },
+]
+
+export const AION_BOUNDARY =
+  'BIT describes Aion publicly as an agentic research platform its investment team uses daily. Its internals are not public. These surfaces are inferred from BIT\'s public AI Engineer and Data Platform roles and its product descriptions. They are a map for judging where a development would land, never a claim about BIT\'s private architecture.'
+
+export const AION_RESEARCHED_AT = '2026-07-29'
+
+export const AION_SOURCES: readonly AionSource[] = [
+  {
+    title: 'AI Engineer (m/f/d)',
+    url: 'https://bitcap.jobs.personio.com/job/2685548?language=en',
+    publisher: 'BIT Capital',
+  },
+  {
+    title: 'Data Platforms Engineer',
+    url: 'https://bitcap.jobs.personio.com/job/1833794?language=en',
+    publisher: 'BIT Capital',
+  },
+  {
+    title: 'Investment approach',
+    url: 'https://bitcap.com/en/investmentansatz',
+    publisher: 'BIT Capital',
   },
 ]
