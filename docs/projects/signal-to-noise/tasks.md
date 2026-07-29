@@ -58,11 +58,12 @@ suppression rate is already 35%.
 - The BIT Capital on-site is 2026-07-30. Published data must stay coherent and
   citable until then. Prefer a measured, explainable finding over a shipped but
   unvalidated change.
-- Live published state, verified 2026-07-29 against the running API:
+- Live published state, verified 2026-07-29 against the running API after the
+  v15 refresh:
   - Investment: 22 days, 2026-07-05 → 2026-07-26, 220 candidates,
-    142 surfaced, 78 suppressed.
-  - AI Engineering: 8 days, 2026-07-19 → 2026-07-26, 80 candidates,
-    31 surfaced, 49 suppressed.
+    130 surfaced, 90 suppressed.
+  - AI Engineering: 8 days, 2026-07-19 → 2026-07-26, 79 canonical
+    Developments, 30 surfaced and 49 suppressed.
 - Key files:
   - `src/fli/insights/prompts/investment_company_analysis.txt` —
     `# Suppression and rejection` at line 407, `## decision` at line 467.
@@ -96,7 +97,7 @@ suppression rate is already 35%.
 
 ## Milestones
 
-- [ ] M1 — Rotate the evidence axis. Five edits, two files, no version bump
+- [x] M1 — Rotate the evidence axis. Five edits, two files, no version bump
       yet. Acceptance: the five edits in *The five edits* below are applied
       verbatim and `./scripts/check-fast.sh` prints OK. Do **not** bump
       `PROMPT_VERSION` during M1; testing runs against a scratch DB, and the
@@ -114,7 +115,7 @@ suppression rate is already 35%.
 
       If either control moves, the edit is wrong. Stop and re-diagnose rather
       than adjusting the expectations.
-- [ ] M3 — Schema reorder tested separately from the prompt edits. Acceptance:
+- [x] M3 — Schema reorder tested separately from the prompt edits. Acceptance:
       run the same four items with only the `decision`-first schema change and
       no prompt change, so the two effects are not confounded. Records whether
       field ordering matters for a reasoning model at all. About $0.88.
@@ -126,7 +127,7 @@ suppression rate is already 35%.
       the rule sits inside `## The Investment routing boundary` and the
       Engineering judgment is provably unchanged on a sample. Validate:
       `fli audience-routing run --dry-run` then a bounded scratch run.
-- [ ] M6 — Publication decision, all-or-nothing. Acceptance: an explicit go or
+- [x] M6 — Publication decision, all-or-nothing. Acceptance: an explicit go or
       no-go on bumping both version constants and re-running all 22 days at
       about $49, with the risk recorded here. There is no partial option: see
       the version-pin trap in Validation.
@@ -403,12 +404,13 @@ run and checking they are no longer interchangeable.
 
 ## Open Questions / Blockers
 
-- Whether to re-run the full 22-day corpus before the on-site. Roughly $49 and
-  it would bake a grouping change made on 2026-07-29 at 14:59 into every day
-  presented. Current recommendation is no; decide at M6.
-- Whether the 78 existing suppressions contain false negatives. Never audited,
-  on either audience. This is the inverse of the current work and would make
-  the calibration claim two-sided.
+- Whether the 90 current v15 suppressions contain false negatives after the
+  evidence-axis rotation. The old v14 suppression set was audited, but the new
+  set still needs a bounded qualitative read before claiming calibrated
+  precision.
+- Whether an Investment-only router change is still worth adding after the
+  final Insight gate. Do not tighten the shared router merely to reproduce a
+  judgment the company-aware stage already owns.
 
 ## Current Batch
 
@@ -420,20 +422,20 @@ run and checking they are no longer interchangeable.
 | done | Finding 4 — false negatives; inconsistent bar inside `NVDA-B4` | parent | Progress Log |
 | done | Finding 5 — suppressed material corporate events (Meta/Anthropic, Etched, Kimi capacity) | parent | Progress Log |
 | done | Diagnose root cause and write the five edits | parent | The five edits |
-| todo | M1 — apply the five edits, no version bump | worker | The five edits |
-| todo | M2 — run the four pre-registered tests to a scratch DB (~$0.88) | worker | Milestones |
+| done | M1 — apply the five edits, no version bump | parent | The five edits |
+| done | M3 — isolate and test decision-first schema ordering | parent | Milestones |
+| in progress | M4 — scratch cohorts complete; changed decisions still need a bounded human audit | parent | Progress Log |
+| done | M6 — publish the complete 22-day v15 cohort | parent | Progress Log |
+| failed | M2 — the pre-registered four-item contract did not fully pass | parent | Progress Log |
 | todo | Continue auditing for further evidence-class defects | parent | |
 
 ## Backlog / Remaining Work
 
-- [ ] M4 — two-day false-negative measurement on 2026-07-24 and 2026-07-26.
+- [ ] M4 — finish the bounded human read of changed decisions from the July 24
+      and July 26 scratch cohorts.
 - [ ] M5 — narrow Investment-only router rule, gated on M2–M4.
-- [ ] M6 — explicit go or no-go on the full 22-day re-run, with cost and risk.
-- [ ] Audit the 78 existing suppressions for false negatives.
-- [ ] Update `docs/STATUS.md` if the evidence bar becomes a published contract.
-      Note that STATUS.md is already stale: it describes Investment as a single
-      July 21 top ten and Engineering as having no second day, while the live
-      product serves 22 and 8 days respectively.
+- [ ] Audit the 90 current v15 suppressions for false negatives.
+- [x] Update `docs/STATUS.md` with the published v15 contract and counts.
 - [ ] Closeout: review and finalize `learnings.md`, then archive this project
       directory with the Project skill's archive helper.
 
@@ -467,6 +469,35 @@ run and checking they are no longer interchangeable.
 
 ## Progress Log
 
+- 2026-07-29: [DONE] **Investment v15 is fully published and inspectable.**
+  The complete 22-day Sol/xhigh refresh produced 220 imported runs and one
+  atomic publication spanning July 5–26: 130 surfaced and 90 suppressed, with
+  no unresolved model failures. Stored telemetry is 8,057,639 input tokens,
+  2,796,505 cached input tokens, 653,420 output tokens, 544,327 reasoning
+  tokens, and $47.306522. SQLite integrity and foreign-key checks are clean.
+  A transient old-owner conflict exposed that multi-day refresh publication
+  was replacing days sequentially; the publisher now validates and replaces
+  the whole day set in one transaction, with a regression test proving that
+  canonical ownership can move without a partial cohort.
+- 2026-07-29: [DONE] **Suppression is now a first-class audit view in both
+  audience readers.** The existing stored `no_match_reason` fields were already
+  complete; the missing product affordance was a status control. The live UI
+  now exposes a compact `Brief | Suppressed` switch with counts, keeps status
+  in the URL, and renders the exact stored reason under `No company connection
+  cleared the bar` or `No surface cleared the bar`. Verified live on July 24:
+  Investment 7/3 and Engineering 6/4.
+- 2026-07-29: [DONE] **M1, M3 and M4 executed; the original M2 contract did not
+  fully pass.** Decision-first ordering alone did not fix the known travel
+  false positive. With the prompt rotation, travel suppressed and the Huawei
+  control surfaced, but Etched still suppressed because the packet did not
+  establish its competing-hardware identity, and the Microsoft control
+  surfaced without retaining the pre-registered `MSFT-B5` mapping. The
+  July 24 and July 26 scratch cohorts produced 7/3 and 3/7 surface/suppress
+  splits. Adi explicitly chose the full refresh after reviewing this evidence;
+  do not rewrite M2 as a pass.
+- 2026-07-29: [RESOLVED] The earlier version-pin blocker is closed. Both
+  Investment constants are `investment-agent-v15`, all 22 days have current
+  runs, the always-on service was restarted, and the API serves v15.
 - 2026-07-29: [DONE] **AI Engineering audited (8 days, 80 candidates, 31
   surfaced, 49 suppressed). It is in better shape than Investment on evidence
   quality, but has one severe concentration defect and one honest coverage

@@ -188,18 +188,23 @@ def test_run_range_warms_one_target_then_fans_out(monkeypatch, tmp_path: Path):
         lambda **kwargs: [
             {
                 "daily_rank": rank,
-                "development_id": f"{rank:064d}",
+                "development_id": (
+                    f"{kwargs['day'].replace('-', '')}{rank:056d}"
+                ),
             }
             for rank in range(1, kwargs["limit"] + 1)
         ],
     )
     monkeypatch.setattr(
         investment_agent.investment_agent_runs,
-        "publish_day",
-        lambda **kwargs: {
-            "day": kwargs["day"],
-            "candidate_count": len(kwargs["candidates"]),
-        },
+        "publish_days",
+        lambda **kwargs: [
+            {
+                "day": item["day"],
+                "candidate_count": len(item["candidates"]),
+            }
+            for item in kwargs["publications"]
+        ],
     )
 
     result = investment_agent.run_range(
@@ -261,7 +266,7 @@ def test_run_range_dry_run_resolves_targets_without_writes_or_model_calls(
     )
     monkeypatch.setattr(
         investment_agent.investment_agent_runs,
-        "publish_day",
+        "publish_days",
         lambda **_kwargs: pytest.fail("dry-run published a day"),
     )
     trace_root = tmp_path / "traces"
@@ -307,11 +312,14 @@ def test_run_range_preserves_individual_failures(monkeypatch, tmp_path: Path):
     )
     monkeypatch.setattr(
         investment_agent.investment_agent_runs,
-        "publish_day",
-        lambda **kwargs: {
-            "day": kwargs["day"],
-            "candidate_count": len(kwargs["candidates"]),
-        },
+        "publish_days",
+        lambda **kwargs: [
+            {
+                "day": item["day"],
+                "candidate_count": len(item["candidates"]),
+            }
+            for item in kwargs["publications"]
+        ],
     )
 
     result = investment_agent.run_range(
@@ -361,11 +369,14 @@ def test_run_range_selects_top_investment_routes_not_raw_daily_ranks(
     monkeypatch.setattr(investment_agent, "run_one", fake_run_one)
     monkeypatch.setattr(
         investment_agent.investment_agent_runs,
-        "publish_day",
-        lambda **kwargs: {
-            "day": kwargs["day"],
-            "candidates": kwargs["candidates"],
-        },
+        "publish_days",
+        lambda **kwargs: [
+            {
+                "day": item["day"],
+                "candidates": item["candidates"],
+            }
+            for item in kwargs["publications"]
+        ],
     )
 
     result = investment_agent.run_range(

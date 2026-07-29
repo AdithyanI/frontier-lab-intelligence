@@ -129,9 +129,13 @@ test('Insights reuses the Feed week strip without explanatory reader clutter', (
   assert.match(appStyles, /\.insight-calendar \.feed-day:only-child \{ grid-column: 7; \}/)
 })
 
-test('Insights keeps status in the audit URL without exposing a reader control strip', () => {
+test('Insights keeps status in the audit URL and exposes a compact suppression review switch', () => {
   assert.match(insightSource, /const status = parseStatus\(searchParams\.get\('status'\)\)/)
   assert.match(insightSource, /nextParams\.set\('status', nextStatus\)/)
+  assert.match(insightSource, /className="insight-status-switch"/)
+  assert.match(insightSource, />Brief<\/span>/)
+  assert.match(insightSource, />Suppressed<\/span>/)
+  assert.match(insightSource, /currentRun\.suppressed_development_count/)
   assert.doesNotMatch(insightSource, /InsightStatusMenu/)
   assert.doesNotMatch(insightSource, /role="menuitemradio"/)
 })

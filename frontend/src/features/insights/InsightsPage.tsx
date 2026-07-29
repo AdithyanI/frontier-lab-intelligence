@@ -854,6 +854,7 @@ export default function Insights() {
     currentData && isInvestmentAgentResponse(currentData) ? currentData : null
   const engineeringAgentData =
     currentData && isEngineeringAgentResponse(currentData) ? currentData : null
+  const currentRun = currentData?.run ?? null
 
   useEffect(() => {
     if (audience !== 'investment' || Object.keys(investmentBetIndex).length > 0) return
@@ -1060,6 +1061,29 @@ export default function Insights() {
             loading={datesLoading}
           />
         </section>
+      )}
+
+      {currentRun && (
+        <div className="insight-status-switch" role="group" aria-label="Insight decision view">
+          <button
+            type="button"
+            className={status === 'kept' ? 'is-active' : ''}
+            aria-pressed={status === 'kept'}
+            onClick={() => setView(audience, selectedDate, 'kept')}
+          >
+            <span>Brief</span>
+            <strong>{currentRun.surfaced_development_count}</strong>
+          </button>
+          <button
+            type="button"
+            className={status === 'suppressed' ? 'is-active' : ''}
+            aria-pressed={status === 'suppressed'}
+            onClick={() => setView(audience, selectedDate, 'suppressed')}
+          >
+            <span>Suppressed</span>
+            <strong>{currentRun.suppressed_development_count}</strong>
+          </button>
+        </div>
       )}
 
       {datesError && (

@@ -464,6 +464,50 @@
 
 .insight-calendar { margin-top: 16px; }
 
+.insight-status-switch {
+  display: flex;
+  justify-content: flex-end;
+  gap: 20px;
+  min-height: 44px;
+  margin-top: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.insight-status-switch button {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  gap: 8px;
+  padding: 0 2px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  transition: border-color 150ms var(--ease-out), color 150ms var(--ease-out);
+}
+
+.insight-status-switch button:hover { color: var(--ink); }
+
+.insight-status-switch button.is-active {
+  border-bottom-color: var(--blue-ink);
+  color: var(--ink);
+}
+
+.insight-status-switch button:focus-visible {
+  outline: 2px solid var(--blue-mid);
+  outline-offset: 2px;
+}
+
+.insight-status-switch strong {
+  color: inherit;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 500;
+}
+
 .insight-list {
   margin-top: 32px;
   border-top: 1px solid var(--border-strong);

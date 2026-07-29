@@ -1098,19 +1098,20 @@ def run_range(
             ]
             for day in requested_days
         }
-        for day in requested_days:
-            if (
-                day in failed_days
-                or len(compact_by_day[day]) != len(targets_by_day[day])
-            ):
-                continue
-            publications.append(
-                investment_agent_runs.publish_day(
-                    day=day,
-                    candidates=targets_by_day[day],
-                    selection_limit=top_ranked,
-                    db_path=db_path,
-                )
+        publishable = [
+            {
+                "day": day,
+                "candidates": targets_by_day[day],
+                "selection_limit": top_ranked,
+            }
+            for day in requested_days
+            if day not in failed_days
+            and len(compact_by_day[day]) == len(targets_by_day[day])
+        ]
+        if publishable:
+            publications = investment_agent_runs.publish_days(
+                publications=publishable,
+                db_path=db_path,
             )
     return {
         "schema_version": "investment-agent-batch-v2",

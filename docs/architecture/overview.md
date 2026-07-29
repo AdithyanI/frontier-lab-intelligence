@@ -56,7 +56,7 @@ or reinterpret its upstream evidence.
 | Artifacts | `fli.evidence.artifacts` | Canonical source links, lineage, retrieval, and extracted text. |
 | Daily Development rank | `fli.scoring.development_attention` | Versioned, inspectable lexicographic ordering of canonically published Developments. |
 | Audience routing | `fli.routing` | Independent AI Engineering and Investment relevance decisions with durable runs. |
-| Insights | `fli.insights` | Separate Investment and AI Engineering agents with strict result validation, exact traces, atomic daily publication, and audience-specific read models. |
+| Insights | `fli.insights` | Separate Investment and AI Engineering agents with strict result validation, exact traces, atomic cohort publication, and audience-specific read models. |
 | Delivery | `fli.delivery` | Explicitly confirmed Slack and email adapters over one canonical Daily Brief; credentials and provider behavior remain server-side. |
 | Provider diagnostics | `fli.diagnostics` | Non-mutating machine-readable checks of shared provider behavior, including reusable-prefix cache telemetry. |
 | Product adapters | `fli.web`, `fli.cli` | HTTP/UI composition and non-interactive commands; no domain truth belongs here. |
@@ -136,10 +136,13 @@ composition.
    Development and company-memo links; the model does not generate URLs or
    restate the source ledger. The durable run binds evidence and universe
    hashes, exact memo calls, prompt/model identity, and token/cache/cost
-   telemetry. A complete v14 run atomically publishes its exact daily candidate
-   cohort; publication requires a completed v14 row for every member, and
-   readers project only v14 members. Partial reruns, legacy prompt versions,
-   and older out-of-lane results therefore cannot leak into the current day.
+   telemetry. A complete v15 run publishes its exact candidate cohort;
+   publication requires a completed v15 row for every member, and readers
+   project only v15 members. A multi-day refresh validates and replaces the
+   complete requested day set in one transaction, so canonical Development
+   ownership can move between days without exposing partial state. Partial
+   reruns, legacy prompt versions, and older out-of-lane results therefore
+   cannot leak into the current publication.
    `fli insights
    run-investment-agent` owns the production loop: it
    completes one warm request for the stable prompt key, runs the remaining
@@ -204,9 +207,10 @@ composition.
   publish Feed and Events once through the maximum requested date, route the
   complete range against that snapshot, preview each audience's exact cohort,
   then run the relevant audience agent. Each runner fans out targets with
-  bounded workers and publishes a day only after every requested target
-  succeeds. Several Evidence publishers must not compete for the same date
-  publication.
+  bounded workers. Investment replaces the complete requested day set
+  atomically after every target succeeds; AI Engineering publishes a day only
+  after every requested target for that day succeeds. Several Evidence
+  publishers must not compete for the same date publication.
 - **Exact Event identity:** quote, retweet, reply-parent, and first-party thread
   relationships may group evidence; shared topic or conversation text may not.
 - **Dynamic curation:** Feed and Event readers overlay current Registry state so

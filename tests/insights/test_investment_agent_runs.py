@@ -223,6 +223,91 @@ def test_publication_rejects_cross_day_development_reuse(tmp_path: Path):
     ] == [DAY]
 
 
+def test_multi_day_publication_can_atomically_move_development_ownership(
+    tmp_path: Path,
+):
+    db_path = tmp_path / "investment-agent.db"
+    next_day = "2026-07-22"
+    first = _trace()
+    second = _trace()
+    second["date"] = next_day
+    second["development_id"] = "e" * 64
+    second["daily_rank"] = 2
+    for name, trace in [("first", first), ("second", second)]:
+        path = tmp_path / f"{name}.json"
+        path.write_text(json.dumps(trace), encoding="utf-8")
+        investment_agent_runs.import_trace(path, db_path=db_path)
+    investment_agent_runs.publish_days(
+        publications=[
+            {
+                "day": DAY,
+                "candidates": [
+                    {"development_id": DEVELOPMENT_ID, "daily_rank": 1}
+                ],
+                "selection_limit": 1,
+            },
+            {
+                "day": next_day,
+                "candidates": [
+                    {"development_id": "e" * 64, "daily_rank": 2}
+                ],
+                "selection_limit": 1,
+            },
+        ],
+        db_path=db_path,
+    )
+
+    moved_first = _trace()
+    moved_first["date"] = next_day
+    moved_first["daily_rank"] = 3
+    moved_second = _trace()
+    moved_second["development_id"] = "e" * 64
+    moved_second["daily_rank"] = 4
+    for name, trace in [
+        ("moved-first", moved_first),
+        ("moved-second", moved_second),
+    ]:
+        path = tmp_path / f"{name}.json"
+        path.write_text(json.dumps(trace), encoding="utf-8")
+        investment_agent_runs.import_trace(path, db_path=db_path)
+
+    investment_agent_runs.publish_days(
+        publications=[
+            {
+                "day": DAY,
+                "candidates": [
+                    {"development_id": "e" * 64, "daily_rank": 4}
+                ],
+                "selection_limit": 1,
+            },
+            {
+                "day": next_day,
+                "candidates": [
+                    {"development_id": DEVELOPMENT_ID, "daily_rank": 3}
+                ],
+                "selection_limit": 1,
+            },
+        ],
+        db_path=db_path,
+    )
+
+    conn = investment_agent_runs.connect(db_path)
+    try:
+        assert [
+            tuple(row)
+            for row in conn.execute(
+                """SELECT day, development_id, daily_rank
+                   FROM investment_agent_day_publication_item
+                   ORDER BY day"""
+            )
+        ] == [
+            (DAY, "e" * 64, 4),
+            (next_day, DEVELOPMENT_ID, 3),
+        ]
+    finally:
+        conn.close()
+
+
 def test_import_trace_requires_every_retained_company_to_have_an_opened_memo(
     tmp_path: Path,
 ):

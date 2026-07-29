@@ -339,40 +339,87 @@ def publish_day(
     db_path: Path = DEFAULT_DB,
 ) -> dict[str, Any]:
     """Atomically publish one complete Investment-routed daily cohort."""
-    if not candidates:
-        raise ValueError("cannot publish an empty Investment cohort")
-    normalized = [
-        {
-            "development_id": str(item["development_id"]),
-            "daily_rank": int(item["daily_rank"]),
-        }
-        for item in candidates
+    return publish_days(
+        publications=[
+            {
+                "day": day,
+                "candidates": candidates,
+                "selection_limit": selection_limit,
+            }
+        ],
+        db_path=db_path,
+    )[0]
+
+
+def publish_days(
+    *,
+    publications: list[dict[str, Any]],
+    db_path: Path = DEFAULT_DB,
+) -> list[dict[str, Any]]:
+    """Atomically replace one or more complete Investment daily cohorts."""
+    if not publications:
+        raise ValueError("cannot publish an empty Investment day set")
+    normalized_publications: list[dict[str, Any]] = []
+    for publication in publications:
+        day = str(publication["day"])
+        candidates = publication["candidates"]
+        selection_limit = int(publication["selection_limit"])
+        if not candidates:
+            raise ValueError("cannot publish an empty Investment cohort")
+        normalized = [
+            {
+                "development_id": str(item["development_id"]),
+                "daily_rank": int(item["daily_rank"]),
+            }
+            for item in candidates
+        ]
+        if len({item["development_id"] for item in normalized}) != len(normalized):
+            raise ValueError("Investment publication repeats a Development")
+        if len({item["daily_rank"] for item in normalized}) != len(normalized):
+            raise ValueError("Investment publication repeats a daily rank")
+        normalized.sort(
+            key=lambda item: (item["daily_rank"], item["development_id"])
+        )
+        normalized_publications.append(
+            {
+                "day": day,
+                "candidates": normalized,
+                "selection_limit": selection_limit,
+                "selection_sha256": _sha256(
+                    {
+                        "audience": "investment",
+                        "selection_kind": "top_investment_routed",
+                        "selection_limit": selection_limit,
+                        "candidates": normalized,
+                    }
+                ),
+            }
+        )
+    days = [item["day"] for item in normalized_publications]
+    if len(days) != len(set(days)):
+        raise ValueError("Investment publication repeats a day")
+    development_ids = [
+        candidate["development_id"]
+        for publication in normalized_publications
+        for candidate in publication["candidates"]
     ]
-    if len({item["development_id"] for item in normalized}) != len(normalized):
-        raise ValueError("Investment publication repeats a Development")
-    if len({item["daily_rank"] for item in normalized}) != len(normalized):
-        raise ValueError("Investment publication repeats a daily rank")
-    normalized.sort(key=lambda item: (item["daily_rank"], item["development_id"]))
-    selection_sha256 = _sha256(
-        {
-            "audience": "investment",
-            "selection_kind": "top_investment_routed",
-            "selection_limit": selection_limit,
-            "candidates": normalized,
-        }
-    )
+    if len(development_ids) != len(set(development_ids)):
+        raise ValueError(
+            "cannot publish an Investment Development on more than one day"
+        )
+    replacement_days = set(days)
     conn = connect(db_path)
     try:
         repeated = conn.execute(
             f"""SELECT development_id, day
                 FROM investment_agent_day_publication_item
-                WHERE day != ?
+                WHERE day NOT IN ({",".join("?" for _ in replacement_days)})
                   AND development_id IN (
-                      {",".join("?" for _ in normalized)}
+                      {",".join("?" for _ in development_ids)}
                   )
                 ORDER BY day, development_id
                 LIMIT 1""",
-            (day, *(item["development_id"] for item in normalized)),
+            (*sorted(replacement_days), *development_ids),
         ).fetchone()
         if repeated is not None:
             raise ValueError(
@@ -380,71 +427,83 @@ def publish_day(
                 f"day: {repeated['development_id']} already belongs to "
                 f"{repeated['day']}"
             )
-        for item in normalized:
-            row = conn.execute(
-                """SELECT 1
-                   FROM investment_agent_run
-                   WHERE day = ?
-                     AND development_id = ?
-                     AND daily_rank = ?
-                     AND prompt_version = ?
-                   LIMIT 1""",
-                (
-                    day,
-                    item["development_id"],
-                    item["daily_rank"],
-                    CURRENT_PROMPT_VERSION,
-                ),
-            ).fetchone()
-            if row is None:
-                raise ValueError(
-                    "cannot publish an Investment candidate without a "
-                    "completed imported run"
-                )
+        for publication in normalized_publications:
+            for item in publication["candidates"]:
+                row = conn.execute(
+                    """SELECT 1
+                       FROM investment_agent_run
+                       WHERE day = ?
+                         AND development_id = ?
+                         AND daily_rank = ?
+                         AND prompt_version = ?
+                       LIMIT 1""",
+                    (
+                        publication["day"],
+                        item["development_id"],
+                        item["daily_rank"],
+                        CURRENT_PROMPT_VERSION,
+                    ),
+                ).fetchone()
+                if row is None:
+                    raise ValueError(
+                        "cannot publish an Investment candidate without a "
+                        "completed imported run"
+                    )
         now = _now()
         with conn:
-            conn.execute(
+            conn.executemany(
                 "DELETE FROM investment_agent_day_publication_item WHERE day = ?",
-                (day,),
+                [(day,) for day in days],
             )
-            conn.execute(
+            conn.executemany(
                 "DELETE FROM investment_agent_day_publication WHERE day = ?",
-                (day,),
+                [(day,) for day in days],
             )
-            conn.execute(
+            conn.executemany(
                 """INSERT INTO investment_agent_day_publication (
                        day, audience, selection_kind, selection_limit,
                        selection_sha256, candidate_count, published_at
                    ) VALUES (?, 'investment', 'top_investment_routed', ?, ?, ?, ?)""",
-                (
-                    day,
-                    selection_limit,
-                    selection_sha256,
-                    len(normalized),
-                    now,
-                ),
+                [
+                    (
+                        publication["day"],
+                        publication["selection_limit"],
+                        publication["selection_sha256"],
+                        len(publication["candidates"]),
+                        now,
+                    )
+                    for publication in normalized_publications
+                ],
             )
             conn.executemany(
                 """INSERT INTO investment_agent_day_publication_item (
                        day, development_id, daily_rank
                    ) VALUES (?, ?, ?)""",
                 [
-                    (day, item["development_id"], item["daily_rank"])
-                    for item in normalized
+                    (
+                        publication["day"],
+                        item["development_id"],
+                        item["daily_rank"],
+                    )
+                    for publication in normalized_publications
+                    for item in publication["candidates"]
                 ],
             )
     finally:
         conn.close()
-    return {
-        "schema_version": STORE_SCHEMA_VERSION,
-        "day": day,
-        "audience": "investment",
-        "selection_kind": "top_investment_routed",
-        "selection_limit": selection_limit,
-        "selection_sha256": selection_sha256,
-        "candidate_count": len(normalized),
-        "published_at": now,
-    }
+    return [
+        {
+            "schema_version": STORE_SCHEMA_VERSION,
+            "day": publication["day"],
+            "audience": "investment",
+            "selection_kind": "top_investment_routed",
+            "selection_limit": publication["selection_limit"],
+            "selection_sha256": publication["selection_sha256"],
+            "candidate_count": len(publication["candidates"]),
+            "published_at": now,
+        }
+        for publication in normalized_publications
+    ]
 
 
 def _open_readonly(path: Path) -> sqlite3.Connection | None:
