@@ -1087,6 +1087,30 @@ def test_events_api_traverses_exact_parent_tree_before_later_branches(
     monkeypatch.setattr(feed_store, "DEFAULT_FEED_DB", feed_db)
     monkeypatch.setattr(feed_store, "DEFAULT_REGISTRY_DB", registry)
     monkeypatch.setattr(feed_store, "DEFAULT_DERIVED_ROOT", empty_rankings)
+    monkeypatch.setattr(
+        feed_store.rankings_store,
+        "entity_network_context",
+        lambda: {
+            "snapshot_id": "test-network",
+            "snapshot_completed_at": "2026-07-12T00:00:00+00:00",
+            "network_source_total": 3,
+            "network_rank_total": 5,
+            "parent_snapshot_id": None,
+            "incremental": False,
+        },
+    )
+    monkeypatch.setattr(
+        feed_store.rankings_store,
+        "entity_network_ranks",
+        lambda: {
+            entity_id: {
+                "network_rank": entity_id,
+                "network_entities_below": 5 - entity_id,
+                "network_rank_total": 5,
+            }
+            for entity_id in range(1, 6)
+        },
+    )
     monkeypatch.setattr(event_store, "DEFAULT_FEED_DB", feed_db)
     monkeypatch.setattr(event_store, "DEFAULT_EVENTS_DB", events_db)
 

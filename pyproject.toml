@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Frontier Lab Intelligence — tracks frontier AI labs and key people, scores signal from their public output, delivers persona-tailored reports and alerts."
 requires-python = ">=3.13"
 dependencies = [
-    "fastapi==0.139.0",
+    "fastapi",
     "httpx>=0.28,<1",
     "numpy>=2,<3",
     "openai>=2.30,<3",
