@@ -41,8 +41,8 @@ DEFAULT_TOP_RANKED = 10
 DEFAULT_WORKERS = 9
 MAX_RESPONSE_ATTEMPTS = 3
 RETRYABLE_RESPONSE_STATUS_CODES = frozenset({408, 409, 429, 499})
-PROMPT_VERSION = "engineering-agent-v1"
-PROMPT_CACHE_KEY = "fli:engineering-agent:v1"
+PROMPT_VERSION = "engineering-agent-v2"
+PROMPT_CACHE_KEY = "fli:engineering-agent:v2"
 PROMPT_PATH = (
     REPO_ROOT
     / "src"
@@ -401,8 +401,8 @@ def _validate_final(
     headline = str(result.get("headline") or "").strip()
     if not headline or "\n" in headline:
         raise ValueError("the Engineering result has an empty headline")
-    if len(headline.split()) > 30:
-        raise ValueError("the Engineering headline is longer than 30 words")
+    if len(headline.split()) > 18:
+        raise ValueError("the Engineering headline is longer than 18 words")
     if not str(result.get("what_changed") or "").strip():
         raise ValueError("the Engineering result has an empty what_changed")
     decision = result.get("decision")
@@ -667,6 +667,15 @@ def run_days(
             )
     if not targets:
         raise ValueError("No AI Engineering analysis targets were selected.")
+
+    store_version = engineering_agent_runs.CURRENT_PROMPT_VERSION
+    if store_version != PROMPT_VERSION:
+        raise ValueError(
+            f"engineering_agent.PROMPT_VERSION is {PROMPT_VERSION} but the "
+            f"store reads {store_version}. Publishing would silently serve "
+            "rows from the older version. Update CURRENT_PROMPT_VERSION in "
+            "engineering_agent_runs.py."
+        )
 
     selection = {
         "audience": "ai_engineering",

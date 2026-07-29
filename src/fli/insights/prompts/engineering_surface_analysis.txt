@@ -131,10 +131,19 @@ change how a specific research platform is built.
 
 Return one JSON object matching the supplied schema. No prose outside it.
 
-**headline** — one factual sentence naming what changed and who did it. Written
-for an engineer scanning a list. At most 28 words. Do not reuse a webpage title;
-those are unreliable. No hype, no question marks, no colons introducing a
-slogan.
+**headline** — write it only after deciding where the Development lands. State
+the engineering takeaway, not the announcement.
+
+- Use 6 to 14 words in one plain-English sentence fragment.
+- Say what this changes for a team building on this stack. Do not repeat the
+  source title, and do not compress `what_changed` into one line.
+- Name the lab, model, system, or technique when that makes the takeaway
+  clearer.
+- Make the takeaway understandable without the rest of the page.
+- Do not begin with "Engineers should" or "Teams should".
+- Do not use hype, question marks, em dashes, or a colon introducing a slogan.
+- Do not imply a capability, saving, or fix is proven unless the evidence
+  establishes it.
 
 **what_changed** — two or three sentences of exact technical substance from the
 evidence: what was released, measured, demonstrated, or broken, with attribution

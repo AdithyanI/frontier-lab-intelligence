@@ -17,7 +17,7 @@ DEFAULT_DB = (
 SURFACE_PATH = REPO_ROOT / "docs" / "references" / "aion-surfaces.json"
 STORE_SCHEMA_VERSION = "engineering-agent-store-v1"
 READ_SCHEMA_VERSION = "engineering-agent-read-v1"
-CURRENT_PROMPT_VERSION = "engineering-agent-v1"
+CURRENT_PROMPT_VERSION = "engineering-agent-v2"
 TRACE_SCHEMA_VERSIONS = {"engineering-agent-trace-v1"}
 STATUSES = {"kept", "suppressed", "all"}
 RESULT_FIELDS = {
@@ -151,7 +151,7 @@ def _validate_trace(trace: dict[str, Any]) -> None:
     if set(final) != RESULT_FIELDS:
         raise ValueError("Engineering agent result does not match the v1 schema")
     headline = str(final.get("headline") or "").strip()
-    if not headline or "\n" in headline or len(headline.split()) > 30:
+    if not headline or "\n" in headline or len(headline.split()) > 18:
         raise ValueError("Engineering agent result has an invalid headline")
     if not str(final.get("what_changed") or "").strip():
         raise ValueError("Engineering agent result has an empty what_changed")

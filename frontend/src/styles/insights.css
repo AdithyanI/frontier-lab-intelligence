@@ -590,11 +590,13 @@
 }
 
 /* Company-aware Investment successor */
-.investment-agent-row {
+.investment-agent-row,
+.engineering-agent-row {
   grid-template-columns: 112px minmax(0, 1fr);
 }
 
-.investment-agent-rank a {
+.investment-agent-rank a,
+.engineering-agent-rank a {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -604,25 +606,32 @@
 }
 
 .investment-agent-rank a:hover,
-.investment-agent-rank a:focus-visible {
+.investment-agent-rank a:focus-visible,
+.engineering-agent-rank a:hover,
+.engineering-agent-rank a:focus-visible {
   color: var(--blue-ink);
 }
 
 .investment-agent-rank a:hover strong,
-.investment-agent-rank a:focus-visible strong {
+.investment-agent-rank a:focus-visible strong,
+.engineering-agent-rank a:hover strong,
+.engineering-agent-rank a:focus-visible strong {
   color: var(--blue-ink);
 }
 
-.investment-agent-rank a:focus-visible {
+.investment-agent-rank a:focus-visible,
+.engineering-agent-rank a:focus-visible {
   outline: 2px solid var(--blue-mid);
   outline-offset: 5px;
 }
 
-.investment-agent-body {
+.investment-agent-body,
+.engineering-agent-body {
   padding-bottom: 54px;
 }
 
-.investment-agent-head {
+.investment-agent-head,
+.engineering-agent-head {
   display: flex;
   max-width: 980px;
   align-items: flex-start;
@@ -630,30 +639,35 @@
   gap: 32px;
 }
 
-.investment-agent-head > div {
+.investment-agent-head > div,
+.engineering-agent-head > div {
   min-width: 0;
 }
 
-.investment-agent-head h2 {
+.investment-agent-head h2,
+.engineering-agent-head h2 {
   max-width: 30ch;
   font-size: 31px;
   line-height: 1.18;
   letter-spacing: -0.012em;
 }
 
-.investment-agent-opening {
+.investment-agent-opening,
+.engineering-agent-opening {
   max-width: 68ch;
   margin-top: 30px;
   padding-bottom: 30px;
   border-bottom: 1px solid var(--border);
 }
 
-.investment-agent-opening section {
+.investment-agent-opening section,
+.engineering-agent-opening section {
   padding: 0;
 }
 
 .investment-agent-opening h3,
-.investment-agent-process h4 {
+.investment-agent-process h4,
+.engineering-agent-opening h3 {
   margin: 0;
   color: var(--muted);
   font-size: 9px;
@@ -662,7 +676,8 @@
   text-transform: uppercase;
 }
 
-.investment-agent-opening p {
+.investment-agent-opening p,
+.engineering-agent-opening p {
   margin: 8px 0 0;
   color: var(--ink-soft);
   font-size: 14px;
@@ -681,18 +696,21 @@
   border-bottom: 1px solid var(--border);
 }
 
-.investment-agent-companies > header h3 {
+.investment-agent-companies > header h3,
+.engineering-agent-lands > header h3 {
   margin: 0;
   font-size: 17px;
   font-weight: 600;
 }
 
 .investment-agent-sources > summary::-webkit-details-marker,
-.investment-agent-process > summary::-webkit-details-marker {
+.investment-agent-process > summary::-webkit-details-marker,
+.engineering-agent-sources > summary::-webkit-details-marker {
   display: none;
 }
 .investment-agent-sources > summary::after,
-.investment-agent-process > summary::after {
+.investment-agent-process > summary::after,
+.engineering-agent-sources > summary::after {
   width: 6px;
   height: 6px;
   border-right: 1px solid;
@@ -704,11 +722,13 @@
   transition: transform 150ms var(--ease-out);
 }
 .investment-agent-sources[open] > summary::after,
-.investment-agent-process[open] > summary::after {
+.investment-agent-process[open] > summary::after,
+.engineering-agent-sources[open] > summary::after {
   transform: rotate(225deg);
 }
 .investment-agent-sources > summary:focus-visible,
-.investment-agent-process > summary:focus-visible {
+.investment-agent-process > summary:focus-visible,
+.engineering-agent-sources > summary:focus-visible {
   outline: 2px solid var(--blue-mid);
   outline-offset: 2px;
 }
@@ -782,7 +802,8 @@
 }
 
 .investment-agent-sources > summary,
-.investment-agent-process > summary {
+.investment-agent-process > summary,
+.engineering-agent-sources > summary {
   display: flex;
   min-height: 47px;
   align-items: center;
@@ -797,20 +818,23 @@
   position: relative;
 }
 
-.investment-agent-sources {
+.investment-agent-sources,
+.engineering-agent-sources {
   max-width: 980px;
   margin-top: 32px;
   border-top: 1px solid var(--border-strong);
   border-bottom: 1px solid var(--border);
 }
 
-.investment-agent-sources > summary .mono {
+.investment-agent-sources > summary .mono,
+.engineering-agent-sources > summary .mono {
   color: var(--muted);
   font-size: 9px;
   font-weight: 400;
 }
 
-.investment-agent-sources-body {
+.investment-agent-sources-body,
+.engineering-agent-sources-body {
   display: flex;
   flex-wrap: wrap;
   gap: 9px 24px;
@@ -819,38 +843,46 @@
 }
 
 .investment-agent-sources-body a,
-.investment-agent-sources-body .copy-event-id {
+.investment-agent-sources-body .copy-event-id,
+.engineering-agent-sources-body a,
+.engineering-agent-sources-body .copy-event-id {
   color: var(--blue-ink);
   font-size: 10.5px;
   text-decoration: none;
 }
 
 .investment-agent-sources-body a:hover,
-.investment-agent-sources-body a:focus-visible {
+.investment-agent-sources-body a:focus-visible,
+.engineering-agent-sources-body a:hover,
+.engineering-agent-sources-body a:focus-visible {
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 
-.investment-agent-no-match {
+.investment-agent-no-match,
+.engineering-agent-no-match {
   max-width: 980px;
   padding: 24px 0;
   border-bottom: 1px solid var(--border-strong);
 }
 
-.investment-agent-no-match h3 {
+.investment-agent-no-match h3,
+.engineering-agent-no-match h3 {
   margin: 0;
   font-size: 16px;
   font-weight: 600;
 }
 
-.investment-agent-no-match p {
+.investment-agent-no-match p,
+.engineering-agent-no-match p {
   margin: 0;
   color: var(--ink-soft);
   font-size: 12.5px;
   line-height: 1.6;
 }
 
-.investment-agent-no-match p {
+.investment-agent-no-match p,
+.engineering-agent-no-match p {
   max-width: 72ch;
   margin-top: 8px;
 }
@@ -904,7 +936,8 @@
 }
 
 @container (max-width: 760px) {
-  .investment-agent-head {
+  .investment-agent-head,
+  .engineering-agent-head {
     align-items: flex-start;
     flex-direction: column;
   }
@@ -1096,102 +1129,70 @@
   }
 }
 
-/* ---- AI Engineering: surface-linked Insights ---- */
+/* ---- AI Engineering: the surface landings, the only new part ---- */
 
-.engineering-agent-row {
-  border-top: 1px solid var(--border);
-  padding: 28px 0;
+.engineering-agent-lands {
+  max-width: 980px;
+  margin-top: 30px;
 }
 
-.engineering-agent-body {
+.engineering-agent-lands > header {
+  margin-bottom: 18px;
+}
+
+.engineering-agent-lands > ol {
   display: flex;
   flex-direction: column;
-  gap: 20px;
-}
-
-.engineering-agent-head h2 {
-  font-size: 1.18rem;
-  line-height: 1.4;
-  margin: 0;
-}
-
-.engineering-agent-opening h3 {
-  color: var(--muted);
-  font-size: 0.68rem;
-  letter-spacing: 0.08em;
-  margin: 0 0 6px;
-  text-transform: uppercase;
-}
-
-.engineering-agent-opening p {
-  margin: 0;
-}
-
-.engineering-agent-lands > header h3,
-.engineering-agent-no-match h3 {
-  font-size: 0.95rem;
-  margin: 0 0 12px;
-}
-
-.engineering-agent-lands ol {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
+  gap: 22px;
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
-.engineering-agent-lands li {
-  border-left: 2px solid var(--border-strong);
-  padding-left: 14px;
+.engineering-agent-lands > ol > li {
+  padding-left: 18px;
+  border-left: 1px solid var(--border-strong);
 }
 
 .engineering-agent-surface {
-  align-items: baseline;
-  color: inherit;
   display: inline-flex;
+  align-items: center;
   gap: 10px;
+  color: inherit;
   text-decoration: none;
 }
 
-.engineering-agent-surface:hover .engineering-agent-surface-name {
-  text-decoration: underline;
+.engineering-agent-surface:focus-visible {
+  outline: 2px solid var(--blue-mid);
+  outline-offset: 4px;
 }
 
 .engineering-agent-surface-id {
-  background: var(--blue-wash);
+  padding: 3px 7px;
   border-radius: 3px;
+  background: var(--blue-wash);
   color: var(--blue-ink);
-  font-size: 0.7rem;
+  font-size: 9px;
   letter-spacing: 0.06em;
-  padding: 2px 7px;
 }
 
 .engineering-agent-surface-name {
+  font-size: 13px;
   font-weight: 600;
 }
 
+.engineering-agent-surface:hover .engineering-agent-surface-name,
+.engineering-agent-surface:focus-visible .engineering-agent-surface-name {
+  color: var(--blue-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .engineering-agent-why {
+  max-width: 68ch;
+  margin: 8px 0 0;
   color: var(--ink-soft);
-  margin: 6px 0 0;
-}
-
-.engineering-agent-no-match p {
-  color: var(--ink-soft);
-  margin: 0;
-}
-
-.engineering-agent-sources > summary {
-  cursor: pointer;
-  display: flex;
-  gap: 12px;
-  justify-content: space-between;
-}
-
-.engineering-agent-sources-body {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  padding-top: 10px;
+  font-size: 12.5px;
+  line-height: 1.6;
+  text-wrap: pretty;
 }
