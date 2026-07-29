@@ -190,6 +190,46 @@ the noise half, so the change is not a one-way loosening.
 about line 276. Move `decision` to first position in both `properties` and
 `required`, ahead of `headline`. Tested on its own in M3.
 
+## Candidate edits 6-8 — presentation, not evidence
+
+These come from Findings 6-8 and are cheap to fold into the same mega run,
+since the expensive part is the run and not the edit. They fix how conclusions
+are *stated*, which is a separate axis from whether an item should surface.
+Written as candidates because they have not been agreed yet.
+
+**Edit 6 — ban unfalsifiable headline verbs.** Add to `## headline` in the
+prompt:
+
+```text
+Do not write a headline whose claim is true regardless of the evidence. Reject
+constructions such as "strengthens the case for", "sharpens the risk of",
+"raises the bar", "tests assumptions about", and "underscores the need for". A
+reader must be able to say what would have to be observed for the headline to
+be wrong. Name what changed and for whom.
+```
+
+**Edit 7 — the headline may not outrun the body.** Add to `## headline`:
+
+```text
+The headline may not assert an effect that `what_changed` then withdraws. If
+the body will say the evidence does not establish adoption, performance, or
+commercial effect, the headline must carry that limit — state the observed
+change rather than the unproven consequence.
+```
+
+**Edit 8 — force per-item specificity in `impact`.** Add to `## connections`:
+
+```text
+State what this specific Development changes about this company's exposure. Do
+not restate the company's product list. If your impact text would read the same
+for any other Development that fires this bet, the connection is not specific
+enough to publish.
+```
+
+Edit 8 targets the `PANW-B1` sink directly: 20 firings, all naming the same
+three products. Validate it by re-reading the `PANW-B1` impact texts after the
+run and checking they are no longer interchangeable.
+
 ## Execution Rules
 
 - Keep work scoped to the current milestone unless this tracker expands scope.
@@ -427,6 +467,55 @@ about line 276. Move `decision` to first position in both `properties` and
 
 ## Progress Log
 
+- 2026-07-29: [BLOCKER] **The Investment product is currently serving zero
+  Insights on every day.** `investment_agent.PROMPT_VERSION` is
+  `investment-agent-v15-candidate` (commit `7f0cccb`) but the run store holds
+  only `investment-agent-v14` rows, so `_latest_rows` matches nothing and
+  `/api/insights` returns `available: false` for 2026-07-20, 2026-07-24, and
+  2026-07-26. This is the version-pin trap in Validation firing for real. AI
+  Engineering is unaffected because it has the lockstep guard in `run_days`
+  that Investment lacks. The planned full re-run resolves it. **Do not demo or
+  present until that run has completed and the days are verified served.**
+- 2026-07-29: [DONE] **Finding 6 — 21% of Investment headlines use verbs that
+  cannot be wrong.** 30 of 142 surfaced headlines are built on constructions
+  whose truth conditions are unfalsifiable: "strengthens/sharpens the case for"
+  (17), "tests X assumptions" (6), "sharpens X risk" (5), "raises the
+  pressure/bar" (2). A headline of the form "Agentic breach strengthens the
+  case for AI security" is true of essentially any security news, so it carries
+  no information the reader did not already hold. This matters more than the
+  evidence-class findings for a reviewer skimming the feed, because it is
+  visible without opening a single item, and an investment audience is trained
+  to notice claims that cannot be falsified.
+- 2026-07-29: [DONE] **Finding 7 — 16 of 142 headlines assert a company effect
+  that the body immediately withdraws.** The headline uses a present-tense
+  causal verb with no hedge, then `what_changed` states the evidence does not
+  establish it. Examples: 07-08 r4 "GPT-Live raises Duolingo's voice quality bar
+  and competitive pressure" / body: "API access is only planned, and the
+  evidence does not establish independent validation or commercial adoption";
+  07-18 r4 "Kimi's cost benchmark sharpens Microsoft software substitution
+  risk" / body: "does not establish production performance, enterprise
+  adoption, or broad availability". The body is doing honest work and the
+  headline is undoing it. Note this is a *presentation* defect, distinct from
+  the evidence-bar defect: these items may well deserve to surface.
+- 2026-07-29: [DONE] **Finding 8 — `PANW-B1` is a sink that fires on any agent
+  news, and its analysis does not vary.** It fired 20 times, the most of any
+  bet. All 20 impact texts name the same three products (Prisma AIRS, Portkey's
+  AI Gateway, Idira) and 15 of 20 close with a "threshold not met" clause.
+  PANW overall holds 55 connections across 18 of 22 days, the largest of any
+  ticker. **Corrected mid-analysis:** I first assumed verbatim boilerplate, but
+  measured 6-gram pairwise overlap is only 3.3%, so the prose is genuinely
+  rewritten each time. The defect is not repeated wording, it is repeated
+  *thinking* — the same three-product recital reached from any agent-capability
+  input. A template of thought rather than a template of words, which is harder
+  to see and worse.
+- 2026-07-29: [DONE] Fan-out measured: 18 of 142 Insights connect 4 or more
+  companies, topping out at 6 (07-09 r1, 07-09 r4). Recorded as an observation,
+  not yet judged a defect.
+- 2026-07-29: [DISCARDED] Tested whether any Insight names a company its
+  evidence never mentions. The test returned 245 hits and was **invalid**: it
+  matched ticker symbols against prose that spells out company names, so
+  "NVDA" never appears in a body that says "NVIDIA". Third regex-derived
+  artifact this session. Recorded so the number is not reused.
 - 2026-07-29: [DONE] **Root cause found, and it is a prompt contradiction
   rather than a missing rule.** Line 294 grants permission to publish early
   evidence with `threshold_met: false`; line 407 orders suppression when no
