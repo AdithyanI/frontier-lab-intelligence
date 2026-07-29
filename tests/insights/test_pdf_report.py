@@ -19,45 +19,31 @@ def _item(rank: int) -> dict:
         "daily_rank": rank,
         "day": DAY,
         "development_id": f"development-{rank}",
-        "investment_headline": f"Model escape strengthens independent controls {rank}",
-        "development_summary": (
+        "headline": f"Model escape strengthens independent controls {rank}",
+        "what_changed": (
             "OpenAI reported that cyber-capable models escaped a constrained "
             "evaluation environment and 昇腾950发布说明 remained unresolved."
         ),
-        "prior_assumption": (
-            "A reasonable prior is that agent escapes remain confined to test systems."
-        ),
         "no_match_reason": None,
         "company_names": {"NTSK": "Netskope", "PANW": "Palo Alto Networks"},
-        "company_assessments": [
+        "connections": [
             {
-                "mechanism_title": "Independent runtime containment and egress control",
                 "mechanism": "The escape turns unauthorized egress into a demonstrated risk.",
-                "main_uncertainty": "We do not know whether enterprises buy new controls.",
-                "next_check": "Netskope's disclosed count of paid AI-security customers.",
-                "splits": False,
-                "exposures": [
+                "companies": [
                     {
                         "ticker": "NTSK",
-                        "affected_driver": "Paid AI-security module adoption",
-                        "direction": "positive",
-                        "materiality": "material",
-                        "size_basis": "ARR was $845 million",
+                        "bet_id": "NTSK-B1",
+                        "threshold_met": True,
                         "impact": "Netskope sells inline enforcement for agent traffic.",
                     },
                     {
                         "ticker": "PANW",
-                        "affected_driver": "AI-security product attachment",
-                        "direction": "negative",
-                        "materiality": "unknown",
-                        "size_basis": None,
+                        "bet_id": "PANW-B5",
+                        "threshold_met": False,
                         "impact": "Palo Alto's coverage is broader but undisclosed.",
                     },
                 ],
             }
-        ],
-        "rejected_after_memo": [
-            {"ticker": "RBRK", "reason": "Rubrik needs agent telemetry this lacks."}
         ],
         "memo_calls": [
             {
@@ -67,15 +53,37 @@ def _item(rank: int) -> dict:
                     "ticker": "NTSK",
                     "connection_type": "direct",
                     "mechanism": "Inline controls cover unauthorized egress.",
-                    "affected_operating_driver": "Paid module adoption",
+                    "candidate_bet_id": "NTSK-B1",
                     "why_memo_is_needed": "Confirm Netskope's agent traffic controls map here.",
                 },
-            }
+            },
+            {
+                "turn": 1,
+                "call_id": f"call-panw-{rank}",
+                "arguments": {
+                    "ticker": "PANW",
+                    "connection_type": "direct",
+                    "mechanism": "Native controls may constrain independent security demand.",
+                    "candidate_bet_id": "PANW-B5",
+                    "why_memo_is_needed": "Test whether native controls threaten the product category.",
+                },
+            },
+            {
+                "turn": 1,
+                "call_id": f"call-rbrk-{rank}",
+                "arguments": {
+                    "ticker": "RBRK",
+                    "connection_type": "indirect",
+                    "mechanism": "Recovery demand may rise after agent incidents.",
+                    "candidate_bet_id": "RBRK-B2",
+                    "why_memo_is_needed": "Test whether this incident reaches recovery demand.",
+                },
+            },
         ],
         "telemetry": {
             "model": "gpt-5.6-sol",
             "reasoning_effort": "xhigh",
-            "prompt_version": "investment-agent-v11",
+            "prompt_version": "investment-agent-v14",
             "company_universe_count": 37,
             "memo_count": 3,
             "turn_count": 2,
@@ -99,7 +107,7 @@ def _item(rank: int) -> dict:
 
 def _payload() -> dict:
     return {
-        "schema_version": "investment-agent-read-v6",
+        "schema_version": "investment-agent-read-v8",
         "content_kind": "investment_agent",
         "available": True,
         "reason": None,
@@ -139,7 +147,6 @@ def test_report_renders_the_complete_investment_workbook():
     assert "Today's brief" in text
     assert "WHAT HAPPENED" in text
     assert "Company read-through" in text
-    assert "The belief this moves" in text
     assert "Sources and audit trail" in text
     assert "昇腾950发布说明" in text
     # Superseded editorial sections must not reappear.
@@ -154,11 +161,12 @@ def test_report_shows_every_company_with_its_direction_and_evidence():
     assert "Netskope" in text
     assert "NTSK" in text
     assert "Palo Alto Networks" in text
-    assert "Potential positive" in text
-    assert "Potential negative" in text
-    assert "ARR was $845 million" in text
-    assert "UNPROVEN" in text
-    assert "WATCH" in text
+    assert "Upside" in text
+    assert "Downside" in text
+    assert "Review thesis" in text
+    assert "Early signal" in text
+    assert "NTSK-B1" in text
+    assert "PANW-B5" in text
 
 
 def test_report_shows_the_screening_funnel_and_rejections():
@@ -169,8 +177,7 @@ def test_report_shows_the_screening_funnel_and_rejections():
     assert "3 memos opened" in text
     assert "2 retained" in text
     assert "1 rejected" in text
-    assert "OPENED AND REJECTED" in text
-    assert "Rubrik needs agent telemetry this lacks." in text
+    assert "OPENED AND REJECTED" not in text
 
 
 def test_report_links_only_application_owned_sources():

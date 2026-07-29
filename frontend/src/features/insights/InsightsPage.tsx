@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import {
+  COMPANY_BET_DIRECTION_COPY,
   getCachedJSON,
   type BriefDeliveryChannel,
   type BriefDeliveryResult,
@@ -9,9 +10,10 @@ import {
   type InsightDates,
   type InsightStatus,
   type InsightsResponse,
-  type InvestmentAgentCompanyAssessment,
+  type InvestmentAgentConnection,
   type InvestmentAgentInsightsResponse,
   type InvestmentAgentItem,
+  type InvestmentCompanyUniverse,
 } from '../../shared/api'
 import CopyEventId from '../../shared/components/CopyEventId'
 import DateNavigator from '../../shared/components/DateNavigator'
@@ -534,99 +536,129 @@ function InsightState({
   )
 }
 
-const INVESTMENT_AGENT_DIRECTION = {
-  positive: { icon: '↗', label: 'Potential positive' },
-  negative: { icon: '↘', label: 'Potential negative' },
-  mixed: { icon: '↔', label: 'Mixed' },
-  unclear: { icon: '?', label: 'Direction unclear' },
-} as const
+type InvestmentBetDisplay = {
+  id: string
+  title: string
+  direction: 'upside' | 'downside'
+}
 
-function InvestmentAgentMechanism({
-  assessment,
+type InvestmentBetIndex = Record<string, InvestmentBetDisplay>
+
+function InvestmentAgentConnectionView({
+  connection,
   companyNames,
+  betIndex,
 }: {
-  assessment: InvestmentAgentCompanyAssessment
+  connection: InvestmentAgentConnection
   companyNames: Record<string, string>
+  betIndex: InvestmentBetIndex
 }) {
+  const companies = [...connection.companies].sort(
+    (left, right) => Number(right.threshold_met) - Number(left.threshold_met),
+  )
   return (
     <details className="investment-agent-mechanism">
       <summary>
         <span className="investment-agent-mechanism-identity">
-          <strong>{decodeTextEntities(assessment.mechanism_title)}</strong>
           <span className="investment-agent-mechanism-tickers">
-            {assessment.exposures.map((exposure) => (
-              <span
-                className="investment-agent-direction"
-                data-direction={exposure.direction}
-                key={exposure.ticker}
-              >
-                <span aria-hidden="true">{INVESTMENT_AGENT_DIRECTION[exposure.direction].icon}</span>
-                {exposure.ticker}
-              </span>
-            ))}
+            {companies.map((company) => {
+              const bet = betIndex[company.bet_id]
+              return (
+                <span className="investment-agent-bet-signal" key={company.ticker}>
+                  <span
+                    className="investment-agent-bet-direction"
+                    data-direction={bet?.direction}
+                  >
+                    <span aria-hidden="true" />
+                    {bet ? COMPANY_BET_DIRECTION_COPY[bet.direction] : 'Direction'}
+                  </span>
+                  <span className="mono">{company.ticker}</span>
+                  {company.threshold_met && (
+                    <span className="investment-agent-threshold is-met">
+                      Review thesis
+                    </span>
+                  )}
+                </span>
+              )
+            })}
           </span>
         </span>
         <span className="investment-agent-mechanism-causal">
-          {decodeTextEntities(assessment.mechanism)}
+          {decodeTextEntities(connection.mechanism)}
         </span>
       </summary>
       <div className="investment-agent-mechanism-detail">
         <ol className="investment-agent-exposures">
-          {assessment.exposures.map((exposure) => (
-            <li key={exposure.ticker}>
-              <div className="investment-agent-exposure-head">
-                <strong>{companyNames[exposure.ticker] ?? exposure.ticker}</strong>
-                <Link
-                  className="mono"
-                  to={`/bit-lens/companies?company=${encodeURIComponent(exposure.ticker)}`}
-                >
-                  {exposure.ticker}
-                </Link>
-              </div>
-              <p className="investment-agent-exposure-driver">
-                <span
-                  className="investment-agent-direction"
-                  data-direction={exposure.direction}
-                >
-                  {INVESTMENT_AGENT_DIRECTION[exposure.direction].label}
-                </span>
-                <span className="investment-agent-exposure-driver-name">
-                  {decodeTextEntities(exposure.affected_driver)}
-                </span>
-              </p>
-              <p className="investment-agent-exposure-impact">
-                {decodeTextEntities(exposure.impact ?? exposure.note ?? '')}
-              </p>
-              {exposure.size_basis && (
-                <p className="investment-agent-size-basis">
-                  {decodeTextEntities(exposure.size_basis)}
-                </p>
-              )}
-            </li>
-          ))}
+          {companies.map((company) => {
+            const bet = betIndex[company.bet_id]
+            return (
+              <li key={company.ticker}>
+                <div className="investment-agent-exposure-head">
+                  <strong>{companyNames[company.ticker] ?? company.ticker}</strong>
+                  <Link
+                    className="mono"
+                    to={`/bit-lens/companies?company=${encodeURIComponent(company.ticker)}`}
+                  >
+                    {company.ticker}
+                  </Link>
+                  <span
+                    className={`investment-agent-threshold ${
+                      company.threshold_met ? 'is-met' : 'is-early'
+                    }`}
+                  >
+                    {company.threshold_met ? 'Review thesis' : 'Early signal'}
+                  </span>
+                </div>
+                <div className="investment-agent-exposure-body">
+                  <Link
+                    className="investment-agent-bet-meta"
+                    to={`/bit-lens/companies?company=${encodeURIComponent(
+                      company.ticker,
+                    )}&bet=${encodeURIComponent(company.bet_id)}`}
+                  >
+                    <span
+                      className="investment-agent-bet-direction"
+                      data-direction={bet?.direction}
+                    >
+                      <span aria-hidden="true" />
+                      {bet ? COMPANY_BET_DIRECTION_COPY[bet.direction] : 'Direction'}
+                    </span>
+                    <span className="investment-agent-bet-id mono">
+                      {company.bet_id}
+                    </span>
+                  </Link>
+                  <div className="investment-agent-exposure-copy">
+                    {bet?.title && (
+                      <Link
+                        className="investment-agent-bet-title"
+                        to={`/bit-lens/companies?company=${encodeURIComponent(
+                          company.ticker,
+                        )}&bet=${encodeURIComponent(company.bet_id)}`}
+                      >
+                        {decodeTextEntities(bet.title)}
+                      </Link>
+                    )}
+                    <p className="investment-agent-exposure-impact">
+                      {decodeTextEntities(company.impact)}
+                    </p>
+                  </div>
+                </div>
+              </li>
+            )
+          })}
         </ol>
-        <dl className="investment-agent-mechanism-footer">
-          <div>
-            <dt className="mono">Unproven</dt>
-            <dd>{decodeTextEntities(assessment.main_uncertainty)}</dd>
-          </div>
-          <div>
-            <dt className="mono">Watch</dt>
-            <dd>{decodeTextEntities(assessment.next_check)}</dd>
-          </div>
-        </dl>
       </div>
     </details>
   )
 }
 
 function InvestmentAgentProcess({ item }: { item: InvestmentAgentItem }) {
-  const rejectedCount = item.rejected_after_memo.length
   const retainedCount = new Set(
-    item.company_assessments.flatMap((assessment) =>
-      assessment.exposures.map((exposure) => exposure.ticker),
+    item.connections.flatMap((connection) =>
+      connection.companies.map((company) => company.ticker),
     ),
   ).size
+  const rejectedCount = Math.max(0, item.telemetry.memo_count - retainedCount)
   return (
     <details className="investment-agent-process">
       <summary>
@@ -657,7 +689,13 @@ function InvestmentAgentProcess({ item }: { item: InvestmentAgentItem }) {
   )
 }
 
-function InvestmentAgentInsight({ item }: { item: InvestmentAgentItem }) {
+function InvestmentAgentInsight({
+  item,
+  betIndex,
+}: {
+  item: InvestmentAgentItem
+  betIndex: InvestmentBetIndex
+}) {
   const titleId = `investment-agent-${item.development_id}-title`
   const feedPath = `/evidence/feed?date=${item.day}&event_id=${encodeURIComponent(item.development_id)}`
   const artifacts = item.provenance?.artifacts ?? []
@@ -676,28 +714,29 @@ function InvestmentAgentInsight({ item }: { item: InvestmentAgentItem }) {
       </div>
       <div className="insight-body investment-agent-body">
         <header className="insight-head investment-agent-head">
-          <h2 id={titleId}>{decodeTextEntities(item.investment_headline)}</h2>
+          <h2 id={titleId}>{decodeTextEntities(item.headline)}</h2>
         </header>
 
         <div className="investment-agent-opening">
           <section>
-            <h3 className="mono">What happened</h3>
-            <p>{decodeTextEntities(item.development_summary)}</p>
+            <h3 className="mono">What changed</h3>
+            <p>{decodeTextEntities(item.what_changed)}</p>
           </section>
         </div>
 
-        {item.company_assessments.length > 0 ? (
+        {item.connections.length > 0 ? (
           <section className="investment-agent-companies" aria-label="Company read-throughs">
             <header>
               <h3>How this reaches companies</h3>
             </header>
-            {item.company_assessments
-              .filter((assessment) => Array.isArray(assessment?.exposures))
-              .map((assessment) => (
-                <InvestmentAgentMechanism
-                  assessment={assessment}
+            {item.connections
+              .filter((connection) => Array.isArray(connection?.companies))
+              .map((connection) => (
+                <InvestmentAgentConnectionView
+                  connection={connection}
                   companyNames={item.company_names}
-                  key={assessment.mechanism_title}
+                  betIndex={betIndex}
+                  key={`${connection.mechanism}:${connection.companies.map((company) => company.ticker).join(',')}`}
                 />
               ))}
           </section>
@@ -705,30 +744,6 @@ function InvestmentAgentInsight({ item }: { item: InvestmentAgentItem }) {
           <section className="investment-agent-no-match">
             <h3>No company connection cleared the bar</h3>
             <p>{decodeTextEntities(item.no_match_reason || 'No decision-useful connection was established.')}</p>
-          </section>
-        )}
-
-        {item.prior_assumption && (
-          <section className="investment-agent-prior">
-            <h3 className="mono">The belief this moves</h3>
-            <p>{decodeTextEntities(item.prior_assumption)}</p>
-          </section>
-        )}
-
-        {item.rejected_after_memo.length > 0 && (
-          <section className="investment-agent-rejections">
-            <h3>Opened, then rejected</h3>
-            <ul>
-              {item.rejected_after_memo.map((rejection) => (
-                <li key={rejection.ticker}>
-                  <strong>
-                    {item.company_names[rejection.ticker] ?? rejection.ticker}
-                    {' '}<span className="mono">{rejection.ticker}</span>
-                  </strong>
-                  <p>{decodeTextEntities(rejection.reason)}</p>
-                </li>
-              ))}
-            </ul>
           </section>
         )}
 
@@ -790,11 +805,7 @@ function InvestmentAgentYield({
       </span>
       <span className="insight-yield-sep" aria-hidden="true">·</span>
       <span className="insight-yield-part">
-        <strong>{run.company_assessment_count}</strong> company read-throughs
-      </span>
-      <span className="insight-yield-sep" aria-hidden="true">·</span>
-      <span className="insight-yield-part">
-        <strong>{run.rejected_company_count}</strong> rejected after memo review
+        <strong>{run.company_connection_count}</strong> company connections
       </span>
     </p>
   )
@@ -816,6 +827,7 @@ export default function Insights() {
   const [dataError, setDataError] = useState<string | null>(null)
   const [datesRetryKey, setDatesRetryKey] = useState(0)
   const [dataRetryKey, setDataRetryKey] = useState(0)
+  const [investmentBetIndex, setInvestmentBetIndex] = useState<InvestmentBetIndex>({})
   const activeDatesViewRef = useRef('')
   const activeDataViewRef = useRef('')
   const searchParamsRef = useRef(searchParams)
@@ -829,6 +841,32 @@ export default function Insights() {
     : null
   const investmentAgentData =
     currentData && isInvestmentAgentResponse(currentData) ? currentData : null
+
+  useEffect(() => {
+    if (audience !== 'investment' || Object.keys(investmentBetIndex).length > 0) return
+    let active = true
+    getCachedJSON<InvestmentCompanyUniverse>('/api/bit-lens/companies')
+      .then((payload) => {
+        if (!active) return
+        const nextIndex: InvestmentBetIndex = {}
+        payload.companies.forEach((company) => {
+          company.research_memo?.bets.forEach((bet) => {
+            nextIndex[bet.id] = {
+              id: bet.id,
+              title: bet.if,
+              direction: bet.direction,
+            }
+          })
+        })
+        setInvestmentBetIndex(nextIndex)
+      })
+      .catch(() => {
+        // The Insight remains readable using its stored ticker and bet ID.
+      })
+    return () => {
+      active = false
+    }
+  }, [audience, investmentBetIndex])
   const availableDates = useMemo(() => currentDates?.dates ?? [], [currentDates])
   const dateWindow = useMemo(
     () => getDateWindow(dateWindowEnd, availableDates.length),
@@ -1048,7 +1086,11 @@ export default function Insights() {
           aria-label={`${copy.label} company-aware ${STATUS_COPY[status].label.toLowerCase()} insights`}
         >
           {investmentAgentData.items.map((item) => (
-            <InvestmentAgentInsight item={item} key={item.run_id} />
+            <InvestmentAgentInsight
+              item={item}
+              betIndex={investmentBetIndex}
+              key={item.run_id}
+            />
           ))}
         </section>
       )}

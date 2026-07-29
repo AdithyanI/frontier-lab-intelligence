@@ -2,6 +2,7 @@ import { Navigate, NavLink, Route, Routes } from 'react-router-dom'
 import Architecture from '../features/architecture/ArchitecturePage'
 import BitLensLayout from '../features/bit-lens/BitLensLayout'
 import BitLensPage from '../features/bit-lens/BitLensPage'
+import AionStackPage from '../features/bit-lens/AionStackPage'
 import CompanyUniversePage from '../features/bit-lens/CompanyUniversePage'
 import Artifacts from '../features/evidence/ArtifactsPage'
 import Evidence from '../features/evidence/EvidenceLayout'
@@ -55,6 +56,7 @@ export default function App() {
           <Route path="/bit-lens" element={<BitLensLayout />}>
             <Route index element={<Navigate to="companies" replace />} />
             <Route path="companies" element={<CompanyUniversePage />} />
+            <Route path="aion" element={<AionStackPage />} />
             <Route path="research" element={<BitLensPage />} />
           </Route>
           <Route path="/system" element={<System />}>

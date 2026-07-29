@@ -28,13 +28,19 @@ def _payload() -> dict:
         "items": [
             {
                 "daily_rank": rank,
-                "investment_headline": f"Insight {rank}",
-                "development_summary": f"Decision-useful interpretation {rank}.",
-                "company_assessments": [
+                "headline": f"Insight {rank}",
+                "what_changed": f"Decision-useful interpretation {rank}.",
+                "connections": [
                     {
-                        "mechanism_title": f"Causal path {rank}",
-                        "next_check": f"Take next step {rank}.",
-                        "exposures": [{"ticker": "NTSK"}],
+                        "mechanism": f"Causal path {rank}",
+                        "companies": [
+                            {
+                                "ticker": "NTSK",
+                                "bet_id": "NTSK-B1",
+                                "threshold_met": False,
+                                "impact": f"Take next step {rank}.",
+                            }
+                        ],
                     }
                 ],
                 "provenance": {"primary_event_id": f"event-{rank}"},
@@ -42,7 +48,7 @@ def _payload() -> dict:
             for rank in range(1, 7)
         ],
     }
-    payload["items"][0]["development_summary"] = (
+    payload["items"][0]["what_changed"] = (
         "This complete interpretation must remain visible in Slack. " * 60
         + "FULL_INTERPRETATION_END"
     )

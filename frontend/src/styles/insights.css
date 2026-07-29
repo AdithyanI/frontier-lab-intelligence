@@ -713,33 +713,66 @@
   outline-offset: 2px;
 }
 
-.investment-agent-direction {
+.investment-agent-bet-signal,
+.investment-agent-bet-link {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-size: 10.5px;
-  font-weight: 600;
+  gap: 7px;
+}
+
+.investment-agent-bet-signal {
   white-space: nowrap;
 }
 
-.investment-agent-direction > span {
-  font-size: 13px;
+.investment-agent-bet-direction {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  text-transform: uppercase;
 }
 
-.investment-agent-direction[data-direction='positive'] {
+.investment-agent-bet-direction > span {
+  width: 7px;
+  height: 7px;
+  flex: 0 0 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.investment-agent-bet-direction[data-direction='upside'] {
   color: var(--positive);
 }
 
-.investment-agent-direction[data-direction='negative'] {
+.investment-agent-bet-direction[data-direction='downside'] {
   color: var(--negative);
 }
 
-.investment-agent-direction[data-direction='mixed'] {
-  color: var(--blue-ink);
+.investment-agent-threshold {
+  display: inline-flex;
+  align-items: center;
+  min-height: 20px;
+  padding: 2px 7px;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.03em;
+  line-height: 1.2;
+  text-transform: uppercase;
 }
 
-.investment-agent-direction[data-direction='unclear'] {
-  color: var(--muted);
+.investment-agent-threshold.is-met {
+  border-color: color-mix(in srgb, var(--negative) 34%, var(--border));
+  color: var(--negative);
+}
+
+.investment-agent-threshold.is-early {
+  color: var(--ink-soft);
 }
 
 .investment-agent-process > summary .mono {
@@ -798,46 +831,18 @@
   text-underline-offset: 3px;
 }
 
-.investment-agent-rejections,
 .investment-agent-no-match {
   max-width: 980px;
   padding: 24px 0;
   border-bottom: 1px solid var(--border-strong);
 }
 
-.investment-agent-rejections h3,
 .investment-agent-no-match h3 {
   margin: 0;
   font-size: 16px;
   font-weight: 600;
 }
 
-.investment-agent-rejections ul {
-  margin: 14px 0 0;
-  padding: 0;
-  list-style: none;
-}
-
-.investment-agent-rejections li {
-  display: grid;
-  grid-template-columns: minmax(160px, 0.35fr) minmax(0, 1fr);
-  gap: 24px;
-  padding: 12px 0;
-  border-top: 1px solid var(--border);
-}
-
-.investment-agent-rejections strong {
-  font-size: 12.5px;
-}
-
-.investment-agent-rejections strong span {
-  margin-left: 5px;
-  color: var(--muted);
-  font-size: 9px;
-  font-weight: 400;
-}
-
-.investment-agent-rejections p,
 .investment-agent-no-match p {
   margin: 0;
   color: var(--ink-soft);
@@ -905,7 +910,6 @@
   }
 
   .investment-agent-process-body > ol > li,
-  .investment-agent-rejections li,
   .investment-agent-mechanism > summary {
     grid-template-columns: minmax(0, 1fr);
     gap: 8px;
@@ -957,18 +961,6 @@
   display: flex;
   flex-direction: column;
   gap: 7px;
-}
-
-.investment-agent-mechanism-identity strong {
-  font-size: 15px;
-  font-weight: 600;
-  line-height: 1.32;
-  text-wrap: balance;
-}
-
-.investment-agent-mechanism > summary:hover strong {
-  text-decoration: underline;
-  text-underline-offset: 2px;
 }
 
 .investment-agent-mechanism-tickers {
@@ -1024,7 +1016,7 @@
   align-items: baseline;
   flex-wrap: wrap;
   gap: 5px 9px;
-  margin-bottom: 7px;
+  margin-bottom: 14px;
 }
 
 .investment-agent-exposure-head strong {
@@ -1042,94 +1034,64 @@
   text-decoration: underline;
 }
 
-.investment-agent-size-basis {
-  max-width: 66ch;
-  margin: 8px 0 0;
-  color: var(--muted);
-  font-size: 12px;
-  line-height: 1.45;
+.investment-agent-exposure-body {
+  display: grid;
+  grid-template-columns: 124px minmax(0, 72ch);
+  gap: 28px;
+  align-items: start;
+  max-width: 920px;
+}
+
+.investment-agent-bet-meta {
+  display: grid;
+  gap: 9px;
+  justify-items: start;
+  padding-top: 3px;
+  text-decoration: none;
+}
+
+.investment-agent-bet-id {
+  color: var(--blue-ink);
+  font-size: 10.5px;
+  white-space: nowrap;
+}
+
+.investment-agent-bet-title {
+  display: block;
+  color: var(--blue-ink);
+  font-size: 14.5px;
+  font-weight: 500;
+  line-height: 1.5;
+  text-decoration: none;
   text-wrap: pretty;
 }
 
-.investment-agent-exposures > li > p {
-  max-width: 66ch;
-  margin: 0;
+.investment-agent-bet-meta:hover .investment-agent-bet-id,
+.investment-agent-bet-meta:focus-visible .investment-agent-bet-id,
+.investment-agent-bet-title:hover,
+.investment-agent-bet-title:focus-visible {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.investment-agent-exposure-impact {
+  margin: 11px 0 0;
   color: var(--ink-soft);
   font-size: 13.5px;
   line-height: 1.62;
   text-wrap: pretty;
 }
 
-.investment-agent-exposure-driver {
-  display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 4px 10px;
-  margin-bottom: 9px !important;
-}
+@media (max-width: 680px) {
+  .investment-agent-exposure-body {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
 
-.investment-agent-exposure-driver-name {
-  color: var(--ink);
-  font-size: 14px;
-  line-height: 1.45;
-}
-
-.investment-agent-exposure-impact {
-  color: var(--ink-soft) !important;
-}
-
-.investment-agent-mechanism-footer {
-  display: grid;
-  gap: 12px;
-  max-width: 700px;
-  margin: 0;
-  padding: 20px 0 0 24px;
-  border-top: 1px solid var(--border);
-}
-
-.investment-agent-mechanism-footer > div {
-  display: grid;
-  grid-template-columns: 78px minmax(0, 1fr);
-  gap: 16px;
-  align-items: baseline;
-}
-
-.investment-agent-mechanism-footer dt {
-  color: var(--muted);
-  font-size: 9px;
-  letter-spacing: 0.055em;
-  text-transform: uppercase;
-}
-
-.investment-agent-mechanism-footer dd {
-  max-width: 62ch;
-  margin: 0;
-  color: var(--ink-soft);
-  font-size: 13px;
-  line-height: 1.6;
-  text-wrap: pretty;
-}
-
-.investment-agent-prior {
-  max-width: 880px;
-  margin-top: 34px;
-  padding: 16px 0 16px 18px;
-  border-left: 2px solid var(--ink);
-}
-
-.investment-agent-prior h3 {
-  margin: 0 0 7px;
-  color: var(--muted);
-  font-size: 9px;
-  font-weight: 400;
-  letter-spacing: 0.055em;
-  text-transform: uppercase;
-}
-
-.investment-agent-prior p {
-  max-width: 62ch;
-  margin: 0;
-  font-size: 14px;
-  line-height: 1.6;
-  text-wrap: pretty;
+  .investment-agent-bet-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-top: 0;
+  }
 }

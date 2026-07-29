@@ -589,6 +589,12 @@
 
 .company-path-list > details {
   border-bottom: 1px solid var(--border);
+  scroll-margin-block: 28px;
+}
+
+.company-path-list > details[data-requested='true']:focus-visible {
+  outline: 1px solid var(--blue-mid);
+  outline-offset: 5px;
 }
 
 .company-path-list > details:last-child {
@@ -597,8 +603,8 @@
 
 .company-path-list > details > summary {
   display: grid;
-  grid-template-columns: 22px minmax(0, 1fr) auto;
-  gap: 12px;
+  grid-template-columns: 76px minmax(0, 1fr);
+  gap: 16px;
   align-items: baseline;
   padding: 13px 0;
   cursor: pointer;
@@ -630,14 +636,27 @@
 }
 
 .company-path-direction {
-  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 76px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.04em;
   line-height: 1.5;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.company-path-direction > span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
 }
 
 .company-path-direction.is-upside { color: var(--positive); }
 .company-path-direction.is-downside { color: var(--negative); }
-.company-path-direction.is-mixed { color: var(--blue-ink); }
-.company-path-direction.is-unclear { color: var(--muted); }
 
 .company-causal-chain {
   display: grid;
@@ -1440,4 +1459,65 @@
     width: 100%;
   }
 
+}
+
+/* ---- BIT Lens: assumed Aion stack ---- */
+
+.aion-boundary {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 12.5px;
+  line-height: 1.6;
+}
+
+.aion-surface-list {
+  margin: 26px 0 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--border);
+}
+
+.aion-surface {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 200px) minmax(0, 1fr);
+  gap: 4px 28px;
+  align-items: baseline;
+  padding: 17px 0;
+  border-bottom: 1px solid var(--border);
+  scroll-margin-top: 90px;
+}
+
+.aion-surface[data-requested='true'] {
+  background: var(--blue-wash);
+  box-shadow: -14px 0 0 var(--blue-wash), 14px 0 0 var(--blue-wash);
+}
+
+.aion-surface-id {
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: 0.05em;
+}
+
+.aion-surface h3 {
+  margin: 0;
+  font-size: 14.5px;
+  font-weight: 600;
+  line-height: 1.45;
+  text-wrap: balance;
+}
+
+.aion-surface p {
+  margin: 0;
+  max-width: 72ch;
+  color: var(--ink-soft);
+  line-height: 1.65;
+  text-wrap: pretty;
+}
+
+@media (max-width: 860px) {
+  .aion-surface {
+    grid-template-columns: 56px minmax(0, 1fr);
+    gap: 6px 20px;
+  }
+  .aion-surface p { grid-column: 2; }
 }

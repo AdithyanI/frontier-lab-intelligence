@@ -15,7 +15,7 @@ from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 INVESTMENT_CONTEXT_SCHEMA_VERSION = "bit-investment-context-v5"
-COMPANY_MEMO_SCHEMA_VERSION = "company-memos-v2"
+COMPANY_MEMO_SCHEMA_VERSION = "company-memos-v3"
 COMPANY_MEMO_PATH = REPO_ROOT / "docs" / "references" / "company-memos.json"
 BIT_PUBLIC_VIEW_GRADES = {"explicit_thesis", "commentary", "none"}
 BIT_PUBLIC_VIEW_SOURCE_SCOPES = {"firm", "flagship", "other_product", "mixed", "none"}
@@ -379,13 +379,18 @@ def _investment_company_memos() -> dict[str, dict[str, Any]]:
         for bet in bets:
             missing = [
                 field
-                for field in ("id", "if", "exposure", "then", "material_when")
+                for field in ("id", "direction", "if", "exposure", "then", "threshold")
                 if not str(bet.get(field) or "").strip()
             ]
             if missing:
                 raise ValueError(
                     f"Company memo {ticker} bet {bet.get('id')} is missing "
                     f"{', '.join(missing)}"
+                )
+            if bet["direction"] not in {"upside", "downside"}:
+                raise ValueError(
+                    f"Company memo {ticker} bet {bet.get('id')} has an "
+                    "invalid direction"
                 )
         source_ledger = memo.get("source_ledger")
         if not isinstance(source_ledger, list) or not source_ledger:

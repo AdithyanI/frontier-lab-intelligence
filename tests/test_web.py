@@ -193,6 +193,17 @@ def test_bit_lens_company_universe_is_a_complete_read_only_projection():
     bets = companies["MU"]["research_memo"]["bets"]
     assert bets and bets[0]["id"] == "MU-B1"
     assert all(
-        {"id", "if", "exposure", "then", "material_when", "watch"} <= set(bet)
+        {
+            "id",
+            "direction",
+            "if",
+            "exposure",
+            "then",
+            "threshold",
+            "watch",
+            "sources",
+        }
+        == set(bet)
         for bet in bets
     )
+    assert {bet["direction"] for bet in bets} <= {"upside", "downside"}

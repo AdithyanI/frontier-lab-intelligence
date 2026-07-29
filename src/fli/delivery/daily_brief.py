@@ -147,18 +147,19 @@ def _rank(item: dict[str, Any]) -> int:
 
 
 def _title(item: dict[str, Any]) -> str:
-    return str(item.get("investment_headline") or "")
+    return str(item.get("headline") or "")
 
 
 def _summary(item: dict[str, Any]) -> str:
-    return str(item.get("development_summary") or "")
+    return str(item.get("what_changed") or "")
 
 
 def _next_check(item: dict[str, Any]) -> str:
-    """The first named observable an analyst can go and look for."""
-    for assessment in item.get("company_assessments") or []:
-        if assessment.get("next_check"):
-            return str(assessment["next_check"])
+    """The first company-specific implication in the compact result."""
+    for connection in item.get("connections") or []:
+        for company in connection.get("companies") or []:
+            if company.get("impact"):
+                return str(company["impact"])
     return ""
 
 

@@ -12,24 +12,18 @@ from fli.insights import investment_agent
 
 def _result(*, day: str, rank: int) -> dict:
     decision = "surface" if rank % 2 else "suppress"
-    assessments = (
+    connections = (
         [
             {
-                "mechanism_title": "Independent agent controls",
                 "mechanism": "A direct mechanism.",
-                "splits": False,
-                "exposures": [
+                "companies": [
                     {
                         "ticker": "PANW",
-                        "affected_driver": "paid adoption",
-                        "direction": "positive",
-                        "materiality": "unknown",
-                        "size_basis": None,
+                        "bet_id": "PANW-B1",
+                        "threshold_met": False,
                         "impact": "Placeholder impact sentence for the exposure.",
                     }
                 ],
-                "main_uncertainty": "Demand is not measured.",
-                "next_check": "PANW paid production customers.",
             }
         ]
         if decision == "surface"
@@ -39,7 +33,7 @@ def _result(*, day: str, rank: int) -> dict:
         "trace_path": f"/tmp/{day}-{rank}.json",
         "development_id": f"{rank:064d}",
         "daily_rank": rank,
-        "memo_tickers": ["PANW"] if assessments else [],
+        "memo_tickers": ["PANW"] if connections else [],
         "turns": [
             {
                 "turn": 1,
@@ -53,18 +47,11 @@ def _result(*, day: str, rank: int) -> dict:
             }
         ],
         "final_result": {
-            "investment_headline": f"Investment implication for rank {rank}",
-            "development_summary": "What changed.",
+            "headline": f"Investment implication for rank {rank}",
+            "what_changed": "What changed.",
             "decision": decision,
-            "portfolio_readthrough": "A bounded read-through.",
-            "prior_assumption": (
-                "Independent controls matter more after this Development."
-                if assessments
-                else None
-            ),
-            "company_assessments": assessments,
-            "rejected_after_memo": [],
-            "no_match_reason": None if assessments else "No company connection.",
+            "connections": connections,
+            "no_match_reason": None if connections else "No company connection.",
         },
         "imported": {
             "day": day,
@@ -241,8 +228,8 @@ def test_run_range_warms_one_target_then_fans_out(monkeypatch, tmp_path: Path):
         "surfaced": 4,
         "suppressed": 2,
         "memo_calls": 4,
-        "company_assessments": 4,
-        "rejected_after_memo": 0,
+        "companies": 4,
+        "memos_rejected": 0,
     }
     assert result["telemetry"]["cached_tokens"] == 5_400
     assert result["telemetry"]["reported_cost_usd"] == 0.06
@@ -414,4 +401,4 @@ def test_trace_path_is_durable_unique_and_versioned(tmp_path: Path):
 
     assert first.parent == tmp_path / "2026-07-20"
     assert first != second
-    assert "rank-001-5-6-sol-xhigh-investment-agent-v12" in first.name
+    assert "rank-001-5-6-sol-xhigh-investment-agent-v14" in first.name

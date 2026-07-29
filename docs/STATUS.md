@@ -64,12 +64,13 @@ candidate-decision modules, stores, prompts, API fallbacks, and UI renderers
 were deleted rather than kept dormant. AI Engineering has no current generator
 and returns an explicit unavailable reason.
 
-The July 19–21 published top-ten cohorts prove screening across all 37 compact
-company cards, selective memo retrieval, surface/suppress judgment, and
-after-memo rejection. Those visible cohorts still use v8/v9. The active
-contract is v11; two v11 proof rows exist, but no complete v11 day has been
-published. The immediate refresh boundary is therefore a dry-run followed by
-one complete v11 replay of the three top-ten cohorts.
+The July 21 published top-ten cohort now proves the active v14 contract across
+all 37 compact company cards and the binary standing-bet corpus. Sol/xhigh
+surfaced seven Developments and suppressed three, retained 21 bet references
+across 20 Development-company connections, and cleared zero explicit
+thresholds. The result is intentionally conservative: launches, pilots,
+provider benchmarks, and early demand signals can fire a bet without claiming
+that its thesis-level threshold is already met.
 
 ## Where the System Stands
 
@@ -82,11 +83,11 @@ one complete v11 replay of the three top-ten cohorts.
 | Development projection + daily rank | Implemented grouping-only audit surface | `/api/developments` and `/evidence/feed` derive same-day Developments from exact Events plus accepted canonical artifacts. Independently authored original posts merge only when they share the same release-specific artifact; generic host roots are rejected as anchors. Exact Event IDs, posts, activity, and artifact lineage remain inspectable underneath. `daily-development-rank-v1` orders each day by distinct Registry participants across every source Event, mean participant network position, maximum public interactions on one source post, then stable Development ID. Original authors, quote authors, and reposters each count once. There is no organization bonus, scalar score, or weighted blend, and the projection needs no separate database yet. |
 | Canonical artifact library | Complete supported pass + operator index | Outbound primary-resource links are conservatively canonicalized, source-linked, fetched once, snapshotted, and replayable. The current Event-native import contains 6,298 accepted source observations, 6,304 disclosures, and 5,378 canonical artifacts with zero import failures. One shared extraction validator rejects placeholder-dominated bodies and deterministic bot, consent, authentication, client-rendering, and error shells before they become packet evidence; immutable raw responses remain preserved. |
 | Feed audience routing | v15 July 5–21 production replay complete | The current v15 top-100 pass completed 1,647 Developments with zero failures: 618 both, 200 Engineering-only, 88 Investment-only, and 741 neither. Its deterministic evidence gate completed 325 packets without an LLM call—122 short unsupported text posts and 203 posts whose linked or media evidence was unavailable—while preserving an explicit reason for both audiences. Luna/medium evaluated the remaining 1,322 packets. The run reported 759,808 cached input tokens, 424 cache-hit requests, and $7.762206 total cost. Five transient failures on July 20–21 succeeded on the exact resumable retry. The immutable v14 pass remains available as historical comparison. |
-| Audience Insight generation | Company-aware Investment top-ten proof for July 19–21; v11 refresh pending | The Sol/xhigh projection selects the ten highest daily ranks with a positive Investment route—not the union-positive Feed—then screens all 37 companies. Across 30 published v8/v9 Developments it surfaces 19, suppresses 11, retains 52 company assessments, and records five after-memo rejections. July 19 surfaces 4/10, July 20 9/10, and July 21 6/10. Those cohorts reused 472,576 cached input tokens from 1,386,679 total and reported $7.740683. The active v11 contract has two unpublished proof rows; preview and then replay the complete three-day cohort before presenting v11 as live. The production loop owns bounded transient retries and exact traces. Complete daily cohorts publish atomically, so a failed or partial run cannot leak older or out-of-lane rows into the UI. AI Engineering successor work and broader Investment calibration remain unproven. |
+| Audience Insight generation | Investment agent v14 published for the July 21 top ten | The Sol/xhigh projection selects the ten highest daily ranks with a positive Investment route—not the union-positive Feed—then screens all 37 companies and retrieves only plausible complete memos. The v14 cohort surfaces 7/10 Developments, suppresses 3/10, and retains 21 memo-owned bet references across 20 Development-company connections. None of the exact memo thresholds cleared, so all retained links remain early signals rather than thesis-review alerts. The run reported 446,739 input tokens, 158,255 cached tokens, 42,009 output tokens, 34,981 reasoning tokens, and $2.781818. Complete cohorts publish atomically and only the current prompt version can satisfy or render a publication. AI Engineering successor work and broader Investment calibration remain unproven. |
 | Prompt-cache operations | Implemented and live-verified | Cacheable jobs keep stable 1,024+ token prefixes first, use deterministic keys, serialize within a key, and record Responses `cached_tokens`. Registry jobs now use eight cache lanes instead of 64; audience routing is single-key/cache-first by default; Insight refresh runs one lane per audience prompt. The 27 July different-input canary observed 3/4 Luna and 4/4 Terra warm hits through the shared Azure-backed LiteLLM route. `fli prompt-cache-canary --no-input` makes the check repeatable; misses remain a measured best-effort provider condition rather than proof that a model lacks caching. The authoritative contract, current proof, incident history, and troubleshooting checklist live in [`prompt-caching.md`](references/prompt-caching.md). |
-| Investment company context | Complete 37-company research set plus three-day top-ten mapping proof | BIT Lens and the Investment read path expose a source-bearing memo for every company in the canonical candidate universe. Each packet separates company prior context from Event evidence and includes business economics, operating drivers, testable frontier-AI transmission paths, thesis tests, uncertainties, and an exact dated source ledger. The two-stage agent now proves structured Event-to-company judgment across the July 19–21 top ten, including reason-bearing suppression and after-memo rejection; the next boundary is replay across the routed cohort, not company cold start. |
+| Investment company context | Complete 37-company research set with 176 binary standing bets | BIT Lens and the Investment read path consume one `company-memos-v3` corpus. Its 176 pre-registered bets have 127 upside and 49 downside directions, zero `mixed` labels, exact thresholds, watchpoints, and source lineage. Direction is owned by the memo and resolved from `ticker + bet_id`; the daily model cannot restate or contradict it. A reproducible Sol/xhigh ledger preserves every reclassification and the source hash used to rebuild the corpus. |
 | Insight path consolidation | Complete; one path in code and data | The company-aware Investment agent is the only Insight generator. `fli.insights` now contains only `investment_agent`, `investment_agent_runs`, `company_context`, `pdf_report`, and `cli`; roughly 9,000 lines of superseded editorial, daily-runner, Codex App Server, consolidation, and candidate-decision code were deleted with their tests, prompts, and stores. `/api/insights` has no fallback tier, the SPA has no second renderer, and an audience without a current run returns an explicit reason instead of older content. |
-| Insights UI and delivery | One reader, PDF, and delivery projection over the published cohort | Each surfaced Development leads with its agent-written investment headline rather than unreliable webpage metadata. Company rows are collapsed by default; opening one shows the mechanism, each affected company with its direction, affected business driver, size basis, and per-company impact, plus one unproven claim and one next check. Evidence links are application-owned and deterministic: one opens the exact Feed Development and one opens the exact company memo. Model text does not own those URLs. The A4 PDF workbook and confirmed Slack/email delivery render the same published cohort. AI Engineering has no current-lineage run and says so explicitly. |
+| Insights UI and delivery | One v14 reader, PDF, and delivery projection over the published cohort | Each surfaced Development leads with its agent-written investment headline and collapsed mechanism rows. Opening a mechanism shows every retained company, the memo-owned green upside or red downside direction, the exact bet title and link, the model's per-company impact, and either `Review thesis` when the exact threshold cleared or `Early signal` when it did not. The bet link opens, scrolls to, and focuses the exact BIT Lens bet. Evidence and memo URLs remain application-owned and deterministic. The A4 PDF workbook and confirmed Slack/email delivery consume the same v14 publication. AI Engineering has no current-lineage run and says so explicitly. |
 | Submission package | Submitted 20 July 2026; live reviewer path remains available | The submitted email leads with the public product and video, links the written How it works report, provides five exact showcase Insights, links the public repository, and attaches one sample PDF. A clean checkout restores a checksummed read-only snapshot with one command. |
 
 Counts above are dated checkpoint evidence, not live contracts. Query the
@@ -136,16 +137,17 @@ case-study thesis.
 
 ## Current Direction
 
-The current work boundary is audience-specific Insight judgment over the
-deterministic Development projection. Exact Events remain the provenance unit;
-shared release-specific artifacts merge same-day original posts for inspection
-and `daily-development-rank-v1` provides the common order. The v15 Development
-routing proof is complete for the July 5–21 top-100 cohort, and Investment
-v8/v9 is published for the ten highest positive Investment routes on July
-19–21. The next step is to preview and publish the same three-day cohort under
-the active v11 contract, then audit its false positives, suppressions, and
-cross-Development duplication. AI Engineering may later be built on the same
-path; it must not be restored from deleted editorial code.
+The current work boundary is qualitative calibration of the v14 Investment
+judgment over the deterministic Development projection. Exact Events remain
+the provenance unit; shared release-specific artifacts merge same-day original
+posts for inspection and `daily-development-rank-v1` provides the common
+order. The v15 Development routing proof is complete for the July 5–21 top-100
+cohort, and the July 21 Investment top ten is published under v14. The next
+step is to audit marginal company connections and cross-Development
+duplication before replaying additional days; the binary direction and exact
+threshold contracts should remain fixed during that calibration. AI
+Engineering may later be built on the same path; it must not be restored from
+deleted editorial code.
 
 Completed reasoning is preserved in the sharded build log and the surviving
 trackers under [`docs/projects/archive/`](projects/archive/). Removed project

@@ -38,8 +38,9 @@ from reportlab.platypus import (
 
 
 
-REPORT_SCHEMA_VERSION = "investment-agent-pdf-v10"
+REPORT_SCHEMA_VERSION = "investment-agent-pdf-v11"
 REPO_ROOT = Path(__file__).resolve().parents[3]
+COMPANY_MEMO_PATH = REPO_ROOT / "docs" / "references" / "company-memos.json"
 DEFAULT_CACHE_ROOT = REPO_ROOT / "data" / "derived" / "insights" / "pdf-cache"
 PUBLIC_APP_URL = "https://frontier-lab-intelligence.adithyan.io"
 
@@ -533,7 +534,7 @@ def _cover(payload: dict[str, Any], styles: dict[str, ParagraphStyle]) -> list[A
             Paragraph(f'#{int(item["daily_rank"])}', styles["toc_rank"]),
             Paragraph(
                 f'<link href="#insight-{int(item["daily_rank"])}" color="#235165">'
-                f'{_markup(item["investment_headline"])}</link>',
+                f'{_markup(item["headline"])}</link>',
                 styles["toc_title"],
             ),
         ]
@@ -572,30 +573,41 @@ def _section_title(title: str, styles: dict[str, ParagraphStyle]) -> list[Any]:
     ]
 
 
+def _bet_index() -> dict[str, dict[str, Any]]:
+    payload = json.loads(COMPANY_MEMO_PATH.read_text(encoding="utf-8"))
+    return {
+        str(bet["id"]): bet
+        for memo in (payload.get("companies") or {}).values()
+        for bet in memo.get("bets") or []
+    }
+
+
 def _mechanism_block(
-    assessment: dict[str, Any],
+    connection: dict[str, Any],
     styles: dict[str, ParagraphStyle],
     company_names: dict[str, Any],
+    bets: dict[str, dict[str, Any]],
 ) -> list[Any]:
     """Render one causal path and every company hanging off it."""
     direction_copy = {
-        "positive": ("Potential positive", POSITIVE),
-        "negative": ("Potential negative", NEGATIVE),
-        "mixed": ("Mixed", MUTED),
-        "unclear": ("Direction unclear", MUTED),
+        "upside": ("Upside", POSITIVE),
+        "downside": ("Downside", NEGATIVE),
     }
     story: list[Any] = [
-        Paragraph(_markup(assessment.get("mechanism_title")), styles["body_strong"]),
-        Spacer(1, 1.6 * mm),
-        Paragraph(_markup(assessment.get("mechanism")), styles["body"]),
+        Paragraph(_markup(connection.get("mechanism")), styles["body"]),
         Spacer(1, 3.2 * mm),
     ]
     rows: list[list[Any]] = []
-    for index, exposure in enumerate(assessment.get("exposures") or [], start=1):
-        ticker = str(exposure.get("ticker") or "")
+    companies = sorted(
+        connection.get("companies") or [],
+        key=lambda item: not bool(item.get("threshold_met")),
+    )
+    for index, company in enumerate(companies, start=1):
+        ticker = str(company.get("ticker") or "")
         name = str(company_names.get(ticker) or ticker)
+        bet = bets.get(str(company.get("bet_id") or ""), {})
         label, color = direction_copy.get(
-            str(exposure.get("direction") or "unclear"), direction_copy["unclear"]
+            str(bet.get("direction") or "upside"), ("Direction unavailable", MUTED)
         )
         direction_style = ParagraphStyle(
             f"Direction-{ticker}-{index}",
@@ -605,16 +617,20 @@ def _mechanism_block(
         body: list[Any] = [
             Paragraph(f"{_markup(name)}  <font color='#6B6B68'>{_markup(ticker)}</font>", styles["body_strong"]),
             Spacer(1, 1.2 * mm),
-            Paragraph(_markup(label), direction_style),
+            Paragraph(
+                _markup(
+                    f"{label} · "
+                    f"{'Review thesis' if company.get('threshold_met') else 'Early signal'}"
+                    f" · {company.get('bet_id') or ''}"
+                ),
+                direction_style,
+            ),
             Spacer(1, 0.8 * mm),
-            Paragraph(_markup(exposure.get("affected_driver")), styles["body"]),
+            Paragraph(_markup(bet.get("if")), styles["body"]),
         ]
-        impact = exposure.get("impact") or exposure.get("note")
+        impact = company.get("impact")
         if impact:
             body.extend([Spacer(1, 1.4 * mm), Paragraph(_markup(impact), styles["small"])])
-        size_basis = exposure.get("size_basis")
-        if size_basis:
-            body.extend([Spacer(1, 1.2 * mm), Paragraph(_markup(size_basis), styles["small"])])
         rows.append([Paragraph(str(index), styles["toc_rank"]), body])
     if rows:
         story.append(
@@ -631,35 +647,6 @@ def _mechanism_block(
                         ("LEFTPADDING", (0, 0), (-1, -1), 0),
                         ("RIGHTPADDING", (0, 0), (0, -1), 6),
                         ("RIGHTPADDING", (1, 0), (1, -1), 0),
-                    ]
-                ),
-            )
-        )
-    footer_rows = [
-        (label, assessment.get(key))
-        for label, key in (("UNPROVEN", "main_uncertainty"), ("WATCH", "next_check"))
-        if assessment.get(key)
-    ]
-    if footer_rows:
-        story.extend([Spacer(1, 2.5 * mm)])
-        story.append(
-            Table(
-                [
-                    [
-                        Paragraph(label, styles["label"]),
-                        Paragraph(_markup(value), styles["small"]),
-                    ]
-                    for label, value in footer_rows
-                ],
-                colWidths=[22 * mm, CONTENT_WIDTH - 22 * mm],
-                style=TableStyle(
-                    [
-                        ("VALIGN", (0, 0), (-1, -1), "TOP"),
-                        ("LINEABOVE", (0, 0), (-1, 0), 0.35, BORDER),
-                        ("TOPPADDING", (0, 0), (-1, -1), 6),
-                        ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
-                        ("LEFTPADDING", (0, 0), (-1, -1), 0),
-                        ("RIGHTPADDING", (0, 0), (0, -1), 6),
                     ]
                 ),
             )
@@ -713,12 +700,12 @@ def _agent_sources_section(
     if memo_calls:
         retained = len(
             {
-                str(exposure.get("ticker"))
-                for assessment in item.get("company_assessments") or []
-                for exposure in assessment.get("exposures") or []
+                str(company.get("ticker"))
+                for connection in item.get("connections") or []
+                for company in connection.get("companies") or []
             }
         )
-        rejected = len(item.get("rejected_after_memo") or [])
+        rejected = max(0, int(telemetry.get("memo_count", 0)) - retained)
         funnel = (
             f'{telemetry.get("company_universe_count", 0)} screened'
             f' / {telemetry.get("memo_count", 0)} memos opened'
@@ -767,39 +754,6 @@ def _agent_sources_section(
             )
         )
 
-    rejected_rows = [
-        [
-            Paragraph(
-                _markup(company_names.get(str(entry.get("ticker"))) or entry.get("ticker")),
-                styles["small"],
-            ),
-            Paragraph(_markup(entry.get("reason")), styles["small"]),
-        ]
-        for entry in item.get("rejected_after_memo") or []
-    ]
-    if rejected_rows:
-        story.extend(
-            [
-                Spacer(1, 5 * mm),
-                Paragraph("OPENED AND REJECTED", styles["label"]),
-                Spacer(1, 1.4 * mm),
-                Table(
-                    rejected_rows,
-                    colWidths=[30 * mm, CONTENT_WIDTH - 30 * mm],
-                    splitByRow=1,
-                    style=TableStyle(
-                        [
-                            ("VALIGN", (0, 0), (-1, -1), "TOP"),
-                            ("LINEBELOW", (0, 0), (-1, -1), 0.35, BORDER),
-                            ("TOPPADDING", (0, 0), (-1, -1), 6),
-                            ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
-                            ("LEFTPADDING", (0, 0), (-1, -1), 0),
-                            ("RIGHTPADDING", (0, 0), (0, -1), 8),
-                        ]
-                    ),
-                ),
-            ]
-        )
 
     if telemetry:
         story.extend(
@@ -827,7 +781,7 @@ def _insight(item: dict[str, Any], styles: dict[str, ParagraphStyle]) -> list[An
                 Paragraph(f"#{rank}", styles["rank"]),
                 [
                     Paragraph(
-                        f'<a name="insight-{rank}"/>{_markup(item.get("investment_headline"))}',
+                        f'<a name="insight-{rank}"/>{_markup(item.get("headline"))}',
                         styles["title"],
                     ),
                 ],
@@ -856,12 +810,13 @@ def _insight(item: dict[str, Any], styles: dict[str, ParagraphStyle]) -> list[An
         ),
         Paragraph("WHAT HAPPENED", styles["label"]),
         Spacer(1, 2 * mm),
-        Paragraph(_markup(item.get("development_summary")), styles["body"]),
+        Paragraph(_markup(item.get("what_changed")), styles["body"]),
     ]
-    assessments = list(item.get("company_assessments") or [])
-    if assessments:
+    connections = list(item.get("connections") or [])
+    bets = _bet_index()
+    if connections:
         story.extend(_section_title("Company read-through", styles))
-        for index, assessment in enumerate(assessments):
+        for index, connection in enumerate(connections):
             if index:
                 story.extend(
                     [
@@ -875,13 +830,10 @@ def _insight(item: dict[str, Any], styles: dict[str, ParagraphStyle]) -> list[An
                         ),
                     ]
                 )
-            story.extend(_mechanism_block(assessment, styles, company_names))
+            story.extend(_mechanism_block(connection, styles, company_names, bets))
     elif item.get("no_match_reason"):
         story.extend(_section_title("No company read-through", styles))
         story.append(Paragraph(_markup(item["no_match_reason"]), styles["body"]))
-    if item.get("prior_assumption"):
-        story.extend(_section_title("The belief this moves", styles))
-        story.append(Paragraph(_markup(item["prior_assumption"]), styles["body"]))
     story.append(PageBreak())
     story.extend(_agent_sources_section(item, styles))
     return story

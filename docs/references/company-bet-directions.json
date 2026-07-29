@@ -1,0 +1,1295 @@
+{
+  "bet_count": 176,
+  "classifications": {
+    "03800.HK-B1": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "upside",
+      "rationale": "The threshold tests reproducible full-size improvements that shorten qualification cycles and raise saleable manufacturing yield.",
+      "ticker": "03800.HK"
+    },
+    "03800.HK-B2": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "The threshold requires sustained cost, yield, or quality gains that create a durable ASP-cost spread or better product mix.",
+      "ticker": "03800.HK"
+    },
+    "03800.HK-B3": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "The threshold tests incremental solar investment that absorbs photovoltaic supply and improves polysilicon industry utilization.",
+      "ticker": "03800.HK"
+    },
+    "03800.HK-B4": {
+      "ambiguous": false,
+      "direction": "downside",
+      "previous_direction": "downside",
+      "rationale": "The threshold tests competitors reaching scaled cost or quality parity and winning customers, weakening pricing, share, and margins.",
+      "ticker": "03800.HK"
+    },
+    "AG1-B1": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "upside",
+      "rationale": "The threshold requires broad deployment that reduces inspection time or rework without increasing customer claims.",
+      "ticker": "AG1"
+    },
+    "AG1-B2": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "The threshold tests higher realized GPU and inventory velocity without increased markdowns or loss-making cohorts.",
+      "ticker": "AG1"
+    },
+    "AG1-B3": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "upside",
+      "rationale": "The threshold requires agents to reduce human touches and response times while preserving conversion and document quality.",
+      "ticker": "AG1"
+    },
+    "AG1-B4": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "The threshold tests higher financing approval or attachment with stable credit losses, funding, and regulatory compliance.",
+      "ticker": "AG1"
+    },
+    "AG1-B5": {
+      "ambiguous": false,
+      "direction": "downside",
+      "previous_direction": "downside",
+      "rationale": "The threshold tests rival capability parity followed by weaker conversion, dealer activity, or higher acquisition costs.",
+      "ticker": "AG1"
+    },
+    "AMD-B1": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "upside",
+      "rationale": "The threshold requires paid production deployments and customer expansion at competitive workload economics.",
+      "ticker": "AMD"
+    },
+    "AMD-B2": {
+      "ambiguous": true,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "The threshold tests both outcomes, but near-day-zero production support would strengthen Instinct qualification, demand, and pricing.",
+      "ticker": "AMD"
+    },
+    "AMD-B3": {
+      "ambiguous": false,
+      "direction": "downside",
+      "previous_direction": "mixed",
+      "rationale": "The threshold tests custom accelerators absorbing production capacity and reducing planned Instinct orders.",
+      "ticker": "AMD"
+    },
+    "AMD-B4": {
+      "ambiguous": false,
+      "direction": "downside",
+      "previous_direction": "downside",
+      "rationale": "The threshold tests supply allocations that defer Helios shipments or raise unit costs enough to compress gross margin.",
+      "ticker": "AMD"
+    },
+    "AMD-B5": {
+      "ambiguous": false,
+      "direction": "downside",
+      "previous_direction": "downside",
+      "rationale": "The threshold tests export rules that block or delay sales or impose costly product redesigns and charges.",
+      "ticker": "AMD"
+    },
+    "AMZN-B1": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "The threshold requires AI demand to become billable capacity at utilization and pricing sufficient to cover the capital base.",
+      "ticker": "AMZN"
+    },
+    "AMZN-B2": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "The threshold tests verified Trainium workload economics and broad production adoption.",
+      "ticker": "AMZN"
+    },
+    "AMZN-B3": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "upside",
+      "rationale": "The threshold requires sustained production-agent usage that drives measurable consumption and retention across AWS services.",
+      "ticker": "AMZN"
+    },
+    "AMZN-B4": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "The threshold tests durable incremental purchases or retention after all cannibalization and operating costs.",
+      "ticker": "AMZN"
+    },
+    "AMZN-B5": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "The threshold requires audited operating improvements at scale while preserving customer experience, safety, and compliance.",
+      "ticker": "AMZN"
+    },
+    "AVGO-B1": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "The threshold requires custom-silicon wins to reach profitable volume production and retain content across generations.",
+      "ticker": "AVGO"
+    },
+    "AVGO-B2": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "The threshold tests volume deployment of Broadcom-based Ethernet with sustained revenue from greater bandwidth and optical content.",
+      "ticker": "AVGO"
+    },
+    "AVGO-B3": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "The threshold requires production AI on VCF to generate attributable renewals, expansion, and durable margin.",
+      "ticker": "AVGO"
+    },
+    "AVGO-B4": {
+      "ambiguous": false,
+      "direction": "downside",
+      "previous_direction": "mixed",
+      "rationale": "The threshold anchors downside on efficiency outpacing demand and reducing or delaying aggregate accelerator and networking deployments.",
+      "ticker": "AVGO"
+    },
+    "AXON-B1": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "The threshold tests broad agency adoption with persistent productivity gains and software gross profit exceeding governance costs.",
+      "ticker": "AXON"
+    },
+    "AXON-B2": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "The threshold requires reliable, governed operational outcomes that support expanded deployments across jurisdictions.",
+      "ticker": "AXON"
+    },
+    "AXON-B3": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "The threshold tests scalable approved drone deployments with reliable outcomes and accompanying recurring software economics.",
+      "ticker": "AXON"
+    },
+    "COHR-B1": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "upside",
+      "rationale": "The threshold requires optical link growth to exceed price erosion while new capacity achieves acceptable yields.",
+      "ticker": "COHR"
+    },
+    "COHR-B2": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "The threshold tests high-volume CPO production with economically meaningful company content after pluggable cannibalization.",
+      "ticker": "COHR"
+    },
+    "COHR-B3": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "The threshold requires a major operator to deploy optical circuit switching at scale with company production volume.",
+      "ticker": "COHR"
+    },
+    "COHR-B4": {
+      "ambiguous": false,
+      "direction": "downside",
+      "previous_direction": "downside",
+      "rationale": "The threshold tests optical demand falling below committed capacity and causing an unabsorbed capacity gap.",
+      "ticker": "COHR"
+    },
+    "COHR-B5": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "upside",
+      "rationale": "The threshold requires AI-related equipment investment to expand categories containing meaningful company content and offset other weakness.",
+      "ticker": "COHR"
+    },
+    "DDOG-B1": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "upside",
+      "rationale": "The threshold tests incremental paid AI-observability usage and cross-sell with revenue exceeding infrastructure costs.",
+      "ticker": "DDOG"
+    },
+    "DDOG-B2": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "The threshold requires broad paid agent usage, persistent resolution gains, low incident rates, and costs below revenue.",
+      "ticker": "DDOG"
+    },
+    "DDOG-B3": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "upside",
+      "rationale": "The threshold tests sustained incremental paid telemetry and module adoption without platform displacement.",
+      "ticker": "DDOG"
+    },
+    "DDOG-B4": {
+      "ambiguous": false,
+      "direction": "downside",
+      "previous_direction": "downside",
+      "rationale": "The threshold tests lower-cost alternatives causing sustained customer losses or weaker expansion.",
+      "ticker": "DDOG"
+    },
+    "DDOG-B5": {
+      "ambiguous": true,
+      "direction": "downside",
+      "previous_direction": "mixed",
+      "rationale": "The threshold tests both cost directions, but costs outgrowing monetized AI usage would compress gross margin.",
+      "ticker": "DDOG"
+    },
+    "DUOL-B1": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "upside",
+      "rationale": "The threshold requires conversion, retention, and pricing gains to exceed inference costs and Max-tier cannibalization.",
+      "ticker": "DUOL"
+    },
+    "DUOL-B2": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "upside",
+      "rationale": "The threshold tests falling cost per successful interaction without sacrificing response quality or reliability.",
+      "ticker": "DUOL"
+    },
+    "DUOL-B3": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "The threshold requires more approved and effective course units per expert-hour with stable quality and efficacy.",
+      "ticker": "DUOL"
+    },
+    "DUOL-B4": {
+      "ambiguous": false,
+      "direction": "downside",
+      "previous_direction": "downside",
+      "rationale": "The threshold tests lower-priced general assistants achieving comparable efficacy and sustained learner retention.",
+      "ticker": "DUOL"
+    },
+    "DUOL-B5": {
+      "ambiguous": false,
+      "direction": "downside",
+      "previous_direction": "downside",
+      "rationale": "The threshold tests scaled errors or restrictions that damage retention, product use, or test recognition.",
+      "ticker": "DUOL"
+    },
+    "GOOGL-B1": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "The threshold requires AI activity and monetization to exceed inference costs and conventional-search cannibalization.",
+      "ticker": "GOOGL"
+    },
+    "GOOGL-B2": {
+      "ambiguous": false,
+      "direction": "downside",
+      "previous_direction": "downside",
+      "rationale": "The threshold tests rivals taking valuable activity and advertising budgets or weakening Google's distribution and data advantages.",
+      "ticker": "GOOGL"
+    },
+    "GOOGL-B3": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "upside",
+      "rationale": "The threshold requires recurring production consumption and capacity returns above depreciation, energy, and support costs.",
+      "ticker": "GOOGL"
+    },
+    "GOOGL-B4": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "The threshold requires efficiency and utilization gains to outrun workload and replacement costs, improving margins and capital efficiency.",
+      "ticker": "GOOGL"
+    },
+    "GOOGL-B5": {
+      "ambiguous": true,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "The threshold equally permits paid Cloud security adoption or damaging incidents, but adoption is more specific to the named security-product exposure.",
+      "ticker": "GOOGL"
+    },
+    "GRND-B1": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "The threshold requires improved connection outcomes and retained usage to convert into incremental paid adoption or retention.",
+      "ticker": "GRND"
+    },
+    "GRND-B2": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "upside",
+      "rationale": "The threshold requires durable reductions in AI interaction or product-cycle costs after added infrastructure and staffing expenses.",
+      "ticker": "GRND"
+    },
+    "GRND-B3": {
+      "ambiguous": false,
+      "direction": "downside",
+      "previous_direction": "downside",
+      "rationale": "The threshold tests lost user time, connection intent, or willingness to pay due to substitute assistants.",
+      "ticker": "GRND"
+    },
+    "GRND-B4": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "The threshold requires lower verified harm and moderation workload while preserving user trust and legal validity.",
+      "ticker": "GRND"
+    },
+    "HNGE-B1": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "upside",
+      "rationale": "The threshold requires broad, clinically validated gains in member outcomes or engagement without higher safety-event rates.",
+      "ticker": "HNGE"
+    },
+    "HNGE-B2": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "The threshold requires automation to reduce low-value clinician work while maintaining or improving outcomes, satisfaction, and safety.",
+      "ticker": "HNGE"
+    },
+    "HNGE-B3": {
+      "ambiguous": false,
+      "direction": "downside",
+      "previous_direction": "mixed",
+      "rationale": "The threshold tests rivals winning RFPs or forcing discounts through credible outcome parity, weakening differentiation and pricing.",
+      "ticker": "HNGE"
+    },
+    "HNGE-B4": {
+      "ambiguous": false,
+      "direction": "downside",
+      "previous_direction": "mixed",
+      "rationale": "The threshold tests incidents or new requirements that delay launches, increase review burdens, or impair retention and procurement.",
+      "ticker": "HNGE"
+    },
+    "HOOD-B1": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "upside",
+      "rationale": "The threshold requires sustained retention, deposit, or ARPU gains whose gross profit exceeds AI and compliance costs.",
+      "ticker": "HOOD"
+    },
+    "HOOD-B2": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "The threshold requires agentic accounts to add funded customers, deposits, trades, or spend with costs below monetization.",
+      "ticker": "HOOD"
+    },
+    "HOOD-B3": {
+      "ambiguous": false,
+      "direction": "downside",
+      "previous_direction": "downside",
+      "rationale": "The threshold tests customer losses, complaints, enforcement, redesign, or Gold churn from model errors.",
+      "ticker": "HOOD"
+    },
+    "HOOD-B4": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "The threshold requires lower investigation time, backlog, or staffing without worse fraud or regulatory outcomes.",
+      "ticker": "HOOD"
+    },
+    "HOOD-B5": {
+      "ambiguous": true,
+      "direction": "downside",
+      "previous_direction": "mixed",
+      "rationale": "The threshold can capture either cheaper off-app volume or weaker Gold attachment and trade economics, but the latter most directly tests agent disintermediation.",
+      "ticker": "HOOD"
+    },
+    "HUT-B1": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "The threshold requires executable leases at returns above all-in development, financing, and residual-risk costs.",
+      "ticker": "HUT"
+    },
+    "HUT-B2": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "The threshold requires density or tenant-demand gains to exceed redesign, equipment, and delay costs.",
+      "ticker": "HUT"
+    },
+    "HUT-B3": {
+      "ambiguous": false,
+      "direction": "downside",
+      "previous_direction": "mixed",
+      "rationale": "The threshold tests efficiency reducing required compute faster than workloads grow, weakening leasing and renewals.",
+      "ticker": "HUT"
+    },
+    "HUT-B4": {
+      "ambiguous": false,
+      "direction": "downside",
+      "previous_direction": "mixed",
+      "rationale": "The threshold centers on counterparty concentration that can impair contracted economics unless payment support and site reusability mitigate it.",
+      "ticker": "HUT"
+    },
+    "IFX-B1": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "upside",
+      "rationale": "The threshold requires scaled platform shipments, rising megawatts, retained power content, and a timely capacity ramp supporting revenue and margin growth.",
+      "ticker": "IFX"
+    },
+    "IFX-B2": {
+      "ambiguous": false,
+      "direction": "downside",
+      "previous_direction": "downside",
+      "rationale": "The threshold tests multi-quarter declines in deployed megawatts and orders while manufacturing capacity continues ramping.",
+      "ticker": "IFX"
+    },
+    "IFX-B3": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "upside",
+      "rationale": "The threshold requires permitted power projects to reach procurement and include the company's components.",
+      "ticker": "IFX"
+    },
+    "IFX-B4": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "upside",
+      "rationale": "The threshold requires models to fit MCU constraints and multiple OEMs to advance to serial production.",
+      "ticker": "IFX"
+    },
+    "IFX-B5": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "upside",
+      "rationale": "The threshold requires serial robot production and multi-function bill-of-material wins, supporting revenue and product mix.",
+      "ticker": "IFX"
+    },
+    "INPST-B1": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "The threshold requires sustained utilization or peak-handling gains without increasing capital expenditure per parcel.",
+      "ticker": "INPST"
+    },
+    "INPST-B2": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "The threshold requires production-route cost or throughput improvements while service quality is maintained.",
+      "ticker": "INPST"
+    },
+    "INPST-B3": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "The threshold requires more contacts resolved without humans while complaint, repeat-contact, refund, and error rates hold or improve.",
+      "ticker": "INPST"
+    },
+    "INPST-B4": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "upside",
+      "rationale": "The threshold requires faster sales workflows to produce retained merchants and incremental profitable parcel volume.",
+      "ticker": "INPST"
+    },
+    "INPST-B5": {
+      "ambiguous": false,
+      "direction": "downside",
+      "previous_direction": "downside",
+      "rationale": "The threshold tests sustained downtime, data compromise, parcel loss, regulatory action, or significant SLA penalties.",
+      "ticker": "INPST"
+    },
+    "INTC-B1": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "upside",
+      "rationale": "The threshold requires rising CPU demand per AI system without offsetting share or pricing losses.",
+      "ticker": "INTC"
+    },
+    "INTC-B2": {
+      "ambiguous": false,
+      "direction": "downside",
+      "previous_direction": "downside",
+      "rationale": "The threshold tests a sustained migration of cloud workloads away from x86, reducing server revenue and margin.",
+      "ticker": "INTC"
+    },
+    "INTC-B3": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "The threshold requires multiple external designs to reach sustained production at competitive yield, pricing, and returns.",
+      "ticker": "INTC"
+    },
+    "INTC-B4": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "The threshold requires widely used local applications to drive measurable PC replacement demand and pricing premiums.",
+      "ticker": "INTC"
+    },
+    "INTC-B5": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "The threshold requires production-scale custom awards whose economics exceed lost standard-processor contribution.",
+      "ticker": "INTC"
+    },
+    "IREN-B1": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "upside",
+      "rationale": "The threshold requires signed demand to cover commissioned capacity at attractive pricing with durable high utilization.",
+      "ticker": "IREN"
+    },
+    "IREN-B2": {
+      "ambiguous": false,
+      "direction": "downside",
+      "previous_direction": "downside",
+      "rationale": "The threshold tests efficiency or custom silicon outpacing workload growth and weakening external GPU demand.",
+      "ticker": "IREN"
+    },
+    "IREN-B3": {
+      "ambiguous": false,
+      "direction": "downside",
+      "previous_direction": "mixed",
+      "rationale": "The threshold tests facility-design shortfalls or cooling, networking, and electrical bottlenecks that delay contracted deployments.",
+      "ticker": "IREN"
+    },
+    "IREN-B4": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "upside",
+      "rationale": "The threshold requires customers to pay for managed services while performance and uptime hold at scale.",
+      "ticker": "IREN"
+    },
+    "IREN-B5": {
+      "ambiguous": false,
+      "direction": "downside",
+      "previous_direction": "mixed",
+      "rationale": "The threshold tests new accelerators obsoleting the existing fleet before contracted revenue amortizes it.",
+      "ticker": "IREN"
+    },
+    "KSPI-B1": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "upside",
+      "rationale": "The threshold requires sustained incremental transactions or retention after serving costs without higher complaints or harmful outcomes.",
+      "ticker": "KSPI"
+    },
+    "KSPI-B2": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "upside",
+      "rationale": "The threshold requires broad merchant adoption to lift conversion or advertising spend with revenue above model and remediation costs.",
+      "ticker": "KSPI"
+    },
+    "KSPI-B3": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "The threshold requires materially deployed models to deliver superior out-of-sample credit-loss and fraud performance.",
+      "ticker": "KSPI"
+    },
+    "KSPI-B4": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "upside",
+      "rationale": "The threshold requires sustained engagement and contribution-profit gains culminating in durable positive adjusted EBITDA.",
+      "ticker": "KSPI"
+    },
+    "KSPI-B5": {
+      "ambiguous": false,
+      "direction": "downside",
+      "previous_direction": "mixed",
+      "rationale": "The threshold tests customer selection shifting to unaffiliated agents, weakening discovery, take rate, and customer ownership.",
+      "ticker": "KSPI"
+    },
+    "LITE-B1": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "upside",
+      "rationale": "Sustained high-speed volume orders supported by capacity and yields would increase shipments and product mix.",
+      "ticker": "LITE"
+    },
+    "LITE-B2": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "Expanded CPO deployments with retained laser content exceeding lost pluggable contribution would increase net optical revenue.",
+      "ticker": "LITE"
+    },
+    "LITE-B3": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "upside",
+      "rationale": "Backlog conversion, repeat orders and reliable deployments would establish a new systems revenue stream.",
+      "ticker": "LITE"
+    },
+    "LITE-B4": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "upside",
+      "rationale": "Production qualification and committed volumes sufficient to justify investment would open a billable VCSEL market.",
+      "ticker": "LITE"
+    },
+    "LITE-B5": {
+      "ambiguous": false,
+      "direction": "downside",
+      "previous_direction": "downside",
+      "rationale": "Falling optical orders, weaker pricing and unchanged capacity commitments would reduce revenue, margins and utilization.",
+      "ticker": "LITE"
+    },
+    "LKNCY-B1": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "Meaningful agent-originated orders with higher retention or contribution profit would improve demand and customer economics.",
+      "ticker": "LKNCY"
+    },
+    "LKNCY-B2": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "upside",
+      "rationale": "Persistent reductions in forecast error, waste and stockouts would improve availability, margins and working capital.",
+      "ticker": "LKNCY"
+    },
+    "LKNCY-B3": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "Higher repeat rates and contribution margins without disproportionate complexity would improve product-launch economics.",
+      "ticker": "LKNCY"
+    },
+    "LKNCY-B4": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "Lower labor and downtime per order without more quality failures would improve store-level margins.",
+      "ticker": "LKNCY"
+    },
+    "LKNCY-B5": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "Higher utilization and lower per-ton costs sufficient to earn acceptable returns would improve manufacturing economics.",
+      "ticker": "LKNCY"
+    },
+    "LMND-B1": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "More verified end-to-end automation without higher leakage or complaints would lower handling costs and improve service.",
+      "ticker": "LMND"
+    },
+    "LMND-B2": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "Improved cohort-adjusted underwriting and acquisition economics would raise gross profit per exposure and acquisition dollar.",
+      "ticker": "LMND"
+    },
+    "LMND-B3": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "Scaled autonomous-mile cohorts with mature loss performance and adequate unit economics would support profitable share gains.",
+      "ticker": "LMND"
+    },
+    "LMND-B4": {
+      "ambiguous": false,
+      "direction": "downside",
+      "previous_direction": "downside",
+      "rationale": "Fraud losses and manual-review rates rising faster than premiums would erase automation savings and weaken profitability.",
+      "ticker": "LMND"
+    },
+    "META-B1": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "upside",
+      "rationale": "Sustained engagement and impressions without equivalent trust or retention declines would increase advertising revenue.",
+      "ticker": "META"
+    },
+    "META-B2": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "upside",
+      "rationale": "Incremental advertiser returns and demand exceeding compute costs would increase advertising revenue and profit.",
+      "ticker": "META"
+    },
+    "META-B3": {
+      "ambiguous": true,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "The more exposure-specific threshold tests efficiency, utilization and custom-silicon gains that lower costs and improve returns.",
+      "ticker": "META"
+    },
+    "META-B4": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "Broad repeat usage, paid value and declining cost per completed task would create durable agent revenue.",
+      "ticker": "META"
+    },
+    "META-B5": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "Sustained shipments and upgrades with positive contribution would grow hardware revenue and narrow segment losses.",
+      "ticker": "META"
+    },
+    "MRVL-B1": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "Additional custom-silicon programs reaching sustained qualified production would increase unit and design revenue.",
+      "ticker": "MRVL"
+    },
+    "MRVL-B2": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "upside",
+      "rationale": "Qualified systems, purchase commitments and production revenue would expand custom-silicon and interconnect sales.",
+      "ticker": "MRVL"
+    },
+    "MRVL-B3": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "upside",
+      "rationale": "Volume adoption with rising content per cluster would increase port value, mix and data-center revenue.",
+      "ticker": "MRVL"
+    },
+    "MRVL-B4": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "Major production deployments and meaningful socket wins would add switching and connectivity revenue.",
+      "ticker": "MRVL"
+    },
+    "MRVL-B5": {
+      "ambiguous": false,
+      "direction": "downside",
+      "previous_direction": "downside",
+      "rationale": "Lower infrastructure purchases, delayed clusters or insourced programs would reduce revenue and worsen capacity absorption.",
+      "ticker": "MRVL"
+    },
+    "MSFT-B1": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "Billable workload growth, utilization and pricing exceeding infrastructure costs would improve cloud profit and cash returns.",
+      "ticker": "MSFT"
+    },
+    "MSFT-B2": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "upside",
+      "rationale": "Production deployments that lift revenue and retention above serving costs would increase recurring gross profit.",
+      "ticker": "MSFT"
+    },
+    "MSFT-B3": {
+      "ambiguous": false,
+      "direction": "downside",
+      "previous_direction": "mixed",
+      "rationale": "Application replacement, weaker renewals and insufficient offsetting cloud consumption would reduce application gross profit.",
+      "ticker": "MSFT"
+    },
+    "MSFT-B4": {
+      "ambiguous": true,
+      "direction": "downside",
+      "previous_direction": "mixed",
+      "rationale": "The more direct threshold branch is substantial workload migration away from Azure, which would reduce cloud demand.",
+      "ticker": "MSFT"
+    },
+    "MSFT-B5": {
+      "ambiguous": true,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "The product-specific threshold tests governance and security becoming decisive paid features that strengthen revenue and retention.",
+      "ticker": "MSFT"
+    },
+    "MU-B1": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "upside",
+      "rationale": "Accelerator and HBM-content growth outpacing supply while qualifications persist would increase HBM volume and mix.",
+      "ticker": "MU"
+    },
+    "MU-B2": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "upside",
+      "rationale": "HBM capacity consumption exceeding replacement bit growth would tighten conventional DRAM supply and support pricing and margins.",
+      "ticker": "MU"
+    },
+    "MU-B3": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "upside",
+      "rationale": "Agent-driven server and memory growth outpacing efficiency gains would increase conventional memory demand.",
+      "ticker": "MU"
+    },
+    "MU-B4": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "AI-related NAND consumption and premium SSD adoption exceeding supply growth would improve revenue, mix and pricing.",
+      "ticker": "MU"
+    },
+    "MU-B5": {
+      "ambiguous": false,
+      "direction": "downside",
+      "previous_direction": "downside",
+      "rationale": "Memory requirements falling faster than AI workloads grow would weaken demand, utilization and pricing.",
+      "ticker": "MU"
+    },
+    "NTSK-B1": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "upside",
+      "rationale": "Paid production adoption generating measurable expansion or competitive wins would increase recurring revenue and mix.",
+      "ticker": "NTSK"
+    },
+    "NTSK-B2": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "Meaningful production agent traffic through interoperable low-latency controls would support adoption and revenue expansion.",
+      "ticker": "NTSK"
+    },
+    "NTSK-B3": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "Production automation whose accuracy and throughput exceed review and error costs would increase ARR and service efficiency.",
+      "ticker": "NTSK"
+    },
+    "NTSK-B4": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "Purchasing differentiation and network savings exceeding capacity costs would improve wins, retention and margins.",
+      "ticker": "NTSK"
+    },
+    "NTSK-B5": {
+      "ambiguous": false,
+      "direction": "downside",
+      "previous_direction": "mixed",
+      "rationale": "Buyer preference for bundled controls or restricted platform access would slow recurring-revenue growth and weaken differentiation.",
+      "ticker": "NTSK"
+    },
+    "NVDA-B1": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "upside",
+      "rationale": "Compute spending growth exceeding price-performance gains without material migration would increase Data Center revenue and gross profit.",
+      "ticker": "NVDA"
+    },
+    "NVDA-B2": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "upside",
+      "rationale": "Sustained agent token volumes with usage expanding faster than hardware efficiency would drive recurring infrastructure demand.",
+      "ticker": "NVDA"
+    },
+    "NVDA-B3": {
+      "ambiguous": false,
+      "direction": "downside",
+      "previous_direction": "mixed",
+      "rationale": "Compute per useful task falling faster than usage expands would reduce accelerator requirements and platform spending.",
+      "ticker": "NVDA"
+    },
+    "NVDA-B4": {
+      "ambiguous": false,
+      "direction": "downside",
+      "previous_direction": "downside",
+      "rationale": "Competing accelerators winning material production deployments would cause revenue-share loss and margin pressure.",
+      "ticker": "NVDA"
+    },
+    "NVDA-B5": {
+      "ambiguous": false,
+      "direction": "downside",
+      "previous_direction": "downside",
+      "rationale": "Broad restrictions that prevent demand redirection without price, timing or margin loss would reduce revenue and profitability.",
+      "ticker": "NVDA"
+    },
+    "OMDA-B1": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "upside",
+      "rationale": "Sustained incremental retention and lower care-team hours without added safety issues would improve revenue and margins.",
+      "ticker": "OMDA"
+    },
+    "OMDA-B2": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "upside",
+      "rationale": "Measurable clinical and medical-cost improvements across cohorts would strengthen buyer ROI, renewals, and revenue.",
+      "ticker": "OMDA"
+    },
+    "OMDA-B3": {
+      "ambiguous": false,
+      "direction": "downside",
+      "previous_direction": "downside",
+      "rationale": "A systematic care error, serious incident, or regulatory restriction would raise costs and impair retention and growth.",
+      "ticker": "OMDA"
+    },
+    "OMDA-B4": {
+      "ambiguous": true,
+      "direction": "downside",
+      "previous_direction": "mixed",
+      "rationale": "Weaker renewals, lower prices, or channel insourcing by adequate competing AI products would erode revenue and differentiation.",
+      "ticker": "OMDA"
+    },
+    "OSCR-B1": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "upside",
+      "rationale": "Broad Oswell use that reduces contact or utilization costs without worse outcomes would improve retention and unit economics.",
+      "ticker": "OSCR"
+    },
+    "OSCR-B2": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "upside",
+      "rationale": "Service savings exceeding model and oversight costs while preserving quality would improve operating leverage.",
+      "ticker": "OSCR"
+    },
+    "OSCR-B3": {
+      "ambiguous": false,
+      "direction": "downside",
+      "previous_direction": "downside",
+      "rationale": "Recurring high-stakes guidance errors or inadequate controls would create legal, regulatory, utilization, and attrition costs.",
+      "ticker": "OSCR"
+    },
+    "OSCR-B4": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "Meaningful enrollment volume and higher conversion or product attachment would increase premium and adjacent revenue.",
+      "ticker": "OSCR"
+    },
+    "OSCR-B5": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "Financially visible contract wins, client lives, and services revenue would expand growth and margins.",
+      "ticker": "OSCR"
+    },
+    "PANW-B1": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "Production agent adoption and dedicated independent-control budgets would expand subscriptions, contract breadth, and retention.",
+      "ticker": "PANW"
+    },
+    "PANW-B2": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "Superior detection and response at lower operating cost amid stronger attacks would increase demand and platform consolidation.",
+      "ticker": "PANW"
+    },
+    "PANW-B3": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "Customer preference for consistent third-party controls across heterogeneous AI stacks would support differentiation and pricing.",
+      "ticker": "PANW"
+    },
+    "PANW-B4": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "Demand for enforceable agent controls beyond native tools would create incremental subscription spend and platform adoption.",
+      "ticker": "PANW"
+    },
+    "PANW-B5": {
+      "ambiguous": true,
+      "direction": "downside",
+      "previous_direction": "mixed",
+      "rationale": "Native controls reaching comparable enterprise efficacy would compress pricing and reduce the platform's addressable scope.",
+      "ticker": "PANW"
+    },
+    "PSTG-B1": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "upside",
+      "rationale": "Production deployments that measurably improve accelerator utilization would increase product revenue, ARR, and installed-base expansion.",
+      "ticker": "PSTG"
+    },
+    "PSTG-B2": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "upside",
+      "rationale": "Paid production adoption with incremental attach or expansion would increase recurring revenue and software mix.",
+      "ticker": "PSTG"
+    },
+    "PSTG-B3": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "Sustained hyperscaler production volume and additional customer validation would generate substantial product, licensing, and support revenue.",
+      "ticker": "PSTG"
+    },
+    "PSTG-B4": {
+      "ambiguous": false,
+      "direction": "downside",
+      "previous_direction": "downside",
+      "rationale": "Persistent shipment constraints or input-cost inflation exceeding pricing benefits would compress revenue and gross margin.",
+      "ticker": "PSTG"
+    },
+    "PSTG-B5": {
+      "ambiguous": false,
+      "direction": "downside",
+      "previous_direction": "downside",
+      "rationale": "Declining shared-storage content per AI cluster and orders lagging compute growth would weaken adoption and product mix.",
+      "ticker": "PSTG"
+    },
+    "RBRK-B1": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "upside",
+      "rationale": "Production customers purchasing, renewing, and expanding Agent Cloud would increase subscription ARR and net retention.",
+      "ticker": "RBRK"
+    },
+    "RBRK-B2": {
+      "ambiguous": true,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "AI-driven threats shifting enterprise spending toward independently validated recovery would increase core subscription demand.",
+      "ticker": "RBRK"
+    },
+    "RBRK-B3": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "upside",
+      "rationale": "Shorter recovery times and lower manual effort without added failures would improve win rates, retention, pricing, and support economics.",
+      "ticker": "RBRK"
+    },
+    "RBRK-B4": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "upside",
+      "rationale": "Paid production AI workflows and expansion of protected datasets would increase ARR and net retention.",
+      "ticker": "RBRK"
+    },
+    "RBRK-B5": {
+      "ambiguous": false,
+      "direction": "downside",
+      "previous_direction": "downside",
+      "rationale": "Native tools that meet cross-platform needs or restrict access would displace Agent Cloud and weaken ARR.",
+      "ticker": "RBRK"
+    },
+    "RDDT-B1": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "New or renewed agreements that materially add other revenue would improve consolidated growth and margins.",
+      "ticker": "RDDT"
+    },
+    "RDDT-B2": {
+      "ambiguous": false,
+      "direction": "downside",
+      "previous_direction": "downside",
+      "rationale": "Unoffset declines in search-referred users and ad impressions would reduce advertising inventory and acquisition efficiency.",
+      "ticker": "RDDT"
+    },
+    "RDDT-B3": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "upside",
+      "rationale": "Sustained gains in retention, contribution, or monetizable sessions net of serving costs would improve advertising economics.",
+      "ticker": "RDDT"
+    },
+    "RDDT-B4": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "upside",
+      "rationale": "Repeatable advertiser-return improvements that raise spend and ARPU net of costs would increase revenue and operating leverage.",
+      "ticker": "RDDT"
+    },
+    "RDDT-B5": {
+      "ambiguous": false,
+      "direction": "downside",
+      "previous_direction": "mixed",
+      "rationale": "Synthetic abuse that reduces legitimate participation, advertiser confidence, or data reliability would raise costs and weaken the platform moat.",
+      "ticker": "RDDT"
+    },
+    "SNDK-B1": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "upside",
+      "rationale": "Sustained production qualifications and outsized Datacenter exabyte growth would increase higher-value enterprise revenue and gross margin.",
+      "ticker": "SNDK"
+    },
+    "SNDK-B2": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "upside",
+      "rationale": "HBF meeting technical requirements and entering a production roadmap would create premium memory revenue.",
+      "ticker": "SNDK"
+    },
+    "SNDK-B3": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "Recurring high-capacity SSD deployments based on operating-cost savings would expand addressable exabytes and revenue.",
+      "ticker": "SNDK"
+    },
+    "SNDK-B4": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "upside",
+      "rationale": "Higher standard device capacities and qualified socket wins without offsetting price declines would raise revenue per device.",
+      "ticker": "SNDK"
+    },
+    "SNDK-B5": {
+      "ambiguous": false,
+      "direction": "downside",
+      "previous_direction": "downside",
+      "rationale": "Bit-supply growth exceeding demand would raise inventories, weaken NAND pricing, and compress gross margin.",
+      "ticker": "SNDK"
+    },
+    "TSM-B1": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "upside",
+      "rationale": "Sustained AI production orders filling incremental advanced-node capacity at attractive pricing would raise revenue and gross profit.",
+      "ticker": "TSM"
+    },
+    "TSM-B2": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "upside",
+      "rationale": "Retaining packaging share while scaling capacity without persistent yield or cycle-time penalties would improve revenue and mix.",
+      "ticker": "TSM"
+    },
+    "TSM-B3": {
+      "ambiguous": false,
+      "direction": "downside",
+      "previous_direction": "mixed",
+      "rationale": "Efficiency outpacing AI usage growth and leaving committed capacity underutilized would reduce wafer demand and returns.",
+      "ticker": "TSM"
+    },
+    "TSM-B4": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "Incremental AI silicon area and advanced-node adoption exceeding device and compute offsets would increase wafer demand and mix.",
+      "ticker": "TSM"
+    },
+    "TSM-B5": {
+      "ambiguous": false,
+      "direction": "downside",
+      "previous_direction": "mixed",
+      "rationale": "Restrictions on major products or equipment and underutilized localized fabs would weaken demand, margins, and capital returns.",
+      "ticker": "TSM"
+    },
+    "XMTR-B1": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "upside",
+      "rationale": "Sustained conversion and support-cost improvements without added quality failures would increase volume and marketplace efficiency.",
+      "ticker": "XMTR"
+    },
+    "XMTR-B2": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "Realized margin, delivery, and remediation gains across meaningful volume would improve marketplace economics.",
+      "ticker": "XMTR"
+    },
+    "XMTR-B3": {
+      "ambiguous": true,
+      "direction": "upside",
+      "previous_direction": "mixed",
+      "rationale": "Native integrations generating attributable order volume at scale would increase enterprise revenue and repeat spending.",
+      "ticker": "XMTR"
+    },
+    "XMTR-B4": {
+      "ambiguous": false,
+      "direction": "upside",
+      "previous_direction": "upside",
+      "rationale": "Sustained recurring data-center orders at acceptable realized margins would increase marketplace revenue and gross profit.",
+      "ticker": "XMTR"
+    },
+    "XMTR-B5": {
+      "ambiguous": false,
+      "direction": "downside",
+      "previous_direction": "downside",
+      "rationale": "Comparable competitor fulfillment accompanied by deteriorating repeat rates, pricing spreads, or supplier participation would pressure growth and margins.",
+      "ticker": "XMTR"
+    }
+  },
+  "counts_after": {
+    "downside": 49,
+    "upside": 127
+  },
+  "counts_before": {
+    "downside": 29,
+    "mixed": 88,
+    "upside": 59
+  },
+  "generated_at": "2026-07-29T10:45:43+00:00",
+  "model": "gpt-5.6-sol",
+  "prompt_cache_key": "fli:company-bet-direction:v2",
+  "prompt_version": "company-bet-direction-v2",
+  "reasoning_effort": "xhigh",
+  "schema_version": "company-bet-directions-v1",
+  "source_sha256": "50d5088465c6fa6cf4ce4261fc0d4212a72fe66e1ed3826d0a58672084d336c1",
+  "telemetry": [
+    {
+      "batch": 1,
+      "cache_write_tokens": 8238,
+      "cached_tokens": 0,
+      "input_tokens": 8241,
+      "output_tokens": 6753,
+      "reported_cost_usd": null,
+      "response_id": "resp_x5NZeJS_v4YUGOx91keyVF-IRsOcTl3OTi6-miYxbCgcg9QHbKVLfEPqanTkyuIQN8iXlxyWPHUMIn2rcmXhHrjydC-XpwTZtnJ5xQDnDnCXZLJp1jpiMTFwthjXzTLiwsucg0nCof5VuuNYSn5vN43C7RLnOIo0Qi2jxJufv-wUz5kZi7R3o4p8FwbajdDIWkLTisviD-WBLxTAxtugXJcjVfP7kJutn_V_ltceJyK0Tyi0LcxGUG4Dq94HPwZKYKReUt5Wwhch17WcJXSuUirX4V5G2elX_BAaO8WaSlCq2FQwA8l_3z0o8bbIfUXp8KzA7xRC4pojwfKDYHhKPX67ZRMl4Jzbjj0obdfIlPHEKUEoMpaeiF_HCStj6lYTa1Jk-ywco5gnpx6qmxJSMIa-XOEydE5BLyiqdkyMcd1IYl6L7e2h-2OcVjTBqWVJ8Fou-0ku0CgG-3cUXWWhn0-g",
+      "reused_local_trace": "tmp/company-bet-direction-classification/20260729T104156Z/batch-01.json"
+    },
+    {
+      "batch": 2,
+      "cache_write_tokens": 8100,
+      "cached_tokens": 0,
+      "input_tokens": 8103,
+      "output_tokens": 6386,
+      "reported_cost_usd": null,
+      "response_id": "resp_KAr3cGxR-h7BQlaSr6L96lx4hN_bjPGDyEZD7c_-b9aR4pD-DXtOXt9a-c35SJmuzQr_RXA8aPrLQrxpo3DDhe-LwWVgE3fQ9IbCgg3g4FK26PQotC4RK0SIRoIShLjDgo6q_FrCEheFEG-3l7YRlV41XYR4BkGI4aYUQODgUYjQgu5xSK1Tm6fCcQ5Q7gYq0OBtKngi-ebSuzdNwoNWPsE8B2k0_30dh5FoTCj9Y_V027fnibFFJ_jPqL900woOD_9Bw0l0I8T7J9BXfGzr1S2cObip0ndOxG3EguXQJBWvwVssyG-arNXx2TXfEnhfaOovDtormy5gZWAJPmm2itBCd4N36-wA97zlj7SFDbyNqkUmZrjw0Pq08ILQm_eeffJryx5iI6N4vJn8Li-gOVxpAU5VrrGGy-ZvuUne6YRvUgn_lJ6Rwcu5wcVFZ_AZllJH__s2dtoR9QjqPp5CcarP",
+      "reused_local_trace": "tmp/company-bet-direction-classification/20260729T104156Z/batch-02.json"
+    },
+    {
+      "batch": 3,
+      "cache_write_tokens": 8160,
+      "cached_tokens": 0,
+      "input_tokens": 8163,
+      "output_tokens": 6047,
+      "reported_cost_usd": null,
+      "response_id": "resp_lOA0ogiaD3nLqv7uh0f7bJglOgOEBtv-t20E76BzdKsAxmP5Sl1gRFUky-oNpvoptHm9F1szV3RdLpho4Wuwu6hgYzUdBpOG8WLLQAQ-qfsvZXrYnEUer2b38Gp5Kj4d8DDWzOc1aLCzCPEsbV7GLXPxAkZ4XMj9H4xU4jTLviI3KLYzYVoR0XG62rqHVbMGDfuSba2KP91Bzm6TFDEOVaIo8Q-vBuy3I0kpwDaN32eIhOZn2HyLCDlOZY7chakmySyK0wcrOAYCDGOL7yBG198V7ZI3T2Y_cTq7FrA4NffSqj2ZblWcGtCPvktxYqxwBGAy1QPut2hVqNhlOE6DbVJwOb_bFH1D9J1TK_nByeJ4vxYXmFPpskZ-yygaXmNL8f6hxc77vLt29BWuixgc7UA01ivIkd2crMPq4OMjCxZCx3P9ASYqKC_vFnLxSjkYLqzYoUW8QihItrnUUadR_UQV",
+      "reused_local_trace": "tmp/company-bet-direction-classification/20260729T104156Z/batch-03.json"
+    },
+    {
+      "batch": 4,
+      "cache_write_tokens": 8044,
+      "cached_tokens": 0,
+      "input_tokens": 8047,
+      "output_tokens": 5200,
+      "reported_cost_usd": null,
+      "response_id": "resp_MaH641LMFCif4JCNdGm-nZadO1kGtOksTc5AczOMfuMFyRcdhB_zHSKas6-yK_iI7hogTxbny4VNljs5vC28sonYungPNzoEf3gIJVxNeSbPVIbG3wOtMhWCnAgDFR0v3eiC2hbLuKM-lN56Y3DU6IDM40cFEJ7Pnnpg6Fw40s_3hhUdnJBspgX2im-X1QeMcr9R-5UdGwwR1y2wFg2GCbJdU2WReNaSm0zRsE6m0FLfUnq9vmuXAU0IRpSCKRF0bY3Oo7qDhiZsO94kPuGU7K0x7S7dKiR_bdqYozwK3EiBoYOLII24Kx07koGXduABE6Z7G1qm-j0FLBBa9rR-m0kqZOY6iC53RaH5o34tpVsJo8ZF7usz3nsMhd5WmV3sC07UITSP7dR7mw_z5VhX8f56bV993Z-mCTjFPrSfkicwBSXScss_6lDSDx20Ib8nNS-72E4FTsLk9MoYnWtcclWy",
+      "reused_local_trace": "tmp/company-bet-direction-classification/20260729T104156Z/batch-04.json"
+    }
+  ]
+}

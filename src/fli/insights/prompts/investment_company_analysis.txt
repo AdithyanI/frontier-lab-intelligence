@@ -43,7 +43,7 @@ however, identify:
 2. which company exposure or dependency it reaches;
 3. which operating driver could move;
 4. the causal mechanism connecting the two;
-5. the likely direction, if one can be stated;
+5. whether the standing bet's pre-committed threshold is met now;
 6. the main fact that remains unproven; and
 7. the next observable an analyst should check.
 
@@ -113,17 +113,15 @@ connection, but it is not sufficient evidence for a final company
 read-through.
 
 When a compact card establishes a credible candidate, you may call
-`get_company_memo`. The packet contains four things:
+`get_company_memo`. The packet contains two things:
 
-- `scale`: every size magnitude stated anywhere in the research, verbatim.
-  This is the only basis for judging materiality. When it is empty, you
-  cannot size the effect and must say so.
-- `bit_view`: any public BIT Capital view that is genuinely attributable,
-  with the tests that would support or challenge it. Null when none exists.
-- `memo.frontier_ai_transmission_paths`: paths researched before this
-  Development, each with its own materiality condition.
-- `memo.business_and_economics` and `memo.operating_and_financial_drivers`:
-  what the company sells and what moves its reported results.
+- `summary`: what the company sells and what moves its reported results.
+- `bets`: the company's standing bets, researched before this Development.
+  Each bet carries an `id`, an `if` naming the world-side condition, an
+  `exposure` naming the part of the business that carries it, a `then` naming
+  the financial consequence, a binary `direction`, a `threshold`, and the
+  observables to `watch`. These are the transmission paths. You select among
+  them; you do not author new ones.
 
 The Development remains the new evidence. A company card or memo is prior
 context used to interpret that evidence. Portfolio disclosure is context only.
@@ -184,16 +182,18 @@ Identify:
 - what the evidence does not establish; and
 - the most plausible economic or strategic transmission channels.
 
-Then evaluate every compact company card. The card is only a candidate index.
-Do not treat the presence of an AI channel in a card as proof that this
-Development is relevant.
+Then evaluate every compact company card. Each card carries the company's
+standing bets: hypotheses fixed before this daily analysis. The
+card is a candidate index, not evidence. A bet that sounds topically adjacent
+is not proof that this Development instantiates it.
 
 Call a company memo only when you can already state:
 
 - the ticker;
 - whether the proposed connection is direct or indirect;
 - the preliminary causal mechanism;
-- the affected operating driver; and
+- `candidate_bet_id`: which standing bet on that company's card the
+  Development appears to instantiate; and
 - why the full memo is needed to confirm or reject the match.
 
 If you are unsure whether a company has a real causal connection, do not open
@@ -223,10 +223,10 @@ Opening a memo does not mean the company must be published. The memo may:
 - leave too much uncertainty to support a useful conclusion.
 
 After reading every requested memo, reassess the candidate from the beginning.
-Place each opened ticker exactly once in either:
-
-- `company_assessments`, when the causal connection remains useful; or
-- `rejected_after_memo`, when the full memo does not support publication.
+Keep a company only when the full memo supports a useful causal connection.
+Omit an opened company when the memo breaks that connection. Memo calls remain
+available in the audit trace, so the final reader-facing result does not need
+to explain every discarded candidate.
 
 Do not include a company merely because you spent a tool call on it.
 
@@ -289,10 +289,11 @@ Publish a company read-through only when all of the following are true:
 7. **Observable next check:** You can name evidence that would support,
    challenge, or size the implication.
 
-The Development does not need to prove financial materiality today. Frontier
+The Development does not need to satisfy a bet's `threshold` today. Frontier
 intelligence is often valuable before revenue, pricing, adoption, or market
 share is visible. Early evidence can be published when the causal mechanism is
-concrete and the limitation is stated plainly.
+concrete and the limitation is stated plainly. In that case keep the company,
+but set `threshold_met` to false.
 
 Examples of early but potentially useful evidence include:
 
@@ -314,30 +315,35 @@ description is not revenue. Contract value is not recognized revenue. A
 technical capability is not automatically a commercial moat. A plausible
 demand signal is not proof that one vendor will win.
 
-# Direction
+# Standing direction and today's threshold
 
-Direction describes the plausible direction of the Development's effect on the
-named company driver. It does not describe confidence.
+Each memo pre-commits every standing bet to one stable direction:
 
-- `positive`: the Development plausibly supports demand, pricing, adoption,
-  differentiation, utilization, supply advantage, or another favorable
-  company driver.
-- `negative`: the Development plausibly increases substitution, cost,
-  competitive pressure, execution risk, regulation, security exposure, or
-  another adverse company driver.
-- `mixed`: the Development itself creates both a meaningful positive path and
-  a meaningful negative path for the same company.
-- `unclear`: a real causal connection exists, but the available evidence does
-  not support a directional conclusion.
+- `upside`: if the bet's world condition occurs and its threshold is crossed,
+  the primary tested consequence is favorable for the named company.
+- `downside`: if the bet's world condition occurs and its threshold is crossed,
+  the primary tested consequence is adverse for the named company.
 
-`unclear` is under-used. Product fit is not evidence of demand. A company with
-real product exposure, where the evidence does not show this Development
-reaching its customers, is `unclear` and not `positive`.
+You do not generate, restate, or change direction. The application looks it up
+from the memo by `bet_id`, so today's result cannot diverge from the standing
+bet.
 
-Do not use `mixed` merely because the magnitude, timing, adoption, or winner is
-uncertain. Put those issues in `main_uncertainty`. When one plausible economic
-direction is clear, use `positive` or `negative` and state the limitation
-separately.
+Your only new gate judgment is `threshold_met`.
+
+- Use `true` only when the frozen Development evidence establishes the exact
+  threshold now.
+- Use `false` when the Development fires the bet but the threshold still
+  depends on future adoption, paid use, recurring revenue, utilization,
+  customer behavior, pricing, market share, margins, or another unobserved
+  result.
+- Do not treat a forecast, product announcement, benchmark, anecdote, plausible
+  causal path, or management ambition as proof that the threshold is met.
+- Do not predict that the threshold will probably be met. Judge only the
+  supplied evidence.
+
+This is a high bar. `false` does not mean irrelevant or rejected. It means
+"early signal." `true` means the evidence is strong enough that an analyst
+should review the standing thesis now.
 
 # BIT Capital public views and portfolio context
 
@@ -346,9 +352,9 @@ attributable. When it is present it carries `would_support_it` and
 `would_challenge_it`: tests written during research, before this Development
 existed.
 
-- When the Development bears on one of those tests, say so in the exposure
-  `impact` and name the direction. A Development that moves a pre-registered
-  test is stronger than one that merely touches an operating driver.
+- When the Development bears on one of those tests, say so in `impact`.
+  A Development that moves a standing test is stronger than one that merely
+  touches an operating driver.
 - `is_explicit_thesis` false means commentary. Commentary is weaker evidence
   than a stated thesis; do not upgrade it.
 - Do not turn portfolio ownership into a thesis, and do not infer conviction,
@@ -416,22 +422,12 @@ Suppress the whole Development when:
   or
 - no observable next check can be named.
 
-Use `rejected_after_memo` when a company looked credible at the compact-card
-stage but failed after full research. Give one plain, specific reason. A useful
-rejection reason explains the broken link, such as:
-
-- the memo does not confirm the proposed product exposure;
-- the affected activity is too small or remote from the business model;
-- the Development does not change the named operating driver;
-- the connection depends on an unsupported intermediate step; or
-- the evidence cannot distinguish the company from many generic peers.
-
 # Final structured result
 
 Return one cross-company result using the supplied strict JSON schema. Do not
 add fields outside that schema.
 
-## `investment_headline`
+## `headline`
 
 Write the reader-facing headline only after completing the company analysis.
 It should state the most important supported investment implication, not merely
@@ -440,7 +436,8 @@ repeat the source title or describe the announcement.
 - Use 6 to 14 words in one plain-English sentence fragment.
 - Name the affected company, competitive pressure, business variable, or
   investment category when that makes the implication clearer.
-- State direction when the evidence supports it.
+- State the supported investment implication; the UI supplies the standing
+  direction from the memo.
 - Make the causal takeaway understandable without the rest of the page.
 - Do not begin with "Analysts should" or "Investors should."
 - Do not imply proven adoption, revenue, materiality, or a winner unless the
@@ -454,7 +451,7 @@ Examples of the intended form:
 - "Cheaper Gemini models increase pricing pressure on Azure and AWS"
 - "Gemini TPU training sharpens NVIDIA's custom-silicon risk"
 
-## `development_summary`
+## `what_changed`
 
 Explain what changed in three to five short sentences.
 
@@ -471,44 +468,10 @@ Explain what changed in three to five short sentences.
 
 Use:
 
-- `surface` when at least one company assessment clears the final standard.
-- `suppress` when no company assessment clears the standard.
+- `surface` when at least one company connection clears the final standard.
+- `suppress` when no company connection clears the standard.
 
-## `portfolio_readthrough`
-
-Give the cross-company conclusion in the reader's terms.
-
-- Lead with what an analyst should take from the Development.
-- Say which company this most changes the picture for, and why the others sit
-  below it.
-- Attach each limitation to the company it constrains rather than closing with
-  one generic disclaimer.
-- Do not open with the word "Treat".
-- Do not imply that every named company is a current holding.
-- Do not provide buy or sell advice.
-
-If every company ends in the same place with the same direction and the same
-materiality, say plainly what distinguishes the strongest case from the
-weakest. If nothing distinguishes them, state that. An honest "these move
-together for one reason" is a better result than four parallel paragraphs
-implying four separate findings.
-
-## `prior_assumption`
-
-One sentence naming a reasonable prior a BIT analyst might already hold, and
-which way this Development moves it. Write the belief, then the movement.
-
-Anchor it to the work above. Name a company or an `affected_driver` that
-appears in your `company_assessments`, so the sentence lands on a position
-rather than on the industry. "A reasonable prior is that agent escapes stay
-inside test systems" is an observation about the world and is too loose.
-"Netskope's AI-security modules looked like an option on future budgets; this
-argues the budget already exists" is anchored, because a reader can act on it.
-
-Use `null` when suppressed, or when the Development genuinely moves no prior
-worth naming. Do not manufacture a contrarian angle.
-
-## `company_assessments`
+## `connections`
 
 This field holds causal mechanisms, not companies. A mechanism is one path from
 the Development to a company driver. Group every company that moves for the
@@ -525,60 +488,33 @@ often means the Development supports several thin claims rather than one
 finding. When that happens, keep the mechanisms that survive scrutiny and
 reject the rest.
 
-For each mechanism:
+For each connection:
 
-- `mechanism_title`: 4 to 10 words naming the causal path. Name the path, not a
-  company.
 - `mechanism`: no more than two sentences tracing the complete link from the
   Development to the companies on this path.
-- `splits`: `true` only when this mechanism moves at least one company
-  favorably and another adversely. It must be `false` when every company on the
-  path moves the same way. A mechanism that splits is usually more valuable
-  than one that does not, because it identifies a winner at someone's expense.
-- `main_uncertainty`: the single thing that could make this mechanism wrong.
-  One short sentence, under 25 words, carrying one idea. Open with "We do not
-  know whether" or "Nobody has shown yet that" so the limit is unmistakable.
-- `next_check`: exactly one primary observable, naming the company it applies
-  to.
 
 For each company on the mechanism:
 
 - `ticker`: the canonical ticker from the supplied universe.
-- `affected_driver`: one concise phrase naming the company business variable
-  that could move, in plain business language.
-- `direction`: `positive`, `negative`, `mixed`, or `unclear`.
-- `materiality`: whether a plausible outcome could move this company's reported
-  results at its own scale.
-  - `material`: the memo supports a revenue or driver scale where this could
-    show up in results.
-  - `immaterial`: the connection is real but small against this company's
-    existing base.
-  - `unknown`: `scale.stated_magnitudes` is empty, or nothing in it covers the
-    part of the business this path touches.
-  Judge against `scale.stated_magnitudes` and the memo's
-  `materiality_condition`. Never estimate a figure the memo does not contain.
-  A large stated figure that is an acquisition price or a capital-spending
-  plan is not a revenue base; do not treat it as one. `unknown` is a correct
-  and common answer.
-- `size_basis`: the one figure from `scale.stated_magnitudes` your materiality
-  judgment rests on, quoted close to the packet's wording and under twelve
-  words. It must contain the magnitude itself, so `ARR was $845 million`
-  works and `disclosed ARR` does not. Null when `materiality` is `unknown`,
-  and only then. A reader must be able to check your verdict against this
-  figure without opening the memo. Never invent or round a figure the packet
-  does not state.
+- `bet_id`: the id of the standing bet in that company's memo that this
+  Development tests, copied exactly. Every company carries a small set of
+  standing hypotheses fixed before this daily analysis. Your job is to
+  identify which one the Development tests, not to invent a new transmission
+  path. If no bet fits, omit the company.
+- `threshold_met`: `true` only when the Development establishes the cited
+  bet's exact `threshold` now. Otherwise use `false`. The fact that a bet fired
+  is not enough.
 - `impact`: two or three short sentences on what this Development means for
   this company. Name the product, segment, or contract that carries the
-  effect, then say what would have to happen for it to reach reported
-  results. Do not say the company "ranks first" or "ranks second"; the order
-  already shows that. Do not restate the mechanism sentence. Write it so an
-  analyst who reads only this paragraph still knows what is at stake.
+  effect. Explain the evidence behind the `threshold_met` judgment. If false,
+  name the missing observable that prevents the gate from clearing. If true,
+  name the supplied fact that cleared it. Do not restate direction, the
+  mechanism sentence, or the whole standing bet. Do not say the company
+  "ranks first" or "ranks second"; the order already shows that.
 
-## `rejected_after_memo`
-
-Include every opened memo that did not survive final review. Give the ticker
-and one concrete reason. Do not include companies rejected before a memo call;
-those were never promoted into the full-review stage.
+The bet already states the exposure, direction, financial consequence,
+threshold, and what to watch. Do not repeat those in `impact`.
+Add only what is new today.
 
 ## `no_match_reason`
 
@@ -586,8 +522,8 @@ those were never promoted into the full-review stage.
 - When `decision` is `suppress`, state the single clearest reason that no
   publishable company connection remained.
 
-Every opened ticker must appear exactly once in `company_assessments` or
-`rejected_after_memo`.
+Every company in `connections` must have an opened memo. An opened memo may be
+omitted when it does not survive final review.
 
 # Writing standard
 

@@ -15,27 +15,17 @@ DEFAULT_DB = (
     REPO_ROOT / "data" / "derived" / "insights" / "investment-agent.db"
 )
 STORE_SCHEMA_VERSION = "investment-agent-store-v2"
-READ_SCHEMA_VERSION = "investment-agent-read-v6"
+READ_SCHEMA_VERSION = "investment-agent-read-v8"
+CURRENT_PROMPT_VERSION = "investment-agent-v14"
 TRACE_SCHEMA_VERSIONS = {"investment-agent-trace-v1"}
 STATUSES = {"kept", "suppressed", "all"}
-MECHANISM_FIELDS = {
-    "mechanism_title",
-    "mechanism",
-    "splits",
-    "exposures",
-    "main_uncertainty",
-    "next_check",
-}
-EXPOSURE_FIELDS = {
+CONNECTION_FIELDS = {"mechanism", "companies"}
+COMPANY_FIELDS = {
     "ticker",
-    "affected_driver",
-    "direction",
-    "materiality",
-    "size_basis",
+    "bet_id",
+    "threshold_met",
     "impact",
 }
-DIRECTIONS = {"positive", "negative", "mixed", "unclear"}
-MATERIALITIES = {"material", "immaterial", "unknown"}
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS investment_agent_meta (
@@ -158,56 +148,63 @@ def _validate_trace(trace: dict[str, Any]) -> None:
     final = trace.get("final_result")
     if not isinstance(final, dict):
         raise ValueError("Investment agent trace has no validated final result")
-    headline = str(final.get("investment_headline") or "").strip()
+    if set(final) != {
+        "headline",
+        "what_changed",
+        "decision",
+        "connections",
+        "no_match_reason",
+    }:
+        raise ValueError("Investment agent result does not match the v14 schema")
+    headline = str(final.get("headline") or "").strip()
     if not headline or "\n" in headline or len(headline.split()) > 18:
         raise ValueError("Investment agent result has an invalid headline")
     decision = final.get("decision")
     if decision not in {"surface", "suppress"}:
         raise ValueError("Investment agent result has an invalid decision")
-    assessments = final.get("company_assessments")
-    rejections = final.get("rejected_after_memo")
-    if not isinstance(assessments, list) or not isinstance(rejections, list):
-        raise ValueError("Investment agent result has invalid company decisions")
+    connections = final.get("connections")
+    if not isinstance(connections, list):
+        raise ValueError("Investment agent result has invalid company connections")
     assessed = [
-        str(exposure.get("ticker") or "")
-        for item in assessments
+        str(company.get("ticker") or "")
+        for item in connections
         if isinstance(item, dict)
-        for exposure in (item.get("exposures") or [])
+        for company in (item.get("companies") or [])
     ]
-    rejected = [str(item.get("ticker") or "") for item in rejections]
-    represented = assessed + rejected
-    if not represented and decision == "surface":
-        raise ValueError("surfaced Investment result has no company assessment")
-    if len(represented) != len(set(represented)) or "" in represented:
-        raise ValueError("Investment result repeats or omits a company ticker")
-    for assessment in assessments:
-        if set(assessment) != MECHANISM_FIELDS:
-            raise ValueError(
-                "Investment mechanism does not match the minimal schema"
-            )
-        exposures = assessment["exposures"]
-        if not isinstance(exposures, list) or not exposures:
-            raise ValueError("Investment mechanism has no company exposure")
-        for field in ("mechanism_title", "mechanism", "main_uncertainty", "next_check"):
-            if not str(assessment[field]).strip():
-                raise ValueError(f"Investment mechanism has empty {field}")
-        directions = {str(item.get("direction")) for item in exposures}
-        opposed = "positive" in directions and "negative" in directions
-        if bool(assessment["splits"]) != opposed:
-            raise ValueError("Investment mechanism splits flag is inconsistent")
-        for exposure in exposures:
-            if set(exposure) != EXPOSURE_FIELDS:
+    cited_bets = [
+        (
+            str(company.get("ticker") or ""),
+            str(company.get("bet_id") or ""),
+        )
+        for item in connections
+        if isinstance(item, dict)
+        for company in (item.get("companies") or [])
+    ]
+    if not assessed and decision == "surface":
+        raise ValueError("surfaced Investment result has no company connection")
+    if "" in assessed or any(not bet_id for _, bet_id in cited_bets):
+        raise ValueError("Investment result omits a company ticker or bet id")
+    if len(cited_bets) != len(set(cited_bets)):
+        raise ValueError("Investment result repeats a company bet")
+    for connection in connections:
+        if set(connection) != CONNECTION_FIELDS:
+            raise ValueError("Investment connection does not match the v14 schema")
+        companies = connection["companies"]
+        if not isinstance(companies, list) or not companies:
+            raise ValueError("Investment connection has no company")
+        if not str(connection["mechanism"]).strip():
+            raise ValueError("Investment connection has an empty mechanism")
+        for company in companies:
+            if set(company) != COMPANY_FIELDS:
                 raise ValueError(
-                    "Investment company exposure does not match the minimal schema"
+                    "Investment company does not match the v14 schema"
                 )
-            if str(exposure["direction"]) not in DIRECTIONS:
-                raise ValueError("Investment company exposure has invalid direction")
-            if str(exposure["materiality"]) not in MATERIALITIES:
-                raise ValueError("Investment company exposure has invalid materiality")
-            for field in EXPOSURE_FIELDS - {"direction", "materiality"}:
-                if not str(exposure[field]).strip():
+            if not isinstance(company["threshold_met"], bool):
+                raise ValueError("Investment company threshold_met must be boolean")
+            for field in COMPANY_FIELDS - {"threshold_met"}:
+                if not str(company[field]).strip():
                     raise ValueError(
-                        f"Investment company exposure has empty {field}"
+                        f"Investment company has empty {field}"
                     )
     memo_calls = trace.get("memo_calls")
     if not isinstance(memo_calls, list):
@@ -216,9 +213,11 @@ def _validate_trace(trace: dict[str, Any]) -> None:
         str((item.get("arguments") or {}).get("ticker") or "")
         for item in memo_calls
     ]
-    if set(called) != set(represented):
+    if len(called) != len(set(called)) or "" in called:
+        raise ValueError("Investment memo audit repeats or omits a ticker")
+    if not set(assessed).issubset(set(called)):
         raise ValueError(
-            "every opened memo must be assessed or rejected exactly once"
+            "every retained company must have an opened memo"
         )
 
 
@@ -244,6 +243,11 @@ def import_trace(
         f"investment-agent-{trace['date']}-"
         f"{str(trace['development_id'])[:12]}-{run_identity_sha256[:12]}"
     )
+    assessed = {
+        str(company["ticker"])
+        for connection in final["connections"]
+        for company in connection["companies"]
+    }
     values = {
         "run_id": run_id,
         "day": str(trace["date"]),
@@ -259,10 +263,9 @@ def import_trace(
         "evidence_sha256": str(trace["evidence_sha256"]),
         "input_sha256": str(trace["input_sha256"]),
         "memo_count": len(trace["memo_calls"]),
-        "assessed_company_count": sum(
-            len(item["exposures"]) for item in final["company_assessments"]
-        ),
-        "rejected_company_count": len(final["rejected_after_memo"]),
+        "assessed_company_count": len(assessed),
+        "rejected_company_count": len(trace["memo_calls"])
+        - len(assessed),
         "turn_count": len(turns),
         "input_tokens": sum(int(item.get("input_tokens") or 0) for item in turns),
         "cached_tokens": sum(int(item.get("cached_tokens") or 0) for item in turns),
@@ -322,8 +325,8 @@ def import_trace(
         "day": values["day"],
         "development_id": values["development_id"],
         "decision": values["decision"],
-        "company_assessments": values["assessed_company_count"],
-        "rejected_after_memo": values["rejected_company_count"],
+        "company_connections": values["assessed_company_count"],
+        "memos_rejected": values["rejected_company_count"],
         "reported_cost_usd": values["reported_cost_usd"],
     }
 
@@ -364,9 +367,17 @@ def publish_day(
             row = conn.execute(
                 """SELECT 1
                    FROM investment_agent_run
-                   WHERE day = ? AND development_id = ? AND daily_rank = ?
+                   WHERE day = ?
+                     AND development_id = ?
+                     AND daily_rank = ?
+                     AND prompt_version = ?
                    LIMIT 1""",
-                (day, item["development_id"], item["daily_rank"]),
+                (
+                    day,
+                    item["development_id"],
+                    item["daily_rank"],
+                    CURRENT_PROMPT_VERSION,
+                ),
             ).fetchone()
             if row is None:
                 raise ValueError(
@@ -436,6 +447,7 @@ def _latest_rows(conn: sqlite3.Connection) -> list[sqlite3.Row]:
                           ORDER BY completed_at DESC, run_id DESC
                       ) AS recency_order
                FROM investment_agent_run AS run
+               WHERE run.prompt_version = ?
            )
            SELECT current.*
            FROM current
@@ -444,7 +456,8 @@ def _latest_rows(conn: sqlite3.Connection) -> list[sqlite3.Row]:
             AND publication.development_id = current.development_id
             AND publication.daily_rank = current.daily_rank
            WHERE current.recency_order = 1
-           ORDER BY current.day, current.daily_rank, current.development_id"""
+           ORDER BY current.day, current.daily_rank, current.development_id""",
+        (CURRENT_PROMPT_VERSION,),
     ).fetchall()
 
 
@@ -570,10 +583,10 @@ def insights_payload(
         "suppressed_development_count": sum(
             str(row["decision"]) == "suppress" for row in day_rows
         ),
-        "company_assessment_count": sum(
+        "company_connection_count": sum(
             int(row["assessed_company_count"]) for row in day_rows
         ),
-        "rejected_company_count": sum(
+        "memo_rejected_count": sum(
             int(row["rejected_company_count"]) for row in day_rows
         ),
         "model": str(day_rows[-1]["model"]),
@@ -608,12 +621,9 @@ def insights_payload(
                 "development_id": str(row["development_id"]),
                 "daily_rank": int(row["daily_rank"]),
                 "decision": str(row["decision"]),
-                "investment_headline": str(final["investment_headline"]),
-                "development_summary": str(final["development_summary"]),
-                "portfolio_readthrough": str(final["portfolio_readthrough"]),
-                "prior_assumption": final.get("prior_assumption"),
-                "company_assessments": final["company_assessments"],
-                "rejected_after_memo": final["rejected_after_memo"],
+                "headline": str(final["headline"]),
+                "what_changed": str(final["what_changed"]),
+                "connections": final["connections"],
                 "no_match_reason": final["no_match_reason"],
                 "company_names": company_names,
                 "memo_calls": json.loads(str(row["memo_calls_json"])),

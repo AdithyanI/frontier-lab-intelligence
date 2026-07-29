@@ -28,10 +28,15 @@ export interface CompanyBet {
   if: string
   exposure: string
   then: string
-  material_when: string
+  threshold: string
   watch: string[]
-  direction: 'upside' | 'downside' | 'mixed'
+  direction: 'upside' | 'downside'
   sources: CompanyMemoSourceRef[]
+}
+
+export const COMPANY_BET_DIRECTION_COPY: Record<CompanyBet['direction'], string> = {
+  upside: 'Upside',
+  downside: 'Downside',
 }
 
 export interface CompanyResearchMemo {

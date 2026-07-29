@@ -114,20 +114,28 @@ composition.
    ranks inside that Investment lane, not the first ten Developments in the
    union-positive Feed. A direct single-rank run fails closed when that rank is
    not Investment-routed. The agent then reads the complete Development and a
-   compact, stable card for every company in the 37-name universe. It rejects
-   uncertain matches at this screening stage. Only when the Development supplies
-   a concrete causal path may it call the local memo tool for a company. It then
-   either rejects that candidate after inspection or emits one minimal
-   assessment: bottom line, mechanism, affected business driver, direction,
-   main uncertainty, and one next check. The final result also carries one
-   concise, investment-facing headline written after company analysis.
-   Application code supplies the exact
-   Feed Development and company-memo links; the model does not generate URLs or
+   compact, stable card for every company in the 37-name universe. Each card
+   names that company's pre-registered standing bets. It rejects uncertain
+   matches at this screening stage. Only when the Development supplies a
+   concrete causal path may it call the local memo tool for a company. It then
+   either omits that candidate after inspection or emits a connection containing
+   the ticker, one valid memo-owned bet id, a short impact, and
+   `threshold_met`. The model never restates bet direction. Application code
+   resolves `upside | downside` from the cited memo, so BIT Lens, Insights, PDF,
+   and delivery cannot diverge. `threshold_met` is true only when the
+   Development establishes the cited bet's pre-registered threshold now; false
+   is an early signal, not a rejection. The final result also carries one
+   concise investment headline, a factual Development summary, the shared
+   causal mechanism for each group of connected companies, and a reason when
+   the Development is suppressed. Application code supplies the exact Feed
+   Development and company-memo links; the model does not generate URLs or
    restate the source ledger. The durable run binds evidence and universe
    hashes, exact memo calls, prompt/model identity, and token/cache/cost
-   telemetry. A complete run atomically publishes its exact daily candidate
-   cohort; readers project only those members, so partial reruns and older
-   out-of-lane results cannot leak into the current day. `fli insights
+   telemetry. A complete v14 run atomically publishes its exact daily candidate
+   cohort; publication requires a completed v14 row for every member, and
+   readers project only v14 members. Partial reruns, legacy prompt versions,
+   and older out-of-lane results therefore cannot leak into the current day.
+   `fli insights
    run-investment-agent` owns the production loop: it
    completes one warm request for the stable prompt key, runs the remaining
    requested ranks with bounded parallelism, writes the exact request and
@@ -140,12 +148,16 @@ composition.
    immediately. Sol/xhigh top-ten passes now cover
    July 19–21 as the persisted calibration proof of this successor boundary;
    full-day replay remains future work.
-10. The 37 web-grounded company memos live independently in
-   `docs/references/company-memos/`; BIT Lens projects them with their exact
-   source ledger and generation provenance. `fli.insights.company_context` is
-   the only reader of that packet and validates every profile, holding, and
-   memo before it reaches the product. The read contract exposes a visible
-   pending state if a memo is ever absent rather than silently degrading.
+10. The 37 web-grounded company memos live in the single generated packet
+   `docs/references/company-memos.json`; BIT Lens projects each company with its
+   exact source ledger. The reproducible simplifier binds every one of the 176
+   standing bets to the audited binary-direction ledger in
+   `docs/references/company-bet-directions.json`, rejects stale source hashes,
+   and emits `company-memos-v3`. Every bet contains one stable id, binary
+   direction, causal condition, exposure, consequence, explicit threshold,
+   watchpoints, and source ids. `fli.insights.company_context` is the only
+   runtime reader of that packet and validates every profile, holding, memo,
+   bet id, and binary direction before it reaches the product.
 11. The web and CLI expose the frozen evidence, decisions, provenance, and
    operational status without becoming alternate data owners. For a complete
    published Investment cohort, the web adapter can deterministically render the

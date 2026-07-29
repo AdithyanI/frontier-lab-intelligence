@@ -12,6 +12,7 @@ Idempotent:  .venv/bin/python scripts/simplify-company-memos.py
 from __future__ import annotations
 
 import json
+import hashlib
 import sys
 from pathlib import Path
 from typing import Any
@@ -19,23 +20,104 @@ from typing import Any
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SOURCE_DIR = REPO_ROOT / "docs" / "references" / "archive" / "company-memos-full"
 OUTPUT = REPO_ROOT / "docs" / "references" / "company-memos.json"
+DIRECTION_LEDGER = (
+    REPO_ROOT / "docs" / "references" / "company-bet-directions.json"
+)
 
-SCHEMA_VERSION = "company-memos-v2"
+SCHEMA_VERSION = "company-memos-v3"
+DIRECTION_LEDGER_SCHEMA_VERSION = "company-bet-directions-v1"
 MAX_WATCHPOINTS = 2
 
-def _bets(ticker: str, memo: dict[str, Any]) -> list[dict[str, Any]]:
+
+def _canonical_json(value: Any) -> str:
+    return json.dumps(
+        value,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+
+
+def _sha256(value: Any) -> str:
+    return hashlib.sha256(_canonical_json(value).encode()).hexdigest()
+
+
+def _source_records(paths: list[Path]) -> list[dict[str, str]]:
+    records: list[dict[str, str]] = []
+    for path in paths:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+        ticker = str(raw["company"]["ticker"])
+        for index, item in enumerate(
+            raw["memo"].get("frontier_ai_transmission_paths") or [],
+            start=1,
+        ):
+            records.append(
+                {
+                    "bet_id": f"{ticker}-B{index}",
+                    "ticker": ticker,
+                    "if": str(item["development"]),
+                    "exposure": str(item["company_exposure"]),
+                    "then": str(item["financial_consequence"]),
+                    "threshold": str(item["materiality_condition"]),
+                }
+            )
+    return records
+
+
+def _directions(paths: list[Path]) -> dict[str, str]:
+    if not DIRECTION_LEDGER.is_file():
+        raise SystemExit(
+            "Missing binary direction ledger. Run "
+            "scripts/classify-company-bet-directions.py first."
+        )
+    payload = json.loads(DIRECTION_LEDGER.read_text(encoding="utf-8"))
+    if payload.get("schema_version") != DIRECTION_LEDGER_SCHEMA_VERSION:
+        raise SystemExit("Unsupported company bet direction ledger")
+    records = _source_records(paths)
+    source_sha256 = _sha256(records)
+    if payload.get("source_sha256") != source_sha256:
+        raise SystemExit(
+            "The direction ledger does not match the archived memo source. "
+            "Re-run scripts/classify-company-bet-directions.py."
+        )
+    classifications = payload.get("classifications")
+    if not isinstance(classifications, dict):
+        raise SystemExit("Direction ledger has no classifications")
+    expected = {item["bet_id"] for item in records}
+    if set(classifications) != expected:
+        raise SystemExit("Direction ledger does not cover the exact source bet set")
+    directions = {
+        bet_id: str(item["direction"])
+        for bet_id, item in classifications.items()
+    }
+    invalid = {
+        bet_id: direction
+        for bet_id, direction in directions.items()
+        if direction not in {"upside", "downside"}
+    }
+    if invalid:
+        raise SystemExit(f"Direction ledger contains invalid values: {invalid}")
+    return directions
+
+
+def _bets(
+    ticker: str,
+    memo: dict[str, Any],
+    directions: dict[str, str],
+) -> list[dict[str, Any]]:
     bets = []
     paths = memo.get("frontier_ai_transmission_paths") or []
     for index, path in enumerate(paths, start=1):
+        bet_id = f"{ticker}-B{index}"
         bets.append(
             {
-                "id": f"{ticker}-B{index}",
+                "id": bet_id,
+                "direction": directions[bet_id],
                 "if": path["development"],
                 "exposure": path["company_exposure"],
                 "then": path["financial_consequence"],
-                "material_when": path["materiality_condition"],
+                "threshold": path["materiality_condition"],
                 "watch": list(path.get("watchpoints") or [])[:MAX_WATCHPOINTS],
-                "direction": path["direction"],
                 "sources": path.get("sources") or [],
             }
         )
@@ -46,6 +128,7 @@ def build() -> dict[str, Any]:
     paths = sorted(SOURCE_DIR.glob("*.json"))
     if not paths:
         raise SystemExit(f"No memos found in {SOURCE_DIR}")
+    directions = _directions(paths)
 
     companies: dict[str, Any] = {}
     for path in paths:
@@ -62,7 +145,7 @@ def build() -> dict[str, Any]:
             "name": company["name"],
             "summary": business["summary"],
             "summary_sources": business.get("sources") or [],
-            "bets": _bets(ticker, memo),
+            "bets": _bets(ticker, memo, directions),
             "source_ledger": memo["source_ledger"],
             "researched_at": (raw.get("provenance") or {})["research_date"],
         }

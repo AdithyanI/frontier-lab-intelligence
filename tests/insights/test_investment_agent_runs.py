@@ -14,39 +14,28 @@ DEVELOPMENT_ID = "d" * 64
 
 def _trace() -> dict:
     result = {
-        "investment_headline": "Agent risk strengthens demand for independent controls",
-        "development_summary": "The Development establishes a new control risk.",
+        "headline": "Agent risk strengthens demand for independent controls",
+        "what_changed": "The Development establishes a new control risk.",
         "decision": "surface",
-        "portfolio_readthrough": "Security demand may move before revenue does.",
-        "prior_assumption": "Independent controls matter more after this incident.",
-        "company_assessments": [
+        "connections": [
             {
-                "mechanism_title": "Independent agent controls",
                 "mechanism": "Agent activity needs an independent control layer.",
-                "splits": False,
-                "exposures": [
+                "companies": [
                     {
                         "ticker": "PANW",
-                        "affected_driver": "AI security product attachment",
-                        "direction": "positive",
-                        "materiality": "unknown",
-                        "size_basis": None,
+                        "bet_id": "PANW-B1",
+                        "threshold_met": False,
                         "impact": "Placeholder impact sentence for the exposure.",
                     }
                 ],
-                "main_uncertainty": "No disclosed revenue contribution.",
-                "next_check": "Track PANW attach and customer references.",
             }
-        ],
-        "rejected_after_memo": [
-            {"ticker": "DDOG", "reason": "The link remained generic after review."}
         ],
         "no_match_reason": None,
     }
     return {
         "schema_version": "investment-agent-trace-v1",
-        "prompt_version": "investment-agent-v9",
-        "prompt_cache_key": "fli:investment-agent:v9",
+        "prompt_version": "investment-agent-v14",
+        "prompt_cache_key": "fli:investment-agent:v14",
         "date": DAY,
         "daily_rank": 1,
         "development_id": DEVELOPMENT_ID,
@@ -82,7 +71,7 @@ def _trace() -> dict:
     }
 
 
-def test_import_trace_preserves_company_assessments_rejections_and_telemetry(
+def test_import_trace_preserves_company_connections_and_telemetry(
     tmp_path: Path,
 ):
     trace_path = tmp_path / "trace.json"
@@ -105,8 +94,8 @@ def test_import_trace_preserves_company_assessments_rejections_and_telemetry(
         db_path=db_path,
     )
 
-    assert imported["company_assessments"] == 1
-    assert imported["rejected_after_memo"] == 1
+    assert imported["company_connections"] == 1
+    assert imported["memos_rejected"] == 1
     assert dates["dates"] == [
         {
             "day": DAY,
@@ -123,19 +112,23 @@ def test_import_trace_preserves_company_assessments_rejections_and_telemetry(
     assert payload["run"]["audience"] == "investment"
     assert payload["run"]["selection_kind"] == "top_investment_routed"
     assert payload["run"]["selection_limit"] == 1
-    assert payload["items"][0]["investment_headline"] == (
+    assert payload["items"][0]["headline"] == (
         "Agent risk strengthens demand for independent controls"
     )
-    assessment = payload["items"][0]["company_assessments"][0]
-    assert assessment["mechanism_title"] == "Independent agent controls"
-    assert assessment["exposures"][0]["ticker"] == "PANW"
-    assert assessment["exposures"][0]["direction"] == "positive"
-    assert payload["items"][0]["prior_assumption"] == (
-        "Independent controls matter more after this incident."
+    connection = payload["items"][0]["connections"][0]
+    assert connection["mechanism"] == (
+        "Agent activity needs an independent control layer."
     )
-    assert payload["items"][0]["rejected_after_memo"] == [
-        {"ticker": "DDOG", "reason": "The link remained generic after review."}
+    assert connection["companies"] == [
+        {
+            "ticker": "PANW",
+            "bet_id": "PANW-B1",
+            "threshold_met": False,
+            "impact": "Placeholder impact sentence for the exposure.",
+        }
     ]
+    assert payload["run"]["company_connection_count"] == 1
+    assert payload["run"]["memo_rejected_count"] == 1
 
 
 def test_publication_hides_completed_rows_outside_the_selected_cohort(
@@ -146,7 +139,7 @@ def test_publication_hides_completed_rows_outside_the_selected_cohort(
     excluded = _trace()
     excluded["development_id"] = "e" * 64
     excluded["daily_rank"] = 3
-    excluded["final_result"]["investment_headline"] = (
+    excluded["final_result"]["headline"] = (
         "Excluded engineering-only Development must stay hidden"
     )
     for name, trace in [("selected", selected), ("excluded", excluded)]:
@@ -174,22 +167,26 @@ def test_publication_hides_completed_rows_outside_the_selected_cohort(
     ]
 
 
-def test_import_trace_requires_every_opened_memo_to_be_resolved(tmp_path: Path):
+def test_import_trace_requires_every_retained_company_to_have_an_opened_memo(
+    tmp_path: Path,
+):
     trace = _trace()
-    trace["final_result"]["rejected_after_memo"] = []
+    trace["memo_calls"] = [
+        {"turn": 1, "call_id": "ddog", "arguments": {"ticker": "DDOG"}}
+    ]
     trace_path = tmp_path / "trace.json"
     trace_path.write_text(json.dumps(trace), encoding="utf-8")
 
-    with pytest.raises(ValueError, match="every opened memo"):
+    with pytest.raises(ValueError, match="every retained company"):
         investment_agent_runs.import_trace(
             trace_path,
             db_path=tmp_path / "investment-agent.db",
         )
 
 
-def test_import_trace_requires_a_concise_investment_headline(tmp_path: Path):
+def test_import_trace_requires_a_concise_headline(tmp_path: Path):
     trace = _trace()
-    trace["final_result"]["investment_headline"] = ""
+    trace["final_result"]["headline"] = ""
     trace_path = tmp_path / "trace.json"
     trace_path.write_text(json.dumps(trace), encoding="utf-8")
 
@@ -202,11 +199,11 @@ def test_import_trace_requires_a_concise_investment_headline(tmp_path: Path):
 
 def test_import_trace_rejects_the_superseded_dense_company_schema(tmp_path: Path):
     trace = _trace()
-    trace["final_result"]["company_assessments"][0]["confidence"] = "medium"
+    trace["final_result"]["connections"][0]["companies"][0]["confidence"] = "medium"
     trace_path = tmp_path / "trace.json"
     trace_path.write_text(json.dumps(trace), encoding="utf-8")
 
-    with pytest.raises(ValueError, match="minimal schema"):
+    with pytest.raises(ValueError, match="v14 schema"):
         investment_agent_runs.import_trace(
             trace_path,
             db_path=tmp_path / "investment-agent.db",
@@ -281,7 +278,7 @@ def test_investment_api_prefers_company_aware_successor(monkeypatch):
 
     assert dates["dates"][-1]["content_kind"] == "investment_agent"
     assert payload["content_kind"] == "investment_agent"
-    assert payload["schema_version"] == "investment-agent-read-v6"
+    assert payload["schema_version"] == "investment-agent-read-v8"
     assert payload["items"][0]["provenance"] == {
         "primary_event_id": "event-id",
         "source_event_count": 1,

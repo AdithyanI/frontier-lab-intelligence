@@ -42,28 +42,17 @@ export interface BriefDeliveryResult {
 }
 
 export type InvestmentAgentRelevance = 'direct' | 'indirect'
-export type InvestmentAgentDirection = 'positive' | 'negative' | 'mixed' | 'unclear'
 
-export type InvestmentAgentMateriality = 'material' | 'immaterial' | 'unknown'
-
-export interface InvestmentAgentExposure {
+export interface InvestmentAgentCompany {
   ticker: string
-  affected_driver: string
-  direction: InvestmentAgentDirection
-  materiality: InvestmentAgentMateriality
-  size_basis?: string | null
-  impact?: string
-  /** Superseded by `impact` in investment-agent-v11; kept so earlier runs still render. */
-  note?: string
+  bet_id: string
+  threshold_met: boolean
+  impact: string
 }
 
-export interface InvestmentAgentCompanyAssessment {
-  mechanism_title: string
+export interface InvestmentAgentConnection {
   mechanism: string
-  splits: boolean
-  exposures: InvestmentAgentExposure[]
-  main_uncertainty: string
-  next_check: string
+  companies: InvestmentAgentCompany[]
 }
 
 export interface InvestmentAgentMemoCall {
@@ -73,7 +62,7 @@ export interface InvestmentAgentMemoCall {
     ticker: string
     connection_type: InvestmentAgentRelevance
     mechanism: string
-    affected_operating_driver: string
+    candidate_bet_id: string
     why_memo_is_needed: string
   }
 }
@@ -84,12 +73,9 @@ export interface InvestmentAgentItem {
   development_id: string
   daily_rank: number
   decision: InsightDecision
-  investment_headline: string
-  development_summary: string
-  portfolio_readthrough: string
-  prior_assumption: string | null
-  company_assessments: InvestmentAgentCompanyAssessment[]
-  rejected_after_memo: Array<{ ticker: string; reason: string }>
+  headline: string
+  what_changed: string
+  connections: InvestmentAgentConnection[]
   no_match_reason: string | null
   company_names: Record<string, string>
   memo_calls: InvestmentAgentMemoCall[]
@@ -139,8 +125,8 @@ export interface InvestmentAgentInsightsResponse {
     development_count: number
     surfaced_development_count: number
     suppressed_development_count: number
-    company_assessment_count: number
-    rejected_company_count: number
+    company_connection_count: number
+    memo_rejected_count: number
     model: string
     reasoning_effort: string
     prompt_version: string

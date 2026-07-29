@@ -38,8 +38,8 @@ MAX_UNIQUE_MEMOS = 8
 MAX_MODEL_TURNS = 4
 MAX_RESPONSE_ATTEMPTS = 3
 RETRYABLE_RESPONSE_STATUS_CODES = frozenset({408, 409, 429, 499})
-PROMPT_VERSION = "investment-agent-v12"
-PROMPT_CACHE_KEY = "fli:investment-agent:v12"
+PROMPT_VERSION = "investment-agent-v14"
+PROMPT_CACHE_KEY = "fli:investment-agent:v14"
 PROMPT_PATH = (
     REPO_ROOT
     / "src"
@@ -96,34 +96,29 @@ def _investment_candidates(
 
 
 def _company_cards(payload: dict[str, Any]) -> list[dict[str, Any]]:
+    memos = _all_memos()
     cards: list[dict[str, Any]] = []
     for company in payload["companies"]:
-        context = company.get("analyst_context") or {}
+        ticker = company["ticker"]
+        memo = memos.get(ticker)
+        if memo is None:
+            raise RuntimeError(f"No research memo for candidate {ticker}.")
         cards.append(
             {
+                "ticker": ticker,
                 "name": company["name"],
-                "ticker": company["ticker"],
-                "business_summary": context.get("business_summary") or "",
-                "operating_drivers": context.get("operating_drivers") or [],
-                "frontier_ai_channels": [
-                    {
-                        "channel": channel.get("channel") or "",
-                        "potential_upside": channel.get("potential_upside") or "",
-                        "potential_downside": channel.get("potential_downside")
-                        or "",
-                    }
-                    for channel in (context.get("frontier_ai_channels") or [])
+                "summary": memo["summary"],
+                "bets": [
+                    {"id": bet["id"], "if": bet["if"]} for bet in memo["bets"]
                 ],
             }
         )
     return cards
 
 
-_MONEY_RE = re.compile(
-    r"(?:US\$|\$|€|EUR\s|USD\s)\s?\d[\d,.]*\s?"
-    r"(?:billion|million|bn\b|m\b|b\b|trillion)?",
-    re.IGNORECASE,
-)
+def _bet_ids(ticker: str) -> list[str]:
+    return [bet["id"] for bet in _all_memos()[ticker]["bets"]]
+
 
 
 def _all_memos() -> dict[str, Any]:
@@ -135,16 +130,17 @@ def _memo_packet(ticker: str) -> dict[str, Any]:
     memo = copy.deepcopy(_all_memos()[ticker])
     memo.pop("source_ledger", None)
     return {
-        "schema_version": "investment-agent-company-memo-v3",
+        "schema_version": "investment-agent-company-memo-v4",
         "company": {"name": memo["name"], "ticker": memo["ticker"]},
         "research_date": memo.get("researched_at"),
         "packet_policy": {
             "included": (
-                "What the company does and the standing bets written before "
-                "this Development. Each bet is a pre-registered hypothesis: if the "
+                "What the company does and its standing bets. Each bet is a "
+                "hypothesis fixed before this daily analysis: if the "
                 "world-side condition holds, the named exposure moves the "
-                "named financial line, but only when the materiality gate is "
-                "met."
+                "named financial line. Its binary direction is fixed in the "
+                "memo, and its threshold states when the consequence is "
+                "important enough to review the thesis."
             ),
             "excluded": (
                 "Ecosystem relationships, committed strategy actions, "
@@ -181,14 +177,20 @@ def _memo_tool(tickers: list[str]) -> dict[str, Any]:
                     "enum": ["direct", "indirect"],
                 },
                 "mechanism": {"type": "string"},
-                "affected_operating_driver": {"type": "string"},
+                "candidate_bet_id": {
+                    "type": "string",
+                    "description": (
+                        "The id of the standing bet on this company's card "
+                        "that the Development appears to instantiate."
+                    ),
+                },
                 "why_memo_is_needed": {"type": "string"},
             },
             "required": [
                 "ticker",
                 "connection_type",
                 "mechanism",
-                "affected_operating_driver",
+                "candidate_bet_id",
                 "why_memo_is_needed",
             ],
             "additionalProperties": False,
@@ -197,39 +199,25 @@ def _memo_tool(tickers: list[str]) -> dict[str, Any]:
 
 
 def _final_format(tickers: list[str]) -> dict[str, Any]:
-    exposure = {
+    company = {
         "type": "object",
         "properties": {
             "ticker": {"type": "string", "enum": tickers},
-            "affected_driver": {
+            "bet_id": {
                 "type": "string",
                 "description": (
-                    "One company business variable in plain language. Avoid "
-                    "investment jargon."
+                    "The id of the standing bet from this company's memo that "
+                    "this Development instantiates, exactly as written in the "
+                    "memo. Cite an existing bet; never invent an id."
                 ),
             },
-            "direction": {
-                "type": "string",
-                "enum": ["positive", "negative", "mixed", "unclear"],
-            },
-            "materiality": {
-                "type": "string",
-                "enum": ["material", "immaterial", "unknown"],
+            "threshold_met": {
+                "type": "boolean",
                 "description": (
-                    "Whether a plausible outcome could move this company's "
-                    "reported results at its own scale. Judge against the "
-                    "cited bet's material_when condition. Use 'unknown' when "
-                    "neither the bet nor the Development supplies a magnitude. "
-                    "Never estimate a figure the packet does not contain."
-                ),
-            },
-            "size_basis": {
-                "type": ["string", "null"],
-                "description": (
-                    "The single figure the materiality judgment rests on, "
-                    "quoted from the cited bet or the Development, under 12 "
-                    "words. Null when materiality is 'unknown' or when no "
-                    "source states a figure. Never invent a figure."
+                    "True only when this Development's supplied evidence "
+                    "establishes the cited bet's exact threshold now. A "
+                    "plausible path, product launch, forecast, or early signal "
+                    "is false."
                 ),
             },
             "impact": {
@@ -245,23 +233,15 @@ def _final_format(tickers: list[str]) -> dict[str, Any]:
         },
         "required": [
             "ticker",
-            "affected_driver",
-            "direction",
-            "materiality",
-            "size_basis",
+            "bet_id",
+            "threshold_met",
             "impact",
         ],
         "additionalProperties": False,
     }
-    assessment = {
+    connection = {
         "type": "object",
         "properties": {
-            "mechanism_title": {
-                "type": "string",
-                "description": (
-                    "A 4-10 word name for the causal path, not a company name."
-                ),
-            },
             "mechanism": {
                 "type": "string",
                 "description": (
@@ -270,49 +250,20 @@ def _final_format(tickers: list[str]) -> dict[str, Any]:
                     "once for the whole path, not per company."
                 ),
             },
-            "splits": {
-                "type": "boolean",
-                "description": (
-                    "True when this path moves at least one company favorably "
-                    "and another adversely. False when every company on it "
-                    "moves the same way."
-                ),
-            },
-            "exposures": {
+            "companies": {
                 "type": "array",
                 "minItems": 1,
                 "maxItems": MAX_UNIQUE_MEMOS,
-                "items": exposure,
+                "items": company,
                 "description": (
                     "Every company on this mechanism, ordered most to least "
                     "exposed."
                 ),
             },
-            "main_uncertainty": {
-                "type": "string",
-                "description": (
-                    "One short sentence naming the single thing that could "
-                    "make this wrong. Start with 'We do not know whether' or "
-                    "'Nobody has shown yet that'. Keep it under 25 words and "
-                    "carry only one idea, so an analyst can grasp it in one "
-                    "read."
-                ),
-            },
-            "next_check": {
-                "type": "string",
-                "description": (
-                    "Exactly one primary observable for an analyst to check, "
-                    "naming the company it applies to. Not a list of metrics."
-                ),
-            },
         },
         "required": [
-            "mechanism_title",
             "mechanism",
-            "splits",
-            "exposures",
-            "main_uncertainty",
-            "next_check",
+            "companies",
         ],
         "additionalProperties": False,
     }
@@ -323,59 +274,34 @@ def _final_format(tickers: list[str]) -> dict[str, Any]:
         "schema": {
             "type": "object",
             "properties": {
-                "investment_headline": {
+                "headline": {
                     "type": "string",
                     "description": (
                         "A 6-14 word plain-English headline stating the most "
                         "important supported investment implication."
                     ),
                 },
-                "development_summary": {"type": "string"},
+                "what_changed": {"type": "string"},
                 "decision": {
                     "type": "string",
                     "enum": ["surface", "suppress"],
                 },
-                "portfolio_readthrough": {"type": "string"},
-                "prior_assumption": {
-                    "type": ["string", "null"],
-                    "description": (
-                        "One sentence naming a reasonable prior a BIT analyst "
-                        "might hold and which way this Development moves it. "
-                        "Null when suppressed or when nothing moves a prior."
-                    ),
-                },
-                "company_assessments": {
+                "connections": {
                     "type": "array",
                     "maxItems": MAX_UNIQUE_MEMOS,
-                    "items": assessment,
+                    "items": connection,
                     "description": (
                         "Causal mechanisms, ordered most to least "
                         "decision-relevant."
                     ),
                 },
-                "rejected_after_memo": {
-                    "type": "array",
-                    "maxItems": MAX_UNIQUE_MEMOS,
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "ticker": {"type": "string", "enum": tickers},
-                            "reason": {"type": "string"},
-                        },
-                        "required": ["ticker", "reason"],
-                        "additionalProperties": False,
-                    },
-                },
                 "no_match_reason": {"type": ["string", "null"]},
             },
             "required": [
-                "investment_headline",
-                "development_summary",
+                "headline",
+                "what_changed",
                 "decision",
-                "portfolio_readthrough",
-                "prior_assumption",
-                "company_assessments",
-                "rejected_after_memo",
+                "connections",
                 "no_match_reason",
             ],
             "additionalProperties": False,
@@ -603,57 +529,47 @@ def _validate_final(
     *,
     fetched_tickers: set[str],
 ) -> None:
-    headline = str(result["investment_headline"]).strip()
+    headline = str(result["headline"]).strip()
     if not headline or "\n" in headline or len(headline.split()) > 18:
         raise ValueError(
             "Investment headline must be one concise non-empty line."
         )
     assessed = [
-        exposure["ticker"]
-        for path in result["company_assessments"]
-        for exposure in path["exposures"]
+        company["ticker"]
+        for connection in result["connections"]
+        for company in connection["companies"]
     ]
-    rejected = [item["ticker"] for item in result["rejected_after_memo"]]
-    represented = assessed + rejected
-    if len(represented) != len(set(represented)):
-        raise ValueError("A ticker appears more than once in the final result.")
-    if set(represented) != fetched_tickers:
+    cited_bets = [
+        (company["ticker"], company["bet_id"])
+        for connection in result["connections"]
+        for company in connection["companies"]
+    ]
+    if len(cited_bets) != len(set(cited_bets)):
         raise ValueError(
-            "Every fetched memo must appear exactly once in the final result."
+            "A company bet appears more than once in the final result."
         )
-    for path in result["company_assessments"]:
-        directions = {item["direction"] for item in path["exposures"]}
-        splits = bool(path["splits"])
-        opposed = "positive" in directions and "negative" in directions
-        if splits != opposed:
-            raise ValueError(
-                "splits must be true exactly when one mechanism holds both a "
-                "positive and a negative company direction."
-            )
-        for exposure in path["exposures"]:
-            basis = str(exposure.get("size_basis") or "").strip()
-            sized = exposure["materiality"] in {"material", "immaterial"}
-            if sized and not basis:
+    if not set(assessed).issubset(fetched_tickers):
+        raise ValueError(
+            "A company was assessed without opening its memo."
+        )
+    for connection in result["connections"]:
+        for company in connection["companies"]:
+            valid = _bet_ids(company["ticker"])
+            if company["bet_id"] not in valid:
                 raise ValueError(
-                    f"{exposure['ticker']} claims a sized materiality without "
-                    "a size_basis figure."
-                )
-            if sized and not _MONEY_RE.search(basis):
-                raise ValueError(
-                    f"{exposure['ticker']} size_basis carries no magnitude: "
-                    f"{basis!r}"
-                )
-            if not sized and basis:
-                raise ValueError(
-                    f"{exposure['ticker']} reports unknown materiality but "
-                    "supplied a size_basis."
+                    f"{company['ticker']} cites unknown bet "
+                    f"{company['bet_id']!r}. Valid ids: {', '.join(valid)}"
                 )
     if result["decision"] == "surface":
         if not assessed or result["no_match_reason"] is not None:
-            raise ValueError("A surfaced result needs assessments and no null reason.")
+            raise ValueError(
+                "A surfaced result needs company connections and a null reason."
+            )
     else:
         if assessed or not str(result["no_match_reason"] or "").strip():
-            raise ValueError("A suppressed result needs no assessments and a reason.")
+            raise ValueError(
+                "A suppressed result needs no company connections and a reason."
+            )
     serialized = json.dumps(result, ensure_ascii=False).lower()
     if "http://" in serialized or "https://" in serialized or "](" in serialized:
         raise ValueError("Final model prose must not contain links or citations.")
@@ -968,13 +884,24 @@ def _compact_result(result: dict[str, Any]) -> dict[str, Any]:
         "daily_rank": result["daily_rank"],
         "development_id": result["development_id"],
         "decision": final["decision"],
-        "investment_headline": final["investment_headline"],
+        "headline": final["headline"],
         "memo_tickers": result["memo_tickers"],
-        "company_assessments": sum(
-            len(path["exposures"]) for path in final["company_assessments"]
+        "companies": len(
+            {
+                company["ticker"]
+                for connection in final["connections"]
+                for company in connection["companies"]
+            }
         ),
-        "mechanisms": len(final["company_assessments"]),
-        "rejected_after_memo": len(final["rejected_after_memo"]),
+        "connections": len(final["connections"]),
+        "memos_rejected": len(result["memo_tickers"])
+        - len(
+            {
+                company["ticker"]
+                for connection in final["connections"]
+                for company in connection["companies"]
+            }
+        ),
         "turns": len(turns),
         "request_retries": len(result.get("request_failures") or []),
         "input_tokens": sum(int(turn["input_tokens"]) for turn in turns),
@@ -1080,8 +1007,8 @@ def run_range(
                 "surfaced": 0,
                 "suppressed": 0,
                 "memo_calls": 0,
-                "company_assessments": 0,
-                "rejected_after_memo": 0,
+                "companies": 0,
+                "memos_rejected": 0,
             },
             "telemetry": {
                 "input_tokens": 0,
@@ -1219,11 +1146,11 @@ def run_range(
             "surfaced": sum(item["decision"] == "surface" for item in compact),
             "suppressed": sum(item["decision"] == "suppress" for item in compact),
             "memo_calls": sum(len(item["memo_tickers"]) for item in compact),
-            "company_assessments": sum(
-                int(item["company_assessments"]) for item in compact
+            "companies": sum(
+                int(item["companies"]) for item in compact
             ),
-            "rejected_after_memo": sum(
-                int(item["rejected_after_memo"]) for item in compact
+            "memos_rejected": sum(
+                int(item["memos_rejected"]) for item in compact
             ),
         },
         "telemetry": {

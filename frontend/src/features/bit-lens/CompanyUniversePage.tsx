@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import {
+  COMPANY_BET_DIRECTION_COPY,
   getCachedJSON,
   type CompanyMemoSourceRef,
   type CompanyResearchMemo,
@@ -23,13 +24,6 @@ const monthFormatter = new Intl.DateTimeFormat('en-GB', {
   year: 'numeric',
   timeZone: 'UTC',
 })
-
-const DIRECTION_MARK: Record<string, string> = {
-  upside: '↑',
-  downside: '↓',
-  mixed: '↔',
-  unclear: '?',
-}
 
 const sourceTypeCopy: Record<CompanyResearchMemo['source_ledger'][number]['source_type'], string> = {
   company_primary: 'Company',
@@ -201,7 +195,13 @@ function PortfolioContext({ company }: { company: InvestmentCompany }) {
   )
 }
 
-function CompanyDetail({ company }: { company: InvestmentCompany }) {
+function CompanyDetail({
+  company,
+  requestedBet,
+}: {
+  company: InvestmentCompany
+  requestedBet?: string
+}) {
   const researchMemo = company.research_memo
 
   if (!researchMemo) {
@@ -236,13 +236,19 @@ function CompanyDetail({ company }: { company: InvestmentCompany }) {
         </header>
         <div className="company-path-list">
           {memo.bets.map((bet) => (
-            <details key={bet.id}>
+            <details
+              key={bet.id}
+              id={bet.id}
+              open={bet.id === requestedBet}
+              tabIndex={bet.id === requestedBet ? -1 : undefined}
+              data-requested={bet.id === requestedBet ? 'true' : undefined}
+            >
               <summary>
                 <span
                   className={`company-path-direction is-${bet.direction}`}
-                  aria-hidden="true"
                 >
-                  {DIRECTION_MARK[bet.direction] ?? '\u2194'}
+                  <span aria-hidden="true" />
+                  {COMPANY_BET_DIRECTION_COPY[bet.direction]}
                 </span>
                 <h4>{cleanMemoText(bet.if)}</h4>
               </summary>
@@ -256,8 +262,8 @@ function CompanyDetail({ company }: { company: InvestmentCompany }) {
                   <dd>{cleanMemoText(bet.then)}</dd>
                 </div>
                 <div>
-                  <dt>Material when</dt>
-                  <dd>{cleanMemoText(bet.material_when)}</dd>
+                  <dt>Threshold</dt>
+                  <dd>{cleanMemoText(bet.threshold)}</dd>
                 </div>
                 <div>
                   <dt>Watch</dt>
@@ -305,6 +311,7 @@ function CompanyDetail({ company }: { company: InvestmentCompany }) {
 export default function CompanyUniversePage() {
   const [searchParams] = useSearchParams()
   const requestedCompany = (searchParams.get('company') || '').trim().toUpperCase()
+  const requestedBet = (searchParams.get('bet') || '').trim().toUpperCase()
   const [payload, setPayload] = useState<InvestmentCompanyUniverse | null>(null)
   const [error, setError] = useState(false)
   const [requestVersion, setRequestVersion] = useState(0)
@@ -314,6 +321,15 @@ export default function CompanyUniversePage() {
   const [openCompanies, setOpenCompanies] = useState<Set<string>>(
     new Set([requestedCompany || 'IREN']),
   )
+
+  useEffect(() => {
+    if (!requestedCompany) return
+    setQuery(requestedCompany)
+    setOpenCompanies((current) => {
+      if (current.has(requestedCompany)) return current
+      return new Set([...current, requestedCompany])
+    })
+  }, [requestedCompany])
 
   useEffect(() => {
     let active = true
@@ -349,6 +365,27 @@ export default function CompanyUniversePage() {
       return comparePortfolio(a, b)
     })
   }, [payload, query, disclosure, sort])
+
+  useEffect(() => {
+    if (
+      !payload
+      || !requestedBet
+      || !requestedCompany
+      || !openCompanies.has(requestedCompany)
+    ) return
+
+    const frame = window.requestAnimationFrame(() => {
+      const target = document.getElementById(requestedBet)
+      if (!target) return
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      target.scrollIntoView({
+        behavior: reduceMotion ? 'auto' : 'smooth',
+        block: 'center',
+      })
+      target.focus({ preventScroll: true })
+    })
+    return () => window.cancelAnimationFrame(frame)
+  }, [payload, requestedBet, requestedCompany, openCompanies])
 
   function setCompanyOpen(ticker: string, isOpen: boolean) {
     setOpenCompanies((current) => {
@@ -479,7 +516,7 @@ export default function CompanyUniversePage() {
                   </div>
                 )}
               </summary>
-              <CompanyDetail company={company} />
+              <CompanyDetail company={company} requestedBet={requestedBet} />
             </details>
           ))}
         </div>
