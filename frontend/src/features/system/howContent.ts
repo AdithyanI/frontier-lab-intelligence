@@ -46,8 +46,8 @@ export const HOW_BEATS: HowBeat[] = [
   {
     id: 'publish',
     step: '5',
-    title: 'Publish',
-    text: 'A company-aware agent screens each surviving Development against all 37 portfolio companies, and must either name the company in its output or write down why it was rejected. Every claim cites its source, and the application supplies every link.',
+    title: 'Write',
+    text: 'Two agents write, one per audience, and neither sees the other. The Investment agent screens all 37 portfolio companies and must either name a company in its output or record why it was rejected. The AI Engineering agent maps the same Development onto the seven surfaces of a reference AI system. Every claim cites its source, and the application supplies every link.',
   },
 ]
 
@@ -123,7 +123,7 @@ export function createReviewRubric({
     {
       weight: '15%',
       name: 'Actionable delivery',
-      text: 'One published Investment brief per completed day, with each Insight traced to the companies it reaches and the memos the agent opened to get there.',
+      text: 'One published brief per audience per completed day, with each Insight traced to the companies or engineering surfaces it reaches and the memos the agent opened to get there.',
       to: insightsPath,
       linkLabel: 'Insights',
     },

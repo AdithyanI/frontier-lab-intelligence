@@ -41,6 +41,13 @@ const GOLDEN = Math.PI * (3 - Math.sqrt(5))
 
 const W = 560
 const CX = 195
+/* The drawing is composed in a 560-unit frame (W drives the camera math and
+   the universe mask), but stage labels hang off the right edge of each plane
+   and the focused camera zooms up to 1.32x, which used to push the longest
+   label past the frame and clip it mid-word. The viewBox is therefore wider
+   than the composition frame: the extra units are pure right-hand margin for
+   labels and change nothing about where the funnel sits. */
+const VW = 640
 
 const STAGE_ORDER: FunnelStage[] = [
   'universe',
@@ -64,7 +71,14 @@ type Plane = {
 }
 
 /* Vertical rhythm: planes shrink as noise is removed. Labels carry the
-   concept, never the numbers. */
+   concept, never the numbers.
+
+   Label width is constrained: each focused stage zooms and pans, so a label
+   anchored at `CX + rx + 14` can run past the 560-unit viewBox and be
+   silently clipped mid-word. The tightest stage is `collect` (s=1.22), which
+   leaves roughly 180 user units — about 33 characters at the 9px concept
+   size. Keep both label lines short, and re-check against `FOCUS` if a
+   camera changes. */
 const PLANES: Plane[] = [
   {
     id: 'universe',
@@ -96,8 +110,8 @@ const PLANES: Plane[] = [
     dots: 62,
     step: '2',
     name: 'Collect',
-    concept: 'exact Events grouped by shared artifacts',
-    detail: 'every original post stays visible',
+    concept: 'every post kept as an exact Event',
+    detail: 'with its linked source frozen',
   },
   {
     id: 'rank',
@@ -216,8 +230,8 @@ function UniverseField({ ring }: { ring: Plane }) {
           <stop offset="0.91" stopColor="#fff" />
           <stop offset="1" stopColor="#000" />
         </linearGradient>
-        <mask id="universe-mask" maskUnits="userSpaceOnUse" x={0} y={0} width={W} height={H}>
-          <rect x={0} y={0} width={W} height={H} fill="url(#universe-fade)" />
+        <mask id="universe-mask" maskUnits="userSpaceOnUse" x={0} y={0} width={VW} height={H}>
+          <rect x={0} y={0} width={VW} height={H} fill="url(#universe-fade)" />
         </mask>
       </defs>
       <g mask="url(#universe-mask)">
@@ -458,7 +472,7 @@ export default function SignalFunnel({ active }: { active: FunnelStage | null })
 
   return (
     <svg
-      viewBox={`0 0 ${W} ${H}`}
+      viewBox={`0 0 ${VW} ${H}`}
       role="img"
       aria-label="The signal funnel: from everything published publicly, a screened cohort chooses what to collect, exact Events are grouped into Developments, ranked, judged for two audiences, and distilled into two daily cited briefs."
       className="signal-funnel"

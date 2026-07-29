@@ -437,3 +437,117 @@ export function RankLayersFigure() {
     </svg>
   )
 }
+
+/* Stage 6: the cost model as arithmetic a reader can follow on screen.
+   Deliberately simplified: assume every input token is a cache hit, so there
+   is one input price instead of two. That is the floor, and it makes the real
+   point visible — once input is cached, almost the whole bill is the model
+   thinking. */
+export function CostFigure() {
+  const meter = [
+    { model: 'gpt-5.6-luna', role: 'routing · the volume model', input: '$0.10', output: '$6' },
+    { model: 'gpt-5.6-sol', role: 'the two analysts · the few, done well', input: '$0.50', output: '$30' },
+  ]
+
+  const units = [
+    {
+      name: 'Route one Development',
+      sub: 'luna · medium',
+      inTok: '5k', inRate: '× $0.10/M', inCost: '$0.0005',
+      outTok: '0.3k', outRate: '× $6/M', outCost: '$0.002',
+      total: '~$0.002',
+    },
+    {
+      name: 'One AI Engineering Insight',
+      sub: 'sol · high · one call',
+      inTok: '6k', inRate: '× $0.50/M', inCost: '$0.003',
+      outTok: '1k', outRate: '× $30/M', outCost: '$0.03',
+      total: '~$0.03',
+    },
+    {
+      name: 'One Investment Insight',
+      sub: 'sol · xhigh · screen + memos',
+      inTok: '50k', inRate: '× $0.50/M', inCost: '$0.025',
+      outTok: '4k', outRate: '× $30/M', outCost: '$0.12',
+      total: '~$0.15',
+    },
+  ]
+
+  const day = [
+    { label: '100 Developments routed', cost: '~$0.20', w: 70, fill: BLUE, lx: 30 },
+    { label: '10 Investment Insights', cost: '~$1.50', w: 525, fill: BLUE_MID, lx: 340 },
+    { label: '10 AI Engineering Insights', cost: '~$0.30', w: 105, fill: BLUE_INK, lx: 650 },
+  ]
+
+  return (
+    <svg viewBox="0 0 1080 700" role="img" aria-label="The cost model, assuming every input token is cached: price per million tokens for the two models, the arithmetic for one routed Development, one AI Engineering Insight and one Investment Insight, and the total for one published day, about two dollars.">
+      <rect x="0" y="0" width="1080" height="700" fill="#fff" />
+      <text x="30" y="34" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.08em">COST · A RULE OF THUMB</text>
+      <text x="1050" y="34" textAnchor="end" fontFamily={MONO} fontSize="9.5" fill={MUTED} letterSpacing="0.06em">ASSUME EVERY INPUT TOKEN IS CACHED</text>
+
+      {/* 1 · the meter */}
+      <text x="30" y="80" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.06em">1 · THE METER · PER MILLION TOKENS</text>
+      <text x="700" y="106" textAnchor="middle" fontFamily={MONO} fontSize="8.5" fill={MUTED} letterSpacing="0.06em">CACHED INPUT</text>
+      <text x="920" y="106" textAnchor="middle" fontFamily={MONO} fontSize="8.5" fill={MUTED} letterSpacing="0.06em">OUTPUT</text>
+      <line x1="30" y1="116" x2="1050" y2="116" stroke={MUTED} strokeWidth="1" opacity="0.3" />
+      {meter.map((row, index) => {
+        const y = 116 + index * 58
+        return (
+          <g key={row.model}>
+            <rect x="30" y={y} width="1020" height="58" fill={index === 1 ? SAND : '#fff'} opacity={index === 1 ? 0.7 : 1} />
+            <text x="50" y={y + 26} fontFamily={MONO} fontSize="13" fill={INK}>{row.model}</text>
+            <text x="50" y={y + 44} fontFamily={UI} fontSize="12.5" fill={MUTED}>{row.role}</text>
+            <text x="700" y={y + 36} textAnchor="middle" fontFamily={UI} fontSize="18" fontWeight="600" fill={BLUE_INK}>{row.input}</text>
+            <text x="920" y={y + 36} textAnchor="middle" fontFamily={UI} fontSize="18" fontWeight="600" fill={INK}>{row.output}</text>
+            <line x1="30" y1={y + 58} x2="1050" y2={y + 58} stroke={MUTED} strokeWidth="1" opacity="0.3" />
+          </g>
+        )
+      })}
+      <text x="30" y="252" fontFamily={MONO} fontSize="9" fill={MUTED} letterSpacing="0.06em">OUTPUT COSTS 60× CACHED INPUT · SOL COSTS 5× LUNA</text>
+
+      {/* 2 · the arithmetic */}
+      <text x="30" y="300" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.06em">2 · WHAT ONE CALL COSTS</text>
+      <text x="480" y="324" textAnchor="middle" fontFamily={MONO} fontSize="8.5" fill={MUTED} letterSpacing="0.06em">INPUT</text>
+      <text x="790" y="324" textAnchor="middle" fontFamily={MONO} fontSize="8.5" fill={MUTED} letterSpacing="0.06em">OUTPUT</text>
+      <line x1="30" y1="334" x2="1050" y2="334" stroke={MUTED} strokeWidth="1" opacity="0.3" />
+      {units.map((unit, index) => {
+        const y = 334 + index * 62
+        return (
+          <g key={unit.name}>
+            <text x="50" y={y + 28} fontFamily={UI} fontSize="15" fontWeight="600" fill={INK}>{unit.name}</text>
+            <text x="50" y={y + 46} fontFamily={MONO} fontSize="9" fill={MUTED} letterSpacing="0.05em">{unit.sub}</text>
+            <text x="400" y={y + 34} textAnchor="end" fontFamily={MONO} fontSize="12.5" fill={INK}>{unit.inTok}</text>
+            <text x="410" y={y + 34} fontFamily={MONO} fontSize="10" fill={MUTED}>{unit.inRate}</text>
+            <text x="600" y={y + 34} textAnchor="end" fontFamily={MONO} fontSize="12.5" fill={MUTED}>{unit.inCost}</text>
+            <text x="700" y={y + 34} textAnchor="end" fontFamily={MONO} fontSize="12.5" fill={INK}>{unit.outTok}</text>
+            <text x="710" y={y + 34} fontFamily={MONO} fontSize="10" fill={MUTED}>{unit.outRate}</text>
+            <text x="880" y={y + 34} textAnchor="end" fontFamily={MONO} fontSize="12.5" fill={BLUE_INK}>{unit.outCost}</text>
+            <text x="1050" y={y + 36} textAnchor="end" fontFamily={UI} fontSize="19" fontWeight="600" fill={BLUE_INK}>{unit.total}</text>
+            <line x1="30" y1={y + 62} x2="1050" y2={y + 62} stroke={MUTED} strokeWidth="1" opacity="0.22" />
+          </g>
+        )
+      })}
+      <text x="30" y="540" fontFamily={MONO} fontSize="9" fill={MUTED} letterSpacing="0.06em">ONCE INPUT IS CACHED, ALMOST THE WHOLE BILL IS THE MODEL THINKING</text>
+
+      {/* 3 · one day */}
+      <text x="30" y="580" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.06em">3 · ONE PUBLISHED DAY, BOTH BRIEFS</text>
+      {(() => {
+        let x = 30
+        return day.map((part) => {
+          const seg = (
+            <g key={part.label}>
+              <rect x={x} y={592} width={part.w} height="24" fill={part.fill} opacity="0.9" />
+              <rect x={part.lx} y={636} width="11" height="11" fill={part.fill} opacity="0.9" />
+              <text x={part.lx + 19} y={646} fontFamily={UI} fontSize="13" fontWeight="600" fill={INK}>{part.cost}</text>
+              <text x={part.lx + 76} y={646} fontFamily={UI} fontSize="12.5" fill={MUTED}>{part.label}</text>
+            </g>
+          )
+          x += part.w + 3
+          return seg
+        })
+      })()}
+      <text x="1050" y="613" textAnchor="end" fontFamily={UI} fontSize="21" fontWeight="600" fill={INK}>≈ $2 a day</text>
+      <text x="30" y="678" fontFamily={MONO} fontSize="9" fill={MUTED} letterSpacing="0.06em">X SIDE · $0.18 PER 1,000 PROFILES · ~$0.001 PER FROZEN ARTICLE BODY · FOLLOW-GRAPH EXTENSION IS A SEPARATE ONE-OFF</text>
+    </svg>
+  )
+}

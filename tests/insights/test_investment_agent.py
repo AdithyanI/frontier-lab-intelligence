@@ -394,6 +394,59 @@ def test_run_range_selects_top_investment_routes_not_raw_daily_ranks(
     assert [item["daily_rank"] for item in result["targets"]] == [1, 4]
 
 
+def test_run_range_skips_developments_published_on_another_day(
+    monkeypatch, tmp_path: Path
+):
+    duplicate = "a" * 64
+    replacement = "b" * 64
+    candidates = [
+        {"daily_rank": 1, "development_id": duplicate},
+        {"daily_rank": 4, "development_id": replacement},
+    ]
+    calls: list[tuple[str, int, str]] = []
+
+    monkeypatch.setattr(
+        investment_agent,
+        "_investment_candidates",
+        lambda **_kwargs: candidates,
+    )
+    monkeypatch.setattr(
+        investment_agent.investment_agent_runs,
+        "published_development_days",
+        lambda **_kwargs: {duplicate: "2026-07-18"},
+    )
+
+    def fake_run_one(**kwargs):
+        calls.append(
+            (kwargs["day"], kwargs["rank"], kwargs["development_id"])
+        )
+        return _result(day=kwargs["day"], rank=kwargs["rank"])
+
+    monkeypatch.setattr(investment_agent, "run_one", fake_run_one)
+    monkeypatch.setattr(
+        investment_agent.investment_agent_runs,
+        "publish_days",
+        lambda **kwargs: kwargs["publications"],
+    )
+
+    result = investment_agent.run_range(
+        through="2026-07-19",
+        top_ranked=1,
+        workers=1,
+        trace_root=tmp_path / "traces",
+        db_path=tmp_path / "investment-agent.db",
+    )
+
+    assert calls == [("2026-07-19", 4, replacement)]
+    assert result["targets"] == [
+        {
+            "day": "2026-07-19",
+            "daily_rank": 4,
+            "development_id": replacement,
+        }
+    ]
+
+
 def test_trace_path_is_durable_unique_and_versioned(tmp_path: Path):
     first = investment_agent._trace_path(
         trace_root=tmp_path,

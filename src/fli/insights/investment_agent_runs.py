@@ -351,6 +351,28 @@ def publish_day(
     )[0]
 
 
+def published_development_days(
+    *,
+    db_path: Path = DEFAULT_DB,
+) -> dict[str, str]:
+    """Return the published owner day for every Investment Development."""
+    conn = _open_readonly(db_path)
+    if conn is None:
+        return {}
+    try:
+        rows = conn.execute(
+            """SELECT development_id, day
+               FROM investment_agent_day_publication_item
+               ORDER BY day, development_id"""
+        ).fetchall()
+    finally:
+        conn.close()
+    return {
+        str(row["development_id"]): str(row["day"])
+        for row in rows
+    }
+
+
 def publish_days(
     *,
     publications: list[dict[str, Any]],

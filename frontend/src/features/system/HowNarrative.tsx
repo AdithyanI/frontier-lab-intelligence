@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import litellmRequestLog from '../../assets/litellm-request-log.webp'
 import { EvidenceInputMap } from '../architecture/ArchitecturePage'
 import NetworkRankFigure from '../architecture/NetworkRankFigure'
-import { CollectFigure, JudgeFigure, PublishFigure, RankFigure, RankLayersFigure, SourceChoiceFigure, TrustedSetFigure } from './DecisionFigures'
+import { CollectFigure, CostFigure, JudgeFigure, PublishFigure, RankFigure, RankLayersFigure, SourceChoiceFigure, TrustedSetFigure } from './DecisionFigures'
 import { VIDEO_WALKTHROUGH_URL } from './howContent'
 
 /* Decision figures open fullscreen on click, so they can be presented
@@ -323,11 +323,17 @@ export default function HowNarrative({
         </article>
 
         <article className="how-read-block how-read-block--wide" id="why-publish">
-          <h4><span className="mono">5</span> Write: connect each Development to actual companies</h4>
+          <h4><span className="mono">5</span> Write: two agents, one per audience</h4>
           <p>
             At this point we have a much smaller set of Developments that may
-            matter. The ten highest-ranked ones with a positive investment
-            route go to the company-aware Investment agent, one at a time.
+            matter. Each one now goes to the agent for the audience it was
+            routed to, one Development at a time. The two agents never see
+            each other's work.
+          </p>
+          <p className="how-read-sub mono">5a · Investment</p>
+          <p>
+            The ten highest-ranked Developments with a positive investment
+            route go to the company-aware Investment agent.
           </p>
           <p>
             The agent screens all 37 companies in BIT's disclosed portfolio
@@ -350,14 +356,30 @@ export default function HowNarrative({
             be stated honestly, and what would have to be true. Application
             code supplies every link. The model never writes a URL.
           </p>
+          <FigureFrame>
+            <PublishFigure />
+          </FigureFrame>
+          <p className="how-read-sub mono">5b · AI Engineering</p>
+          <p>
+            The AI Engineering agent asks a different question of the same
+            evidence: if you were building a serious AI system, does this
+            change a decision you have already made? To keep that concrete, it
+            judges every Development against one assumed reference
+            architecture with seven named surfaces &mdash; retrieval,
+            extraction, evaluation, agents, models, data, and operations.
+          </p>
+          <p>
+            An Insight has to land on one of those surfaces and say what an
+            engineer should now do differently. It is a single call with no
+            tool loop, because the surface map is small enough to send in
+            full. Where the evidence says nothing about a surface, that
+            surface simply stays empty rather than being reached for.
+          </p>
           <p>
             A day publishes only when every requested rank succeeds. A partial
             run stays invisible rather than mixing prompt versions on one
             page.
           </p>
-          <FigureFrame>
-            <PublishFigure />
-          </FigureFrame>
           <p>
             <Link className="how-beat-link" to={insightsPath}>
               Read the brief &rarr;
@@ -380,33 +402,49 @@ export default function HowNarrative({
             model at high effort to map the Development to concrete technical
             decisions.
           </p>
-          <div className="how-cost-table" role="table" aria-label="Models and measured cost">
-            <div className="how-cost-row how-cost-head" role="row">
-              <span role="columnheader">Step</span>
-              <span role="columnheader">Model</span>
-              <span role="columnheader">Cost record</span>
-            </div>
-            <div className="how-cost-row" role="row">
-              <strong role="cell">Audience routing</strong>
-              <span role="cell" className="mono">gpt-5.6-luna · medium</span>
-              <span role="cell">recorded per request</span>
-            </div>
-            <div className="how-cost-row" role="row">
-              <strong role="cell">Investment agent</strong>
-              <span role="cell" className="mono">gpt-5.6-sol · xhigh</span>
-              <span role="cell">attached to each saved run</span>
-            </div>
-            <div className="how-cost-row" role="row">
-              <strong role="cell">AI Engineering agent</strong>
-              <span role="cell" className="mono">gpt-5.6-sol · high</span>
-              <span role="cell">attached to each saved run</span>
-            </div>
-          </div>
-          <p className="how-cost-note">
-            LiteLLM records the exact model, tokens, cache reuse, latency, and
-            cost for each request. The agent traces keep the complete request
-            and response before a result is imported.
+          <p className="how-read-sub mono">6a · What it costs to run</p>
+          <p>
+            Every request records its exact tokens, cache reuse, and cost, so
+            the precise numbers are always available. But the useful thing to
+            carry around is the shape of the bill. The figure below simplifies
+            hard: it assumes every input token is a cache hit, which gives one
+            input price instead of two and makes the arithmetic something you
+            can do in your head.
           </p>
+          <FigureFrame label="Expand the cost rule of thumb">
+            <CostFigure />
+          </FigureFrame>
+          <p>
+            Reading it left to right: routing a Development is a fifth of a
+            cent, an AI Engineering Insight is about three cents, and an
+            Investment Insight is about fifteen. A full day of both briefs
+            lands near two dollars, and routing a hundred Developments costs
+            less than two Investment Insights. That is the design in one line
+            &mdash; a cheap model does the volume, an expensive one is spent
+            only on the few that survive.
+          </p>
+          <p>
+            The ratio worth remembering is that output costs about sixty times
+            cached input. Most of that output is reasoning rather than prose,
+            so once the input is cached you are essentially paying for the
+            model to think, not to read. That is also why the fixed twenty
+            thousand tokens of company cards in the Investment prompt are
+            nearly free after the first run of the day.
+          </p>
+          <p>
+            On the collection side, X profile lookups run about eighteen cents
+            per thousand and a frozen article body is about a tenth of a cent.
+            Extending the follow graph is the one genuinely lumpy cost, and it
+            is a one-off rather than part of a daily brief.
+          </p>
+          <p className="how-cost-note">
+            These are rounded planning figures, not a price list. Assuming a
+            full cache hit makes them a floor: prompt caching is best-effort,
+            so an uncached run costs more, and the uncached input price stays
+            the safe upper bound when estimating a refresh.
+          </p>
+
+          <p className="how-read-sub mono">6b · One real request</p>
           <p>
             Audience-routing calls pass through LiteLLM. It handles retries
             and records the model, tokens, time, and cost for every request.
@@ -457,10 +495,10 @@ export default function HowNarrative({
           </p>
           <p>
             The cost appears when one event is covered widely. On 24 July,
-            TIME, the Guardian and the Wall Street Journal each published their
-            own article about the same OpenAI agent incident, so each one
-            arrived as a separate Development and the brief carried four
-            versions of a single story, pointing at the same companies.
+            TIME, the Guardian and Reuters each published their own article
+            about the same OpenAI agent incident, so each one arrived as a
+            separate Development and the brief carried four versions of a
+            single story, pointing at the same companies.
           </p>
           <p>
             The fix belongs at the end rather than the start. Once a day&rsquo;s

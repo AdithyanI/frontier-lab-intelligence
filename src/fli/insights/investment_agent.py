@@ -943,11 +943,15 @@ def run_range(
         (through_day - timedelta(days=offset)).isoformat()
         for offset in reversed(range(days))
     ]
+    published_days = investment_agent_runs.published_development_days(
+        db_path=db_path
+    )
+    selected_development_ids: set[str] = set()
     targets: list[tuple[str, int, str]] = []
     for day in requested_days:
         candidates = _investment_candidates(
             day=day,
-            limit=max(top_ranked, 200 if rank is not None else top_ranked),
+            limit=max(top_ranked, 200),
             api_base=api_base,
         )
         if rank is not None:
@@ -961,7 +965,19 @@ def run_range(
                     f"{day} daily rank {rank} is not a current "
                     "Investment-routed Development."
                 )
-        for item in candidates[:top_ranked]:
+        eligible = []
+        for item in candidates:
+            development_id = str(item["development_id"])
+            owner_day = published_days.get(development_id)
+            if owner_day is not None and owner_day != day:
+                continue
+            if development_id in selected_development_ids:
+                continue
+            eligible.append(item)
+            selected_development_ids.add(development_id)
+            if len(eligible) == top_ranked:
+                break
+        for item in eligible:
             targets.append(
                 (
                     day,
