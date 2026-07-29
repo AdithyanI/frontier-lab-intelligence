@@ -155,15 +155,16 @@ def test_report_renders_the_complete_investment_workbook():
     assert "SOURCE LEDGER" not in text
 
 
-def test_cover_states_the_brief_totals_and_one_method_signature():
+def test_cover_states_the_brief_totals_without_model_plumbing():
     text = _pdf_text(pdf_report.build_report_pdf(_payload()))
 
     assert "COMPANY" in text
     assert "READ-THROUGHS" in text
     assert "METHOD" in text
-    assert "MODEL GPT-5.6-SOL" in text
-    assert "PROMPT INVESTMENT-AGENT-V14" in text
-    # Per-insight telemetry dumps are noise; the method is stated once.
+    # Model, effort, prompt version, and turn counts are run plumbing, not reading.
+    assert "GPT-5.6-SOL" not in text
+    assert "XHIGH" not in text
+    assert "INVESTMENT-AGENT-V14" not in text
     assert "investment-agent-v14" not in text
     assert "2 turns" not in text
 

@@ -32,9 +32,19 @@ export default function AionStackPage() {
             className="aion-surface"
             data-requested={surface.id === requestedSurface ? 'true' : undefined}
           >
-            <span className="mono aion-surface-id">{surface.id}</span>
-            <h3>{surface.name}</h3>
-            <p>{surface.what}</p>
+            <details open={surface.id === requestedSurface}>
+              <summary>
+                <span className="mono aion-surface-id">{surface.id}</span>
+                <h3>{surface.name}</h3>
+                <span className="aion-surface-what">{surface.what}</span>
+              </summary>
+              <dl className="aion-surface-detail">
+                <div>
+                  <dt>What counts</dt>
+                  <dd>{surface.scope}</dd>
+                </div>
+              </dl>
+            </details>
           </li>
         ))}
       </ol>

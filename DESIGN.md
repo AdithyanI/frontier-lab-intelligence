@@ -290,16 +290,17 @@ Rules:
   running the full page width. Display is Times, prose is the working
   grotesque, and every identifier, count, label, and provenance line is mono.
   The cover states the title, audience/date, a four-cell numeral band
-  (surfaced, read-throughs, screened, memos), one `METHOD` note carrying the
-  model/effort/prompt signature exactly once, and the ranked clickable index
-  with each Insight's tickers. Each Insight opens its own page: title, mono
+  (surfaced, read-throughs, screened, memos), one `METHOD` note explaining the
+  screening rule, and the ranked clickable index with each Insight's tickers.
+  Model, reasoning effort, prompt version, and turn counts are run plumbing and
+  never appear anywhere in the document. Each Insight opens its own page: title, mono
   provenance line, capital-blue rule, what happened, then one card per company
   read-through — direction-coloured accent rule and badge, mono ticker, the
   linked standing bet, and the model's impact — closing with the inline
   `Sources and audit trail` section whose right-hand note is the screening
   funnel. Section rules, mechanisms with their first card, and the complete
   audit trail are kept together so no page carries chrome, a stray rule, or a
-  single orphaned row. Per-Insight telemetry never appears in the body. PDF
+  single orphaned row. PDF
   text remains vector and selectable, with an embedded mixed-script fallback
   for citation titles outside WinAnsi.
 - **BIT Lens:** two ruled views of one public client-context workspace. The

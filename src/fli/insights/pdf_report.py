@@ -38,7 +38,7 @@ from reportlab.platypus import (
 )
 
 
-REPORT_SCHEMA_VERSION = "investment-agent-pdf-v12"
+REPORT_SCHEMA_VERSION = "investment-agent-pdf-v13"
 REPO_ROOT = Path(__file__).resolve().parents[3]
 COMPANY_MEMO_PATH = REPO_ROOT / "docs" / "references" / "company-memos.json"
 DEFAULT_CACHE_ROOT = REPO_ROOT / "data" / "derived" / "insights" / "pdf-cache"
@@ -657,17 +657,6 @@ def _stat_band(
     )
 
 
-def _method_signature(payload: dict[str, Any], items: list[dict[str, Any]]) -> str:
-    run = payload.get("run") or {}
-    telemetry = (items[0].get("telemetry") if items else {}) or {}
-    fields = (
-        ("MODEL", run.get("model") or telemetry.get("model")),
-        ("EFFORT", run.get("reasoning_effort") or telemetry.get("reasoning_effort")),
-        ("PROMPT", run.get("prompt_version") or telemetry.get("prompt_version")),
-    )
-    return "   ".join(f"{label} {str(value).upper()}" for label, value in fields if value)
-
-
 def _cover(payload: dict[str, Any], styles: dict[str, ParagraphStyle]) -> list[Any]:
     audience = str(payload["audience"])
     day = str(payload["date"])
@@ -707,20 +696,20 @@ def _cover(payload: dict[str, Any], styles: dict[str, ParagraphStyle]) -> list[A
         _stat_band(_brief_totals(payload, items), styles),
         Spacer(1, 8 * mm),
     ]
-    method_lines: list[Any] = [
-        Paragraph(
-            _markup(
-                "Every ranked development is screened against the BIT company universe. "
-                "A read-through is published only when it maps to a pre-registered "
-                "standing bet; the research memo behind that bet is opened and cited."
+    story.append(
+        _rail(
+            "METHOD",
+            Paragraph(
+                _markup(
+                    "Every ranked development is screened against the BIT company universe. "
+                    "A read-through is published only when it maps to a pre-registered "
+                    "standing bet; the research memo behind that bet is opened and cited."
+                ),
+                styles["small"],
             ),
-            styles["small"],
+            styles,
         )
-    ]
-    signature = _method_signature(payload, items)
-    if signature:
-        method_lines.extend([Spacer(1, 2 * mm), Paragraph(_markup(signature), styles["meta"])])
-    story.append(_rail("METHOD", method_lines, styles))
+    )
     story.extend(
         _section_heading(
             "Today's brief",
