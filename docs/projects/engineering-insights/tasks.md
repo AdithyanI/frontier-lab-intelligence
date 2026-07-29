@@ -187,3 +187,21 @@ choice.
   `previous_response_id`. A single-turn design therefore cannot cache here, and
   0% is expected rather than a defect. The serial warm-up call was kept for
   fail-fast, not for cache.
+- 2026-07-29: [FIXED] The Engineering row looked broken next to Investment for
+  two reasons, and only one was CSS. First, a parallel `.engineering-agent-*`
+  block was written instead of reusing Investment's row skeleton, so the rank
+  `<Link>` rendered as a default underlined anchor, the headline was 19px
+  instead of 31px, and body copy had no 68ch measure. The block was deleted and
+  `.engineering-agent-*` added to the 28 existing shared selector groups, so the
+  two audiences cannot drift again. Second, and larger: the headline
+  instruction asked for a 28-word factual restatement, while the Investment
+  prompt asks for 6 to 14 words stating the implication and explicitly forbids
+  repeating the source title. The Engineering headline therefore duplicated
+  `what_changed` directly beneath it. The instruction now mirrors Investment's
+  register, validators reject above 18 words, and the prompt is v2. Third
+  instance of the same class: a number chosen before looking at good output.
+- 2026-07-29: [FIXED] `engineering_agent_runs.CURRENT_PROMPT_VERSION` pins the
+  version the store reads, mirroring Investment. Bumping only the agent's
+  `PROMPT_VERSION` made `publish_day` silently republish the older rows, and a
+  successful-looking run served stale headlines. `run_days` now fails before
+  spending money when the two versions disagree.
