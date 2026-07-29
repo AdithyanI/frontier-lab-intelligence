@@ -8,7 +8,6 @@ const BLUE = '#5bc5f2'
 const BLUE_MID = '#4391b4'
 const BLUE_INK = '#235165'
 const SAND = '#f4f1ea'
-const PALE_INK = '#c9c9c6'
 const MONO = "'IBM Plex Mono', monospace"
 const UI = "'Inter', system-ui, sans-serif"
 
@@ -561,7 +560,7 @@ export function CollectionCostFigure() {
   const meter = [
     { unit: 'One timeline page request', note: 'up to 20 posts', credits: '15', cost: '$0.00015' },
     { unit: 'One X article body', note: 'long-form posts only', credits: '100', cost: '$0.001' },
-    { unit: 'One profile lookup', note: 'setup only', credits: '18', cost: '$0.00018' },
+    { unit: 'One profile lookup', note: 'when a new account is screened in', credits: '18', cost: '$0.00018' },
   ]
 
   const daily = [
@@ -576,21 +575,6 @@ export function CollectionCostFigure() {
       sub: 'only a handful appear per day',
       calc: '~3 articles × 100 credits',
       total: '~$0.003',
-    },
-  ]
-
-  const once = [
-    {
-      name: 'Ask every Registry account who it follows',
-      sub: 'the answer becomes the trust ranking · 2.8M follow edges',
-      calc: '~2,200 accounts crawled',
-      total: '~$32',
-    },
-    {
-      name: 'Look up every profile',
-      sub: 'screening candidates into the Registry',
-      calc: '~2,600 lookups × 18 credits',
-      total: '~$0.47',
     },
   ]
 
@@ -612,8 +596,8 @@ export function CollectionCostFigure() {
     })
 
   return (
-    <svg viewBox="0 0 1080 660" role="img" aria-label="The X collection cost, split into recurring and one-off. The provider bills in credits where one hundred thousand credits is a dollar. Every day costs about forty cents to sweep the whole network. Building the network was a one-off of about thirty-three dollars, already paid.">
-      <rect x="0" y="0" width="1080" height="660" fill="#fff" />
+    <svg viewBox="0 0 1080 478" role="img" aria-label="The X collection cost. The provider bills in credits where one hundred thousand credits is a dollar. A timeline page request is fifteen credits, an article body is one hundred, a profile lookup is eighteen. Sweeping every account in the network for one day costs about forty cents.">
+      <rect x="0" y="0" width="1080" height="478" fill="#fff" />
       <text x="30" y="34" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.08em">COLLECTION COST · A RULE OF THUMB</text>
       <text x="1050" y="34" textAnchor="end" fontFamily={MONO} fontSize="9.5" fill={MUTED} letterSpacing="0.06em">100,000 PROVIDER CREDITS = $1</text>
 
@@ -643,15 +627,6 @@ export function CollectionCostFigure() {
       {band(daily, 312)}
       <text x="50" y="440" fontFamily={UI} fontSize="14" fontWeight="600" fill={INK}>Every day, all in</text>
       <text x="1050" y="442" textAnchor="end" fontFamily={UI} fontSize="21" fontWeight="600" fill={INK}>≈ $0.40 a day</text>
-
-      {/* 3 · paid once */}
-      <rect x="30" y="480" width="4" height="126" fill={PALE_INK} />
-      <text x="50" y="496" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.06em">3 · PAID ONCE · BUILDING THE NETWORK</text>
-      <line x1="30" y1="506" x2="1050" y2="506" stroke={MUTED} strokeWidth="1" opacity="0.3" />
-      {band(once, 506)}
-      <text x="50" y="634" fontFamily={UI} fontSize="14" fontWeight="600" fill={INK}>Setup, already paid</text>
-      <text x="1050" y="636" textAnchor="end" fontFamily={UI} fontSize="21" fontWeight="600" fill={MUTED}>≈ $33 once</text>
-      <text x="240" y="634" fontFamily={UI} fontSize="12.5" fill={MUTED}>the network is not re-crawled to publish a brief</text>
     </svg>
   )
 }

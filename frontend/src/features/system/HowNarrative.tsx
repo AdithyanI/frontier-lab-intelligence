@@ -452,16 +452,6 @@ export default function HowNarrative({
             freezing.
           </p>
           <p>
-            The one-off underneath it is the follow graph. Once, every account
-            in the Registry was asked a single question &mdash; who do you
-            follow? &mdash; which returned about 2.8 million follow edges
-            pointing at roughly half a million distinct accounts. That crawl is
-            what the trust ranking in step 1c counts, and it is also how the
-            Registry discovers people beyond the obvious names. It has run
-            twice, costs about thirty-three dollars in total, and is already
-            paid. Publishing a brief never re-crawls it.
-          </p>
-          <p>
             One detail is worth knowing when you think about scale: a sweep
             pages each account&rsquo;s timeline until it passes the horizon, so
             asking for five days costs barely more than asking for one. The
