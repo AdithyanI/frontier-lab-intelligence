@@ -34,7 +34,7 @@ def _trace() -> dict:
     }
     return {
         "schema_version": "investment-agent-trace-v1",
-        "prompt_version": "investment-agent-v14",
+        "prompt_version": investment_agent_runs.CURRENT_PROMPT_VERSION,
         "prompt_cache_key": "fli:investment-agent:v14",
         "date": DAY,
         "daily_rank": 1,

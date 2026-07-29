@@ -38,8 +38,8 @@ MAX_UNIQUE_MEMOS = 8
 MAX_MODEL_TURNS = 4
 MAX_RESPONSE_ATTEMPTS = 3
 RETRYABLE_RESPONSE_STATUS_CODES = frozenset({408, 409, 429, 499})
-PROMPT_VERSION = "investment-agent-v14"
-PROMPT_CACHE_KEY = "fli:investment-agent:v14"
+PROMPT_VERSION = "investment-agent-v15-candidate"
+PROMPT_CACHE_KEY = "fli:investment-agent:v15-candidate"
 PROMPT_PATH = (
     REPO_ROOT
     / "src"
@@ -274,6 +274,10 @@ def _final_format(tickers: list[str]) -> dict[str, Any]:
         "schema": {
             "type": "object",
             "properties": {
+                "decision": {
+                    "type": "string",
+                    "enum": ["surface", "suppress"],
+                },
                 "headline": {
                     "type": "string",
                     "description": (
@@ -282,10 +286,6 @@ def _final_format(tickers: list[str]) -> dict[str, Any]:
                     ),
                 },
                 "what_changed": {"type": "string"},
-                "decision": {
-                    "type": "string",
-                    "enum": ["surface", "suppress"],
-                },
                 "connections": {
                     "type": "array",
                     "maxItems": MAX_UNIQUE_MEMOS,
@@ -298,9 +298,9 @@ def _final_format(tickers: list[str]) -> dict[str, Any]:
                 "no_match_reason": {"type": ["string", "null"]},
             },
             "required": [
+                "decision",
                 "headline",
                 "what_changed",
-                "decision",
                 "connections",
                 "no_match_reason",
             ],

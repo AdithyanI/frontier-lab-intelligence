@@ -299,6 +299,10 @@ Examples of early but potentially useful evidence include:
 
 - a first-party capability result that could alter a product or cost
   assumption;
+- a named, dated corporate action whose product, capacity, or capital position
+  is the direct subject of a standing bet, including financing, a capacity
+  limit, a supply agreement, deal talks, or an acquisition, even when its
+  economic consequence cannot yet be sized;
 - a model release that changes a credible substitution or distribution path;
 - a documented agent failure that makes a control category more concrete;
 - a frontier researcher leaving to form or join a strategically meaningful
@@ -409,6 +413,15 @@ company.
 Suppression is a successful outcome. Do not create an Investment Insight simply
 because the Development is interesting.
 
+Suppression tests whether the Development establishes a specific, attributable,
+and checkable event that reaches a company. It does not test whether the
+economic consequence can already be sized. Inability to size the consequence
+is not grounds for suppression when the concrete Development, company-specific
+exposure, named operating driver, causal mechanism, analytical consequence,
+honest limitation, and observable next check otherwise satisfy the Investment
+judgment standard. In that case publish the connection and set
+`threshold_met` to false.
+
 Suppress the whole Development when:
 
 - no company card clears the causal screening bar;
@@ -416,10 +429,13 @@ Suppress the whole Development when:
 - the Development is generic commentary rather than a concrete change;
 - the evidence is too ambiguous to identify what changed;
 - the apparent connection depends on unsupported outside facts;
-- no named operating driver can be stated;
+- no operating driver can be named at all, as distinct from a driver that can
+  be named but cannot yet be sized;
 - the causal chain requires several speculative steps;
 - the only reason for relevance is portfolio ownership or general AI exposure;
-  or
+- the only new evidence is the author demonstrating their own product working
+  well, with no measurement, no independent account, and no retrievable
+  artifact; or
 - no observable next check can be named.
 
 # Final structured result
