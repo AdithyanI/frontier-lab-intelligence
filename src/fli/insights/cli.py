@@ -14,6 +14,8 @@ from uuid import uuid4
 from openai import APIConnectionError, APITimeoutError, AuthenticationError
 
 from fli.insights import company_context
+from fli.insights import engineering_agent
+from fli.insights import engineering_agent_runs
 from fli.insights import investment_agent
 from fli.insights import investment_agent_runs
 from fli.registry import classification as entity_kinds
@@ -92,12 +94,15 @@ def _error(
 
 
 
-class InvestmentAgentBatchIncomplete(RuntimeError):
-    """A company-aware batch preserved its successes but some targets failed."""
+class AgentBatchIncomplete(RuntimeError):
+    """A batch preserved its successes but some targets failed."""
 
-    def __init__(self, result: dict[str, Any]):
-        super().__init__("Investment agent batch completed with failed targets.")
+    def __init__(self, result: dict[str, Any], *, audience: str = "Investment"):
+        super().__init__(f"{audience} agent batch completed with failed targets.")
         self.result = result
+
+
+InvestmentAgentBatchIncomplete = AgentBatchIncomplete
 
 
 def _plain(payload: dict[str, Any]) -> str:
@@ -170,6 +175,54 @@ def _parser() -> argparse.ArgumentParser:
     run.add_argument("--db", type=Path, default=investment_agent_runs.DEFAULT_DB)
     _add_output_flags(run)
 
+    engineering = sub.add_parser(
+        "run-engineering-agent",
+        help=(
+            "Analyze the highest-ranked current AI Engineering-routed "
+            "Developments against the assumed Aion surface map, persist full "
+            "audit traces, and import successful results."
+        ),
+    )
+    engineering.add_argument("--through", required=True)
+    engineering.add_argument("--days", type=int, default=1)
+    engineering.add_argument(
+        "--top-ranked",
+        type=int,
+        default=engineering_agent.DEFAULT_TOP_RANKED,
+        help="Number of AI Engineering-routed Developments to analyze per day.",
+    )
+    engineering.add_argument(
+        "--rank",
+        type=int,
+        help=(
+            "Run only this absolute daily rank on every requested day; the "
+            "Development must have a current positive AI Engineering route."
+        ),
+    )
+    engineering.add_argument(
+        "--dry-run",
+        action="store_true",
+        help=(
+            "Resolve and validate the exact AI Engineering-routed cohort "
+            "without model calls, traces, database writes, or publication."
+        ),
+    )
+    engineering.add_argument("--model", default=engineering_agent.DEFAULT_MODEL)
+    engineering.add_argument(
+        "--reasoning-effort", default=engineering_agent.DEFAULT_EFFORT
+    )
+    engineering.add_argument(
+        "--workers", type=int, default=engineering_agent.DEFAULT_WORKERS
+    )
+    engineering.add_argument("--api-base", default=engineering_agent.DEFAULT_API_BASE)
+    engineering.add_argument(
+        "--trace-root", type=Path, default=engineering_agent.DEFAULT_TRACE_ROOT
+    )
+    engineering.add_argument(
+        "--db", type=Path, default=engineering_agent_runs.DEFAULT_DB
+    )
+    _add_output_flags(engineering)
+
     imported = sub.add_parser(
         "import-investment-trace",
         help="Persist one validated company-aware Investment agent trace.",
@@ -178,9 +231,34 @@ def _parser() -> argparse.ArgumentParser:
     imported.add_argument("--db", type=Path, default=investment_agent_runs.DEFAULT_DB)
     _add_output_flags(imported)
 
+    engineering_import = sub.add_parser(
+        "import-engineering-trace",
+        help="Persist one validated surface-linked Engineering agent trace.",
+    )
+    engineering_import.add_argument("--trace", type=Path, required=True)
+    engineering_import.add_argument(
+        "--db", type=Path, default=engineering_agent_runs.DEFAULT_DB
+    )
+    _add_output_flags(engineering_import)
+
     summary = sub.add_parser("summary", help="Inspect aggregate durable run state.")
     summary.add_argument("--db", type=Path, default=investment_agent_runs.DEFAULT_DB)
     _add_output_flags(summary)
+
+    engineering_summary = sub.add_parser(
+        "engineering-summary",
+        help="Inspect aggregate durable Engineering run state.",
+    )
+    engineering_summary.add_argument(
+        "--db", type=Path, default=engineering_agent_runs.DEFAULT_DB
+    )
+    _add_output_flags(engineering_summary)
+
+    surfaces = sub.add_parser(
+        "aion-surfaces",
+        help="Inspect the assumed Aion surface map the Engineering agent binds to.",
+    )
+    _add_output_flags(surfaces)
 
     company = sub.add_parser(
         "company-context",
@@ -210,6 +288,18 @@ def contract_payload() -> dict[str, Any]:
         "max_unique_memos": investment_agent.MAX_UNIQUE_MEMOS,
         "store_schema_version": investment_agent_runs.STORE_SCHEMA_VERSION,
         "read_schema_version": investment_agent_runs.READ_SCHEMA_VERSION,
+        "ai_engineering": {
+            "prompt_version": engineering_agent.PROMPT_VERSION,
+            "prompt_cache_key": engineering_agent.PROMPT_CACHE_KEY,
+            "prompt_path": _display_path(engineering_agent.PROMPT_PATH),
+            "surface_map_path": _display_path(engineering_agent.SURFACE_PATH),
+            "model": engineering_agent.DEFAULT_MODEL,
+            "reasoning_effort": engineering_agent.DEFAULT_EFFORT,
+            "model_turns": 1,
+            "max_surface_landings": engineering_agent_runs.MAX_LANDINGS,
+            "store_schema_version": engineering_agent_runs.STORE_SCHEMA_VERSION,
+            "read_schema_version": engineering_agent_runs.READ_SCHEMA_VERSION,
+        },
     }
 
 
@@ -243,8 +333,39 @@ def main(
             )
             if not data["complete"]:
                 raise InvestmentAgentBatchIncomplete(data)
+        elif args.action == "run-engineering-agent":
+            data = engineering_agent.run_days(
+                through=args.through,
+                days=args.days,
+                top_ranked=args.top_ranked,
+                rank=args.rank,
+                dry_run=args.dry_run,
+                model=args.model,
+                effort=args.reasoning_effort,
+                workers=args.workers,
+                api_base=args.api_base,
+                trace_root=args.trace_root,
+                db_path=args.db,
+                client_factory=client_factory,
+            )
+            if not data["complete"]:
+                raise AgentBatchIncomplete(data, audience="AI Engineering")
         elif args.action == "import-investment-trace":
             data = investment_agent_runs.import_trace(args.trace, db_path=args.db)
+        elif args.action == "import-engineering-trace":
+            data = engineering_agent_runs.import_trace(args.trace, db_path=args.db)
+        elif args.action == "engineering-summary":
+            if not args.db.is_file():
+                raise FileNotFoundError(args.db)
+            data = {
+                "db": _display_path(args.db),
+                **engineering_agent_runs.summary_payload(args.db),
+            }
+        elif args.action == "aion-surfaces":
+            data = {
+                "path": _display_path(engineering_agent.SURFACE_PATH),
+                "surfaces": engineering_agent.surface_cards(),
+            }
         elif args.action == "summary":
             if not args.db.is_file():
                 raise FileNotFoundError(args.db)

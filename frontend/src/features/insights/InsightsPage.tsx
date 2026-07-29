@@ -12,6 +12,7 @@ import {
   type InsightsResponse,
   type InvestmentAgentConnection,
   type InvestmentAgentInsightsResponse,
+  type EngineeringAgentInsightsResponse,
   type InvestmentAgentItem,
   type InvestmentCompanyUniverse,
 } from '../../shared/api'
@@ -25,6 +26,10 @@ import {
 } from '../../shared/date/dateWindow'
 import { decodeTextEntities } from '../../shared/textEntities'
 import { useAuditDate } from '../../shared/date/auditDateStore'
+import {
+  EngineeringAgentInsight,
+  EngineeringAgentYield,
+} from './EngineeringAgentInsight'
 
 const DEFAULT_AUDIENCE: InsightAudience = 'investment'
 const DEFAULT_STATUS: InsightStatus = 'kept'
@@ -101,6 +106,12 @@ function isInvestmentAgentResponse(
   payload: InsightsResponse,
 ): payload is InvestmentAgentInsightsResponse {
   return payload.content_kind === 'investment_agent'
+}
+
+function isEngineeringAgentResponse(
+  payload: InsightsResponse,
+): payload is EngineeringAgentInsightsResponse {
+  return payload.content_kind === 'engineering_agent'
 }
 
 function reportFilename(response: Response, audience: InsightAudience, day: string) {
@@ -841,6 +852,8 @@ export default function Insights() {
     : null
   const investmentAgentData =
     currentData && isInvestmentAgentResponse(currentData) ? currentData : null
+  const engineeringAgentData =
+    currentData && isEngineeringAgentResponse(currentData) ? currentData : null
 
   useEffect(() => {
     if (audience !== 'investment' || Object.keys(investmentBetIndex).length > 0) return
@@ -1005,6 +1018,9 @@ export default function Insights() {
           {investmentAgentData?.available && investmentAgentData.items.length > 0 && (
             <InvestmentAgentYield data={investmentAgentData} />
           )}
+          {engineeringAgentData?.available && engineeringAgentData.items.length > 0 && (
+            <EngineeringAgentYield data={engineeringAgentData} />
+          )}
         </div>
         <DailyBriefActions
           audience={audience}
@@ -1091,6 +1107,16 @@ export default function Insights() {
               betIndex={investmentBetIndex}
               key={item.run_id}
             />
+          ))}
+        </section>
+      )}
+      {engineeringAgentData?.available && engineeringAgentData.items.length > 0 && (
+        <section
+          className="insight-list engineering-agent-list"
+          aria-label={`${copy.label} surface-linked ${STATUS_COPY[status].label.toLowerCase()} insights`}
+        >
+          {engineeringAgentData.items.map((item) => (
+            <EngineeringAgentInsight item={item} key={item.run_id} />
           ))}
         </section>
       )}

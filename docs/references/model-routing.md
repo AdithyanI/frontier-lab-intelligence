@@ -10,9 +10,9 @@ For the cross-stage cost summary and X-provider units, see
 Use `gpt-5.6-luna` as the default efficient model for bounded structured
 classification and Registry evaluation. This is an accuracy-first default,
 not a rule that the cheapest model or lowest reasoning effort always wins.
-The current daily path uses `gpt-5.6-luna` for audience routing and
-`gpt-5.6-sol` for company-aware Investment analysis. AI Engineering ends at
-routing; it has no current Insight generator or legacy fallback. Historical
+The current daily path uses `gpt-5.6-luna` for audience routing,
+`gpt-5.6-sol` for company-aware Investment analysis, and `gpt-5.6-sol` for
+surface-linked AI Engineering analysis. Historical
 Terra annotations and persisted Codex editorial tasks are retired. The
 web-grounded Registry relevance audit was a one-time non-mutating evaluation,
 not part of the daily path.
@@ -22,6 +22,7 @@ not part of the daily path.
 | Structural entity kind | `gpt-5.6-luna` | `medium` | Existing evaluated classifier contract. |
 | Evidence audience routing | deterministic evidence gate, then `gpt-5.6-luna` | none, then `medium` | A narrow evidence-completeness gate suppresses only short unsupported packets and stores the exact reason without spending model tokens. All other packets reach the self-contained, recall-oriented router. Current checkpoint counts and spend live in [`docs/STATUS.md`](../STATUS.md) and [`tokenomics.md`](tokenomics.md). |
 | Company-aware Investment analysis | `gpt-5.6-sol` | `xhigh` | One Development is screened against the compact company universe, then the model opens only the full memos needed to test concrete causal paths. Sol/xhigh is the quality baseline while this boundary is calibrated. Exact run proof and spend belong in [`docs/STATUS.md`](../STATUS.md) and [`insight-refresh.md`](insight-refresh.md). |
+| Surface-linked AI Engineering analysis | `gpt-5.6-sol` | `high` | One Development is judged in a single call against the seven assumed Aion surfaces in [`aion-surfaces.json`](aion-surfaces.json). There is no tool loop: the surface map is small enough to send in full, so progressive disclosure buys nothing. The work is taste plus one sentence of technical writing, not retrieval or a multi-hop causal chain, so `high` is the calibration baseline rather than `xhigh`. Luna at this boundary is untested. |
 | Missing-bio identity research | `gpt-5.6-luna` | `high` | Multi-source grounded identity resolution needs more checking. |
 | Combined kind + Registry decision | `gpt-5.6-luna` | `high` | Independent structural and admission decisions with optional search. |
 | Registry relevance audit | `gpt-5.6-terra` | `high` | One-time required-web-search evaluation of the initial Registry. It is non-mutating and does not run during daily evidence or Insight generation. |

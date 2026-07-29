@@ -132,8 +132,9 @@ change how a specific research platform is built.
 Return one JSON object matching the supplied schema. No prose outside it.
 
 **headline** — one factual sentence naming what changed and who did it. Written
-for an engineer scanning a list. Do not reuse a webpage title; those are
-unreliable. No hype, no question marks, no colons introducing a slogan.
+for an engineer scanning a list. At most 28 words. Do not reuse a webpage title;
+those are unreliable. No hype, no question marks, no colons introducing a
+slogan.
 
 **what_changed** — two or three sentences of exact technical substance from the
 evidence: what was released, measured, demonstrated, or broken, with attribution

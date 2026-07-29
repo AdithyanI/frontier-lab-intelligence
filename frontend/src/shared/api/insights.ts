@@ -140,10 +140,78 @@ export interface InvestmentAgentInsightsResponse {
   items: InvestmentAgentItem[]
 }
 
-export type InsightsResponse = InvestmentAgentInsightsResponse
+export type InsightsResponse =
+  | InvestmentAgentInsightsResponse
+  | EngineeringAgentInsightsResponse
+
+export interface EngineeringSurface {
+  id: string
+  name: string
+  what: string
+}
+
+export interface EngineeringSurfaceLanding {
+  surface_id: string
+  surface_name: string
+  why: string
+}
+
+export interface EngineeringAgentItem {
+  run_id: string
+  day: string
+  development_id: string
+  daily_rank: number
+  decision: InsightDecision
+  headline: string
+  what_changed: string
+  lands: EngineeringSurfaceLanding[]
+  no_match_reason: string | null
+  provenance: InvestmentAgentItem['provenance']
+  telemetry: {
+    model: string
+    reasoning_effort: string
+    prompt_version: string
+    surface_count: number
+    input_tokens: number
+    cached_tokens: number
+    output_tokens: number
+    reasoning_tokens: number
+    reported_cost_usd: number
+    completed_at: string
+  }
+}
+
+export interface EngineeringAgentInsightsResponse {
+  schema_version: string
+  available: boolean
+  reason?: string | null
+  requested_date: string | null
+  date: string | null
+  audience: 'ai_engineering'
+  status: InsightStatus
+  content_kind: 'engineering_agent'
+  surfaces: EngineeringSurface[]
+  run: {
+    date: string
+    development_count: number
+    surfaced_development_count: number
+    suppressed_development_count: number
+    surface_landing_count: number
+    surface_count: number
+    model: string
+    reasoning_effort: string
+    prompt_version: string
+    input_tokens: number
+    cached_tokens: number
+    output_tokens: number
+    reasoning_tokens: number
+    reported_cost_usd: number
+  } | null
+  items: EngineeringAgentItem[]
+}
 
 export interface InsightDate extends FeedDate {
-  content_kind: 'investment_agent'
+  content_kind: 'investment_agent' | 'engineering_agent'
 }
 
 export interface InsightDates {

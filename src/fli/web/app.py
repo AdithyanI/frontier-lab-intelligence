@@ -41,6 +41,7 @@ from fastapi.staticfiles import StaticFiles
 from fli.ingestion import sources
 from fli.delivery import daily_brief as brief_delivery
 from fli.insights import investment_agent_runs as investment_agent_store
+from fli.insights import engineering_agent_runs as engineering_agent_store
 from fli.insights import company_context
 from fli.insights import pdf_report
 from fli.network import view as rankings_store
@@ -554,14 +555,14 @@ def insight_dates(
 ) -> JSONResponse:
     """Available Insight dates for one audience."""
     if audience != "investment":
+        payload = engineering_agent_store.dates_payload()
+        dates = list(payload.get("dates") or [])
         return JSONResponse(
             {
-                "schema_version": investment_agent_store.READ_SCHEMA_VERSION,
+                **payload,
+                "schema_version": engineering_agent_store.READ_SCHEMA_VERSION,
                 "audience": audience,
-                "available": False,
-                "reason": _AI_ENGINEERING_REASON,
-                "latest_date": None,
-                "dates": [],
+                "latest_date": dates[-1]["day"] if dates else None,
             }
         )
     payload = investment_agent_store.dates_payload()
@@ -635,25 +636,21 @@ def _investment_agent_provenance(
 
 
 _AI_ENGINEERING_REASON = (
-    "The AI Engineering audience has no company-aware run on the current "
+    "The AI Engineering audience has no PDF or delivery path on the current "
     "Insight path yet."
 )
 
 
-def _unavailable_insights(*, audience: str, status: str) -> dict[str, Any]:
-    """Explicit empty payload for an audience with no current-path run."""
-    return {
-        "schema_version": investment_agent_store.READ_SCHEMA_VERSION,
-        "content_kind": "investment_agent",
-        "audience": audience,
-        "status": status,
-        "available": False,
-        "reason": _AI_ENGINEERING_REASON,
-        "date": None,
-        "requested_date": None,
-        "run": None,
-        "items": [],
-    }
+def _engineering_insights(*, day: str | None, status: str) -> dict[str, Any]:
+    """One complete published AI Engineering cohort with owned provenance."""
+    payload = engineering_agent_store.insights_payload(day=day, status=status)
+    if payload.get("available"):
+        for item in payload["items"]:
+            item["provenance"] = _investment_agent_provenance(
+                day=str(item["day"]),
+                development_id=str(item["development_id"]),
+            )
+    return payload
 
 
 def _investment_insights(*, day: str | None, status: str) -> dict[str, Any]:
@@ -675,9 +672,9 @@ def insights(
     status: Literal["kept", "suppressed", "all"] = "kept",
 ) -> JSONResponse:
     """Company-aware Investment Insights ordered by application-owned Feed rank."""
-    if audience != "investment":
-        return JSONResponse(_unavailable_insights(audience=audience, status=status))
     day = insight_date.isoformat() if insight_date else None
+    if audience != "investment":
+        return JSONResponse(_engineering_insights(day=day, status=status))
     payload = _investment_insights(day=day, status=status)
     return JSONResponse(payload)
 

@@ -4,9 +4,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import date as calendar_date
+from functools import lru_cache
 import hashlib
 import html
-from itertools import zip_longest
 import json
 import os
 from pathlib import Path
@@ -14,11 +14,11 @@ import re
 import tempfile
 from threading import Lock, get_ident
 from typing import Any
-from urllib.parse import urlencode
+from urllib.parse import urlencode, urlsplit
 from xml.sax.saxutils import escape
 
 from reportlab.lib.colors import HexColor
-from reportlab.lib.enums import TA_LEFT
+from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import mm
@@ -28,6 +28,7 @@ from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
 from reportlab.platypus import (
     HRFlowable,
+    KeepTogether,
     PageBreak,
     Paragraph,
     SimpleDocTemplate,
@@ -37,8 +38,7 @@ from reportlab.platypus import (
 )
 
 
-
-REPORT_SCHEMA_VERSION = "investment-agent-pdf-v11"
+REPORT_SCHEMA_VERSION = "investment-agent-pdf-v12"
 REPO_ROOT = Path(__file__).resolve().parents[3]
 COMPANY_MEMO_PATH = REPO_ROOT / "docs" / "references" / "company-memos.json"
 DEFAULT_CACHE_ROOT = REPO_ROOT / "data" / "derived" / "insights" / "pdf-cache"
@@ -51,13 +51,18 @@ INK = HexColor("#151515")
 INK_SOFT = HexColor("#434343")
 MUTED = HexColor("#6B6B68")
 BLUE = HexColor("#5BC5F2")
+BLUE_MID = HexColor("#4391B4")
 BLUE_INK = HexColor("#235165")
 POSITIVE = HexColor("#2E7D4F")
 NEGATIVE = HexColor("#A13333")
 
 PAGE_WIDTH, PAGE_HEIGHT = A4
-PAGE_MARGIN = 17 * mm
+PAGE_MARGIN = 20 * mm
 CONTENT_WIDTH = PAGE_WIDTH - 2 * PAGE_MARGIN
+RAIL_WIDTH = 25 * mm
+RAIL_GUTTER = 7 * mm
+BODY_WIDTH = CONTENT_WIDTH - RAIL_WIDTH - RAIL_GUTTER
+CARD_INNER_WIDTH = BODY_WIDTH - 1.8 * mm - 10 * mm
 
 _cache_locks_guard = Lock()
 _cache_locks: dict[str, Lock] = {}
@@ -265,101 +270,93 @@ def get_or_create_report(
 
 def _styles() -> dict[str, ParagraphStyle]:
     sample = getSampleStyleSheet()
+    normal = sample["Normal"]
     return {
         "brand": ParagraphStyle(
             "Brand",
-            parent=sample["Normal"],
+            parent=normal,
             fontName="Helvetica-Bold",
-            fontSize=8,
+            fontSize=7.6,
             leading=10,
             textColor=INK,
-            spaceAfter=0,
         ),
         "cover_title": ParagraphStyle(
             "CoverTitle",
             parent=sample["Title"],
             fontName="Times-Bold",
-            fontSize=31,
-            leading=31.5,
+            fontSize=33,
+            leading=34,
             textColor=INK,
             alignment=TA_LEFT,
             spaceAfter=0,
         ),
         "cover_meta": ParagraphStyle(
             "CoverMeta",
-            parent=sample["Normal"],
+            parent=normal,
             fontName="Courier",
-            fontSize=8,
+            fontSize=8.2,
             leading=12,
             textColor=INK_SOFT,
         ),
         "cover_lede": ParagraphStyle(
             "CoverLede",
-            parent=sample["Normal"],
+            parent=normal,
             fontName="Helvetica",
             fontSize=11,
-            leading=16,
+            leading=16.5,
             textColor=INK_SOFT,
-        ),
-        "cover_section": ParagraphStyle(
-            "CoverSection",
-            parent=sample["Heading2"],
-            fontName="Times-Bold",
-            fontSize=17,
-            leading=19,
-            textColor=INK,
-            spaceAfter=0,
-        ),
-        "title": ParagraphStyle(
-            "InsightTitle",
-            parent=sample["Heading1"],
-            fontName="Times-Bold",
-            fontSize=22,
-            leading=23.5,
-            textColor=INK,
-            spaceAfter=0,
-        ),
-        "rank": ParagraphStyle(
-            "Rank",
-            parent=sample["Normal"],
-            fontName="Courier-Bold",
-            fontSize=23,
-            leading=25,
-            textColor=INK,
         ),
         "section": ParagraphStyle(
             "Section",
             parent=sample["Heading2"],
             fontName="Times-Bold",
-            fontSize=13.5,
-            leading=16,
+            fontSize=15,
+            leading=17,
             textColor=INK,
             spaceBefore=0,
             spaceAfter=0,
         ),
-        "label": ParagraphStyle(
-            "Label",
-            parent=sample["Normal"],
-            fontName="Courier",
-            fontSize=7.5,
-            leading=9.5,
+        "insight_title": ParagraphStyle(
+            "InsightTitle",
+            parent=sample["Heading1"],
+            fontName="Times-Bold",
+            fontSize=20,
+            leading=23,
+            textColor=INK,
+            spaceBefore=0,
+            spaceAfter=0,
+        ),
+        "rail": ParagraphStyle(
+            "Rail",
+            parent=normal,
+            fontName="Courier-Bold",
+            fontSize=6.6,
+            leading=9.6,
             textColor=MUTED,
+        ),
+        "rail_rank": ParagraphStyle(
+            "RailRank",
+            parent=normal,
+            fontName="Courier-Bold",
+            fontSize=17,
+            leading=18,
+            textColor=BLUE_MID,
         ),
         "body": ParagraphStyle(
             "Body",
             parent=sample["BodyText"],
             fontName="Helvetica",
-            fontSize=9.25,
-            leading=13.5,
+            fontSize=9.6,
+            leading=15,
             textColor=INK_SOFT,
             spaceAfter=0,
         ),
-        "body_strong": ParagraphStyle(
-            "BodyStrong",
+        "body_ink": ParagraphStyle(
+            "BodyInk",
             parent=sample["BodyText"],
-            fontName="Helvetica-Bold",
-            fontSize=9.25,
-            leading=13.5,
+            fontName="Helvetica",
+            fontSize=9.6,
+            leading=15,
             textColor=INK,
             spaceAfter=0,
         ),
@@ -367,62 +364,208 @@ def _styles() -> dict[str, ParagraphStyle]:
             "Small",
             parent=sample["BodyText"],
             fontName="Helvetica",
-            fontSize=8.5,
-            leading=12,
+            fontSize=8.6,
+            leading=13,
             textColor=INK_SOFT,
             spaceAfter=0,
         ),
-        "small_link": ParagraphStyle(
-            "SmallLink",
+        "quiet": ParagraphStyle(
+            "Quiet",
+            parent=sample["BodyText"],
+            fontName="Helvetica-Oblique",
+            fontSize=8.9,
+            leading=13.4,
+            textColor=MUTED,
+            spaceAfter=0,
+        ),
+        "meta": ParagraphStyle(
+            "Meta",
+            parent=normal,
+            fontName="Courier",
+            fontSize=7,
+            leading=11,
+            textColor=MUTED,
+        ),
+        "meta_right": ParagraphStyle(
+            "MetaRight",
+            parent=normal,
+            fontName="Courier",
+            fontSize=7,
+            leading=11,
+            textColor=MUTED,
+            alignment=TA_RIGHT,
+        ),
+        "link": ParagraphStyle(
+            "Link",
             parent=sample["BodyText"],
             fontName="Helvetica-Bold",
-            fontSize=8.5,
-            leading=11.5,
+            fontSize=8.8,
+            leading=13,
             textColor=BLUE_INK,
             spaceAfter=0,
         ),
-        "impact": ParagraphStyle(
-            "Impact",
-            parent=sample["Normal"],
+        "company": ParagraphStyle(
+            "Company",
+            parent=normal,
             fontName="Helvetica-Bold",
-            fontSize=8.25,
-            leading=11,
+            fontSize=10,
+            leading=13,
+            textColor=INK,
+        ),
+        "badge": ParagraphStyle(
+            "Badge",
+            parent=normal,
+            fontName="Courier-Bold",
+            fontSize=6.4,
+            leading=8,
+            textColor=PAPER,
+            alignment=TA_CENTER,
+        ),
+        "stat_value": ParagraphStyle(
+            "StatValue",
+            parent=normal,
+            fontName="Courier-Bold",
+            fontSize=18,
+            leading=20,
+            textColor=INK,
+        ),
+        "stat_label": ParagraphStyle(
+            "StatLabel",
+            parent=normal,
+            fontName="Courier",
+            fontSize=6.2,
+            leading=8.6,
             textColor=MUTED,
         ),
         "toc_rank": ParagraphStyle(
             "TocRank",
-            parent=sample["Normal"],
+            parent=normal,
             fontName="Courier-Bold",
-            fontSize=10,
+            fontSize=9,
             leading=14,
-            textColor=INK,
+            textColor=MUTED,
         ),
         "toc_title": ParagraphStyle(
             "TocTitle",
-            parent=sample["Normal"],
+            parent=normal,
             fontName="Helvetica-Bold",
-            fontSize=10.5,
+            fontSize=10,
             leading=14,
             textColor=BLUE_INK,
+        ),
+        "toc_tickers": ParagraphStyle(
+            "TocTickers",
+            parent=normal,
+            fontName="Courier",
+            fontSize=7,
+            leading=14,
+            textColor=MUTED,
+            alignment=TA_RIGHT,
         ),
     }
 
 
-def _later_page_chrome(pdf: canvas.Canvas, _: SimpleDocTemplate, *, audience: str, day: str) -> None:
+def _rail(
+    label: str,
+    content: Any,
+    styles: dict[str, ParagraphStyle],
+    *,
+    label_style: str = "rail",
+    label_offset: float = 2.4,
+) -> Table:
+    """Place a mono label in the left rail beside a measured body column."""
+    body = content if isinstance(content, list) else [content]
+    cells: list[Any] = [
+        Paragraph(label, styles[label_style]) if label else "",
+        body,
+    ]
+    return Table(
+        [cells],
+        colWidths=[RAIL_WIDTH + RAIL_GUTTER, BODY_WIDTH],
+        splitByRow=1,
+        splitInRow=1,
+        style=TableStyle(
+            [
+                ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                ("LEFTPADDING", (0, 0), (-1, -1), 0),
+                ("RIGHTPADDING", (0, 0), (0, 0), RAIL_GUTTER),
+                ("RIGHTPADDING", (1, 0), (1, 0), 0),
+                ("TOPPADDING", (0, 0), (-1, -1), 0),
+                ("TOPPADDING", (0, 0), (0, 0), label_offset),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+            ]
+        ),
+    )
+
+
+def _section_heading(
+    title: str,
+    note: str,
+    styles: dict[str, ParagraphStyle],
+    *,
+    space_before: float = 7 * mm,
+) -> list[Any]:
+    heading = Table(
+        [
+            [
+                Paragraph(
+                    f'<font name="Helvetica-Bold" color="#5BC5F2">/</font> {_markup(title)}',
+                    styles["section"],
+                ),
+                Paragraph(_markup(note), styles["meta_right"]),
+            ]
+        ],
+        colWidths=[CONTENT_WIDTH * 0.45, CONTENT_WIDTH * 0.55],
+        style=TableStyle(
+            [
+                ("VALIGN", (0, 0), (-1, -1), "BOTTOM"),
+                ("LINEABOVE", (0, 0), (-1, 0), 0.7, INK),
+                ("TOPPADDING", (0, 0), (-1, -1), 3.4 * mm),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+                ("LEFTPADDING", (0, 0), (-1, -1), 0),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+            ]
+        ),
+    )
+    # spaceBefore collapses at the top of a frame; a leading Spacer would not.
+    heading.spaceBefore = space_before
+    return [heading, Spacer(1, 4.2 * mm)]
+
+
+def _page_chrome(pdf: canvas.Canvas, *, audience: str, day: str) -> None:
+    pdf.saveState()
+    pdf.resetTransforms()
+    pdf.setStrokeColor(BORDER)
+    pdf.setLineWidth(0.45)
+    pdf.line(PAGE_MARGIN, 13 * mm, PAGE_WIDTH - PAGE_MARGIN, 13 * mm)
+    pdf.setFillColor(MUTED)
+    pdf.setFont("Courier", 6.6)
+    pdf.drawString(
+        PAGE_MARGIN,
+        8.9 * mm,
+        f"FRONTIER LAB INTELLIGENCE  /  {_audience_label(audience)}  /  {_display_day(day)}",
+    )
+    pdf.drawRightString(PAGE_WIDTH - PAGE_MARGIN, 8.9 * mm, f"PAGE {pdf.getPageNumber()}")
+    pdf.restoreState()
+
+
+def _later_page_chrome(
+    pdf: canvas.Canvas, _: SimpleDocTemplate, *, audience: str, day: str
+) -> None:
     pdf.saveState()
     pdf.resetTransforms()
     pdf.setFillColor(BLUE)
-    pdf.rect(PAGE_MARGIN, PAGE_HEIGHT - 15.2 * mm, 3.2 * mm, 3.2 * mm, stroke=0, fill=1)
+    pdf.rect(PAGE_MARGIN, PAGE_HEIGHT - 15.4 * mm, 3 * mm, 3 * mm, stroke=0, fill=1)
     pdf.setFillColor(INK)
-    pdf.setFont("Helvetica-Bold", 7.2)
-    pdf.drawString(PAGE_MARGIN + 5.3 * mm, PAGE_HEIGHT - 13.3 * mm, "FRONTIER LAB INTELLIGENCE")
+    pdf.setFont("Helvetica-Bold", 7)
+    pdf.drawString(PAGE_MARGIN + 5 * mm, PAGE_HEIGHT - 13.6 * mm, "FRONTIER LAB INTELLIGENCE")
     navigation = "BRIEF INDEX"
-    pdf.setFillColor(BLUE_INK)
-    pdf.setFont("Courier-Bold", 6.8)
+    pdf.setFillColor(MUTED)
+    pdf.setFont("Courier", 6.6)
     navigation_x = PAGE_WIDTH - PAGE_MARGIN
-    navigation_y = PAGE_HEIGHT - 13.3 * mm
+    navigation_y = PAGE_HEIGHT - 13.6 * mm
     pdf.drawRightString(navigation_x, navigation_y, navigation)
-    navigation_width = pdf.stringWidth(navigation, "Courier-Bold", 6.8)
+    navigation_width = pdf.stringWidth(navigation, "Courier", 6.6)
     pdf.linkRect(
         "Back to the brief index",
         "brief-index",
@@ -435,32 +578,11 @@ def _later_page_chrome(pdf: canvas.Canvas, _: SimpleDocTemplate, *, audience: st
         relative=0,
         thickness=0,
     )
-    pdf.setStrokeColor(INK)
-    pdf.setLineWidth(0.55)
-    pdf.line(PAGE_MARGIN, PAGE_HEIGHT - 18 * mm, PAGE_WIDTH - PAGE_MARGIN, PAGE_HEIGHT - 18 * mm)
-    pdf.restoreState()
-    _footer_chrome(pdf, audience=audience, day=day)
-
-
-def _footer_chrome(pdf: canvas.Canvas, *, audience: str, day: str) -> None:
-    pdf.saveState()
-    pdf.resetTransforms()
     pdf.setStrokeColor(BORDER)
-    pdf.setLineWidth(0.45)
-    pdf.line(PAGE_MARGIN, 12.5 * mm, PAGE_WIDTH - PAGE_MARGIN, 12.5 * mm)
-    pdf.setFillColor(MUTED)
-    pdf.setFont("Courier", 6.6)
-    pdf.drawString(
-        PAGE_MARGIN,
-        8.4 * mm,
-        f"FRONTIER LAB INTELLIGENCE  /  {_audience_label(audience)}  /  {_display_day(day)}",
-    )
-    pdf.drawRightString(
-        PAGE_WIDTH - PAGE_MARGIN,
-        8.4 * mm,
-        f"PAGE {pdf.getPageNumber()}",
-    )
+    pdf.setLineWidth(0.5)
+    pdf.line(PAGE_MARGIN, PAGE_HEIGHT - 18.4 * mm, PAGE_WIDTH - PAGE_MARGIN, PAGE_HEIGHT - 18.4 * mm)
     pdf.restoreState()
+    _page_chrome(pdf, audience=audience, day=day)
 
 
 def _first_page_chrome(
@@ -475,49 +597,148 @@ def _first_page_chrome(
     pdf.setCreator(f"Frontier Lab Intelligence / {REPORT_SCHEMA_VERSION}")
     pdf.setSubject("Audience-specific, cited frontier AI daily intelligence")
     pdf.setKeywords("frontier AI, investment intelligence, engineering intelligence, cited report")
-    _footer_chrome(pdf, audience=audience, day=day)
+    _page_chrome(pdf, audience=audience, day=day)
+
+
+def _item_tickers(item: dict[str, Any]) -> list[str]:
+    seen: list[str] = []
+    for connection in item.get("connections") or []:
+        for company in connection.get("companies") or []:
+            ticker = str(company.get("ticker") or "")
+            if ticker and ticker not in seen:
+                seen.append(ticker)
+    return seen
+
+
+def _brief_totals(payload: dict[str, Any], items: list[dict[str, Any]]) -> list[tuple[str, str]]:
+    run = payload.get("run") or {}
+    read_throughs = sum(len(_item_tickers(item)) for item in items)
+    screened = max(
+        [int((item.get("telemetry") or {}).get("company_universe_count") or 0) for item in items]
+        or [0]
+    )
+    memos = sum(len(item.get("memo_calls") or []) for item in items)
+    ranked = int(run.get("development_count") or 0) or len(items)
+    return [
+        (str(len(items)), f"SURFACED OF {ranked}\nRANKED DEVELOPMENTS"),
+        (str(read_throughs), "COMPANY\nREAD-THROUGHS"),
+        (str(screened), "COMPANIES\nSCREENED"),
+        (str(memos), "RESEARCH MEMOS\nOPENED"),
+    ]
+
+
+def _stat_band(
+    totals: list[tuple[str, str]], styles: dict[str, ParagraphStyle]
+) -> Table:
+    column = CONTENT_WIDTH / max(len(totals), 1)
+    cells = [
+        [
+            Paragraph(_markup(value), styles["stat_value"]),
+            Spacer(1, 1.6 * mm),
+            Paragraph(_markup(label).replace("\n", "<br/>"), styles["stat_label"]),
+        ]
+        for value, label in totals
+    ]
+    return Table(
+        [cells],
+        colWidths=[column] * len(totals),
+        style=TableStyle(
+            [
+                ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                ("LINEAFTER", (0, 0), (-2, -1), 0.4, BORDER),
+                ("TOPPADDING", (0, 0), (-1, -1), 4 * mm),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 1 * mm),
+                ("LEFTPADDING", (0, 0), (0, 0), 0),
+                ("LEFTPADDING", (1, 0), (-1, -1), 6 * mm),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 6 * mm),
+                ("RIGHTPADDING", (-1, 0), (-1, -1), 0),
+            ]
+        ),
+    )
+
+
+def _method_signature(payload: dict[str, Any], items: list[dict[str, Any]]) -> str:
+    run = payload.get("run") or {}
+    telemetry = (items[0].get("telemetry") if items else {}) or {}
+    fields = (
+        ("MODEL", run.get("model") or telemetry.get("model")),
+        ("EFFORT", run.get("reasoning_effort") or telemetry.get("reasoning_effort")),
+        ("PROMPT", run.get("prompt_version") or telemetry.get("prompt_version")),
+    )
+    return "   ".join(f"{label} {str(value).upper()}" for label, value in fields if value)
 
 
 def _cover(payload: dict[str, Any], styles: dict[str, ParagraphStyle]) -> list[Any]:
     audience = str(payload["audience"])
     day = str(payload["date"])
     items = list(payload.get("items") or [])
+    lede = (
+        "The ranked developments most likely to change today's investment work."
+        if audience == "investment"
+        else "The ranked developments most likely to change today's engineering work."
+    )
     story: list[Any] = [
-        Spacer(1, 9 * mm),
+        HRFlowable(width=14 * mm, thickness=2.6, color=BLUE, hAlign="LEFT", spaceAfter=3.4 * mm),
         Paragraph('<a name="brief-index"/>FRONTIER LAB INTELLIGENCE', styles["brand"]),
-        Spacer(1, 10 * mm),
+        Spacer(1, 11 * mm),
         Paragraph("DAILY<br/>INTELLIGENCE BRIEF", styles["cover_title"]),
-        Spacer(1, 6 * mm),
+        Spacer(1, 5 * mm),
         Paragraph(
-            f'{_markup(_audience_label(audience))}  <font color="#5BC5F2">/</font>  {_markup(_display_day(day))}',
+            f'{_markup(_audience_label(audience))}'
+            f'  <font color="#5BC5F2">/</font>  {_markup(_display_day(day))}',
             styles["cover_meta"],
         ),
+        Spacer(1, 7 * mm),
+        Table(
+            [[Paragraph(_markup(lede), styles["cover_lede"])]],
+            colWidths=[118 * mm],
+            hAlign="LEFT",
+            style=TableStyle(
+                [
+                    ("LEFTPADDING", (0, 0), (-1, -1), 0),
+                    ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+                    ("TOPPADDING", (0, 0), (-1, -1), 0),
+                    ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+                ]
+            ),
+        ),
         Spacer(1, 8 * mm),
+        HRFlowable(width="100%", thickness=0.9, color=INK, spaceAfter=0),
+        _stat_band(_brief_totals(payload, items), styles),
+        Spacer(1, 8 * mm),
+    ]
+    method_lines: list[Any] = [
         Paragraph(
             _markup(
-                "The ranked developments most likely to change today's investment work."
-                if audience == "investment"
-                else "The ranked developments most likely to change today's engineering work."
+                "Every ranked development is screened against the BIT company universe. "
+                "A read-through is published only when it maps to a pre-registered "
+                "standing bet; the research memo behind that bet is opened and cited."
             ),
-            styles["cover_lede"],
-        ),
-        Spacer(1, 8 * mm),
-        HRFlowable(width="100%", thickness=0.8, color=BLUE, spaceBefore=0, spaceAfter=5 * mm),
-        Paragraph(
-            '<font name="Helvetica-Bold" color="#5BC5F2">/</font> Today\'s brief',
-            styles["cover_section"],
-        ),
-        Spacer(1, 2.5 * mm),
-        Paragraph(
-            "Click any title to jump to its analysis. Each brief is followed by its linked sources.",
-            styles["body"],
-        ),
-        Spacer(1, 4 * mm),
+            styles["small"],
+        )
     ]
+    signature = _method_signature(payload, items)
+    if signature:
+        method_lines.extend([Spacer(1, 2 * mm), Paragraph(_markup(signature), styles["meta"])])
+    story.append(_rail("METHOD", method_lines, styles))
+    story.extend(
+        _section_heading(
+            "Today's brief",
+            "CLICK A TITLE TO OPEN ITS ANALYSIS",
+            styles,
+        )
+    )
     if not items:
         story.append(
             Table(
-                [[Paragraph("No Insight cleared the audience bar for this complete run.", styles["body"]) ]],
+                [
+                    [
+                        Paragraph(
+                            "No Insight cleared the audience bar for this complete run.",
+                            styles["body"],
+                        )
+                    ]
+                ],
                 colWidths=[CONTENT_WIDTH],
                 style=TableStyle(
                     [
@@ -537,24 +758,25 @@ def _cover(payload: dict[str, Any], styles: dict[str, ParagraphStyle]) -> list[A
                 f'{_markup(item["headline"])}</link>',
                 styles["toc_title"],
             ),
+            Paragraph(_markup(" ".join(_item_tickers(item))), styles["toc_tickers"]),
         ]
         for item in items
     ]
     story.append(
         Table(
             toc_rows,
-            colWidths=[15 * mm, CONTENT_WIDTH - 15 * mm],
+            colWidths=[12 * mm, CONTENT_WIDTH - 52 * mm, 40 * mm],
             splitByRow=1,
             style=TableStyle(
                 [
                     ("VALIGN", (0, 0), (-1, -1), "TOP"),
-                    ("LINEABOVE", (0, 0), (-1, 0), 0.5, INK),
-                    ("LINEBELOW", (0, 0), (-1, -1), 0.35, BORDER),
-                    ("TOPPADDING", (0, 0), (-1, -1), 6),
-                    ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+                    ("LINEBELOW", (0, 0), (-1, -1), 0.4, BORDER),
+                    ("TOPPADDING", (0, 0), (-1, -1), 2 * mm),
+                    ("BOTTOMPADDING", (0, 0), (-1, -1), 2 * mm),
                     ("LEFTPADDING", (0, 0), (-1, -1), 0),
-                    ("RIGHTPADDING", (0, 0), (0, -1), 8),
-                    ("RIGHTPADDING", (1, 0), (1, -1), 0),
+                    ("RIGHTPADDING", (0, 0), (0, -1), 6),
+                    ("RIGHTPADDING", (1, 0), (1, -1), 6),
+                    ("RIGHTPADDING", (2, 0), (2, -1), 0),
                 ]
             ),
         )
@@ -562,17 +784,7 @@ def _cover(payload: dict[str, Any], styles: dict[str, ParagraphStyle]) -> list[A
     return story
 
 
-def _section_title(title: str, styles: dict[str, ParagraphStyle]) -> list[Any]:
-    return [
-        Spacer(1, 6 * mm),
-        Paragraph(
-            f'<font name="Helvetica-Bold" color="#5BC5F2">/</font> {_markup(title)}',
-            styles["section"],
-        ),
-        Spacer(1, 2.8 * mm),
-    ]
-
-
+@lru_cache(maxsize=1)
 def _bet_index() -> dict[str, dict[str, Any]]:
     payload = json.loads(COMPANY_MEMO_PATH.read_text(encoding="utf-8"))
     return {
@@ -582,145 +794,208 @@ def _bet_index() -> dict[str, dict[str, Any]]:
     }
 
 
+def _bet_url(ticker: str, bet_id: str) -> str:
+    if not ticker:
+        return ""
+    query = {"company": ticker}
+    if bet_id:
+        query["bet"] = bet_id
+    return f"{PUBLIC_APP_URL}/bit-lens/companies?{urlencode(query)}"
+
+
+def _company_card(
+    company: dict[str, Any],
+    styles: dict[str, ParagraphStyle],
+    company_names: dict[str, Any],
+    bets: dict[str, dict[str, Any]],
+) -> Table:
+    """One company read-through: direction rule, standing bet, model impact."""
+    ticker = str(company.get("ticker") or "")
+    name = str(company_names.get(ticker) or ticker)
+    bet_id = str(company.get("bet_id") or "")
+    bet = bets.get(bet_id, {})
+    direction = str(bet.get("direction") or "")
+    label, accent = {
+        "upside": ("UPSIDE", POSITIVE),
+        "downside": ("DOWNSIDE", NEGATIVE),
+    }.get(direction, ("DIRECTION UNAVAILABLE", MUTED))
+    threshold_met = bool(company.get("threshold_met"))
+
+    badge_width = pdfmetrics.stringWidth(label, "Courier-Bold", 6.4) + 7 * mm
+    header = Table(
+        [
+            [
+                Paragraph(
+                    f'{_markup(name)}'
+                    f'  <font name="Courier" size="8" color="#6B6B68">{_markup(ticker)}</font>',
+                    styles["company"],
+                ),
+                Paragraph(label, styles["badge"]),
+            ]
+        ],
+        colWidths=[CARD_INNER_WIDTH - badge_width, badge_width],
+        style=TableStyle(
+            [
+                ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                ("BACKGROUND", (1, 0), (1, 0), accent),
+                ("LEFTPADDING", (0, 0), (-1, -1), 0),
+                ("RIGHTPADDING", (0, 0), (0, 0), 6),
+                ("RIGHTPADDING", (1, 0), (1, 0), 0),
+                ("TOPPADDING", (0, 0), (-1, -1), 0),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+                ("TOPPADDING", (1, 0), (1, 0), 2.8),
+                ("BOTTOMPADDING", (1, 0), (1, 0), 3.2),
+            ]
+        ),
+    )
+
+    status = (
+        '<font name="Courier-Bold" color="#151515">REVIEW THESIS</font>'
+        if threshold_met
+        else "EARLY SIGNAL"
+    )
+    bet_link = _bet_url(ticker, bet_id)
+    bet_reference = (
+        f'<link href="{html.escape(bet_link, quote=True)}" color="#235165">{_markup(bet_id)}</link>'
+        if bet_link and bet_id
+        else _markup(bet_id)
+    )
+    meta_row = Table(
+        [
+            [
+                Paragraph(f"STANDING BET  {bet_reference}", styles["meta"]),
+                Paragraph(status, styles["meta_right"]),
+            ]
+        ],
+        colWidths=[CARD_INNER_WIDTH * 0.55, CARD_INNER_WIDTH * 0.45],
+        style=TableStyle(
+            [
+                ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                ("LEFTPADDING", (0, 0), (-1, -1), 0),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+                ("TOPPADDING", (0, 0), (-1, -1), 0),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+            ]
+        ),
+    )
+    inner: list[Any] = [
+        header,
+        Spacer(1, 2.4 * mm),
+        HRFlowable(width="100%", thickness=0.4, color=BORDER, spaceAfter=2.4 * mm),
+        meta_row,
+        Spacer(1, 2.2 * mm),
+        Paragraph(_markup(bet.get("if")), styles["quiet"]),
+    ]
+    impact = company.get("impact")
+    if impact:
+        inner.extend([Spacer(1, 2.6 * mm), Paragraph(_markup(impact), styles["small"])])
+
+    return Table(
+        [[" ", inner]],
+        colWidths=[1.8 * mm, BODY_WIDTH - 1.8 * mm],
+        hAlign="RIGHT",
+        splitByRow=1,
+        splitInRow=1,
+        style=TableStyle(
+            [
+                ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                ("BACKGROUND", (0, 0), (0, -1), accent),
+                ("BACKGROUND", (1, 0), (1, -1), SURFACE),
+                ("LEFTPADDING", (0, 0), (0, -1), 0),
+                ("RIGHTPADDING", (0, 0), (0, -1), 0),
+                ("TOPPADDING", (0, 0), (0, -1), 0),
+                ("BOTTOMPADDING", (0, 0), (0, -1), 0),
+                ("LEFTPADDING", (1, 0), (1, -1), 5 * mm),
+                ("RIGHTPADDING", (1, 0), (1, -1), 5 * mm),
+                ("TOPPADDING", (1, 0), (1, -1), 4 * mm),
+                ("BOTTOMPADDING", (1, 0), (1, -1), 4.4 * mm),
+            ]
+        ),
+    )
+
+
 def _mechanism_block(
     connection: dict[str, Any],
+    position: int,
+    total: int,
     styles: dict[str, ParagraphStyle],
     company_names: dict[str, Any],
     bets: dict[str, dict[str, Any]],
 ) -> list[Any]:
     """Render one causal path and every company hanging off it."""
-    direction_copy = {
-        "upside": ("Upside", POSITIVE),
-        "downside": ("Downside", NEGATIVE),
-    }
-    story: list[Any] = [
-        Paragraph(_markup(connection.get("mechanism")), styles["body"]),
-        Spacer(1, 3.2 * mm),
-    ]
-    rows: list[list[Any]] = []
+    label = "MECHANISM" if total == 1 else f"MECHANISM<br/>{position} OF {total}"
     companies = sorted(
         connection.get("companies") or [],
         key=lambda item: not bool(item.get("threshold_met")),
     )
-    for index, company in enumerate(companies, start=1):
-        ticker = str(company.get("ticker") or "")
-        name = str(company_names.get(ticker) or ticker)
-        bet = bets.get(str(company.get("bet_id") or ""), {})
-        label, color = direction_copy.get(
-            str(bet.get("direction") or "upside"), ("Direction unavailable", MUTED)
-        )
-        direction_style = ParagraphStyle(
-            f"Direction-{ticker}-{index}",
-            parent=styles["impact"],
-            textColor=color,
-        )
-        body: list[Any] = [
-            Paragraph(f"{_markup(name)}  <font color='#6B6B68'>{_markup(ticker)}</font>", styles["body_strong"]),
-            Spacer(1, 1.2 * mm),
-            Paragraph(
-                _markup(
-                    f"{label} · "
-                    f"{'Review thesis' if company.get('threshold_met') else 'Early signal'}"
-                    f" · {company.get('bet_id') or ''}"
-                ),
-                direction_style,
-            ),
-            Spacer(1, 0.8 * mm),
-            Paragraph(_markup(bet.get("if")), styles["body"]),
-        ]
-        impact = company.get("impact")
-        if impact:
-            body.extend([Spacer(1, 1.4 * mm), Paragraph(_markup(impact), styles["small"])])
-        rows.append([Paragraph(str(index), styles["toc_rank"]), body])
-    if rows:
-        story.append(
-            Table(
-                rows,
-                colWidths=[10 * mm, CONTENT_WIDTH - 10 * mm],
-                splitByRow=1,
-                style=TableStyle(
-                    [
-                        ("VALIGN", (0, 0), (-1, -1), "TOP"),
-                        ("LINEBELOW", (0, 0), (-1, -2), 0.35, BORDER),
-                        ("TOPPADDING", (0, 0), (-1, -1), 7),
-                        ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
-                        ("LEFTPADDING", (0, 0), (-1, -1), 0),
-                        ("RIGHTPADDING", (0, 0), (0, -1), 6),
-                        ("RIGHTPADDING", (1, 0), (1, -1), 0),
-                    ]
-                ),
-            )
-        )
+    cards = [_company_card(company, styles, company_names, bets) for company in companies]
+    opening: list[Any] = [
+        _rail(label, Paragraph(_markup(connection.get("mechanism")), styles["body_ink"]), styles)
+    ]
+    if cards:
+        opening.extend([Spacer(1, 4 * mm), cards[0]])
+    story: list[Any] = [KeepTogether(opening)]
+    for card in cards[1:]:
+        story.extend([Spacer(1, 3 * mm), KeepTogether([card])])
     return story
 
 
-def _agent_sources_section(
-    item: dict[str, Any], styles: dict[str, ParagraphStyle]
-) -> list[Any]:
+def _sources_block(item: dict[str, Any], styles: dict[str, ParagraphStyle]) -> list[Any]:
     """Application-owned provenance: the Feed post, artifacts, and the memo funnel."""
     provenance = item.get("provenance") or {}
     telemetry = item.get("telemetry") or {}
     company_names = item.get("company_names") or {}
-    story: list[Any] = [
-        Spacer(1, 9 * mm),
-        Paragraph(
-            '<font name="Helvetica-Bold" color="#5BC5F2">/</font> Sources and audit trail',
-            styles["section"],
-        ),
-        Spacer(1, 3 * mm),
-    ]
+
+    sources: list[Any] = []
     original = provenance.get("original_post") or {}
     if original.get("url"):
-        story.extend(
-            [
-                Paragraph("ORIGINAL POST", styles["label"]),
-                Spacer(1, 1.4 * mm),
-                Paragraph(
-                    _link(original.get("url"), original.get("author") or original.get("url")),
-                    styles["small_link"],
-                ),
-                Spacer(1, 4 * mm),
-            ]
-        )
-    artifacts = list(provenance.get("artifacts") or [])
-    if artifacts:
-        story.extend([Paragraph("LINKED ARTIFACTS", styles["label"]), Spacer(1, 1.4 * mm)])
-        for artifact in artifacts:
-            story.extend(
-                [
-                    Paragraph(
-                        _link(artifact.get("url"), artifact.get("title")), styles["small_link"]
-                    ),
-                    Spacer(1, 2 * mm),
-                ]
+        sources.append(
+            Paragraph(
+                f'{_link(original.get("url"), original.get("author") or original.get("url"))}'
+                f'{_host_suffix(original.get("url"))}',
+                styles["link"],
             )
-        story.append(Spacer(1, 2 * mm))
+        )
+    for artifact in provenance.get("artifacts") or []:
+        if sources:
+            sources.append(Spacer(1, 2.2 * mm))
+        sources.append(
+            Paragraph(
+                f'{_link(artifact.get("url"), artifact.get("title"))}'
+                f'{_host_suffix(artifact.get("url"))}',
+                styles["link"],
+            )
+        )
 
     memo_calls = list(item.get("memo_calls") or [])
+    retained = len(
+        {
+            str(company.get("ticker"))
+            for connection in item.get("connections") or []
+            for company in connection.get("companies") or []
+        }
+    )
+    opened = int(telemetry.get("memo_count", 0) or len(memo_calls))
+    rejected = max(0, opened - retained)
+    funnel = (
+        f'{telemetry.get("company_universe_count", 0)} SCREENED'
+        f" / {opened} MEMOS OPENED"
+        f" / {retained} RETAINED"
+    )
+    if rejected:
+        funnel = f"{funnel} / {rejected} REJECTED"
+
+    heading = _section_heading(
+        "Sources and audit trail",
+        funnel if memo_calls else "",
+        styles,
+        space_before=9 * mm,
+    )
+    block: list[Any] = list(heading)
+    if sources:
+        block.append(_rail("PRIMARY<br/>SOURCES", sources, styles))
+
     if memo_calls:
-        retained = len(
-            {
-                str(company.get("ticker"))
-                for connection in item.get("connections") or []
-                for company in connection.get("companies") or []
-            }
-        )
-        rejected = max(0, int(telemetry.get("memo_count", 0)) - retained)
-        funnel = (
-            f'{telemetry.get("company_universe_count", 0)} screened'
-            f' / {telemetry.get("memo_count", 0)} memos opened'
-            f' / {retained} retained'
-        )
-        if rejected:
-            funnel = f"{funnel} / {rejected} rejected"
-        story.extend(
-            [
-                Paragraph("HOW THE AGENT GOT HERE", styles["label"]),
-                Spacer(1, 1.4 * mm),
-                Paragraph(_markup(funnel), styles["small"]),
-                Spacer(1, 3 * mm),
-            ]
-        )
         rows = []
         for call in memo_calls:
             arguments = call.get("arguments") or {}
@@ -729,113 +1004,96 @@ def _agent_sources_section(
             rows.append(
                 [
                     Paragraph(
-                        f'{_markup(name)}<br/><font color="#6B6B68">{_markup(ticker)}</font>',
-                        styles["small"],
+                        f'<font name="Courier-Bold" size="7" color="#151515">{_markup(ticker)}</font>'
+                        f'<br/><font name="Helvetica" size="7.4">{_markup(name)}</font>',
+                        styles["meta"],
                     ),
                     Paragraph(_markup(arguments.get("why_memo_is_needed")), styles["small"]),
                 ]
             )
-        story.append(
-            Table(
-                rows,
-                colWidths=[30 * mm, CONTENT_WIDTH - 30 * mm],
-                splitByRow=1,
-                style=TableStyle(
-                    [
-                        ("VALIGN", (0, 0), (-1, -1), "TOP"),
-                        ("LINEABOVE", (0, 0), (-1, 0), 0.5, INK),
-                        ("LINEBELOW", (0, 0), (-1, -1), 0.35, BORDER),
-                        ("TOPPADDING", (0, 0), (-1, -1), 6),
-                        ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
-                        ("LEFTPADDING", (0, 0), (-1, -1), 0),
-                        ("RIGHTPADDING", (0, 0), (0, -1), 8),
-                    ]
-                ),
-            )
+        screening = Table(
+            rows,
+            colWidths=[26 * mm, BODY_WIDTH - 26 * mm],
+            splitByRow=1,
+            style=TableStyle(
+                [
+                    ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                    ("LINEABOVE", (0, 0), (-1, 0), 0.4, BORDER),
+                    ("LINEBELOW", (0, 0), (-1, -1), 0.4, BORDER),
+                    ("TOPPADDING", (0, 0), (-1, -1), 2.4 * mm),
+                    ("BOTTOMPADDING", (0, 0), (-1, -1), 2.4 * mm),
+                    ("LEFTPADDING", (0, 0), (-1, -1), 0),
+                    ("RIGHTPADDING", (0, 0), (0, -1), 6),
+                    ("RIGHTPADDING", (1, 0), (1, -1), 0),
+                ]
+            ),
         )
+        if sources:
+            block.append(Spacer(1, 6 * mm))
+        block.append(_rail("WHY THESE<br/>MEMOS", screening, styles))
+    # The audit trail is one unit: never strand a single memo row on its own page.
+    return [KeepTogether(block)]
 
 
-    if telemetry:
-        story.extend(
-            [
-                Spacer(1, 6 * mm),
-                Paragraph(
-                    _markup(
-                        f'{telemetry.get("model", "")} / {telemetry.get("reasoning_effort", "")}'
-                        f' / {telemetry.get("prompt_version", "")}'
-                        f' / {telemetry.get("turn_count", 0)} turns'
-                    ),
-                    styles["small"],
-                ),
-            ]
-        )
-    return story
+def _host_suffix(url: Any) -> str:
+    host = urlsplit(str(url or "")).netloc.removeprefix("www.")
+    if not host:
+        return ""
+    return f'  <font name="Courier" size="7" color="#6B6B68">{_markup(host)}</font>'
 
 
 def _insight(item: dict[str, Any], styles: dict[str, ParagraphStyle]) -> list[Any]:
     rank = int(item["daily_rank"])
     company_names = item.get("company_names") or {}
-    header = Table(
-        [
-            [
-                Paragraph(f"#{rank}", styles["rank"]),
-                [
-                    Paragraph(
-                        f'<a name="insight-{rank}"/>{_markup(item.get("headline"))}',
-                        styles["title"],
-                    ),
-                ],
-            ]
-        ],
-        colWidths=[18 * mm, CONTENT_WIDTH - 18 * mm],
-        style=TableStyle(
-            [
-                ("VALIGN", (0, 0), (-1, -1), "TOP"),
-                ("LEFTPADDING", (0, 0), (-1, -1), 0),
-                ("RIGHTPADDING", (0, 0), (0, 0), 7),
-                ("RIGHTPADDING", (1, 0), (1, 0), 0),
-            ]
-        ),
-    )
+    provenance = item.get("provenance") or {}
+    original = provenance.get("original_post") or {}
+    trail = [
+        str(original.get("author") or "").upper(),
+        f'{provenance.get("source_event_count")} SOURCE EVENTS'
+        if provenance.get("source_event_count")
+        else "",
+        _display_day(str(item.get("day") or "")),
+    ]
     story: list[Any] = [
-        Spacer(1, 7 * mm),
-        header,
-        Spacer(1, 4.5 * mm),
-        HRFlowable(
-            width="100%",
-            thickness=0.8,
-            color=BLUE,
-            spaceBefore=0,
-            spaceAfter=5 * mm,
+        _rail(
+            f"#{rank}",
+            [
+                Paragraph(
+                    f'<a name="insight-{rank}"/>{_markup(item.get("headline"))}',
+                    styles["insight_title"],
+                ),
+                Spacer(1, 2.8 * mm),
+                Paragraph(_markup("  ·  ".join(part for part in trail if part)), styles["meta"]),
+            ],
+            styles,
+            label_style="rail_rank",
+            label_offset=3.4,
         ),
-        Paragraph("WHAT HAPPENED", styles["label"]),
-        Spacer(1, 2 * mm),
-        Paragraph(_markup(item.get("what_changed")), styles["body"]),
+        Spacer(1, 4.5 * mm),
+        HRFlowable(width="100%", thickness=0.9, color=BLUE, spaceAfter=5.5 * mm),
+        _rail("WHAT<br/>HAPPENED", Paragraph(_markup(item.get("what_changed")), styles["body"]), styles),
     ]
     connections = list(item.get("connections") or [])
     bets = _bet_index()
     if connections:
-        story.extend(_section_title("Company read-through", styles))
-        for index, connection in enumerate(connections):
-            if index:
-                story.extend(
-                    [
-                        Spacer(1, 5 * mm),
-                        HRFlowable(
-                            width="100%",
-                            thickness=0.35,
-                            color=BORDER,
-                            spaceBefore=0,
-                            spaceAfter=4 * mm,
-                        ),
-                    ]
+        tickers = len(_item_tickers(item))
+        note = (
+            f'{tickers} {"COMPANY" if tickers == 1 else "COMPANIES"}'
+            f' / {len(connections)} {"MECHANISM" if len(connections) == 1 else "MECHANISMS"}'
+        )
+        story.extend(_section_heading("Company read-through", note, styles))
+        for index, connection in enumerate(connections, start=1):
+            if index > 1:
+                story.append(Spacer(1, 6 * mm))
+            story.extend(
+                _mechanism_block(
+                    connection, index, len(connections), styles, company_names, bets
                 )
-            story.extend(_mechanism_block(connection, styles, company_names, bets))
+            )
     elif item.get("no_match_reason"):
-        story.extend(_section_title("No company read-through", styles))
-        story.append(Paragraph(_markup(item["no_match_reason"]), styles["body"]))
-    story.append(PageBreak())
-    story.extend(_agent_sources_section(item, styles))
+        story.extend(_section_heading("No company read-through", "NO STANDING BET MATCHED", styles))
+        story.append(_rail("REASON", Paragraph(_markup(item["no_match_reason"]), styles["body"]), styles))
+    story.extend(_sources_block(item, styles))
     return story
 
 
@@ -859,16 +1117,15 @@ def build_report_pdf(payload: dict[str, Any]) -> bytes:
         pagesize=A4,
         leftMargin=PAGE_MARGIN,
         rightMargin=PAGE_MARGIN,
-        topMargin=24 * mm,
-        bottomMargin=19 * mm,
+        topMargin=27 * mm,
+        bottomMargin=20 * mm,
         title=f"Frontier Lab Intelligence - {_audience_label(audience).title()} - {day}",
         author="Frontier Lab Intelligence",
         subject="Audience-specific, cited frontier AI daily intelligence",
         pageCompression=1,
     )
     story = _cover(payload, styles)
-    items = list(payload.get("items") or [])
-    for item in items:
+    for item in payload.get("items") or []:
         story.append(PageBreak())
         story.extend(_insight(item, styles))
 

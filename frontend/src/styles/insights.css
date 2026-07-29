@@ -1095,3 +1095,103 @@
     padding-top: 0;
   }
 }
+
+/* ---- AI Engineering: surface-linked Insights ---- */
+
+.engineering-agent-row {
+  border-top: 1px solid var(--border);
+  padding: 28px 0;
+}
+
+.engineering-agent-body {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.engineering-agent-head h2 {
+  font-size: 1.18rem;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.engineering-agent-opening h3 {
+  color: var(--muted);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  margin: 0 0 6px;
+  text-transform: uppercase;
+}
+
+.engineering-agent-opening p {
+  margin: 0;
+}
+
+.engineering-agent-lands > header h3,
+.engineering-agent-no-match h3 {
+  font-size: 0.95rem;
+  margin: 0 0 12px;
+}
+
+.engineering-agent-lands ol {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.engineering-agent-lands li {
+  border-left: 2px solid var(--border-strong);
+  padding-left: 14px;
+}
+
+.engineering-agent-surface {
+  align-items: baseline;
+  color: inherit;
+  display: inline-flex;
+  gap: 10px;
+  text-decoration: none;
+}
+
+.engineering-agent-surface:hover .engineering-agent-surface-name {
+  text-decoration: underline;
+}
+
+.engineering-agent-surface-id {
+  background: var(--blue-wash);
+  border-radius: 3px;
+  color: var(--blue-ink);
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  padding: 2px 7px;
+}
+
+.engineering-agent-surface-name {
+  font-weight: 600;
+}
+
+.engineering-agent-why {
+  color: var(--ink-soft);
+  margin: 6px 0 0;
+}
+
+.engineering-agent-no-match p {
+  color: var(--ink-soft);
+  margin: 0;
+}
+
+.engineering-agent-sources > summary {
+  cursor: pointer;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.engineering-agent-sources-body {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding-top: 10px;
+}

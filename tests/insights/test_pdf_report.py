@@ -145,14 +145,41 @@ def test_report_renders_the_complete_investment_workbook():
     assert "DAILY" in text
     assert "INTELLIGENCE" in text
     assert "Today's brief" in text
-    assert "WHAT HAPPENED" in text
+    assert "HAPPENED" in text
     assert "Company read-through" in text
-    assert "Sources and audit trail" in text
+    assert "SOURCES" in text
     assert "昇腾950发布说明" in text
     # Superseded editorial sections must not reappear.
     assert "WHAT CHANGED" not in text
     assert "DECISION RULE" not in text
     assert "SOURCE LEDGER" not in text
+
+
+def test_cover_states_the_brief_totals_and_one_method_signature():
+    text = _pdf_text(pdf_report.build_report_pdf(_payload()))
+
+    assert "COMPANY" in text
+    assert "READ-THROUGHS" in text
+    assert "METHOD" in text
+    assert "MODEL GPT-5.6-SOL" in text
+    assert "PROMPT INVESTMENT-AGENT-V14" in text
+    # Per-insight telemetry dumps are noise; the method is stated once.
+    assert "investment-agent-v14" not in text
+    assert "2 turns" not in text
+
+
+def test_report_wastes_no_page_on_chrome_alone():
+    reader = PdfReader(BytesIO(pdf_report.build_report_pdf(_payload())))
+    chrome = ("FRONTIER LAB INTELLIGENCE", "BRIEF INDEX", "PAGE", "/", "INVESTMENT", "2026")
+
+    for number, page in enumerate(reader.pages, start=1):
+        body = (page.extract_text() or "").splitlines()
+        substantive = [
+            line
+            for line in body
+            if line.strip() and not any(line.strip().startswith(mark) for mark in chrome)
+        ]
+        assert len(substantive) > 3, f"page {number} carries chrome only"
 
 
 def test_report_shows_every_company_with_its_direction_and_evidence():
@@ -161,10 +188,11 @@ def test_report_shows_every_company_with_its_direction_and_evidence():
     assert "Netskope" in text
     assert "NTSK" in text
     assert "Palo Alto Networks" in text
-    assert "Upside" in text
-    assert "Downside" in text
-    assert "Review thesis" in text
-    assert "Early signal" in text
+    assert "UPSIDE" in text
+    assert "DOWNSIDE" in text
+    assert "REVIEW THESIS" in text
+    assert "EARLY SIGNAL" in text
+    assert "STANDING BET" in text
     assert "NTSK-B1" in text
     assert "PANW-B5" in text
 
@@ -172,11 +200,12 @@ def test_report_shows_every_company_with_its_direction_and_evidence():
 def test_report_shows_the_screening_funnel_and_rejections():
     text = _pdf_text(pdf_report.build_report_pdf(_payload()))
 
-    assert "HOW THE AGENT GOT HERE" in text
-    assert "37 screened" in text
-    assert "3 memos opened" in text
-    assert "2 retained" in text
-    assert "1 rejected" in text
+    assert "Sources and audit trail" in text
+    assert "MEMOS" in text
+    assert "37 SCREENED" in text
+    assert "3 MEMOS OPENED" in text
+    assert "2 RETAINED" in text
+    assert "1 REJECTED" in text
     assert "OPENED AND REJECTED" not in text
 
 
@@ -185,6 +214,10 @@ def test_report_links_only_application_owned_sources():
 
     assert "https://example.com/research" in links
     assert "https://x.com/example/status/1" in links
+    assert (
+        "https://frontier-lab-intelligence.adithyan.io/bit-lens/companies"
+        "?company=NTSK&bet=NTSK-B1" in links
+    )
 
 
 def test_report_cache_is_content_addressed_and_atomic(tmp_path):

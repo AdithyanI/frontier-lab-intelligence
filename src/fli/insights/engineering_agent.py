@@ -98,7 +98,7 @@ def _engineering_candidates(
     return items
 
 
-def _surface_cards() -> list[dict[str, Any]]:
+def surface_cards() -> list[dict[str, Any]]:
     """Return the Aion surface map exactly as the model will see it."""
     payload = json.loads(SURFACE_PATH.read_text(encoding="utf-8"))
     cards = [
@@ -401,8 +401,8 @@ def _validate_final(
     headline = str(result.get("headline") or "").strip()
     if not headline or "\n" in headline:
         raise ValueError("the Engineering result has an empty headline")
-    if len(headline.split()) > 22:
-        raise ValueError("the Engineering headline is longer than 22 words")
+    if len(headline.split()) > 30:
+        raise ValueError("the Engineering headline is longer than 30 words")
     if not str(result.get("what_changed") or "").strip():
         raise ValueError("the Engineering result has an empty what_changed")
     decision = result.get("decision")
@@ -497,7 +497,7 @@ def run_one(
     if not packet.get("available"):
         raise RuntimeError(packet.get("note") or "Development packet unavailable.")
 
-    cards = _surface_cards()
+    cards = surface_cards()
     surface_ids = [card["id"] for card in cards]
     instructions = _instructions(cards)
     final_format = _final_format(surface_ids)
@@ -749,7 +749,9 @@ def run_days(
             }
         )
 
-    # Populate the shared stable prompt prefix before the parallel fan-out.
+    # Run the first target serially so a broken request fails before the
+    # parallel fan-out. Cross-run prompt caching does not occur at this
+    # endpoint, so this warm-up buys safety, not cache hits.
     warm_target = targets[0]
     try:
         results.append(execute(warm_target))

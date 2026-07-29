@@ -151,7 +151,7 @@ def _validate_trace(trace: dict[str, Any]) -> None:
     if set(final) != RESULT_FIELDS:
         raise ValueError("Engineering agent result does not match the v1 schema")
     headline = str(final.get("headline") or "").strip()
-    if not headline or "\n" in headline or len(headline.split()) > 22:
+    if not headline or "\n" in headline or len(headline.split()) > 30:
         raise ValueError("Engineering agent result has an invalid headline")
     if not str(final.get("what_changed") or "").strip():
         raise ValueError("Engineering agent result has an empty what_changed")
