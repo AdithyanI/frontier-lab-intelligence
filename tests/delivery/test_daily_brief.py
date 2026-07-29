@@ -43,6 +43,7 @@ def _payload() -> dict:
                         ],
                     }
                 ],
+                "company_names": {"NTSK": "Netskope"},
                 "provenance": {"primary_event_id": f"event-{rank}"},
             }
             for rank in range(1, 7)
@@ -82,8 +83,7 @@ def _artifact(tmp_path: Path) -> pdf_report.ReportArtifact:
     )
 
 
-def test_slack_delivery_shows_every_insight_in_full(
-    tmp_path,
+def test_slack_delivery_shows_every_insight_with_company_directions(
     monkeypatch,
 ):
     captured: dict = {}
@@ -92,10 +92,13 @@ def test_slack_delivery_shows_every_insight_in_full(
         captured.update(json.loads(request.content))
         return httpx.Response(200, text="ok")
 
+    def unexpected_pdf(*_args, **_kwargs):
+        raise AssertionError("Slack delivery must not generate a PDF")
+
     monkeypatch.setattr(
         daily_brief.pdf_report,
         "get_or_create_report",
-        lambda *_args, **_kwargs: _artifact(tmp_path),
+        unexpected_pdf,
     )
     result = daily_brief.deliver_daily_brief(
         _payload(),
@@ -104,20 +107,27 @@ def test_slack_delivery_shows_every_insight_in_full(
         slack_transport=httpx.MockTransport(handler),
     )
 
-    rendered = json.dumps(captured)
+    rendered = json.dumps(captured, ensure_ascii=False)
     assert result["status"] == "sent"
     assert result["insight_count"] == 6
-    assert result["pdf_delivery"] == "link"
+    assert result["pdf_delivery"] == "none"
+    assert result["pdf_filename"] is None
+    assert result["report_version"] is None
     assert "Insight 1" in rendered
     assert "FULL_INTERPRETATION_END" in rendered
     assert "Read full brief" in rendered
+    assert "What changed" in rendered
+    assert "How this reaches companies" in rendered
+    assert "Netskope (NTSK)" in rendered
+    assert "↑ Upside" in rendered
     assert "Insight 2" in rendered
     assert "Decision-useful interpretation 2." in rendered
     assert "Insight 5" in rendered
     assert "Insight 6" in rendered
     assert "Decision-useful interpretation 6." in rendered
     assert "more cited Insights" not in rendered
-    assert "/api/insights/report.pdf" in rendered
+    assert "/api/insights/report.pdf" not in rendered
+    assert "Download PDF" not in rendered
     assert "hooks.slack" not in rendered
     section_text = [
         block["text"]["text"]
@@ -125,6 +135,20 @@ def test_slack_delivery_shows_every_insight_in_full(
         if block["type"] == "section"
     ]
     assert all(len(text) <= 3000 for text in section_text)
+
+
+def test_slack_uses_brief_positions_instead_of_feed_ranks():
+    payload = _payload()
+    for item, feed_rank in zip(payload["items"], (4, 12, 24, 25, 30, 31), strict=True):
+        item["daily_rank"] = feed_rank
+
+    rendered = json.dumps(daily_brief._slack_payload(payload), ensure_ascii=False)
+
+    assert "*1. Insight 1*" in rendered
+    assert "*2. Insight 2*" in rendered
+    assert "*4. Insight 4*" in rendered
+    assert "*12. Insight 2*" not in rendered
+    assert "*25. Insight 4*" not in rendered
 
 
 def test_email_delivery_attaches_pdf_and_contains_only_top_five(tmp_path):
@@ -209,9 +233,9 @@ def test_delivery_api_exposes_status_and_forwards_explicit_confirmation(monkeypa
             "audience": "investment",
             "date": DAY,
             "insight_count": 5,
-            "pdf_delivery": "link",
-            "pdf_filename": "daily-brief.pdf",
-            "report_version": "test",
+            "pdf_delivery": "none",
+            "pdf_filename": None,
+            "report_version": None,
             "delivery_id": "delivery-id",
             "provider_id": "provider-id",
             "sent_at": "2026-07-19T12:00:00+00:00",

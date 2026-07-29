@@ -569,19 +569,19 @@
 
 /* ---- Next: what I would build next ---- */
 
-.how-next {
+.how-future {
   margin-top: 24px;
   padding-top: 40px;
   border-top: 1px solid var(--border-strong);
 }
 
-.how-next-list {
+.how-future-list {
   margin: 28px 0 0;
   padding: 0;
   list-style: none;
 }
 
-.how-next-list li {
+.how-future-list li {
   display: grid;
   grid-template-columns: 64px minmax(0, 1fr);
   gap: 8px 28px;
@@ -757,7 +757,7 @@
   .how-map-list li {
     grid-template-columns: 48px minmax(0, 1fr);
   }
-  .how-next-list li {
+  .how-future-list li {
     grid-template-columns: 48px minmax(0, 1fr);
   }
   .how-map-link {

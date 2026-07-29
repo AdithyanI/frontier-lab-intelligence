@@ -1,8 +1,8 @@
 # Daily Brief delivery
 
-Frontier Lab Intelligence can manually send any complete audience-specific
-Daily Brief from the Insights page. Delivery reuses the same canonical brief
-and cached PDF as the web reader. It does not create a separate report.
+Frontier Lab Intelligence can manually send any complete Investment brief from
+the Insights page. Delivery reuses the same canonical brief as the web reader.
+Email also reuses the cached PDF; Slack does not create or link one.
 
 ## Reader flow
 
@@ -15,9 +15,11 @@ Engineering has no current deliverable cohort.
 3. A separate confirmation performs the real provider action.
 4. Success or provider failure remains visible in the same panel.
 
-Slack sends every cited Insight in rank order. Each item includes its linked
-title and complete interpretation. The message ends with links to the full web
-brief and PDF.
+Slack sends every surfaced Insight in brief order. The visible list is numbered
+from one, independent of Feed rank. Each item includes its headline, complete
+`What changed` text, and the memo-owned upside or downside direction for every
+connected company. The message ends with one link to the full web brief; Slack
+does not generate or link a PDF.
 
 Email sends up to five ranked Insights with their interpretations, next steps,
 and exact Feed Event links. The complete audience PDF is attached. The body

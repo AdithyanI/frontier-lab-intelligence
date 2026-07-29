@@ -1,4 +1,4 @@
-"""Manual Slack and email delivery for one canonical Daily Intelligence Brief."""
+"""Manual Slack and email delivery for one canonical Investment brief."""
 
 from __future__ import annotations
 
@@ -19,10 +19,10 @@ from urllib.parse import urlencode
 
 import httpx
 
-from fli.insights import pdf_report
+from fli.insights import company_context, pdf_report
 
 
-SCHEMA_VERSION = "daily-brief-delivery-v1"
+SCHEMA_VERSION = "daily-brief-delivery-v2"
 TOP_INSIGHT_LIMIT = 5
 REPO_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_ENV_PATH = REPO_ROOT / ".env"
@@ -243,6 +243,33 @@ def _slack_prose_blocks(value: Any) -> list[dict[str, Any]]:
     ]
 
 
+def _slack_company_lines(
+    item: dict[str, Any],
+    bets: Mapping[str, Mapping[str, Any]],
+) -> list[str]:
+    company_names = item.get("company_names") or {}
+    seen: set[tuple[str, str]] = set()
+    lines: list[str] = []
+    for connection in item.get("connections") or []:
+        for company in connection.get("companies") or []:
+            ticker = str(company.get("ticker") or "").strip()
+            bet_id = str(company.get("bet_id") or "").strip()
+            identity = (ticker, bet_id)
+            if not ticker or identity in seen:
+                continue
+            seen.add(identity)
+            direction = str((bets.get(bet_id) or {}).get("direction") or "").strip()
+            if direction not in {"upside", "downside"}:
+                continue
+            name = _plain(company_names.get(ticker) or ticker)
+            arrow = "↑" if direction == "upside" else "↓"
+            label = f"{name} ({ticker})" if name != ticker else ticker
+            lines.append(
+                f"• *{_slack_escape(label)}* · {arrow} {direction.title()}"
+            )
+    return lines
+
+
 def _slack_payload(payload: dict[str, Any]) -> dict[str, Any]:
     items = sorted(
         list(payload.get("items") or []),
@@ -250,21 +277,26 @@ def _slack_payload(payload: dict[str, Any]) -> dict[str, Any]:
     )
     day = str(payload.get("date") or payload.get("requested_date") or "")
     audience = _audience_label(str(payload.get("audience") or "investment"))
-    brief_url, report_url = _urls(payload)
+    brief_url, _ = _urls(payload)
+    bets = company_context.investment_bet_index()
     fallback_lines = [
-        f"Frontier Lab Intelligence - {audience} Daily Brief - {_display_day(day)}",
+        f"Frontier Lab Intelligence | {audience} brief | {_display_day(day)}",
     ]
     blocks: list[dict[str, Any]] = [
         {
             "type": "header",
-            "text": {"type": "plain_text", "text": f"{audience} Daily Intelligence", "emoji": False},
+            "text": {
+                "type": "plain_text",
+                "text": f"{audience} brief",
+                "emoji": False,
+            },
         },
         {
             "type": "context",
             "elements": [
                 {
                     "type": "mrkdwn",
-                    "text": f"*{_display_day(day)}* · {len(items)} cited Insights",
+                    "text": f"*{_display_day(day)}* · {len(items)} Insights",
                 }
             ],
         },
@@ -273,14 +305,16 @@ def _slack_payload(payload: dict[str, Any]) -> dict[str, Any]:
     for index, item in enumerate(items):
         if index:
             blocks.append({"type": "divider"})
-        rank = _rank(item) or 1
+        brief_position = index + 1
         title = _slack_escape(_title(item))
-        event_url = _event_url(item, day)
+        summary = _summary(item)
+        company_lines = _slack_company_lines(item, bets)
         fallback_lines.extend(
             [
                 "",
-                f"{rank}. {_plain(_title(item))}",
-                _plain(_summary(item)),
+                f"{brief_position}. {_plain(_title(item))}",
+                "What changed",
+                _plain(summary),
             ]
         )
         blocks.append(
@@ -288,12 +322,31 @@ def _slack_payload(payload: dict[str, Any]) -> dict[str, Any]:
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"*<{event_url}|{rank}. {title}>*",
+                    "text": f"*{brief_position}. {title}*",
                 },
             }
         )
-        if _summary(item):
-            blocks.extend(_slack_prose_blocks(_summary(item)))
+        if summary:
+            prose_blocks = _slack_prose_blocks(summary)
+            if prose_blocks:
+                prose_blocks[0]["text"]["text"] = (
+                    f"*What changed*\n{prose_blocks[0]['text']['text']}"
+                )
+            blocks.extend(prose_blocks)
+        if company_lines:
+            blocks.append(
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": (
+                            "*How this reaches companies*\n"
+                            + "\n".join(company_lines)
+                        ),
+                    },
+                }
+            )
+            fallback_lines.extend(["How this reaches companies", *company_lines])
     blocks.extend(
         [
             {"type": "divider"},
@@ -309,16 +362,11 @@ def _slack_payload(payload: dict[str, Any]) -> dict[str, Any]:
                         },
                         "url": brief_url,
                     },
-                    {
-                        "type": "button",
-                        "text": {"type": "plain_text", "text": "Download PDF", "emoji": False},
-                        "url": report_url,
-                    },
                 ],
             },
         ]
     )
-    fallback_lines.extend([f"Read full brief: {brief_url}", f"Download PDF: {report_url}"])
+    fallback_lines.append(f"Read full brief: {brief_url}")
     return {"text": "\n".join(fallback_lines), "blocks": blocks}
 
 
@@ -459,7 +507,7 @@ def delivery_status_payload(
     total_insight_count = len(list(payload.get("items") or [])) if available else 0
     channels = []
     for channel, label, pdf_delivery in (
-        ("slack", "Slack", "link"),
+        ("slack", "Slack", "none"),
         ("email", "Email", "attachment"),
     ):
         configured = resolved.channel_configured(channel)
@@ -502,11 +550,12 @@ def deliver_daily_brief(
     if not resolved.channel_configured(channel):
         raise DeliveryNotConfigured(f"{channel.title()} delivery is not configured.")
 
-    artifact = pdf_report.get_or_create_report(payload, cache_root=cache_root)
     if channel == "slack":
         provider_id = _send_slack(resolved, payload, transport=slack_transport)
-        pdf_delivery = "link"
+        artifact = None
+        pdf_delivery = "none"
     else:
+        artifact = pdf_report.get_or_create_report(payload, cache_root=cache_root)
         provider_id = _send_email(
             resolved,
             payload,
@@ -534,8 +583,8 @@ def deliver_daily_brief(
             else len(_top_items(payload))
         ),
         "pdf_delivery": pdf_delivery,
-        "pdf_filename": artifact.filename,
-        "report_version": artifact.report_version,
+        "pdf_filename": artifact.filename if artifact else None,
+        "report_version": artifact.report_version if artifact else None,
         "delivery_id": delivery_identity,
         "provider_id": provider_id,
         "sent_at": datetime.now(timezone.utc).isoformat(),

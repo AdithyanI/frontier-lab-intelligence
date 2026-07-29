@@ -178,6 +178,12 @@ def _link(url: Any, label: Any) -> str:
     return f'<link href="{href}" color="#235165">{_markup(label)}</link>'
 
 
+def _insight_app_url(audience: str, day: str, development_id: str) -> str:
+    """Deep link back into the live app, scrolled and focused to this exact Insight."""
+    query = {"audience": audience, "date": day, "insight": development_id}
+    return f"{PUBLIC_APP_URL}/insights?{urlencode(query)}"
+
+
 def _display_day(day: str) -> str:
     try:
         parsed = calendar_date.fromisoformat(day)
@@ -421,22 +427,6 @@ def _styles() -> dict[str, ParagraphStyle]:
             textColor=PAPER,
             alignment=TA_CENTER,
         ),
-        "stat_value": ParagraphStyle(
-            "StatValue",
-            parent=normal,
-            fontName="Courier-Bold",
-            fontSize=18,
-            leading=20,
-            textColor=INK,
-        ),
-        "stat_label": ParagraphStyle(
-            "StatLabel",
-            parent=normal,
-            fontName="Courier",
-            fontSize=6.2,
-            leading=8.6,
-            textColor=MUTED,
-        ),
         "toc_rank": ParagraphStyle(
             "TocRank",
             parent=normal,
@@ -610,53 +600,6 @@ def _item_tickers(item: dict[str, Any]) -> list[str]:
     return seen
 
 
-def _brief_totals(payload: dict[str, Any], items: list[dict[str, Any]]) -> list[tuple[str, str]]:
-    run = payload.get("run") or {}
-    read_throughs = sum(len(_item_tickers(item)) for item in items)
-    screened = max(
-        [int((item.get("telemetry") or {}).get("company_universe_count") or 0) for item in items]
-        or [0]
-    )
-    memos = sum(len(item.get("memo_calls") or []) for item in items)
-    ranked = int(run.get("development_count") or 0) or len(items)
-    return [
-        (str(len(items)), f"SURFACED OF {ranked}\nRANKED DEVELOPMENTS"),
-        (str(read_throughs), "COMPANY\nREAD-THROUGHS"),
-        (str(screened), "COMPANIES\nSCREENED"),
-        (str(memos), "RESEARCH MEMOS\nOPENED"),
-    ]
-
-
-def _stat_band(
-    totals: list[tuple[str, str]], styles: dict[str, ParagraphStyle]
-) -> Table:
-    column = CONTENT_WIDTH / max(len(totals), 1)
-    cells = [
-        [
-            Paragraph(_markup(value), styles["stat_value"]),
-            Spacer(1, 1.6 * mm),
-            Paragraph(_markup(label).replace("\n", "<br/>"), styles["stat_label"]),
-        ]
-        for value, label in totals
-    ]
-    return Table(
-        [cells],
-        colWidths=[column] * len(totals),
-        style=TableStyle(
-            [
-                ("VALIGN", (0, 0), (-1, -1), "TOP"),
-                ("LINEAFTER", (0, 0), (-2, -1), 0.4, BORDER),
-                ("TOPPADDING", (0, 0), (-1, -1), 4 * mm),
-                ("BOTTOMPADDING", (0, 0), (-1, -1), 1 * mm),
-                ("LEFTPADDING", (0, 0), (0, 0), 0),
-                ("LEFTPADDING", (1, 0), (-1, -1), 6 * mm),
-                ("RIGHTPADDING", (0, 0), (-1, -1), 6 * mm),
-                ("RIGHTPADDING", (-1, 0), (-1, -1), 0),
-            ]
-        ),
-    )
-
-
 def _cover(payload: dict[str, Any], styles: dict[str, ParagraphStyle]) -> list[Any]:
     audience = str(payload["audience"])
     day = str(payload["date"])
@@ -693,23 +636,8 @@ def _cover(payload: dict[str, Any], styles: dict[str, ParagraphStyle]) -> list[A
         ),
         Spacer(1, 8 * mm),
         HRFlowable(width="100%", thickness=0.9, color=INK, spaceAfter=0),
-        _stat_band(_brief_totals(payload, items), styles),
-        Spacer(1, 8 * mm),
+        Spacer(1, 6 * mm),
     ]
-    story.append(
-        _rail(
-            "METHOD",
-            Paragraph(
-                _markup(
-                    "Every ranked development is screened against the BIT company universe. "
-                    "A read-through is published only when it maps to a pre-registered "
-                    "standing bet; the research memo behind that bet is opened and cited."
-                ),
-                styles["small"],
-            ),
-            styles,
-        )
-    )
     story.extend(
         _section_heading(
             "Today's brief",
@@ -930,10 +858,8 @@ def _mechanism_block(
 
 
 def _sources_block(item: dict[str, Any], styles: dict[str, ParagraphStyle]) -> list[Any]:
-    """Application-owned provenance: the Feed post, artifacts, and the memo funnel."""
+    """Primary reading links, plus one pointer into the live, interactive audit trail."""
     provenance = item.get("provenance") or {}
-    telemetry = item.get("telemetry") or {}
-    company_names = item.get("company_names") or {}
 
     sources: list[Any] = []
     original = provenance.get("original_post") or {}
@@ -956,71 +882,25 @@ def _sources_block(item: dict[str, Any], styles: dict[str, ParagraphStyle]) -> l
             )
         )
 
-    memo_calls = list(item.get("memo_calls") or [])
-    retained = len(
-        {
-            str(company.get("ticker"))
-            for connection in item.get("connections") or []
-            for company in connection.get("companies") or []
-        }
-    )
-    opened = int(telemetry.get("memo_count", 0) or len(memo_calls))
-    rejected = max(0, opened - retained)
-    funnel = (
-        f'{telemetry.get("company_universe_count", 0)} SCREENED'
-        f" / {opened} MEMOS OPENED"
-        f" / {retained} RETAINED"
-    )
-    if rejected:
-        funnel = f"{funnel} / {rejected} REJECTED"
-
-    heading = _section_heading(
-        "Sources and audit trail",
-        funnel if memo_calls else "",
-        styles,
-        space_before=9 * mm,
-    )
+    heading = _section_heading("Sources and audit trail", "", styles, space_before=9 * mm)
     block: list[Any] = list(heading)
     if sources:
         block.append(_rail("PRIMARY<br/>SOURCES", sources, styles))
-
-    if memo_calls:
-        rows = []
-        for call in memo_calls:
-            arguments = call.get("arguments") or {}
-            ticker = str(arguments.get("ticker") or "")
-            name = str(company_names.get(ticker) or ticker)
-            rows.append(
-                [
-                    Paragraph(
-                        f'<font name="Courier-Bold" size="7" color="#151515">{_markup(ticker)}</font>'
-                        f'<br/><font name="Helvetica" size="7.4">{_markup(name)}</font>',
-                        styles["meta"],
-                    ),
-                    Paragraph(_markup(arguments.get("why_memo_is_needed")), styles["small"]),
-                ]
-            )
-        screening = Table(
-            rows,
-            colWidths=[26 * mm, BODY_WIDTH - 26 * mm],
-            splitByRow=1,
-            style=TableStyle(
-                [
-                    ("VALIGN", (0, 0), (-1, -1), "TOP"),
-                    ("LINEABOVE", (0, 0), (-1, 0), 0.4, BORDER),
-                    ("LINEBELOW", (0, 0), (-1, -1), 0.4, BORDER),
-                    ("TOPPADDING", (0, 0), (-1, -1), 2.4 * mm),
-                    ("BOTTOMPADDING", (0, 0), (-1, -1), 2.4 * mm),
-                    ("LEFTPADDING", (0, 0), (-1, -1), 0),
-                    ("RIGHTPADDING", (0, 0), (0, -1), 6),
-                    ("RIGHTPADDING", (1, 0), (1, -1), 0),
-                ]
+        block.append(Spacer(1, 6 * mm))
+    app_url = _insight_app_url(
+        "investment", str(item.get("day") or ""), str(item.get("development_id") or "")
+    )
+    block.append(
+        _rail(
+            "IN THE<br/>APP",
+            Paragraph(
+                _link(app_url, "Open the full company read-through and audit trail \u2192"),
+                styles["link"],
             ),
+            styles,
         )
-        if sources:
-            block.append(Spacer(1, 6 * mm))
-        block.append(_rail("WHY THESE<br/>MEMOS", screening, styles))
-    # The audit trail is one unit: never strand a single memo row on its own page.
+    )
+    # The audit trail is one unit: never strand the app link on its own page.
     return [KeepTogether(block)]
 
 

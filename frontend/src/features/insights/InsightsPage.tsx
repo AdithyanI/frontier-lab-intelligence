@@ -195,9 +195,7 @@ function DailyBriefDownload({
   const disabledReason = loading
     ? 'The daily brief is still loading.'
     : !available
-      ? audience !== 'investment'
-        ? 'PDF export is only available for the Investment brief.'
-        : 'PDF export is available for complete kept daily briefs.'
+      ? 'PDF export is available for complete kept daily briefs.'
       : ''
 
   return (
@@ -376,13 +374,7 @@ function DailyBriefDelivery({
         disabled={disabled}
         aria-expanded={open}
         aria-controls={open ? panelId : undefined}
-        title={
-          disabled
-            ? audience !== 'investment'
-              ? 'Send is only available for the Investment brief.'
-              : 'Send is available for complete kept daily briefs.'
-            : 'Send this Daily Brief'
-        }
+        title={disabled ? 'Send is available for complete kept daily briefs.' : 'Send this Daily Brief'}
         ref={buttonRef}
       >
         <svg aria-hidden="true" viewBox="0 0 20 20">
@@ -442,7 +434,7 @@ function DailyBriefDelivery({
                     <em>
                       {channel.configured
                         ? channel.channel === 'slack'
-                          ? `All ${status.total_insight_count} Insights + PDF link`
+                          ? `All ${status.total_insight_count} Insights + brief link`
                           : `Top ${status.top_insight_count} + PDF attachment`
                         : 'Not configured'}
                     </em>
@@ -456,8 +448,8 @@ function DailyBriefDelivery({
             <div className="insight-delivery-confirm">
               {selected === 'slack' ? (
                 <p>
-                  Send all {status.total_insight_count} cited Insights, with each complete interpretation, to <strong>{selectedStatus.destination}</strong>.
-                  The message will also link to the full brief and PDF.
+                  Send all {status.total_insight_count} Insights, with what changed and the company directions, to <strong>{selectedStatus.destination}</strong>.
+                  The message will link to the full brief.
                 </p>
               ) : (
                 <p>
@@ -485,7 +477,7 @@ function DailyBriefDelivery({
               {result.channel === 'slack' ? (
                 <p>
                   <strong>Slack notification sent.</strong>
-                  {result.insight_count} complete Insights and links to the full brief and PDF were sent to {result.destination}.
+                  {result.insight_count} Insights and a link to the full brief were sent to {result.destination}.
                 </p>
               ) : (
                 <p>
@@ -1051,7 +1043,9 @@ export default function Insights() {
         <DailyBriefActions
           audience={audience}
           day={selectedDate}
-          available={audience === 'investment' && Boolean(investmentAgentData?.available)}
+          available={audience === 'investment'
+            ? Boolean(investmentAgentData?.available)
+            : Boolean(engineeringAgentData?.available)}
           loading={datesLoading || dataLoading}
         />
       </header>

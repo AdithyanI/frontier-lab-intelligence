@@ -17,11 +17,11 @@ professionals who live in data-dense tools all day:
   build."
 
 Both consume periodic digests and timely pushed alerts; both need every claim
-traceable to its primary source in one click. A completed daily digest
-must remain readable in the product and downloadable as a self-contained,
-audience-specific PDF for offline review and assignment delivery. An operator
-can also explicitly send the selected brief through Slack (every cited Insight
-with its complete interpretation, plus brief and PDF links) or email (up to
+traceable to its primary source in one click. A completed daily digest must
+remain readable in the product. The Investment brief is also downloadable as a
+self-contained PDF for offline review and assignment delivery. An operator can
+explicitly send that Investment brief through Slack (every surfaced Insight
+with `What changed`, company directions, and one brief link) or email (up to
 five ranked Insights plus the PDF attachment). Automated alert scheduling is a
 separate future concern.
 

@@ -71,7 +71,7 @@ export default function HowItWorks() {
         <a href="#how-read-title">In words</a>
         <a href="#how-showcase-title">Example Insights</a>
         <a href="#how-map-title">Assignment map</a>
-        <a href="#how-next-title">What is next</a>
+        <a href="#how-future-title">What is next</a>
         <a href="#technical-appendix">Technical appendix</a>
       </nav>
 
@@ -141,10 +141,10 @@ export default function HowItWorks() {
         </p>
       </section>
 
-      <section className="how-next" aria-labelledby="how-next-title">
+      <section className="how-future" aria-labelledby="how-future-title">
         <header className="how-map-head">
           <p className="how-beat-kicker mono">Next</p>
-          <h3 id="how-next-title">What I would build next</h3>
+          <h3 id="how-future-title">What I would build next</h3>
           <p>
             Two weeks bought a narrow system that works end to end. These are
             the things I would do next, in the order I would do them. The first
@@ -152,7 +152,7 @@ export default function HowItWorks() {
             BIT rather than more code.
           </p>
         </header>
-        <ul className="how-next-list">
+        <ul className="how-future-list">
           {NEXT_STEPS.map((step) => (
             <li key={step.title}>
               <span className="how-map-weight mono">{step.label}</span>

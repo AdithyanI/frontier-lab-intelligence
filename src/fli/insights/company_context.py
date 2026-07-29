@@ -399,6 +399,15 @@ def _investment_company_memos() -> dict[str, dict[str, Any]]:
     return memos
 
 
+def investment_bet_index() -> dict[str, dict[str, Any]]:
+    """Return the validated memo-owned standing bets keyed by bet ID."""
+    return {
+        str(bet["id"]): bet
+        for memo in _investment_company_memos().values()
+        for bet in memo["bets"]
+    }
+
+
 def investment_company_universe_payload() -> dict[str, Any]:
     """Return the complete, dated company-context read model for BIT Lens."""
     context = investment_context()

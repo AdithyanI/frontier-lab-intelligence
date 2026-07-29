@@ -11,7 +11,7 @@ export interface BriefDeliveryChannelStatus {
   configured: boolean
   available: boolean
   destination: string
-  pdf_delivery: 'link' | 'attachment'
+  pdf_delivery: 'none' | 'attachment'
 }
 
 export interface BriefDeliveryStatus {
@@ -33,9 +33,9 @@ export interface BriefDeliveryResult {
   audience: InsightAudience
   date: string
   insight_count: number
-  pdf_delivery: 'link' | 'attachment'
-  pdf_filename: string
-  report_version: string
+  pdf_delivery: 'none' | 'attachment'
+  pdf_filename: string | null
+  report_version: string | null
   delivery_id: string
   provider_id: string
   sent_at: string

@@ -187,8 +187,8 @@ composition.
    no PDF or delivery action.
 13. An operator may explicitly deliver that same complete Investment
    audience/date brief.
-   Slack presents every cited Insight with its complete interpretation, then
-   links to the complete brief and PDF. Email
+   Slack presents every surfaced Insight with its `What changed` text and
+   memo-owned company directions, then links to the complete brief. Email
    receives up to five ranked Insights with the cached PDF attached.
    The write route accepts only same-origin browser confirmations, provider
    secrets never enter the SPA, and no scheduler or automatic alert loop is

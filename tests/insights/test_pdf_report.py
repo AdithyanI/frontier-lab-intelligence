@@ -155,12 +155,14 @@ def test_report_renders_the_complete_investment_workbook():
     assert "SOURCE LEDGER" not in text
 
 
-def test_cover_states_the_brief_totals_without_model_plumbing():
+def test_cover_omits_pipeline_plumbing_analysts_do_not_need():
     text = _pdf_text(pdf_report.build_report_pdf(_payload()))
 
-    assert "COMPANY" in text
-    assert "READ-THROUGHS" in text
-    assert "METHOD" in text
+    # The screening stat band and METHOD blurb were pipeline internals, not
+    # reading material for an analyst opening the brief.
+    assert "READ-THROUGHS" not in text
+    assert "COMPANIES\nSCREENED" not in text
+    assert "METHOD" not in text
     # Model, effort, prompt version, and turn counts are run plumbing, not reading.
     assert "GPT-5.6-SOL" not in text
     assert "XHIGH" not in text
@@ -198,16 +200,21 @@ def test_report_shows_every_company_with_its_direction_and_evidence():
     assert "PANW-B5" in text
 
 
-def test_report_shows_the_screening_funnel_and_rejections():
+def test_report_keeps_sources_clean_and_points_to_the_live_audit_trail():
     text = _pdf_text(pdf_report.build_report_pdf(_payload()))
 
     assert "Sources and audit trail" in text
-    assert "MEMOS" in text
-    assert "37 SCREENED" in text
-    assert "3 MEMOS OPENED" in text
-    assert "2 RETAINED" in text
-    assert "1 REJECTED" in text
-    assert "OPENED AND REJECTED" not in text
+    assert "PRIMARY" in text
+    assert "SOURCES" in text
+    assert "Open the full company read-through and audit trail" in text
+    # The memo screening funnel and per-memo rationale are pipeline noise;
+    # analysts get the same detail interactively in the app link above.
+    assert "SCREENED" not in text
+    assert "MEMOS OPENED" not in text
+    assert "RETAINED" not in text
+    assert "REJECTED" not in text
+    assert "WHY THESE" not in text
+    assert "Confirm Netskope's agent traffic controls map here." not in text
 
 
 def test_report_links_only_application_owned_sources():
@@ -218,6 +225,10 @@ def test_report_links_only_application_owned_sources():
     assert (
         "https://frontier-lab-intelligence.adithyan.io/bit-lens/companies"
         "?company=NTSK&bet=NTSK-B1" in links
+    )
+    assert (
+        "https://frontier-lab-intelligence.adithyan.io/insights"
+        "?audience=investment&date=2026-07-17&insight=development-1" in links
     )
 
 

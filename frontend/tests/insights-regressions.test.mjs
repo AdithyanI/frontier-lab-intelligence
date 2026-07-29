@@ -221,10 +221,10 @@ test('Insights exposes a production PDF download for the complete selected daily
   assert.match(insightSource, /Preparing PDF…/)
   assert.match(insightSource, /Download again/)
   assert.match(insightSource, /PDF export is available for complete kept daily briefs\./)
-  assert.match(insightSource, /PDF export is only available for the Investment brief\./)
+  assert.doesNotMatch(insightSource, /PDF export is only available for the Investment brief\./)
   assert.match(
     insightSource,
-    /available=\{audience === 'investment' && Boolean\(investmentAgentData\?\.available\)\}/,
+    /<DailyBriefActions[\s\S]*?audience=\{audience\}[\s\S]*?audience === 'investment'[\s\S]*?investmentAgentData\?\.available[\s\S]*?engineeringAgentData\?\.available/,
   )
   assert.match(appStyles, /\.insight-page-head \{[^}]*grid-template-columns: minmax\(0, 1fr\) auto;/)
   assert.match(appStyles, /\.insight-report-button \{[^}]*min-height: 44px;/)
@@ -234,14 +234,15 @@ test('Insights exposes a production PDF download for the complete selected daily
 
 test('Insights exposes guarded manual Slack and email delivery beside the PDF action', () => {
   assert.match(apiSource, /export type BriefDeliveryChannel = 'slack' \| 'email'/)
-  assert.match(apiSource, /pdf_delivery: 'link' \| 'attachment'/)
+  assert.match(apiSource, /pdf_delivery: 'none' \| 'attachment'/)
   assert.match(insightSource, /function DailyBriefDelivery/)
   assert.match(insightSource, /\/api\/insights\/delivery\?audience=/)
   assert.match(insightSource, /fetch\('\/api\/insights\/delivery'/)
-  assert.match(insightSource, /All \$\{status\.total_insight_count\} Insights \+ PDF link/)
-  assert.match(insightSource, /with each complete interpretation/)
+  assert.match(insightSource, /All \$\{status\.total_insight_count\} Insights \+ brief link/)
+  assert.match(insightSource, /with what changed and the company directions/)
   assert.match(insightSource, /Send is available for complete kept daily briefs\./)
-  assert.match(insightSource, /Send is only available for the Investment brief\./)
+  assert.match(insightSource, /<DailyBriefActions/)
+  assert.doesNotMatch(insightSource, /Send is only available for the Investment brief\./)
   assert.doesNotMatch(insightSource, /remainingInsightCount/)
   assert.doesNotMatch(insightSource, /Delivery access key/)
   assert.doesNotMatch(insightSource, /fli-delivery-access-key/)
