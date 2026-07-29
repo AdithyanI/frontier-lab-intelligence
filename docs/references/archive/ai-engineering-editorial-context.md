@@ -1,4 +1,9 @@
-# AI Engineering Editorial Context
+# Historical AI Engineering editorial context
+
+This document describes the deleted AI Engineering editorial generator. It is
+preserved for decision history and must not be treated as an executable prompt,
+current product contract, or fallback. AI Engineering currently ends at
+audience routing.
 
 This is the working context for the daily AI Engineering agent. The reader is
 an engineer building production research-agent infrastructure for BIT Capital,

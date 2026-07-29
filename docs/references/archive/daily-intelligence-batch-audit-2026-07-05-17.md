@@ -1,4 +1,4 @@
-# Daily Intelligence Batch Audit: 5–17 July 2026
+# Historical daily intelligence batch audit: 5 to 17 July 2026
 
 Reviewed 19 July 2026. This is a historical evaluation record of the
 superseded editorial lane, not an executable contract or an active project

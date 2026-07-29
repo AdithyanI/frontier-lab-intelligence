@@ -1,4 +1,8 @@
-# Insight Persona Calibration
+# Historical Insight persona calibration
+
+This evaluation belongs to the retired two-editor Insight system. It remains
+useful as qualitative history, but the active company-aware Investment contract
+is documented in [`insight-refresh.md`](../insight-refresh.md).
 
 Last verified: 2026-07-16
 
