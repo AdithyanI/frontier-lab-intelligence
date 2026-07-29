@@ -37,8 +37,10 @@ def test_promoted_memos_are_keyed_by_unique_ticker():
     memos = company_context._investment_company_memos()
 
     assert memos
+    assert all(ticker == memo["ticker"] for ticker, memo in memos.items())
+    assert all(memo["bets"] and memo["source_ledger"] for memo in memos.values())
     assert all(
-        payload["schema_version"] == company_context.COMPANY_MEMO_SCHEMA_VERSION
-        for payload in memos.values()
+        bet["id"] == f"{ticker}-B{index}"
+        for ticker, memo in memos.items()
+        for index, bet in enumerate(memo["bets"], start=1)
     )
-    assert all(ticker == payload["company"]["ticker"] for ticker, payload in memos.items())

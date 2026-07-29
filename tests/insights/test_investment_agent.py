@@ -414,4 +414,4 @@ def test_trace_path_is_durable_unique_and_versioned(tmp_path: Path):
 
     assert first.parent == tmp_path / "2026-07-20"
     assert first != second
-    assert "rank-001-5-6-sol-xhigh-investment-agent-v11" in first.name
+    assert "rank-001-5-6-sol-xhigh-investment-agent-v12" in first.name

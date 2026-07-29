@@ -18,6 +18,12 @@ const dayFormatter = new Intl.DateTimeFormat('en-GB', {
   timeZone: 'UTC',
 })
 
+const monthFormatter = new Intl.DateTimeFormat('en-GB', {
+  month: 'short',
+  year: 'numeric',
+  timeZone: 'UTC',
+})
+
 const DIRECTION_MARK: Record<string, string> = {
   upside: '↑',
   downside: '↓',
@@ -25,24 +31,7 @@ const DIRECTION_MARK: Record<string, string> = {
   unclear: '?',
 }
 
-const thesisStatusCopy: Record<CompanyResearchMemo['memo']['investment_thesis_and_tests']['public_bit_view_status'], string> = {
-  explicit_thesis: 'BIT thesis',
-  commentary: 'BIT commentary',
-  no_public_view: 'No public BIT view',
-}
-
-const thesisEffectCopy: Partial<
-  Record<
-    CompanyResearchMemo['memo']['frontier_ai_transmission_paths'][number]['thesis_effect'],
-    string
-  >
-> = {
-  supports: 'Supports BIT',
-  challenges: 'Challenges BIT',
-  mixed: 'Tests BIT',
-}
-
-const sourceTypeCopy: Record<CompanyResearchMemo['memo']['source_ledger'][number]['source_type'], string> = {
+const sourceTypeCopy: Record<CompanyResearchMemo['source_ledger'][number]['source_type'], string> = {
   company_primary: 'Company',
   bit_primary: 'BIT Capital',
   counterparty_primary: 'Counterparty',
@@ -70,6 +59,10 @@ const sortOptions: readonly CompanyMenuOption<CompanySort>[] = [
 
 function formatDay(day: string) {
   return dayFormatter.format(new Date(`${day}T12:00:00Z`))
+}
+
+function formatMonth(day: string) {
+  return monthFormatter.format(new Date(`${day}T12:00:00Z`))
 }
 
 function formatWeight(weight: number) {
@@ -184,7 +177,7 @@ function companySearchText(company: InvestmentCompany) {
       channel.potential_downside,
       ...channel.watchpoints,
     ]),
-    company.research_memo ? JSON.stringify(company.research_memo.memo) : '',
+    company.research_memo ? JSON.stringify(company.research_memo) : '',
   ].join(' ').toLocaleLowerCase()
 }
 
@@ -206,11 +199,7 @@ function PortfolioContext({ company }: { company: InvestmentCompany }) {
     <div className="company-portfolio-lines">
       <span>
         <strong>{formatWeight(reference.weight_pct)}</strong>
-        <span>
-          {reference.basis === 'current_top_ten'
-            ? `${formatDay(reference.as_of)} top ten`
-            : `Last confirmed ${formatDay(reference.as_of)}`}
-        </span>
+        <span>{formatMonth(reference.as_of)}</span>
       </span>
     </div>
   )
@@ -232,94 +221,60 @@ function CompanyDetail({ company }: { company: InvestmentCompany }) {
     )
   }
 
-  const { memo, provenance } = researchMemo
+  const memo = researchMemo
   const sourceIndex = new Map(
     memo.source_ledger.map((source, index) => [source.url, index + 1]),
   )
-  const thesis = memo.investment_thesis_and_tests
 
   return (
     <div className="company-detail company-research-memo">
-      <section className="company-memo-intro">
-        <div>
-          <p className="company-memo-summary">
-            {cleanMemoText(memo.business_and_economics.summary)}
-            <MemoCitations
-              sources={memo.business_and_economics.sources}
-              sourceIndex={sourceIndex}
-            />
-          </p>
-          <p className="company-memo-thesis">
-            <span className="mono">{thesisStatusCopy[thesis.public_bit_view_status]}</span>
-            {thesis.attributable_public_thesis ? (
-              <span>
-                {cleanMemoText(thesis.attributable_public_thesis)}
-                <MemoCitations sources={thesis.sources} sourceIndex={sourceIndex} />
-              </span>
-            ) : (
-              <span className="muted">
-                No attributable public view. Portfolio ownership is not thesis evidence.
-              </span>
-            )}
-          </p>
-        </div>
-      </section>
+      <p className="company-memo-summary">
+        {cleanMemoText(memo.summary)}
+        <MemoCitations sources={memo.summary_sources} sourceIndex={sourceIndex} />
+      </p>
 
       <section className="company-detail-section company-ai-paths">
         <header className="company-memo-section-head">
-          <div>
-            <h3>Where frontier AI matters</h3>
-          </div>
-          <span>{memo.frontier_ai_transmission_paths.length} standing bets</span>
+          <h3>Where frontier AI matters</h3>
+          <span>{memo.bets.length} standing bets</span>
         </header>
         <div className="company-path-list">
-          {memo.frontier_ai_transmission_paths.map((path) => (
-            <details key={path.development}>
+          {memo.bets.map((bet) => (
+            <details key={bet.id}>
               <summary>
                 <span
-                  className={`company-path-direction is-${path.direction}`}
+                  className={`company-path-direction is-${bet.direction}`}
                   aria-hidden="true"
                 >
-                  {DIRECTION_MARK[path.direction] ?? '\u2194'}
+                  {DIRECTION_MARK[bet.direction] ?? '\u2194'}
                 </span>
-                <h4>{cleanMemoText(path.development)}</h4>
-                <span className="company-path-meta">
-                  {thesisEffectCopy[path.thesis_effect] && (
-                    <span className={`company-path-thesis is-${path.thesis_effect}`}>
-                      {thesisEffectCopy[path.thesis_effect]}
-                    </span>
-                  )}
-                  <span className="company-path-horizon mono">
-                    {formatTaxonomy(path.time_horizon)}
-                  </span>
+                <h4>{cleanMemoText(bet.if)}</h4>
+                <span className="company-path-horizon mono">
+                  {formatTaxonomy(bet.horizon)}
                 </span>
               </summary>
               <dl className="company-causal-chain">
                 <div>
                   <dt>Exposure</dt>
-                  <dd>{cleanMemoText(path.company_exposure)}</dd>
+                  <dd>{cleanMemoText(bet.exposure)}</dd>
                 </div>
                 <div>
-                  <dt>Driver</dt>
-                  <dd>{cleanMemoText(path.affected_driver)}</dd>
-                </div>
-                <div>
-                  <dt>Consequence</dt>
-                  <dd>{cleanMemoText(path.financial_consequence)}</dd>
+                  <dt>Then</dt>
+                  <dd>{cleanMemoText(bet.then)}</dd>
                 </div>
                 <div>
                   <dt>Material when</dt>
-                  <dd>{cleanMemoText(path.materiality_condition)}</dd>
+                  <dd>{cleanMemoText(bet.material_when)}</dd>
                 </div>
                 <div>
                   <dt>Watch</dt>
                   <dd>
                     <ul className="company-bet-watch">
-                      {path.watchpoints.map((watchpoint) => (
+                      {bet.watch.map((watchpoint) => (
                         <li key={watchpoint}>{cleanMemoText(watchpoint)}</li>
                       ))}
                     </ul>
-                    <MemoCitations sources={path.sources} sourceIndex={sourceIndex} />
+                    <MemoCitations sources={bet.sources} sourceIndex={sourceIndex} />
                   </dd>
                 </div>
               </dl>
@@ -330,7 +285,10 @@ function CompanyDetail({ company }: { company: InvestmentCompany }) {
 
       <section className="company-detail-section company-memo-sources">
         <details>
-          <summary>Source ledger and generation record · {memo.source_ledger.length} sources · researched {formatDay(provenance.research_date)}</summary>
+          <summary>
+            {memo.source_ledger.length} sources · researched{' '}
+            {formatDay(memo.researched_at)}
+          </summary>
           <ol>
             {memo.source_ledger.map((source, index) => (
               <li key={source.url} id={`${company.ticker}-source-${index + 1}`}>
@@ -345,11 +303,6 @@ function CompanyDetail({ company }: { company: InvestmentCompany }) {
               </li>
             ))}
           </ol>
-          <p className="company-generation-record mono">
-            {provenance.prompt_version} · {provenance.input_tokens.toLocaleString()} input ·{' '}
-            {provenance.output_tokens.toLocaleString()} output ·{' '}
-            {provenance.cached_tokens.toLocaleString()} cached tokens
-          </p>
         </details>
       </section>
     </div>
@@ -445,8 +398,8 @@ export default function CompanyUniversePage() {
           {payload.counts.research_memos === payload.counts.companies
             ? `All ${payload.counts.companies} companies have a source-bearing research memo. `
             : `${payload.counts.research_memos} companies have a source-bearing research memo; the remaining rows stay visible while their memos are generated. `}
-          June shows only the current top ten; December 2025 is the latest complete
-          audited portfolio, and absence from June does not prove a sale.
+          Each weight is BIT&rsquo;s most recently disclosed position for that
+          company, so the date differs by row.
         </p>
         <div>
           <a href={payload.disclosures.current_top_ten.source.url} target="_blank" rel="noreferrer">

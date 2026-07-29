@@ -188,5 +188,11 @@ def test_bit_lens_company_universe_is_a_complete_read_only_projection():
     assert all("frontier_lab_relevance" not in company for company in data["companies"])
     assert all(company["analyst_context"]["frontier_ai_channels"] for company in data["companies"])
     companies = {company["ticker"]: company for company in data["companies"]}
-    assert companies["IREN"]["research_memo"]["memo"]["source_ledger"]
-    assert companies["MSFT"]["research_memo"]["provenance"]["research_date"] == "2026-07-28"
+    assert companies["IREN"]["research_memo"]["source_ledger"]
+    assert companies["MSFT"]["research_memo"]["researched_at"] == "2026-07-28"
+    bets = companies["MU"]["research_memo"]["bets"]
+    assert bets and bets[0]["id"] == "MU-B1"
+    assert all(
+        {"id", "if", "exposure", "then", "material_when", "watch"} <= set(bet)
+        for bet in bets
+    )

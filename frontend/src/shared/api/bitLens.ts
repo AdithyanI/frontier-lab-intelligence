@@ -23,88 +23,38 @@ export interface CompanyMemoSourceRef {
   claim_date: string | null
 }
 
+export interface CompanyBet {
+  id: string
+  if: string
+  exposure: string
+  then: string
+  material_when: string
+  watch: string[]
+  direction: 'upside' | 'downside' | 'mixed'
+  horizon: 'near_term' | 'medium_term' | 'long_term' | 'unclear'
+  sources: CompanyMemoSourceRef[]
+}
+
 export interface CompanyResearchMemo {
-  schema_version: 'company-memo-pilot-result-v1'
-  company: {
-    name: string
-    ticker: string
-  }
-  memo: {
-    business_and_economics: {
-      summary: string
-      revenue_engines: Array<{
-        engine: string
-        who_pays: string
-        economic_logic: string
-        sources: CompanyMemoSourceRef[]
-      }>
-      sources: CompanyMemoSourceRef[]
-    }
-    operating_and_financial_drivers: Array<{
-      driver: string
-      why_it_matters: string
-      financial_lines: string[]
-      sources: CompanyMemoSourceRef[]
-    }>
-    ecosystem: Array<{
-      relationship: string
-      entities_or_group: string
-      why_it_matters: string
-      sources: CompanyMemoSourceRef[]
-    }>
-    strategy_and_committed_actions: Array<{
-      action: string
-      investment_relevance: string
-      sources: CompanyMemoSourceRef[]
-    }>
-    frontier_ai_transmission_paths: Array<{
-      development: string
-      company_exposure: string
-      affected_driver: string
-      financial_consequence: string
-      direction: 'upside' | 'downside' | 'mixed'
-      materiality_condition: string
-      time_horizon: 'near_term' | 'medium_term' | 'long_term' | 'unclear'
-      thesis_effect: 'supports' | 'challenges' | 'mixed' | 'unclear' | 'no_public_thesis'
-      watchpoints: string[]
-      sources: CompanyMemoSourceRef[]
-    }>
-    investment_thesis_and_tests: {
-      public_bit_view_status: 'explicit_thesis' | 'commentary' | 'no_public_view'
-      attributable_public_thesis: string | null
-      what_would_support_it: string[]
-      what_would_challenge_it: string[]
-      sources: CompanyMemoSourceRef[]
-    }
-    uncertainties_and_research_triggers: Array<{
-      uncertainty: string
-      why_it_matters: string
-      next_research_trigger: string
-      sources: CompanyMemoSourceRef[]
-    }>
-    source_ledger: Array<{
-      url: string
-      title: string
-      publisher: string
-      published_at: string | null
-      source_type:
-        | 'company_primary'
-        | 'bit_primary'
-        | 'counterparty_primary'
-        | 'regulator_primary'
-        | 'high_quality_secondary'
-    }>
-  }
-  provenance: {
-    research_date: string
-    model: string
-    reasoning_effort: string
-    prompt_version: string
-    input_tokens: number
-    cached_tokens: number
-    output_tokens: number
-    reasoning_tokens?: number
-  }
+  ticker: string
+  name: string
+  summary: string
+  summary_sources: CompanyMemoSourceRef[]
+  stated_magnitudes: string[]
+  bets: CompanyBet[]
+  researched_at: string
+  source_ledger: Array<{
+    url: string
+    title: string
+    publisher: string
+    published_at: string | null
+    source_type:
+      | 'company_primary'
+      | 'bit_primary'
+      | 'counterparty_primary'
+      | 'regulator_primary'
+      | 'high_quality_secondary'
+  }>
 }
 
 export interface InvestmentCompany {

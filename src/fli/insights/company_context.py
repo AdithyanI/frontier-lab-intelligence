@@ -15,8 +15,8 @@ from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 INVESTMENT_CONTEXT_SCHEMA_VERSION = "bit-investment-context-v5"
-COMPANY_MEMO_SCHEMA_VERSION = "company-memo-pilot-result-v1"
-COMPANY_MEMO_ROOT = REPO_ROOT / "docs" / "references" / "company-memos"
+COMPANY_MEMO_SCHEMA_VERSION = "company-memos-v2"
+COMPANY_MEMO_PATH = REPO_ROOT / "docs" / "references" / "company-memos.json"
 BIT_PUBLIC_VIEW_GRADES = {"explicit_thesis", "commentary", "none"}
 BIT_PUBLIC_VIEW_SOURCE_SCOPES = {"firm", "flagship", "other_product", "mixed", "none"}
 EVENT_COMPANY_CONNECTION_TYPES = {"direct", "indirect", "none"}
@@ -352,33 +352,45 @@ def portfolio_reference_payload() -> dict[str, Any]:
 
 
 def _investment_company_memos() -> dict[str, dict[str, Any]]:
-    """Load promoted, source-bearing company memos keyed by ticker."""
-    if not COMPANY_MEMO_ROOT.exists():
+    """Load the consolidated, source-bearing company memos keyed by ticker."""
+    if not COMPANY_MEMO_PATH.exists():
         return {}
 
+    payload = _read_json(COMPANY_MEMO_PATH)
+    if not isinstance(payload, dict):
+        raise ValueError(f"{COMPANY_MEMO_PATH} must be an object")
+    if payload.get("schema_version") != COMPANY_MEMO_SCHEMA_VERSION:
+        raise ValueError(f"{COMPANY_MEMO_PATH} uses an unsupported schema version")
+    companies = payload.get("companies")
+    if not isinstance(companies, dict) or not companies:
+        raise ValueError(f"{COMPANY_MEMO_PATH} has no companies")
+
     memos: dict[str, dict[str, Any]] = {}
-    for path in sorted(COMPANY_MEMO_ROOT.glob("*.json")):
-        payload = _read_json(path)
-        if not isinstance(payload, dict):
-            raise ValueError(f"Company memo {path} must be an object")
-        if payload.get("schema_version") != COMPANY_MEMO_SCHEMA_VERSION:
-            raise ValueError(f"Company memo {path} uses an unsupported schema version")
-        company = payload.get("company")
-        memo = payload.get("memo")
-        provenance = payload.get("provenance")
-        if not isinstance(company, dict) or not isinstance(memo, dict):
-            raise ValueError(f"Company memo {path} is missing company or memo")
-        if not isinstance(provenance, dict):
-            raise ValueError(f"Company memo {path} is missing provenance")
-        ticker = company.get("ticker")
-        if not isinstance(ticker, str) or not ticker.strip():
-            raise ValueError(f"Company memo {path} is missing its ticker")
-        if ticker in memos:
-            raise ValueError(f"Duplicate promoted company memo for {ticker}")
+    for ticker, memo in companies.items():
+        if not isinstance(memo, dict):
+            raise ValueError(f"Company memo {ticker} must be an object")
+        if memo.get("ticker") != ticker:
+            raise ValueError(f"Company memo {ticker} disagrees with its key")
+        if not str(memo.get("summary") or "").strip():
+            raise ValueError(f"Company memo {ticker} has no summary")
+        bets = memo.get("bets")
+        if not isinstance(bets, list) or not bets:
+            raise ValueError(f"Company memo {ticker} has no bets")
+        for bet in bets:
+            missing = [
+                field
+                for field in ("id", "if", "exposure", "then", "material_when")
+                if not str(bet.get(field) or "").strip()
+            ]
+            if missing:
+                raise ValueError(
+                    f"Company memo {ticker} bet {bet.get('id')} is missing "
+                    f"{', '.join(missing)}"
+                )
         source_ledger = memo.get("source_ledger")
         if not isinstance(source_ledger, list) or not source_ledger:
-            raise ValueError(f"Company memo {path} has no source ledger")
-        memos[ticker] = payload
+            raise ValueError(f"Company memo {ticker} has no source ledger")
+        memos[ticker] = memo
     return memos
 
 
