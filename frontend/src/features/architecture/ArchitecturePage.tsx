@@ -100,10 +100,10 @@ export function SystemOverview() {
       {/* the shared model boundary hangs off the deterministic pipeline */}
       <path d="M325 138 V172" fill="none" stroke={BLUE_MID} strokeWidth="1.4" markerEnd="url(#overview-arrow)" />
       <path d="M531 180 V146" fill="none" stroke={BLUE_MID} strokeWidth="1.4" markerEnd="url(#overview-arrow)" />
-      <rect x="236" y="180" width="384" height="62" fill={SAND} stroke={BLUE_MID} strokeWidth="1.2" />
+      <rect x="236" y="180" width="456" height="62" fill={SAND} stroke={BLUE_MID} strokeWidth="1.2" />
       <text x="254" y="205" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.08em">MODEL BOUNDARY</text>
       <text x="254" y="230" fontFamily={UI} fontSize="15" fontWeight="600" fill={INK}>LiteLLM + OpenAI Responses</text>
-      <text x="468" y="230" fontFamily={UI} fontSize="11.5" fill={MUTED}>routing · Investment · Engineering</text>
+      <text x="482" y="230" fontFamily={UI} fontSize="10.5" fill={MUTED}>routing · Investment · Engineering</text>
 
       <line x1="30" y1="270" x2="1050" y2="270" stroke={MUTED} strokeWidth="1" strokeDasharray="4 5" opacity="0.35" />
       <text x="30" y="292" fontFamily={UI} fontSize="11.5" fill={MUTED}>
