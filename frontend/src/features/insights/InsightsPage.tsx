@@ -1064,7 +1064,7 @@ function InvestmentAgentMechanism({
   companyNames: Record<string, string>
 }) {
   return (
-    <details className="investment-agent-mechanism" open>
+    <details className="investment-agent-mechanism">
       <summary>
         <span className="investment-agent-mechanism-identity">
           <strong>{decodeTextEntities(assessment.mechanism_title)}</strong>
@@ -1089,36 +1089,34 @@ function InvestmentAgentMechanism({
         <ol className="investment-agent-exposures">
           {assessment.exposures.map((exposure) => (
             <li key={exposure.ticker}>
-              <div className="investment-agent-exposure-main">
-                <div className="investment-agent-exposure-head">
-                  <strong>{companyNames[exposure.ticker] ?? exposure.ticker}</strong>
-                  <Link
-                    className="mono"
-                    to={`/bit-lens/companies?company=${encodeURIComponent(exposure.ticker)}`}
-                  >
-                    {exposure.ticker}
-                  </Link>
-                </div>
-                <p className="investment-agent-exposure-driver">
-                  {decodeTextEntities(exposure.affected_driver)}
-                </p>
-                <p className="investment-agent-exposure-impact">
-                  {decodeTextEntities(exposure.impact ?? exposure.note ?? '')}
-                </p>
+              <div className="investment-agent-exposure-head">
+                <strong>{companyNames[exposure.ticker] ?? exposure.ticker}</strong>
+                <Link
+                  className="mono"
+                  to={`/bit-lens/companies?company=${encodeURIComponent(exposure.ticker)}`}
+                >
+                  {exposure.ticker}
+                </Link>
               </div>
-              <div className="investment-agent-exposure-verdict">
+              <p className="investment-agent-exposure-driver">
                 <span
                   className="investment-agent-direction"
                   data-direction={exposure.direction}
                 >
                   {INVESTMENT_AGENT_DIRECTION[exposure.direction].label}
                 </span>
-                {exposure.size_basis && (
-                  <span className="investment-agent-size-basis">
-                    {decodeTextEntities(exposure.size_basis)}
-                  </span>
-                )}
-              </div>
+                <span className="investment-agent-exposure-driver-name">
+                  {decodeTextEntities(exposure.affected_driver)}
+                </span>
+              </p>
+              <p className="investment-agent-exposure-impact">
+                {decodeTextEntities(exposure.impact ?? exposure.note ?? '')}
+              </p>
+              {exposure.size_basis && (
+                <p className="investment-agent-size-basis">
+                  {decodeTextEntities(exposure.size_basis)}
+                </p>
+              )}
             </li>
           ))}
         </ol>
