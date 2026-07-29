@@ -447,19 +447,20 @@ export default function HowNarrative({
             <CollectionCostFigure />
           </FigureFrame>
           <p>
-            Sweeping the whole network for one day costs about forty cents,
-            and one account for one day is two hundredths of a cent. The part
-            worth noticing is the last line: a sweep pages each account&rsquo;s
-            timeline until it passes the horizon, so five days costs barely
-            more than one. The bill tracks how many accounts are watched, not
-            how many days are asked for &mdash; which is why backfilling the
-            month was cheap and widening the Registry is the decision that
-            actually costs money.
+            The daily bill is about forty cents. That is one sweep across
+            roughly 2,600 accounts, plus the handful of long-form posts worth
+            freezing. Building the network in the first place was a separate
+            one-off of about thirty dollars, and it is already paid &mdash;
+            publishing a brief does not re-crawl the follow graph or re-check
+            profiles.
           </p>
           <p>
-            Extending the follow graph is the one genuinely lumpy cost. It is
-            a one-off that runs when the network is grown, not part of a daily
-            brief.
+            One detail is worth knowing when you think about scale: a sweep
+            pages each account&rsquo;s timeline until it passes the horizon, so
+            asking for five days costs barely more than asking for one. The
+            bill tracks how many accounts are watched, not how many days are
+            requested. Widening the Registry is the decision that costs money;
+            backfilling history is nearly free.
           </p>
 
           <p className="how-read-sub mono">6c · One real request</p>

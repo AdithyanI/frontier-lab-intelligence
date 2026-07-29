@@ -8,6 +8,7 @@ const BLUE = '#5bc5f2'
 const BLUE_MID = '#4391b4'
 const BLUE_INK = '#235165'
 const SAND = '#f4f1ea'
+const PALE_INK = '#c9c9c6'
 const MONO = "'IBM Plex Mono', monospace"
 const UI = "'Inter', system-ui, sans-serif"
 
@@ -552,93 +553,105 @@ export function CostFigure() {
   )
 }
 
-/* Stage 6b: the collection side of the bill, in the same shape as the model
-   cost figure. The provider bills in credits, and one hundred thousand
-   credits is a dollar, so every unit price is a small division. The point
-   worth carrying away is at the bottom: a sweep costs roughly one request per
-   account, so the bill tracks how many accounts are watched, not how many
-   days are asked for. */
+/* Stage 6b: the collection side of the bill, split into the two things a
+   reader actually wants separated — what recurs every day, and what was paid
+   once to build the network. Mixing them makes a cheap daily job look
+   expensive. The provider bills in credits; 100,000 credits is a dollar. */
 export function CollectionCostFigure() {
   const meter = [
     { unit: 'One timeline page request', note: 'up to 20 posts', credits: '15', cost: '$0.00015' },
-    { unit: 'One profile lookup', note: 'used to refresh the network', credits: '18', cost: '$0.00018' },
     { unit: 'One X article body', note: 'long-form posts only', credits: '100', cost: '$0.001' },
+    { unit: 'One profile lookup', note: 'setup only', credits: '18', cost: '$0.00018' },
   ]
 
-  const pulls = [
+  const daily = [
     {
-      name: 'One account, one day',
-      sub: 'usually a single page',
-      calc: '~1 request × 15 credits',
-      total: '~$0.0002',
-    },
-    {
-      name: 'The whole network, one day',
-      sub: '~2,600 accounts swept',
+      name: 'Sweep every account for one day',
+      sub: '~2,600 accounts · one page each',
       calc: '~2,800 requests × 15 credits',
       total: '~$0.40',
     },
     {
-      name: 'The whole network, five days',
-      sub: 'one sweep, longer horizon',
-      calc: '~3,800 requests × 15 credits',
-      total: '~$0.60',
+      name: 'Freeze the long-form posts',
+      sub: 'only a handful appear per day',
+      calc: '~3 articles × 100 credits',
+      total: '~$0.003',
+    },
+  ]
+
+  const once = [
+    {
+      name: 'Crawl the follow graph',
+      sub: 'who the trusted accounts follow',
+      calc: 'cold crawl of ~2,200 sources',
+      total: '~$28',
     },
     {
-      name: 'Re-check every profile',
-      sub: 'network refresh, not a daily cost',
+      name: 'Look up every profile',
+      sub: 'screening accounts into the Registry',
       calc: '~2,600 lookups × 18 credits',
       total: '~$0.47',
     },
   ]
 
+  const band = (
+    rows: { name: string; sub: string; calc: string; total: string }[],
+    top: number,
+  ) =>
+    rows.map((row, index) => {
+      const y = top + index * 54
+      return (
+        <g key={row.name}>
+          <text x="50" y={y + 25} fontFamily={UI} fontSize="15" fontWeight="600" fill={INK}>{row.name}</text>
+          <text x="50" y={y + 42} fontFamily={MONO} fontSize="9" fill={MUTED} letterSpacing="0.05em">{row.sub}</text>
+          <text x="880" y={y + 31} textAnchor="end" fontFamily={MONO} fontSize="11.5" fill={MUTED}>{row.calc}</text>
+          <text x="1050" y={y + 33} textAnchor="end" fontFamily={UI} fontSize="18" fontWeight="600" fill={BLUE_INK}>{row.total}</text>
+          <line x1="30" y1={y + 54} x2="1050" y2={y + 54} stroke={MUTED} strokeWidth="1" opacity="0.22" />
+        </g>
+      )
+    })
+
   return (
-    <svg viewBox="0 0 1080 644" role="img" aria-label="The X collection cost as a rule of thumb: the provider bills in credits where one hundred thousand credits is a dollar, a timeline page is fifteen credits, and sweeping the whole network for one day costs about forty cents because the bill tracks the number of accounts rather than the number of days.">
-      <rect x="0" y="0" width="1080" height="644" fill="#fff" />
+    <svg viewBox="0 0 1080 660" role="img" aria-label="The X collection cost, split into recurring and one-off. The provider bills in credits where one hundred thousand credits is a dollar. Every day costs about forty cents to sweep the whole network. Building the network was a one-off of about thirty dollars, already paid.">
+      <rect x="0" y="0" width="1080" height="660" fill="#fff" />
       <text x="30" y="34" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.08em">COLLECTION COST · A RULE OF THUMB</text>
       <text x="1050" y="34" textAnchor="end" fontFamily={MONO} fontSize="9.5" fill={MUTED} letterSpacing="0.06em">100,000 PROVIDER CREDITS = $1</text>
 
       {/* 1 · the meter */}
-      <text x="30" y="80" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.06em">1 · THE METER · WHAT THE PROVIDER CHARGES</text>
-      <text x="700" y="106" textAnchor="middle" fontFamily={MONO} fontSize="8.5" fill={MUTED} letterSpacing="0.06em">CREDITS</text>
-      <text x="940" y="106" textAnchor="middle" fontFamily={MONO} fontSize="8.5" fill={MUTED} letterSpacing="0.06em">COST</text>
-      <line x1="30" y1="116" x2="1050" y2="116" stroke={MUTED} strokeWidth="1" opacity="0.3" />
+      <text x="30" y="78" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.06em">1 · THE METER · WHAT THE PROVIDER CHARGES</text>
+      <text x="700" y="102" textAnchor="middle" fontFamily={MONO} fontSize="8.5" fill={MUTED} letterSpacing="0.06em">CREDITS</text>
+      <text x="940" y="102" textAnchor="middle" fontFamily={MONO} fontSize="8.5" fill={MUTED} letterSpacing="0.06em">COST</text>
+      <line x1="30" y1="112" x2="1050" y2="112" stroke={MUTED} strokeWidth="1" opacity="0.3" />
       {meter.map((row, index) => {
-        const y = 116 + index * 52
+        const y = 112 + index * 48
         return (
           <g key={row.unit}>
-            <rect x="30" y={y} width="1020" height="52" fill={index % 2 === 1 ? SAND : '#fff'} opacity={index % 2 === 1 ? 0.7 : 1} />
-            <text x="50" y={y + 24} fontFamily={UI} fontSize="14.5" fontWeight="600" fill={INK}>{row.unit}</text>
-            <text x="50" y={y + 41} fontFamily={UI} fontSize="12" fill={MUTED}>{row.note}</text>
-            <text x="700" y={y + 32} textAnchor="middle" fontFamily={MONO} fontSize="14" fill={INK}>{row.credits}</text>
-            <text x="940" y={y + 32} textAnchor="middle" fontFamily={UI} fontSize="16" fontWeight="600" fill={BLUE_INK}>{row.cost}</text>
-            <line x1="30" y1={y + 52} x2="1050" y2={y + 52} stroke={MUTED} strokeWidth="1" opacity="0.3" />
+            <rect x="30" y={y} width="1020" height="48" fill={index % 2 === 1 ? SAND : '#fff'} opacity={index % 2 === 1 ? 0.7 : 1} />
+            <text x="50" y={y + 22} fontFamily={UI} fontSize="14.5" fontWeight="600" fill={INK}>{row.unit}</text>
+            <text x="50" y={y + 38} fontFamily={UI} fontSize="12" fill={MUTED}>{row.note}</text>
+            <text x="700" y={y + 30} textAnchor="middle" fontFamily={MONO} fontSize="14" fill={INK}>{row.credits}</text>
+            <text x="940" y={y + 30} textAnchor="middle" fontFamily={UI} fontSize="16" fontWeight="600" fill={BLUE_INK}>{row.cost}</text>
+            <line x1="30" y1={y + 48} x2="1050" y2={y + 48} stroke={MUTED} strokeWidth="1" opacity="0.3" />
           </g>
         )
       })}
 
-      {/* 2 · what one pull costs */}
-      <text x="30" y="316" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.06em">2 · WHAT ONE PULL COSTS</text>
-      <line x1="30" y1="330" x2="1050" y2="330" stroke={MUTED} strokeWidth="1" opacity="0.3" />
-      {pulls.map((pull, index) => {
-        const y = 330 + index * 54
-        return (
-          <g key={pull.name}>
-            <text x="50" y={y + 25} fontFamily={UI} fontSize="15" fontWeight="600" fill={INK}>{pull.name}</text>
-            <text x="50" y={y + 42} fontFamily={MONO} fontSize="9" fill={MUTED} letterSpacing="0.05em">{pull.sub}</text>
-            <text x="880" y={y + 31} textAnchor="end" fontFamily={MONO} fontSize="11.5" fill={MUTED}>{pull.calc}</text>
-            <text x="1050" y={y + 33} textAnchor="end" fontFamily={UI} fontSize="19" fontWeight="600" fill={BLUE_INK}>{pull.total}</text>
-            <line x1="30" y1={y + 54} x2="1050" y2={y + 54} stroke={MUTED} strokeWidth="1" opacity="0.22" />
-          </g>
-        )
-      })}
+      {/* 2 · every day */}
+      <rect x="30" y="286" width="4" height="126" fill={BLUE_MID} />
+      <text x="50" y="302" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.06em">2 · EVERY DAY · THE RECURRING BILL</text>
+      <line x1="30" y1="312" x2="1050" y2="312" stroke={MUTED} strokeWidth="1" opacity="0.3" />
+      {band(daily, 312)}
+      <text x="50" y="440" fontFamily={UI} fontSize="14" fontWeight="600" fill={INK}>Every day, all in</text>
+      <text x="1050" y="442" textAnchor="end" fontFamily={UI} fontSize="21" fontWeight="600" fill={INK}>≈ $0.40 a day</text>
 
-      {/* 3 · the shape of the bill */}
-      <text x="30" y="576" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.06em">3 · THE BILL TRACKS ACCOUNTS, NOT DAYS</text>
-      <text x="30" y="598" fontFamily={UI} fontSize="13" fill={MUTED}>
-        A sweep pages each account&rsquo;s timeline until it passes the horizon, so asking for five days costs little more than asking for one.
-      </text>
-      <text x="30" y="620" fontFamily={MONO} fontSize="9" fill={MUTED} letterSpacing="0.06em">WIDENING THE REGISTRY IS THE DECISION THAT COSTS MONEY · EXTENDING THE FOLLOW GRAPH IS A SEPARATE ONE-OFF</text>
+      {/* 3 · paid once */}
+      <rect x="30" y="480" width="4" height="126" fill={PALE_INK} />
+      <text x="50" y="496" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.06em">3 · PAID ONCE · BUILDING THE NETWORK</text>
+      <line x1="30" y1="506" x2="1050" y2="506" stroke={MUTED} strokeWidth="1" opacity="0.3" />
+      {band(once, 506)}
+      <text x="50" y="634" fontFamily={UI} fontSize="14" fontWeight="600" fill={INK}>Setup, already paid</text>
+      <text x="1050" y="636" textAnchor="end" fontFamily={UI} fontSize="21" fontWeight="600" fill={MUTED}>≈ $30 once</text>
+      <text x="240" y="634" fontFamily={UI} fontSize="12.5" fill={MUTED}>the network is not re-crawled to publish a brief</text>
     </svg>
   )
 }

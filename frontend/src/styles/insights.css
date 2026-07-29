@@ -1111,6 +1111,10 @@
   text-decoration: underline;
 }
 
+.investment-agent-exposure-head .investment-agent-threshold {
+  margin-left: auto;
+}
+
 .investment-agent-exposure-body {
   display: grid;
   grid-template-columns: 124px minmax(0, 72ch);
