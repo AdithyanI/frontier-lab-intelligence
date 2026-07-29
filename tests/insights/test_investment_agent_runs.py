@@ -167,6 +167,40 @@ def test_publication_hides_completed_rows_outside_the_selected_cohort(
     ]
 
 
+def test_publication_rejects_cross_day_development_reuse(tmp_path: Path):
+    db_path = tmp_path / "investment-agent.db"
+    first = _trace()
+    first_path = tmp_path / "first.json"
+    first_path.write_text(json.dumps(first), encoding="utf-8")
+    investment_agent_runs.import_trace(first_path, db_path=db_path)
+    investment_agent_runs.publish_day(
+        day=DAY,
+        candidates=[
+            {"development_id": DEVELOPMENT_ID, "daily_rank": 1}
+        ],
+        selection_limit=1,
+        db_path=db_path,
+    )
+
+    next_day = "2026-07-22"
+    second = _trace()
+    second["date"] = next_day
+    second["daily_rank"] = 2
+    second_path = tmp_path / "second.json"
+    second_path.write_text(json.dumps(second), encoding="utf-8")
+    investment_agent_runs.import_trace(second_path, db_path=db_path)
+
+    with pytest.raises(ValueError, match="more than one day"):
+        investment_agent_runs.publish_day(
+            day=next_day,
+            candidates=[
+                {"development_id": DEVELOPMENT_ID, "daily_rank": 2}
+            ],
+            selection_limit=1,
+            db_path=db_path,
+        )
+
+
 def test_import_trace_requires_every_retained_company_to_have_an_opened_memo(
     tmp_path: Path,
 ):

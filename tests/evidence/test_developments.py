@@ -63,7 +63,12 @@ def exact_event(
     }
 
 
-def artifact(artifact_id: str, url: str) -> dict:
+def artifact(
+    artifact_id: str,
+    url: str,
+    *,
+    first_event_day: str = "2026-07-21",
+) -> dict:
     return {
         "artifact_id": artifact_id,
         "canonical_url": url,
@@ -71,6 +76,7 @@ def artifact(artifact_id: str, url: str) -> dict:
         "title": "Release",
         "source_rank": 1,
         "merge_anchor": developments.artifact_is_merge_anchor(url),
+        "first_event_day": first_event_day,
     }
 
 
@@ -162,3 +168,39 @@ def test_generic_host_root_does_not_merge_events():
     )
 
     assert len(bundled) == 2
+
+
+def test_release_artifact_publishes_one_development_on_its_first_day():
+    events = [
+        exact_event(
+            "event-a",
+            rank=1,
+            post_id="post-a",
+            entity_id=1,
+            entity_name="One",
+        ),
+        exact_event(
+            "event-b",
+            rank=2,
+            post_id="post-b",
+            entity_id=2,
+            entity_name="Two",
+        ),
+    ]
+    old_release = artifact(
+        "artifact-release",
+        "https://example.com/releases/model-1",
+        first_event_day="2026-07-20",
+    )
+
+    bundled = developments.bundle_events(
+        items=events,
+        event_artifacts={
+            "event-a": [old_release],
+            "event-b": [old_release],
+        },
+        entity_positions={1: 0.5, 2: 0.5},
+        day="2026-07-21",
+    )
+
+    assert bundled == []

@@ -363,6 +363,23 @@ def publish_day(
     )
     conn = connect(db_path)
     try:
+        repeated = conn.execute(
+            f"""SELECT development_id, day
+                FROM investment_agent_day_publication_item
+                WHERE day != ?
+                  AND development_id IN (
+                      {",".join("?" for _ in normalized)}
+                  )
+                ORDER BY day, development_id
+                LIMIT 1""",
+            (day, *(item["development_id"] for item in normalized)),
+        ).fetchone()
+        if repeated is not None:
+            raise ValueError(
+                "cannot publish an Investment Development on more than one "
+                f"day: {repeated['development_id']} already belongs to "
+                f"{repeated['day']}"
+            )
         for item in normalized:
             row = conn.execute(
                 """SELECT 1

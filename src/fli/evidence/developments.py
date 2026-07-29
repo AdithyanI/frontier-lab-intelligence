@@ -85,6 +85,34 @@ def load_event_artifacts(
         ).fetchone()
         if import_run is None:
             return {}
+        tables = {
+            str(row["name"])
+            for row in conn.execute(
+                "SELECT name FROM sqlite_master WHERE type = 'table'"
+            ).fetchall()
+        }
+        first_days = {
+            str(row["artifact_id"]): str(row["first_event_day"])
+            for row in conn.execute(
+                """SELECT artifact_id, MIN(event_day) AS first_event_day
+                   FROM artifact_import_candidate
+                   WHERE decision = 'accepted'
+                     AND artifact_id IS NOT NULL
+                   GROUP BY artifact_id"""
+            ).fetchall()
+        }
+        if "artifact_event_supplement" in tables:
+            for row in conn.execute(
+                """SELECT artifact_id, MIN(event_day) AS first_event_day
+                   FROM artifact_event_supplement
+                   GROUP BY artifact_id"""
+            ).fetchall():
+                artifact_id = str(row["artifact_id"])
+                first_day = str(row["first_event_day"])
+                first_days[artifact_id] = min(
+                    first_day,
+                    first_days.get(artifact_id, first_day),
+                )
         rows = conn.execute(
             """SELECT DISTINCT candidate.event_id, candidate.source_rank,
                               artifact.artifact_id, artifact.canonical_url,
@@ -99,12 +127,6 @@ def load_event_artifacts(
                         artifact.canonical_url""",
             (str(import_run["import_run_id"]), day),
         ).fetchall()
-        tables = {
-            str(row["name"])
-            for row in conn.execute(
-                "SELECT name FROM sqlite_master WHERE type = 'table'"
-            ).fetchall()
-        }
         supplement_rows: list[sqlite3.Row] = []
         if "artifact_event_supplement" in tables:
             supplement_rows = conn.execute(
@@ -134,6 +156,7 @@ def load_event_artifacts(
             "title": str(row["title"] or "") or None,
             "source_rank": int(row["source_rank"]),
             "merge_anchor": artifact_is_merge_anchor(str(row["canonical_url"])),
+            "first_event_day": first_days.get(artifact_id, day),
         }
     return {
         event_id: sorted(
@@ -358,6 +381,11 @@ def bundle_events(
                     str(artifact["canonical_url"]),
                 ),
             )
+            # A release-specific artifact owns one canonical Development day.
+            # Later independently authored posts remain exact Events in the
+            # ledger, but must not republish the same artifact Development.
+            if str(anchor.get("first_event_day") or day) < day:
+                continue
             development_id = _sha256(
                 [BUNDLE_CONTRACT, "artifact", str(anchor["artifact_id"])]
             )
@@ -417,7 +445,11 @@ def bundle_events(
                 **{
                     key: value
                     for key, value in artifact.items()
-                    if key not in {"source_rank", "merge_anchor"}
+                    if key not in {
+                        "source_rank",
+                        "merge_anchor",
+                        "first_event_day",
+                    }
                 },
                 "source_event_ids": sorted(artifact_event_ids[artifact_id]),
                 "is_merge_basis": len(artifact_event_ids[artifact_id]) > 1
