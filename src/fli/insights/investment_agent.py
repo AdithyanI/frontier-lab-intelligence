@@ -133,27 +133,15 @@ def _all_memos() -> dict[str, Any]:
 
 def _memo_packet(ticker: str) -> dict[str, Any]:
     memo = copy.deepcopy(_all_memos()[ticker])
-    magnitudes = memo.pop("stated_magnitudes", [])
     memo.pop("source_ledger", None)
     return {
         "schema_version": "investment-agent-company-memo-v3",
         "company": {"name": memo["name"], "ticker": memo["ticker"]},
         "research_date": memo.get("researched_at"),
-        "scale": {
-            "stated_magnitudes": magnitudes,
-            "note": (
-                "No revenue, ARR, or size magnitude appears anywhere in this "
-                "memo. Materiality at this company's scale cannot be "
-                "established from this packet."
-                if not magnitudes
-                else "Verbatim magnitudes from the research. Do not extrapolate."
-            ),
-        },
         "packet_policy": {
             "included": (
-                "What the company does, every size magnitude the research "
-                "stated, and the standing bets written before this "
-                "Development. Each bet is a pre-registered hypothesis: if the "
+                "What the company does and the standing bets written before "
+                "this Development. Each bet is a pre-registered hypothesis: if the "
                 "world-side condition holds, the named exposure moves the "
                 "named financial line, but only when the materiality gate is "
                 "met."
@@ -229,19 +217,19 @@ def _final_format(tickers: list[str]) -> dict[str, Any]:
                 "enum": ["material", "immaterial", "unknown"],
                 "description": (
                     "Whether a plausible outcome could move this company's "
-                    "reported results at its own scale. Judge against "
-                    "scale.stated_magnitudes in the memo packet. Use "
-                    "'unknown' when the packet supplies no revenue magnitude. "
+                    "reported results at its own scale. Judge against the "
+                    "cited bet's material_when condition. Use 'unknown' when "
+                    "neither the bet nor the Development supplies a magnitude. "
                     "Never estimate a figure the packet does not contain."
                 ),
             },
             "size_basis": {
                 "type": ["string", "null"],
                 "description": (
-                    "The single figure from scale.stated_magnitudes that the "
-                    "materiality judgment rests on, quoted close to the "
-                    "packet's wording and under 12 words. Null when "
-                    "materiality is 'unknown'. Never invent a figure."
+                    "The single figure the materiality judgment rests on, "
+                    "quoted from the cited bet or the Development, under 12 "
+                    "words. Null when materiality is 'unknown' or when no "
+                    "source states a figure. Never invent a figure."
                 ),
             },
             "impact": {

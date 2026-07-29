@@ -31,7 +31,6 @@ export interface CompanyBet {
   material_when: string
   watch: string[]
   direction: 'upside' | 'downside' | 'mixed'
-  horizon: 'near_term' | 'medium_term' | 'long_term' | 'unclear'
   sources: CompanyMemoSourceRef[]
 }
 
@@ -40,7 +39,6 @@ export interface CompanyResearchMemo {
   name: string
   summary: string
   summary_sources: CompanyMemoSourceRef[]
-  stated_magnitudes: string[]
   bets: CompanyBet[]
   researched_at: string
   source_ledger: Array<{

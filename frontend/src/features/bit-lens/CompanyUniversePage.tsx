@@ -69,10 +69,6 @@ function formatWeight(weight: number) {
   return `${weight.toFixed(2).replace(/\.?0+$/, '')}%`
 }
 
-function formatTaxonomy(value: string) {
-  return value.replaceAll('_', ' ')
-}
-
 function cleanMemoText(value: string) {
   return value
     .replace(/\s*\(\[[^\]]+\]\(https:\/\/[^)]+\)\)/g, '')
@@ -249,9 +245,6 @@ function CompanyDetail({ company }: { company: InvestmentCompany }) {
                   {DIRECTION_MARK[bet.direction] ?? '\u2194'}
                 </span>
                 <h4>{cleanMemoText(bet.if)}</h4>
-                <span className="company-path-horizon mono">
-                  {formatTaxonomy(bet.horizon)}
-                </span>
               </summary>
               <dl className="company-causal-chain">
                 <div>

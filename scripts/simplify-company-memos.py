@@ -12,7 +12,6 @@ Idempotent:  .venv/bin/python scripts/simplify-company-memos.py
 from __future__ import annotations
 
 import json
-import re
 import sys
 from pathlib import Path
 from typing import Any
@@ -23,46 +22,6 @@ OUTPUT = REPO_ROOT / "docs" / "references" / "company-memos.json"
 
 SCHEMA_VERSION = "company-memos-v2"
 MAX_WATCHPOINTS = 2
-MAX_MAGNITUDES = 6
-
-_MONEY_RE = re.compile(
-    r"(?:US\$|\$|€|EUR\s|USD\s)\s?\d[\d,.]*\s?"
-    r"(?:billion|million|bn\b|m\b|b\b|trillion)?",
-    re.IGNORECASE,
-)
-
-
-def _prose_strings(node: Any) -> list[str]:
-    found: list[str] = []
-    if isinstance(node, dict):
-        for key, value in node.items():
-            if key in {"sources", "url", "claim_date"}:
-                continue
-            found.extend(_prose_strings(value))
-    elif isinstance(node, list):
-        for value in node:
-            found.extend(_prose_strings(value))
-    elif isinstance(node, str) and not node.startswith("http"):
-        found.append(node)
-    return found
-
-
-def _stated_magnitudes(memo: dict[str, Any]) -> list[str]:
-    """Verbatim dated size sentences, lifted before the fat sections are dropped."""
-    sentences: list[str] = []
-    seen: set[str] = set()
-    for text in _prose_strings(memo):
-        for part in re.split(r"(?<![A-Z])(?<=[.;])\s+(?=[A-Z(])", text):
-            part = part.strip()
-            if not part or len(part) < 25 or not _MONEY_RE.search(part):
-                continue
-            key = part.lower()
-            if key in seen:
-                continue
-            seen.add(key)
-            sentences.append(part)
-    return sentences[:MAX_MAGNITUDES]
-
 
 def _bets(ticker: str, memo: dict[str, Any]) -> list[dict[str, Any]]:
     bets = []
@@ -77,7 +36,6 @@ def _bets(ticker: str, memo: dict[str, Any]) -> list[dict[str, Any]]:
                 "material_when": path["materiality_condition"],
                 "watch": list(path.get("watchpoints") or [])[:MAX_WATCHPOINTS],
                 "direction": path["direction"],
-                "horizon": path["time_horizon"],
                 "sources": path.get("sources") or [],
             }
         )
@@ -104,7 +62,6 @@ def build() -> dict[str, Any]:
             "name": company["name"],
             "summary": business["summary"],
             "summary_sources": business.get("sources") or [],
-            "stated_magnitudes": _stated_magnitudes(memo),
             "bets": _bets(ticker, memo),
             "source_ledger": memo["source_ledger"],
             "researched_at": (raw.get("provenance") or {})["research_date"],

@@ -639,13 +639,6 @@
 .company-path-direction.is-mixed { color: var(--blue-ink); }
 .company-path-direction.is-unclear { color: var(--muted); }
 
-.company-path-horizon {
-  color: var(--muted);
-  font-size: 9px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
 .company-causal-chain {
   display: grid;
   grid-template-columns: 108px minmax(0, 1fr);

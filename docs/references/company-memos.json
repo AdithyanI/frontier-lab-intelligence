@@ -6,7 +6,6 @@
         {
           "direction": "upside",
           "exposure": "The perovskite platform has an AI high-throughput research center focused on formulas, processes, applications and industrialization. The direct exposure is the design-test-learning loop for perovskite and tandem modules.",
-          "horizon": "medium_term",
           "id": "03800.HK-B1",
           "if": "More capable AI agents and closed-loop systems for materials discovery, experiment design and laboratory automation",
           "material_when": "AI-guided work must produce reproducible improvements on full-size modules, shorten measured iteration or qualification cycles, and raise saleable manufacturing yield or customer-qualified performance—not merely generate laboratory records.",
@@ -29,7 +28,6 @@
         {
           "direction": "mixed",
           "exposure": "Analytical hypothesis: large FBR and silane plants generate process, sensor, maintenance and quality data that could support AI-assisted control. The company describes intelligent manufacturing and publishes detailed cost and quality metrics, but has not publicly quantified frontier-AI deployment or attributable benefits in granular-silicon production.",
-          "horizon": "medium_term",
           "id": "03800.HK-B2",
           "if": "Industrial multimodal models for process control, predictive maintenance and optimization of continuous manufacturing",
           "material_when": "Cost, yield or quality improvements must be sustained across multiple production bases, exceed normal engineering and input-price effects, and create a durable ASP-cost spread or measurable product-mix benefit.",
@@ -52,7 +50,6 @@
         {
           "direction": "mixed",
           "exposure": "Exposure is indirect through photovoltaic-material demand. The IEA expects renewables, supported by storage and grids, to meet a substantial portion of incremental data-center electricity consumption, but gas, nuclear and other sources also compete to serve firm load.",
-          "horizon": "medium_term",
           "id": "03800.HK-B3",
           "if": "Continued growth in AI training, inference and agentic workloads increases data-center electricity demand",
           "material_when": "AI-related load must cause incremental, connected solar generation and storage investment large enough to absorb material photovoltaic supply and tighten polysilicon industry utilization rather than merely reallocate existing renewable output.",
@@ -75,7 +72,6 @@
         {
           "direction": "downside",
           "exposure": "The company's differentiation relies on accumulated FBR process know-how, product qualification and perovskite development. Broad access to capable materials models, coding agents and autonomous laboratories could accelerate rival cost reduction or technology qualification in an already oversupplied industry.",
-          "horizon": "medium_term",
           "id": "03800.HK-B4",
           "if": "Frontier-model diffusion lowers materials-R&D and manufacturing-optimization barriers for competitors",
           "material_when": "Competitors must use AI to achieve qualified, scaled production with cost or quality parity and win meaningful customer adoption; model demonstrations without industrial yield or shipments are not material.",
@@ -195,7 +191,6 @@
           "url": "https://bitcap.com/"
         }
       ],
-      "stated_magnitudes": [],
       "summary": "Current economics remain dominated by cyclical photovoltaic materials. In 2025, polysilicon generated about 68% of revenue and wafers about 14%; FBR granular silicon is the core product and primary source of differentiation through cost, purity, handling characteristics and carbon intensity. Industrial silicon, processing services, other silicon products and a small solar-farm business provide additional revenue. The 2026 strategy adds lithium iron phosphate, silicon-carbon anodes and other materials, while perovskite modules remain a commercialization opportunity rather than a proven material earnings engine.",
       "summary_sources": [
         {
@@ -218,7 +213,6 @@
         {
           "direction": "upside",
           "exposure": "The deployed car-audit system combines multi-camera scanning with AI image recognition, detects around 90% of reported damage categories and feeds results into the internal refurbishment workflow. It was operating in five of twelve production centers as of 2025-12-18.",
-          "horizon": "near_term",
           "id": "AG1-B1",
           "if": "Frontier multimodal vision systems improve vehicle-damage detection, severity estimation and post-repair quality inspection.",
           "material_when": "The effect becomes material only if deployment reaches most retail production volume and produces measurable reductions in inspection time or rework without higher customer claims or undisclosed damage.",
@@ -241,7 +235,6 @@
         {
           "direction": "mixed",
           "exposure": "Management describes an AI-driven pricing engine as central to the platform, supported by a pan-European transaction dataset used to calculate the used-car price index.",
-          "horizon": "near_term",
           "id": "AG1-B2",
           "if": "More capable multimodal appraisal and forecasting models combine images, vehicle history and cross-market demand to improve purchase offers, pricing and inventory routing.",
           "material_when": "The effect is material if model changes improve realized GPU and inventory velocity across multiple countries and vehicle categories after controlling for market prices, without a sustained rise in appraisal overrides, markdowns or loss-making cohorts.",
@@ -268,7 +261,6 @@
         {
           "direction": "upside",
           "exposure": "The business operates digital buying, selling and financing journeys across numerous European markets, including integrated one-click merchant financing. These workflows contain document-heavy and multilingual operational steps.",
-          "horizon": "medium_term",
           "id": "AG1-B3",
           "if": "Reliable multilingual AI agents automate seller and dealer support, listing preparation, document checks, finance handoffs and routine transaction exception handling.",
           "material_when": "The impact is material only if agents handle a meaningful share of completed transactions and reduce human touches or response times while maintaining conversion quality, complaint rates and legal-document accuracy.",
@@ -295,7 +287,6 @@
         {
           "direction": "mixed",
           "exposure": "The company originates consumer vehicle loans, offers instant-approval merchant inventory financing and depends on bank and public ABS funding. Natural-person creditworthiness models face specific EU data-protection and AI obligations.",
-          "horizon": "medium_term",
           "id": "AG1-B4",
           "if": "Advanced models improve document extraction, fraud detection and credit-risk segmentation for consumer and merchant financing.",
           "material_when": "The benefit is material only if approval or attachment rises while vintage delinquency and loss rates remain stable or improve, funding remains available and automated decisions satisfy human-oversight and explanation requirements.",
@@ -330,7 +321,6 @@
         {
           "direction": "downside",
           "exposure": "A central claimed advantage is the combination of an AI-driven pricing engine, proprietary transaction data and integrated physical execution. Foundation-model commoditization may narrow the software portion of that advantage even if proprietary data and fulfillment remain differentiated.",
-          "horizon": "medium_term",
           "id": "AG1-B5",
           "if": "Low-cost frontier and open multimodal models allow dealers, marketplaces and other intermediaries to replicate basic valuation, inspection, listing and customer-service capabilities.",
           "material_when": "The risk becomes material if competing channels achieve comparable appraisal accuracy and transaction speed without equivalent proprietary scale, followed by weaker seller conversion, dealer activity or higher acquisition costs.",
@@ -460,10 +450,6 @@
           "url": "https://eur-lex.europa.eu/eli/dir/2023/2225/2023-10-30/eng"
         }
       ],
-      "stated_magnitudes": [
-        "Pursue disclosed long-term segment targets: 10-15% annual Merchant unit growth with EUR 1,080-1,200 GPU, and 20-40% annual Retail unit growth with EUR 3,880-4,470 GPU, alongside lower SG&A per unit.",
-        "Expand captive finance and maintain scalable securitization access, including EUR 1.6 billion of inventory-financing capacity through November 2027 and recurring public consumer-loan ABS issuance."
-      ],
       "summary": "A vertically integrated European used-car platform serving consumers and professional dealers. The core economics come from acquiring and reselling owned vehicle inventory through a high-volume Merchant segment and a higher-gross-profit Retail segment, supplemented by consumer and dealer financing. Technology, proprietary transaction data, production centers, logistics and securitization funding are integral to the model; it is not a capital-light classifieds marketplace.",
       "summary_sources": [
         {
@@ -490,7 +476,6 @@
         {
           "direction": "upside",
           "exposure": "Helios combines Instinct GPUs, EPYC CPUs, Pensando networking and ROCm, with announced large-scale deployments by multiple frontier labs and hyperscalers.",
-          "horizon": "medium_term",
           "id": "AMD-B1",
           "if": "Frontier inference and agentic workloads increase token generation, context processing and always-on compute demand.",
           "material_when": "Material if announced deployments progress into accepted, paid production capacity at gigawatt scale and customers expand beyond initial phases while realized tokens per dollar remains competitive. Pilot-only or materially delayed deployments would not qualify.",
@@ -525,7 +510,6 @@
         {
           "direction": "mixed",
           "exposure": "ROCm libraries, compilers and framework integrations must support new models and techniques quickly enough for customers to qualify Instinct hardware without excessive porting or optimization work.",
-          "horizon": "near_term",
           "id": "AMD-B2",
           "if": "Frontier-model architectures, numerical formats, inference engines and frameworks change rapidly.",
           "material_when": "Material if leading frontier-model releases either run with near-day-zero production support and stable performance or require materially longer qualification than competing stacks across several major customers.",
@@ -552,7 +536,6 @@
         {
           "direction": "mixed",
           "exposure": "Major customers can substitute custom or specialized compute for general-purpose external GPUs. Heterogeneous systems may still use EPYC CPUs, Pensando networking or Instinct for other workflow stages.",
-          "horizon": "medium_term",
           "id": "AMD-B3",
           "if": "Hyperscalers increase use of customer-designed accelerators or specialized inference architectures.",
           "material_when": "Material if custom or specialized accelerators absorb a substantial share of incremental production training or inference capacity at major customers and reduce planned Instinct orders; isolated pilots are insufficient.",
@@ -575,7 +558,6 @@
         {
           "direction": "downside",
           "exposure": "MI455X and Helios depend on external 2nm manufacturing, advanced packaging, HBM4, DRAM and assembly partners.",
-          "horizon": "near_term",
           "id": "AMD-B4",
           "if": "Larger models and rack-scale systems increase demand for leading-edge wafers, HBM and advanced packaging faster than supply expands.",
           "material_when": "Material if HBM4, 2nm or packaging allocation prevents scheduled Helios shipment volumes or raises unit costs enough to compress gross margin. On-time capacity with stable yields would limit the effect.",
@@ -602,7 +584,6 @@
         {
           "direction": "downside",
           "exposure": "High-performance Instinct products and future accelerators can become subject to destination, customer or capability-based licensing requirements.",
-          "horizon": "near_term",
           "id": "AMD-B5",
           "if": "Governments tighten export controls as frontier-compute capabilities increase.",
           "material_when": "Material if new rules deny or materially delay licenses for current or future products, or require redesigns and charges for products serving meaningful customer demand.",
@@ -739,14 +720,6 @@
           "url": "https://bitcap.com/en/news/bit-capital-quartalsbericht-equity-q1-2026-2"
         }
       ],
-      "stated_magnitudes": [
-        "Data Center revenue was $16.6 billion in fiscal 2025 and $5.8 billion in the first quarter of 2026.",
-        "Client and Gaming revenue was $14.6 billion in fiscal 2025.",
-        "Embedded revenue was $3.5 billion in fiscal 2025.",
-        "Expand leading-edge and advanced-packaging capacity through more than $10 billion of announced Taiwan ecosystem investments and next-generation HBM and DRAM collaboration with Samsung.",
-        "Use milestone-linked strategic capital to align major frontier-lab customers, including an OpenAI warrant tied to deployment milestones and an announced equity investment of up to $5 billion in Anthropic.",
-        "AMD Unveils Strategy to Lead the $1 Trillion Compute Market and Accelerate Next Phase of Growth"
-      ],
       "summary": "Fabless supplier of CPUs, GPUs and AI accelerators, networking, adaptive compute and embedded products. Revenue is reported through Data Center, Client and Gaming, and Embedded segments, with an increasing shift from components toward integrated rack-scale AI platforms. Economics depend on design wins, unit shipments, average selling price and system content, product mix, software qualification, and access to advanced foundry, packaging and memory capacity.",
       "summary_sources": [
         {
@@ -765,7 +738,6 @@
         {
           "direction": "mixed",
           "exposure": "AWS sells accelerated compute, networking, storage, databases, model access, and adjacent services, and has disclosed large customer commitments and current capacity constraints.",
-          "horizon": "medium_term",
           "id": "AMZN-B1",
           "if": "Frontier-model training and inference demand rises faster than the supply of deployed accelerators and power.",
           "material_when": "The effect becomes material when contracted or observable AI demand converts into commissioned, billable capacity at utilization and pricing sufficient to cover the elevated capital base.",
@@ -788,7 +760,6 @@
         {
           "direction": "mixed",
           "exposure": "AWS designs Trainium and operates it beside NVIDIA infrastructure; Bedrock and major model partners can create captive demand for the silicon and its software stack.",
-          "horizon": "medium_term",
           "id": "AMZN-B2",
           "if": "Custom accelerators improve frontier-model training and inference price-performance.",
           "material_when": "Trainium must deliver verified workload-level economics and broad production adoption, not merely reservations or internal deployment.",
@@ -811,7 +782,6 @@
         {
           "direction": "upside",
           "exposure": "AWS offers Bedrock, AgentCore, Strands, and the surrounding cloud data and infrastructure used by enterprise applications.",
-          "horizon": "medium_term",
           "id": "AMZN-B3",
           "if": "Enterprises move from model experiments to production agents that require secure runtimes, tools, identity, memory, evaluation, and observability.",
           "material_when": "Customers must deploy agents into sustained production use with measurable workload consumption and retention across AWS services.",
@@ -834,7 +804,6 @@
         {
           "direction": "mixed",
           "exposure": "Amazon controls a large commerce catalog, transaction history, seller network, fulfillment system, advertising inventory, and the Alexa for Shopping interface.",
-          "horizon": "near_term",
           "id": "AMZN-B4",
           "if": "Agentic shopping systems become capable of discovery, comparison, cart construction, and delegated purchasing.",
           "material_when": "Agent users must show durable incremental purchases or higher retention after accounting for cannibalization, returns, incentives, inference, and customer-service costs.",
@@ -853,7 +822,6 @@
         {
           "direction": "mixed",
           "exposure": "Amazon operates high-volume advertising, warehouse, delivery, support, and corporate workflows with large proprietary datasets and repeated decisions.",
-          "horizon": "medium_term",
           "id": "AMZN-B5",
           "if": "AI improves prediction, generation, robotics, and workflow automation across advertising and fulfillment.",
           "material_when": "AI must improve audited operating outcomes at scale while preserving customer experience, worker safety, and compliance.",
@@ -934,9 +902,6 @@
           "url": "https://www.aboutamazon.com/news/retail/amazon-agentic-ai-gen-ai-shopping"
         }
       ],
-      "stated_magnitudes": [
-        "Amazon to Invest Up to $50 Billion to Expand AI and Supercomputing Infrastructure for U.S."
-      ],
       "summary": "Amazon is a diversified operating platform. Consumers buy first-party inventory and services; third-party sellers pay marketplace, fulfillment, and related fees; advertisers buy performance and brand inventory; and enterprises and developers pay for AWS infrastructure and software consumption. Prime and other subscriptions deepen engagement across commerce, media, and services. AWS contributes a disproportionate share of operating income, while the stores network supplies scale, purchase intent, logistics density, and advertising inventory.",
       "summary_sources": [
         {
@@ -955,7 +920,6 @@
         {
           "direction": "mixed",
           "exposure": "Broadcom co-designs custom XPUs and the packaging and connectivity required to deploy them, with current demand concentrated in a small number of large customers.",
-          "horizon": "near_term",
           "id": "AVGO-B1",
           "if": "Frontier labs scale training and inference with larger, workload-specific accelerator fleets and commit to multi-generation custom silicon.",
           "material_when": "The upside becomes material when design wins enter volume production on schedule, end-customer compute is financed and deployed, Broadcom retains content across generations, and program gross margin remains attractive.",
@@ -978,7 +942,6 @@
         {
           "direction": "mixed",
           "exposure": "Broadcom supplies Tomahawk and Jericho switches, NICs, retimers, optical DSPs, SerDes, co-packaged-optics technology, and software for open Ethernet AI fabrics.",
-          "horizon": "near_term",
           "id": "AVGO-B2",
           "if": "AI clusters require faster and more power-efficient scale-up, scale-out, and inter-data-center communication as accelerator counts and distributed workloads grow.",
           "material_when": "The benefit becomes material when large customers deploy Broadcom-based Ethernet architectures at volume and higher bandwidth or optical content translates into sustained revenue rather than isolated qualifications.",
@@ -1001,7 +964,6 @@
         {
           "direction": "mixed",
           "exposure": "VMware Cloud Foundation is Broadcom's integrated private-cloud platform and sits within a large enterprise installed base.",
-          "horizon": "medium_term",
           "id": "AVGO-B3",
           "if": "Production inference shifts toward governed private and hybrid infrastructure because enterprises require control over cost, security, data, and sovereignty.",
           "material_when": "The effect becomes material when production AI workloads are deployed on VCF at scale and generate attributable renewals, expansion, and durable margin rather than survey interest or pilot activity.",
@@ -1024,7 +986,6 @@
         {
           "direction": "mixed",
           "exposure": "Broadcom's AI semiconductor revenue depends on deployment volume and silicon and networking content, while lower cost per token can also expand total usage and stimulate additional custom programs.",
-          "horizon": "medium_term",
           "id": "AVGO-B4",
           "if": "Algorithmic efficiency, model compression, sparse computation, or shifts between training and inference reduce the accelerator or networking required per unit of useful AI output.",
           "material_when": "The downside becomes material if compute and networking required per workload fall faster than total AI demand grows or customers delay planned deployments; upside requires elasticity to produce more aggregate shipped capacity.",
@@ -1098,7 +1059,6 @@
           "url": "https://investors.broadcom.com/news-releases/news-release-details/broadcoms-private-cloud-outlook-2026-reveals-ai-tipping-point"
         }
       ],
-      "stated_magnitudes": [],
       "summary": "Broadcom combines a fabless semiconductor business with infrastructure software. Semiconductor solutions include custom AI accelerators, Ethernet switching and routing, optical and electrical connectivity, broadband, wireless, storage, and industrial products. Infrastructure software is led by VMware Cloud Foundation and also includes mainframe, security, and enterprise software. The durable AI question is how frontier-lab compute demand converts into shipped custom XPUs and networking content while enterprise AI affects VMware adoption.",
       "summary_sources": [
         {
@@ -1117,7 +1077,6 @@
         {
           "direction": "mixed",
           "exposure": "Axon controls a large body of permissioned public-safety evidence and embeds Draft One, Assistant, Evidence, and Records inside daily customer workflows.",
-          "horizon": "near_term",
           "id": "AXON-B1",
           "if": "More capable multimodal and agentic models can summarize audio and video, draft records, answer policy questions, and coordinate evidence workflows with less manual effort.",
           "material_when": "The effect becomes material when agencies adopt the tools broadly, documented time savings and quality persist in production, human-review controls work, and software gross profit exceeds deployment and governance costs.",
@@ -1140,7 +1099,6 @@
         {
           "direction": "mixed",
           "exposure": "Fusus, Axon Vision, body and vehicle cameras, ALPR products, Axon 911, and Evidence create a connected real-time and post-incident data surface.",
-          "horizon": "medium_term",
           "id": "AXON-B2",
           "if": "Frontier computer-vision systems become better at understanding live scenes, searching large video corpora, and fusing signals from cameras, calls, sensors, and locations.",
           "material_when": "The upside requires reliable operational outcomes, auditable human verification, clear permissions, and agency willingness to expand deployments across jurisdictions.",
@@ -1163,7 +1121,6 @@
         {
           "direction": "mixed",
           "exposure": "Axon owns drone and counter-drone products through its platform and Dedrone, while the FAA is developing a framework for normalized beyond-visual-line-of-sight operations.",
-          "horizon": "medium_term",
           "id": "AXON-B3",
           "if": "Autonomy, sensor fusion, and airspace-management software improve enough to support routine drone-as-first-responder and counter-drone operations.",
           "material_when": "The effect becomes material when regulation permits scalable operations, customers fund deployments, systems demonstrate reliable outcomes, and recurring software economics accompany hardware growth.",
@@ -1237,10 +1194,6 @@
           "url": "https://www.faa.gov/newsroom/beyond-visual-line-sight-bvlos"
         }
       ],
-      "stated_magnitudes": [
-        "Axon reports Q4 2025 revenue of $797 million, up 39% year over year",
-        "Axon reports Q1 2026 revenue of $807 million, up 34% year over year"
-      ],
       "summary": "Axon sells an integrated public-safety platform that connects TASER energy weapons, body and vehicle cameras, drones and counter-drone systems, real-time operations, digital evidence, records, emergency communications, training, and AI-assisted workflows. The business combines connected-device revenue with higher-margin recurring software and services, and uses long-duration bundled subscriptions to expand products and users inside public agencies and adjacent enterprise, justice, corrections, federal, and international markets.",
       "summary_sources": [
         {
@@ -1259,7 +1212,6 @@
         {
           "direction": "upside",
           "exposure": "The portfolio includes optical transceivers and underlying InP, silicon-photonics, VCSEL, detector, laser, and transport technologies used across scale-up, scale-out, and scale-across networks.",
-          "horizon": "near_term",
           "id": "COHR-B1",
           "if": "Frontier models, multimodal systems, and agentic workloads drive larger accelerator clusters and more east-west network traffic.",
           "material_when": "Cluster deployments must translate into optical-bandwidth and link growth faster than price erosion, and qualified capacity must ramp at commercially acceptable yields.",
@@ -1286,7 +1238,6 @@
         {
           "direction": "mixed",
           "exposure": "The technology stack includes external lasers, InP devices, silicon photonics, VCSELs, optical engines, and advanced packaging capabilities, reinforced by the NVIDIA development and capacity relationship.",
-          "horizon": "medium_term",
           "id": "COHR-B2",
           "if": "Power, density, and latency constraints accelerate adoption of co-packaged optics and other integrated optical I/O architectures.",
           "material_when": "CPO must enter high-volume production and the company must retain economically meaningful laser, photonic-device, or optical-engine content after accounting for pluggable cannibalization.",
@@ -1313,7 +1264,6 @@
         {
           "direction": "mixed",
           "exposure": "The company has demonstrated a 300-by-300-port optical circuit switch and transceiver technologies intended for OCS-based datacenter architectures.",
-          "horizon": "medium_term",
           "id": "COHR-B3",
           "if": "AI-cluster operators adopt optical circuit switching to reconfigure fabrics and reduce electrical switching and optical-electrical-optical conversions.",
           "material_when": "At least one major operator must deploy OCS at meaningful cluster scale, with the company winning production volume rather than remaining at demonstration or pilot stage.",
@@ -1336,7 +1286,6 @@
         {
           "direction": "downside",
           "exposure": "A growing share of demand and planned capacity is tied to datacenter and communications products, while customers retain architecture choice and bargaining power.",
-          "horizon": "medium_term",
           "id": "COHR-B4",
           "if": "More efficient models, lower communication intensity, short-reach electrical alternatives, or customer-owned photonics reduce merchant optical content per unit of AI compute.",
           "material_when": "Optical link growth must fall materially below committed capacity additions, with purchase agreements and diversification insufficient to absorb the gap.",
@@ -1363,7 +1312,6 @@
         {
           "direction": "upside",
           "exposure": "The Industrial portfolio supplies lasers, engineered materials, and photonic technologies to semiconductor-capital-equipment and precision-manufacturing markets.",
-          "horizon": "medium_term",
           "id": "COHR-B5",
           "if": "Frontier-AI investment increases demand for advanced semiconductor fabrication, packaging, test, and thermal-management equipment.",
           "material_when": "AI-driven fabrication and advanced-packaging investment must expand equipment categories containing meaningful company content and offset weakness in other industrial applications.",
@@ -1486,9 +1434,6 @@
           "url": "https://bitcap.com/fonds/bit-global-technology-leaders"
         }
       ],
-      "stated_magnitudes": [
-        "A multiyear, nonexclusive agreement includes a multibillion-dollar purchase commitment, future capacity rights, broader product access, and a $2 billion investment supporting R&D, capacity, operations, and U.S. manufacturing."
-      ],
       "summary": "The business is a vertically integrated photonics manufacturer spanning engineered materials, semiconductor devices, lasers, optical components, transceivers, subsystems, instruments, and complete systems. Beginning in fiscal 2026, it reports two segments: Datacenter and Communications and Industrial. Economics depend on customer qualifications and design wins, optical-speed transitions, manufacturing yield and utilization, product mix, and cyclical capital spending. For the quarter ended March 31, 2026, management attributed growth to strong datacenter and communications demand and continued expanding capacity.",
       "summary_sources": [
         {
@@ -1511,7 +1456,6 @@
         {
           "direction": "upside",
           "exposure": "Agent and LLM observability can capture model generations, tool calls, handoffs, guardrail checks, errors, latency, token usage, cost and quality or safety evaluations alongside application telemetry.",
-          "horizon": "medium_term",
           "id": "DDOG-B1",
           "if": "Production adoption of multi-model, tool-using AI agents increases.",
           "material_when": "The effect becomes material if monitored production AI workloads generate incremental paid usage and cross-sell rather than merely relabeling existing APM traffic, and if unit revenue remains above cloud-infrastructure costs.",
@@ -1534,7 +1478,6 @@
         {
           "direction": "mixed",
           "exposure": "Bits agents use unified telemetry and organizational context to investigate incidents, triage security signals, generate fixes and execute governed remediation workflows.",
-          "horizon": "medium_term",
           "id": "DDOG-B2",
           "if": "Frontier models improve at reasoning, long-context analysis, tool use and code generation.",
           "material_when": "The effect becomes material only if paid production usage is broad and repeated, measurable resolution gains persist, privileged actions have low incident rates, and incremental inference and engineering costs remain below revenue.",
@@ -1561,7 +1504,6 @@
         {
           "direction": "upside",
           "exposure": "The MCP interface supplies live logs, metrics, traces and incidents to external coding agents, while faster releases create additional monitoring, testing, incident and security requirements.",
-          "horizon": "medium_term",
           "id": "DDOG-B3",
           "if": "AI coding agents increase software-change frequency and move troubleshooting into IDE and CLI workflows.",
           "material_when": "The effect becomes material if AI-assisted development produces sustained incremental paid telemetry and module adoption without the user interface or data plane being displaced by bundled alternatives.",
@@ -1584,7 +1526,6 @@
         {
           "direction": "downside",
           "exposure": "The company competes against cloud-native, commercial and open-source tools and is making its own platform OpenTelemetry-native.",
-          "horizon": "medium_term",
           "id": "DDOG-B4",
           "if": "Hyperscalers, model providers and AI development platforms bundle observability while open standards make telemetry more portable.",
           "material_when": "The effect becomes material if customers can replace the unified platform at acceptable operational quality and materially lower total cost, producing sustained losses or weaker expansion.",
@@ -1607,7 +1548,6 @@
         {
           "direction": "mixed",
           "exposure": "The platform must process and store growing AI telemetry and run its own specialized agents and models on third-party cloud infrastructure.",
-          "horizon": "near_term",
           "id": "DDOG-B5",
           "if": "Longer-context and multimodal agents generate richer traces and more inference, while model-efficiency advances lower compute cost per task.",
           "material_when": "The effect becomes material if AI-related cloud and inference costs grow materially faster or slower than monetized AI usage for multiple reporting periods.",
@@ -1730,10 +1670,6 @@
           "url": "https://bitcap.com/en/news/international-leader-schweiz-entre-disruption-et-rejet-ce-que-la-crise-du-logiciel-revele-sur-le-cycle-dinvestissement-dans-lia"
         }
       ],
-      "stated_magnitudes": [
-        "Large accounts dominate the economics: at 2025-12-31, about 4,310 customers with at least $100,000 of ARR represented roughly 90% of ARR; the customer count reached about 4,550 at 2026-03-31.",
-        "Customers above $100,000 of ARR represented roughly 90% of ARR at 2025 year-end, making enterprise wins, renewals and expansions central to growth."
-      ],
       "summary": "The company sells a multi-tenant SaaS platform to development, operations, security and business teams. Revenue is subscription-based, with primarily monthly or annual terms and many fees calculated from metered monthly usage. The durable model is land-and-expand: customers begin with selected workloads or products, then spend more as cloud resources, telemetry volume and attached modules increase. Large accounts dominate the economics: at 2025-12-31, about 4,310 customers with at least $100,000 of ARR represented roughly 90% of ARR; the customer count reached about 4,550 at 2026-03-31.",
       "summary_sources": [
         {
@@ -1756,7 +1692,6 @@
         {
           "direction": "upside",
           "exposure": "Video Call relies on model-generated dialogue constrained by prompts for learner level, conversational structure and character personality; access is expanding from the premium Max experience toward Super users.",
-          "horizon": "near_term",
           "id": "DUOL-B1",
           "if": "Real-time voice models improve in naturalness, latency, memory, multilingual accuracy and instruction following.",
           "material_when": "Incremental conversion, retention and pricing benefits must exceed model cost and any loss of Max-tier differentiation across meaningful subscriber cohorts.",
@@ -1783,7 +1718,6 @@
         {
           "direction": "upside",
           "exposure": "Learner-facing AI features produce variable model costs; management reported that lower per-unit AI costs were a primary reason Q1 2026 gross margin expanded.",
-          "horizon": "near_term",
           "id": "DUOL-B2",
           "if": "Frontier-model inference becomes cheaper through more efficient architectures, competition and model optimization.",
           "material_when": "Cost per successful learner interaction must fall faster than AI-feature usage grows, without a decline in response quality or reliability.",
@@ -1806,7 +1740,6 @@
         {
           "direction": "mixed",
           "exposure": "Curriculum teams already use LLMs with detailed prompts and human review, and management attributes rapid expansion to B2 coverage in major courses to AI-enabled content tooling.",
-          "horizon": "medium_term",
           "id": "DUOL-B3",
           "if": "Models and AI agents become better at generating, localizing, sequencing and checking educational content.",
           "material_when": "The number of approved, effective course units per expert-hour must rise while error rates, learner complaints and efficacy outcomes remain at least stable.",
@@ -1829,7 +1762,6 @@
         {
           "direction": "downside",
           "exposure": "Language conversation and explanation are native use cases for general assistants, overlapping with Max features and parts of the core curriculum.",
-          "horizon": "medium_term",
           "id": "DUOL-B4",
           "if": "General-purpose AI assistants become persistent, low-cost tutors with voice, memory, personalized lesson planning and multimodal feedback.",
           "material_when": "Substitution becomes material if general assistants demonstrate sustained learner retention, safe level-appropriate progression and comparable efficacy at a lower effective price.",
@@ -1852,7 +1784,6 @@
         {
           "direction": "downside",
           "exposure": "LLMs generate conversations and course material, while AI also supports a high-stakes English test; both activities depend on trust, data handling, review and institutional acceptance.",
-          "horizon": "medium_term",
           "id": "DUOL-B5",
           "if": "Learner-facing models produce inaccurate, culturally weak or unsafe outputs, or regulators impose tighter rules on AI, minors and educational assessment.",
           "material_when": "The effect becomes material if errors occur at scale, trigger measurable retention damage or lead institutions or regulators to restrict product use or test recognition.",
@@ -1972,7 +1903,6 @@
           "url": "https://bitcap.com/en/news/erfreuliche-earnings-geht-die-ki-wette-von-duolingo-auf"
         }
       ],
-      "stated_magnitudes": [],
       "summary": "A freemium mobile learning platform monetized primarily through recurring Super and Max subscriptions, with advertising, in-app purchases and a high-stakes English proficiency test as smaller revenue streams. Free access creates the acquisition and engagement funnel; paid conversion, tier mix and retention drive subscription economics. Frontier AI is unusually direct to the model because it powers premium conversational features, accelerates course production and contributes to cost of revenue.",
       "summary_sources": [
         {
@@ -1995,7 +1925,6 @@
         {
           "direction": "mixed",
           "exposure": "Search, AI Overviews, AI Mode, Gemini, YouTube recommendations, and advertising systems can incorporate the capabilities across large existing audiences.",
-          "horizon": "near_term",
           "id": "GOOGL-B1",
           "if": "Frontier models become materially better at reasoning, multimodal understanding, planning, and personalized assistance.",
           "material_when": "The effect becomes material only if AI sessions generate sustained incremental or retained high-value activity and monetization that exceeds inference costs and any cannibalization of conventional search inventory.",
@@ -2018,7 +1947,6 @@
         {
           "direction": "downside",
           "exposure": "The advertising engine depends on continued access to high-commercial-intent discovery and benefits from browser, device, and default distribution that regulators are making more contestable.",
-          "horizon": "medium_term",
           "id": "GOOGL-B2",
           "if": "Competing assistants or open models become preferred gateways for research, shopping, local discovery, navigation, or task completion.",
           "material_when": "The effect becomes material if rivals take a sustained share of commercially valuable activity, advertisers reallocate measurable budgets, or remedies materially weaken distribution and proprietary-data advantages.",
@@ -2045,7 +1973,6 @@
         {
           "direction": "upside",
           "exposure": "Cloud sells accelerators, Gemini and third-party models, Vertex AI, Gemini Enterprise, agents, data services, collaboration software, and security.",
-          "horizon": "near_term",
           "id": "GOOGL-B3",
           "if": "Enterprise AI moves from experimentation to persistent agents, inference, model training, and automated business workflows.",
           "material_when": "The effect becomes material when pilots convert into recurring production consumption, committed contracts are utilized, and capacity additions earn returns above depreciation, energy, and support costs.",
@@ -2072,7 +1999,6 @@
         {
           "direction": "mixed",
           "exposure": "The company operates a vertically integrated stack with custom training and inference TPUs, global networking, data centers, power projects, and internal and external workloads competing for capacity.",
-          "horizon": "medium_term",
           "id": "GOOGL-B4",
           "if": "Model architectures, quantization, inference systems, or specialized accelerators deliver large gains in training throughput or performance per watt.",
           "material_when": "Efficiency is financially material only if performance and utilization gains outpace growth in model size, agent activity, idle capacity, and the cost of replacing infrastructure generations.",
@@ -2103,7 +2029,6 @@
         {
           "direction": "mixed",
           "exposure": "Cloud combines Gemini-based security capabilities with Wiz's code-to-cloud-to-runtime platform and existing threat-intelligence and security-operations products.",
-          "horizon": "near_term",
           "id": "GOOGL-B5",
           "if": "Frontier models materially improve autonomous vulnerability discovery, code repair, threat automation, and defensive security agents.",
           "material_when": "The effect becomes material if the capabilities operate reliably at enterprise scale and either create measurable paid adoption or cause incidents and compliance costs large enough to affect Cloud economics.",
@@ -2240,11 +2165,6 @@
           "url": "https://bitcap.com/en/news/faz-ki-blase-wenn-alle-davon-reden-dann-ist-es-keine"
         }
       ],
-      "stated_magnitudes": [
-        "Accelerate AI infrastructure and power capacity through elevated capital expenditure, an $84.75 billion equity capital raise priced on June 3, 2026, and the March 2026 closing of the Intersect acquisition.",
-        "The $84.75 billion equity raise and elevated 2026 capital program weaken a simple assumption that the investment cycle is funded solely from current earnings, even if added capacity ultimately earns attractive returns.",
-        "Alphabet Announces Upsize and Pricing of $84.75 Billion Equity Capital Raise to Expand AI Infrastructure and Compute"
-      ],
       "summary": "The core economic engine is ad-supported consumer services, especially Search and YouTube. Cloud monetizes infrastructure, models, developer platforms, agents, security, data tools, and collaboration software through consumption fees and subscriptions. Consumer subscriptions, platform transactions, devices, and Other Bets add diversification. Shared frontier-model R&D is reported centrally, while common compute infrastructure serves both internal products and external Cloud customers, creating reuse benefits but also capital-allocation and capacity conflicts.",
       "summary_sources": [
         {
@@ -2267,7 +2187,6 @@
         {
           "direction": "mixed",
           "exposure": "Grindr can combine improved models with its network, interaction history, and gAI architecture to rank connections, summarize chats, provide insights, and reduce navigation or conversational friction.",
-          "horizon": "near_term",
           "id": "GRND-B1",
           "if": "Frontier models become materially better at recommendation, long-context conversation understanding, summarization, and intent inference.",
           "material_when": "The features must produce measurable improvements in connection outcomes or retained usage and convert into incremental paid adoption or retention after controlling for pricing and paywall changes.",
@@ -2290,7 +2209,6 @@
         {
           "direction": "upside",
           "exposure": "Grindr depends on third-party foundation models within gAI and says agentic AI supports engineering work. Lower serving cost and higher development throughput could make more personalized features economical and accelerate product iteration.",
-          "horizon": "near_term",
           "id": "GRND-B2",
           "if": "Foundation-model inference costs fall and agentic coding systems become more capable.",
           "material_when": "Measured cost per useful AI interaction or product cycle must fall without worsening latency, quality, privacy, safety, or rework, and the savings must remain after additional infrastructure and personnel costs.",
@@ -2313,7 +2231,6 @@
         {
           "direction": "downside",
           "exposure": "Synthetic companions can compete for user attention or satisfy some conversational needs, while general assistants can reproduce generic profile, messaging, and dating advice outside Grindr.",
-          "horizon": "medium_term",
           "id": "GRND-B3",
           "if": "AI-powered companions and general assistants improve at persistent, intimate, and relationship-oriented interaction.",
           "material_when": "AI companions must take measurable time or connection intent from Grindr's core cohorts, or commoditized assistants must reduce willingness to pay for Grindr-native AI features.",
@@ -2332,7 +2249,6 @@
         {
           "direction": "mixed",
           "exposure": "Grindr already combines AI with human review for scams, prohibited activity, profile content, and other safeguards, and it processes highly sensitive location, identity, message, and image data under user controls.",
-          "horizon": "near_term",
           "id": "GRND-B4",
           "if": "AI safety, fraud detection, age-assurance, and content-moderation systems improve, while AI privacy and automated-decision regulation becomes more demanding.",
           "material_when": "Safety systems must reduce verified harm and moderator workload at acceptable false-positive and appeal rates while data use remains legally valid and trusted by users.",
@@ -2410,7 +2326,6 @@
           "url": "https://info.bitcap.com/hubfs/Fact%20Sheets/2024-06%20-%20Juni/2024-06%20BIT%20Global%20Internet%20Leaders%2030%20R-I.pdf?_hsmi=314792919"
         }
       ],
-      "stated_magnitudes": [],
       "summary": "Grindr operates a freemium social-networking platform for gay, bisexual, transgender, queer, and sexually explorative adults. The free product builds reach, engagement, and the pool of users who may convert to paid products. Most revenue comes from subscriptions and consumable add-ons; advertising is the smaller second engine. The business therefore depends on preserving community trust and engagement while improving payer conversion, paid-product mix, pricing, and advertising yield.",
       "summary_sources": [
         {
@@ -2429,7 +2344,6 @@
         {
           "direction": "upside",
           "exposure": "The platform already uses TrueMotion computer vision and wearable sensors for movement analysis, personalized exercise feedback, and clinician decision support.",
-          "horizon": "medium_term",
           "id": "HNGE-B1",
           "if": "A frontier lab releases materially more accurate and robust multimodal human-motion or pose-estimation models, including performance across diverse bodies, camera conditions, and impaired movement patterns.",
           "material_when": "The effect is material only if the upgraded capability is clinically validated against the existing workflow, improves measured member outcomes or engagement across relevant cohorts, and is deployed broadly without raising escalation or safety-event rates.",
@@ -2452,7 +2366,6 @@
         {
           "direction": "mixed",
           "exposure": "Robin already gathers flare-up details, shares resources, and summarizes the situation for the physical therapist; the company has described future roles such as common-question handling and proactive check-ins.",
-          "horizon": "near_term",
           "id": "HNGE-B2",
           "if": "Frontier language and agent models become more reliable at constrained health-information intake, dialogue summarization, proactive outreach, and routing under human supervision.",
           "material_when": "The pathway is material only if automated interactions demonstrably deflect or shorten low-value work while maintaining or improving outcomes, member satisfaction, and safety versus a clinician-led baseline.",
@@ -2475,7 +2388,6 @@
         {
           "direction": "mixed",
           "exposure": "The company competes in a healthcare-delivery category where its technology, clinical model, outcomes evidence, partner integration, and purchasing simplicity all contribute to differentiation.",
-          "horizon": "medium_term",
           "id": "HNGE-B3",
           "if": "Frontier models make competent motion coaching, conversational support, and care-navigation features cheaper and faster for competing digital-health and benefits vendors to build.",
           "material_when": "The effect becomes material if AI-enabled rivals demonstrate comparable independently credible outcomes, win competitive RFPs, shorten implementation, or force discounts without offsetting increases in the company's engagement or clinical-performance advantage.",
@@ -2498,7 +2410,6 @@
         {
           "direction": "mixed",
           "exposure": "The care model handles health information, uses AI tools alongside clinicians, and includes an FDA-cleared wearable. The company has publicly framed responsible AI, privacy, security, transparency, and human complementarity as design principles.",
-          "horizon": "near_term",
           "id": "HNGE-B4",
           "if": "More capable generative and multimodal health AI expands potential use of sensitive patient data and increases scrutiny of model safety, privacy, security, and medical claims.",
           "material_when": "The effect is material if an AI-specific incident, a new regulatory requirement, or a customer security standard materially changes launch timing, review workload, care-model design, or retention and procurement outcomes.",
@@ -2604,7 +2515,6 @@
           "url": "https://bitcap.com/en/news/tiam-fundresearch-das-sind-die-besten-fonds-2025"
         }
       ],
-      "stated_magnitudes": [],
       "summary": "Technology-enabled musculoskeletal care combines software and AI-enabled motion tracking, an FDA-cleared pain-relief wearable, and licensed clinicians across acute injury, chronic pain, and post-surgical rehabilitation. The commercial model is principally B2B/B2B2C: buyers require credible clinical outcomes and medical-cost ROI, while realized economics depend on converting eligible populations into engaged members and delivering care efficiently.",
       "summary_sources": [
         {
@@ -2623,7 +2533,6 @@
         {
           "direction": "upside",
           "exposure": "Cortex is embedded in the Gold distribution surface and combines market information with portfolio context; the Assistant can analyze accounts and initiate supported transactions subject to user confirmation.",
-          "horizon": "medium_term",
           "id": "HOOD-B1",
           "if": "Frontier models improve grounded financial reasoning, real-time synthesis and portfolio personalization.",
           "material_when": "Cortex users must show a sustained, cohort-adjusted increase in paid retention, deposits or ARPU, and the resulting gross-profit uplift must exceed model, data, support and compliance costs.",
@@ -2650,7 +2559,6 @@
         {
           "direction": "mixed",
           "exposure": "The company offers dedicated agentic trading accounts and agent-assigned virtual cards; the card product explicitly supports MCP and major agent clients with spending limits, approvals and revocation controls.",
-          "horizon": "medium_term",
           "id": "HOOD-B2",
           "if": "Third-party AI agents and MCP become common interfaces for investing and spending.",
           "material_when": "Agentic accounts must become a visible contributor to funded-customer growth, deposits, trades or card spend while fraud, execution, support and chargeback costs remain below associated monetization.",
@@ -2677,7 +2585,6 @@
         {
           "direction": "downside",
           "exposure": "Cortex provides portfolio analysis and informational market summaries, while Assistant supports transaction initiation. Current disclosures keep Digests informational and require explicit confirmation before an Assistant transaction is submitted.",
-          "horizon": "near_term",
           "id": "HOOD-B3",
           "if": "Highly persuasive models produce incorrect, unsuitable or engagement-optimized financial outputs.",
           "material_when": "The path becomes material if repeated model errors or unsuitable interactions cause measurable customer losses, elevated complaints, regulatory action, mandatory product redesign or Gold churn.",
@@ -2708,7 +2615,6 @@
         {
           "direction": "mixed",
           "exposure": "The FinCrimes Agent uses Amazon Bedrock to synthesize customer and transaction data into investigative summaries for human analysts.",
-          "horizon": "medium_term",
           "id": "HOOD-B4",
           "if": "Frontier models become more reliable at long-context data synthesis and regulated workflow assistance.",
           "material_when": "Investigation time, backlog or staffing per alert must decline without deterioration in quality assurance, suspicious-activity reporting timeliness, fraud losses or regulatory findings.",
@@ -2731,7 +2637,6 @@
         {
           "direction": "mixed",
           "exposure": "Agentic access lets the platform receive orders from external assistants, but the broader wealth thesis still benefits from owning customer attention, data, Gold engagement and cross-product discovery.",
-          "horizon": "medium_term",
           "id": "HOOD-B5",
           "if": "General-purpose assistants become the primary consumer interface and compare or route orders across financial providers.",
           "material_when": "A meaningful share of account openings, asset flows or orders must originate off-app through external agents, with observable changes in acquisition costs, Gold attachment or per-trade economics.",
@@ -2893,7 +2798,6 @@
           "url": "https://robinhood.com/us/en/agentic-credit-card/"
         }
       ],
-      "stated_magnitudes": [],
       "summary": "A mobile-first financial-services platform serving self-directed retail investors and, increasingly, advised clients and institutions. Its economics combine transaction monetization, spreads on customer cash, margin and securities lending, and recurring subscription, advisory and card-related fees. The strategy is to increase wallet share by pairing brokerage and crypto with Gold, Strategies, Banking, Cortex, private-market access and agent-enabled interfaces; this diversifies revenue while adding advice, credit, model, cyber and multi-regulator risk.",
       "summary_sources": [
         {
@@ -2916,7 +2820,6 @@
         {
           "direction": "mixed",
           "exposure": "Hut 8 controls a development pipeline and has contracted River Bend and Beacon Point for 949 MW of IT capacity linked to frontier-AI workloads.",
-          "horizon": "medium_term",
           "id": "HUT-B1",
           "if": "Frontier models require materially larger training and inference clusters, raising near-term demand for power-dense AI campuses.",
           "material_when": "The effect becomes material only if demand produces executable leases with creditworthy counterparties at returns above the all-in cost of land, power, construction, financing, and residual risk.",
@@ -2943,7 +2846,6 @@
         {
           "direction": "mixed",
           "exposure": "Hut 8 must design and build campuses around evolving tenant architectures; its Beacon Point redesign uses NVIDIA's DSX reference architecture and increased IT capacity within the existing utility and land footprint.",
-          "horizon": "near_term",
           "id": "HUT-B2",
           "if": "New accelerator generations increase rack density and change power, cooling, networking, and building requirements.",
           "material_when": "The effect becomes material when the density gain or improved tenant demand exceeds redesign, cooling, electrical, equipment, and schedule costs.",
@@ -2966,7 +2868,6 @@
         {
           "direction": "mixed",
           "exposure": "Hut 8's AI campuses are leased for long terms, but future expansion and renewal demand ultimately depend on customer compute requirements and alternative capacity.",
-          "horizon": "long_term",
           "id": "HUT-B3",
           "if": "Training efficiency or inference optimization reduces compute required per unit of model capability or customer workload.",
           "material_when": "The effect becomes material if efficiency-driven reductions in required compute exceed workload growth and are not offset by new applications or larger models.",
@@ -2989,7 +2890,6 @@
         {
           "direction": "mixed",
           "exposure": "River Bend links Hut 8 to Anthropic through Fluidstack, while Beacon Point concentrates 704 MW with one undisclosed investment-grade tenant.",
-          "horizon": "medium_term",
           "id": "HUT-B4",
           "if": "Frontier-model developers concentrate procurement among a small number of infrastructure partners and demand increasingly customized campuses.",
           "material_when": "The exposure is material because a small number of counterparties represent most contracted AI capacity; the net effect depends on enforceable payment support and the reusability of the sites for alternative tenants.",
@@ -3070,11 +2970,6 @@
           "url": "https://bitcap.com/news/fondsmanager-beckers-2026-wird-das-jahr-der-auslese-podcast"
         }
       ],
-      "stated_magnitudes": [
-        "As of 2026-07-20, it reported 949 MW of contracted IT capacity across River Bend and Beacon Point, $26.6 billion of aggregate base-term contract value, and expected average annual NOI above $1.75 billion; these are contractual and forward-looking economics rather than current-period revenue.",
-        "Hut 8 Signs 15-Year, 245 MW AI Data Center Lease at River Bend Campus with Total Contract Value of $7.0 Billion",
-        "Hut 8 Closes $4.25 Billion of Investment-Grade Senior Secured Notes for Beacon Point Data Center Project"
-      ],
       "summary": "Hut 8 is a power-first energy and digital-infrastructure developer with three economic layers: long-duration AI data-center leasing, recurring infrastructure and managed-service fees, and owned compute exposure through AI Cloud, traditional cloud, and majority-owned American Bitcoin. The central transition is from comparatively volatile compute and Bitcoin economics toward project-financed, triple-net AI-campus cash flows, but the contracted campuses do not contribute stabilized lease economics until construction, commissioning, and tenant acceptance.",
       "summary_sources": [
         {
@@ -3097,7 +2992,6 @@
         {
           "direction": "upside",
           "exposure": "The group supplies silicon, SiC and GaN switches, drivers, controllers, protection devices and reference architectures across the power chain and is collaborating with NVIDIA on 800 VDC systems.",
-          "horizon": "medium_term",
           "id": "IFX-B1",
           "if": "Frontier-model scaling increases accelerator power, transient loads and rack density, accelerating adoption of high-voltage DC and more sophisticated grid-to-core power delivery.",
           "material_when": "The effect becomes material if next-generation platforms ship at scale, deployed data-center megawatts continue rising, the group retains content within its disclosed $100–250 per-kilowatt range, and Dresden capacity qualifies and ramps without material delay.",
@@ -3128,7 +3022,6 @@
         {
           "direction": "downside",
           "exposure": "AI-power revenue is linked to deployed electrical capacity and hardware platforms, while €500 million of AI-related investment has been pulled forward.",
-          "horizon": "near_term",
           "id": "IFX-B2",
           "if": "Large algorithmic-efficiency gains, weaker frontier-model monetization or a pause in hyperscaler construction reduces physical AI-cluster deployment relative to current capacity plans.",
           "material_when": "The downside becomes material if efficiency improvements or spending restraint cause deployed data-center megawatts and component orders to decline for several quarters while the planned manufacturing ramp continues.",
@@ -3155,7 +3048,6 @@
         {
           "direction": "upside",
           "exposure": "The power portfolio addresses grid conversion, storage inverters, protection, industrial power supplies and data-center power infrastructure through the emerging Power Systems organization.",
-          "horizon": "medium_term",
           "id": "IFX-B3",
           "if": "Sustained AI electricity demand drives grid expansion, energy storage, UPS systems, DC microgrids, solid-state transformers and solid-state circuit breakers.",
           "material_when": "The effect becomes material only if announced power projects obtain permits and interconnections, proceed to equipment procurement and include the group's modules, discretes, drivers, sensors or controllers.",
@@ -3178,7 +3070,6 @@
         {
           "direction": "upside",
           "exposure": "PSOC Edge devices, DEEPCRAFT tools and the broader sensor, connectivity and security portfolio are intended to help OEMs deploy models directly on devices.",
-          "horizon": "medium_term",
           "id": "IFX-B4",
           "if": "Distillation, quantization and smaller multimodal models make useful voice, vision and time-series inference practical on low-power microcontrollers.",
           "material_when": "The route becomes material if relevant models fit the memory, latency and power envelope of the group's MCUs and multiple OEMs move from evaluation kits to serial production.",
@@ -3201,7 +3092,6 @@
         {
           "direction": "upside",
           "exposure": "The portfolio covers sensing, motor control, microcontrollers, power management, Ethernet and security. NVIDIA collaboration includes actuator and sensor digital twins, and management estimates roughly $500 of addressable semiconductor content per humanoid robot.",
-          "horizon": "long_term",
           "id": "IFX-B5",
           "if": "Frontier robotics models and simulation platforms improve perception, planning and control enough to move humanoid and industrial robots from pilots toward serial deployment.",
           "material_when": "The path becomes material when several robot manufacturers enter serial production and the group secures multi-function bill-of-material positions rather than isolated reference-design participation.",
@@ -3356,14 +3246,6 @@
           "url": "https://bitcap.com/en/news/bit-capital-ki-whitepaper-infrastruktur-des-ki-zeitalters"
         }
       ],
-      "stated_magnitudes": [
-        "FY2025 revenue was €14.662 billion: Automotive contributed 50%, legacy Green Industrial Power 11%, Power & Sensor Systems 29% and Connected Secure Systems 10%.",
-        "The business generated €7.402 billion, or 50% of FY2025 revenue.",
-        "In May 2026, management maintained AI-power revenue targets of about €1.5 billion in FY2026 and €2.5 billion in FY2027 and indicated content of roughly $100–250 per kilowatt across platforms.",
-        "The legacy Green Industrial Power segment generated €1.631 billion in FY2025; power-infrastructure products are moving into the Power Systems organization.",
-        "FY2026 investment plans of about €2.7 billion included €500 million pulled forward for AI-related capacity.",
-        "Pull forward €500 million of AI-related capacity investment within an approximately €2.7 billion FY2026 investment plan and accelerate the Dresden Smart Power Fab ramp."
-      ],
       "summary": "The group is a diversified integrated device manufacturer: it designs, manufactures and sells power semiconductors, analog/mixed-signal and sensor products, microcontrollers, connectivity and security chips, plus enabling software. FY2025 revenue was €14.662 billion: Automotive contributed 50%, legacy Green Industrial Power 11%, Power & Sensor Systems 29% and Connected Secure Systems 10%. From Q4 FY2026, reporting is being reorganized into Automotive, Power Systems and Edge Systems. Durable frontier-AI exposure is concentrated in power conversion and distribution; edge and physical AI are smaller, earlier-stage channels.",
       "summary_sources": [
         {
@@ -3386,7 +3268,6 @@
         {
           "direction": "mixed",
           "exposure": "The group deploys capital into a large physical locker network and already uses an internal data-science function for monitoring, forecasting and planning.",
-          "horizon": "medium_term",
           "id": "INPST-B1",
           "if": "More capable spatiotemporal forecasting and optimization models for locker placement and capacity allocation",
           "material_when": "The effect becomes material only if models are deployed across major markets and produce sustained improvements in utilization or peak handling without increasing capex per parcel; isolated pilots or forecast-accuracy claims are insufficient.",
@@ -3409,7 +3290,6 @@
         {
           "direction": "mixed",
           "exposure": "First-mile collection, linehaul, sorting and last-mile delivery are core workflows; dynamic courier routing and a standardized logistics platform are already identified operating capabilities.",
-          "horizon": "near_term",
           "id": "INPST-B2",
           "if": "Agentic route, dispatch and sortation optimization using live operational data",
           "material_when": "Materiality requires measurable improvements in cost or throughput across production routes and peak periods while maintaining service quality, not merely successful simulations.",
@@ -3432,7 +3312,6 @@
         {
           "direction": "mixed",
           "exposure": "The platform operates consumer applications, parcel tracking, chatbots, IVR and claims automation across multiple languages and markets.",
-          "horizon": "near_term",
           "id": "INPST-B3",
           "if": "Reliable multilingual generative-AI agents for tracking, claims and parcel-support workflows",
           "material_when": "The effect becomes material if a meaningful share of contacts is resolved without human handling while complaint, repeat-contact, refund and error rates remain stable or improve.",
@@ -3455,7 +3334,6 @@
         {
           "direction": "upside",
           "exposure": "The 2025 annual report disclosed AI-supported sales in France with up to a seven-fold reduction in lead-acquisition cost and an Iberian generative-AI qualification model that shortened the lead-to-meeting cycle fivefold.",
-          "horizon": "near_term",
           "id": "INPST-B4",
           "if": "Generative-AI sales prospecting, lead qualification and merchant personalization",
           "material_when": "Reported workflow gains must convert into signed merchants, retained accounts and incremental profitable parcel volume across multiple markets; faster meetings alone are not financially material.",
@@ -3474,7 +3352,6 @@
         {
           "direction": "downside",
           "exposure": "Lockers, applications, tracking, routing and sorting depend on an integrated digital and physical network holding operational and consumer data.",
-          "horizon": "near_term",
           "id": "INPST-B5",
           "if": "Frontier-AI-enabled cyberattacks or unreliable autonomous changes to connected logistics software",
           "material_when": "The effect becomes material if an incident causes sustained app, APM or sortation downtime, personal-data compromise, parcel loss, regulatory action or significant SLA penalties.",
@@ -3576,7 +3453,6 @@
           "url": "https://bitcap.com/en/investmentprodukte"
         }
       ],
-      "stated_magnitudes": [],
       "summary": "The platform earns primarily from e-commerce parcel delivery through automated parcel machines, pickup/drop-off points and to-door services, supplemented by fulfilment, returns and consumer-initiated shipping. Network density supports a two-sided flywheel: convenient coverage encourages consumers to select the service at checkout, while higher parcel density improves last-mile economics and merchant appeal. International markets represented 51% of FY2025 revenue, making UK and Eurozone execution central alongside Poland's cash generation. As of 2026-07-28, a recommended all-cash offer remained pending; the acceptance period had been extended to 2026-09-18 for outstanding competition reviews.",
       "summary_sources": [
         {
@@ -3599,7 +3475,6 @@
         {
           "direction": "upside",
           "exposure": "The company supplies x86 server CPUs used for orchestration, data processing and general-purpose workloads around accelerators; management reports rising general-purpose CPU density as AI deployment expands.",
-          "horizon": "near_term",
           "id": "INTC-B1",
           "if": "Frontier-model deployment shifts toward large-scale inference, reasoning and multi-agent workloads.",
           "material_when": "The effect becomes material only if CPU demand per AI system grows and the company's share and pricing do not decline enough to offset that system growth.",
@@ -3622,7 +3497,6 @@
         {
           "direction": "downside",
           "exposure": "The x86 server franchise competes for sockets and platform content against AMD and customer-designed processors optimized for cloud and AI workloads.",
-          "horizon": "medium_term",
           "id": "INTC-B2",
           "if": "Hyperscalers deepen adoption of custom Arm CPUs and tightly integrated accelerator-host architectures.",
           "material_when": "The effect becomes material if major cloud customers move a sustained and growing share of general-purpose or inference-support workloads away from x86.",
@@ -3645,7 +3519,6 @@
         {
           "direction": "mixed",
           "exposure": "The foundry roadmap offers 18A-family processes, advanced packaging and U.S.-based manufacturing; AWS has announced custom designs under a multi-year framework.",
-          "horizon": "medium_term",
           "id": "INTC-B3",
           "if": "Frontier AI increases demand for leading-edge logic, chiplets and advanced packaging, while customers seek geographically diversified manufacturing.",
           "material_when": "The path is material only if multiple external designs reach sustained production at competitive yield, price and return on capital rather than remaining test chips or non-binding pipeline activity.",
@@ -3672,7 +3545,6 @@
         {
           "direction": "mixed",
           "exposure": "Client platforms combine x86 CPUs, integrated graphics and NPUs and are sold through a large OEM and software ecosystem.",
-          "horizon": "medium_term",
           "id": "INTC-B4",
           "if": "More capable local models and agents make on-device AI a meaningful PC purchase criterion.",
           "material_when": "The effect becomes material if widely used enterprise or consumer applications run locally, create measurable replacement demand and sustain pricing premiums.",
@@ -3695,7 +3567,6 @@
         {
           "direction": "mixed",
           "exposure": "The company is pursuing ASICs, external manufacturing and advanced packaging, including an announced AWS AI-fabric design, but custom silicon can also reduce demand for standard x86 products.",
-          "horizon": "medium_term",
           "id": "INTC-B5",
           "if": "Frontier labs and hyperscalers move more workloads to custom AI ASICs and specialized inference systems.",
           "material_when": "The path is material only if the company captures repeat, production-scale ASIC or manufacturing awards with economics that exceed any lost standard-processor contribution.",
@@ -3804,7 +3675,6 @@
           "url": "https://bitcap.com/en/news/bit-capital-quartalsbericht-equity-q1-2026-2"
         }
       ],
-      "stated_magnitudes": [],
       "summary": "The core model combines semiconductor product design with owned manufacturing. Client and data-center businesses monetize processor platforms, while the foundry segment fabricates and packages chips for internal product groups and external customers. Because most foundry segment revenue is intersegment, consolidated value creation depends on competitive product costs plus growth in external wafer and packaging revenue—not foundry segment revenue alone.",
       "summary_sources": [
         {
@@ -3823,7 +3693,6 @@
         {
           "direction": "upside",
           "exposure": "Direct seller of GPU compute and owner of power-dense sites, with multiyear contracts already signed with hyperscale and AI customers.",
-          "horizon": "medium_term",
           "id": "IREN-B1",
           "if": "Frontier-model training, agentic systems and high-volume inference continue to increase aggregate compute demand.",
           "material_when": "Signed demand must cover commissioned capacity at attractive pricing, and utilization must remain high after initial training deployments rather than falling once models become operational.",
@@ -3850,7 +3719,6 @@
         {
           "direction": "downside",
           "exposure": "A large fleet is concentrated in NVIDIA accelerator generations and competes with hyperscaler-owned infrastructure and alternative silicon.",
-          "horizon": "medium_term",
           "id": "IREN-B2",
           "if": "Algorithmic efficiency or adoption of custom accelerators reduces the GPU-hours required per unit of model capability.",
           "material_when": "Efficiency gains or custom-silicon adoption must outpace growth in total tokens, users and AI workloads, causing contracted or spot demand for external GPU capacity to weaken.",
@@ -3873,7 +3741,6 @@
         {
           "direction": "mixed",
           "exposure": "The company owns substations and develops both air- and liquid-cooled facilities, but must deliver designs that meet rapidly changing customer and hardware specifications.",
-          "horizon": "near_term",
           "id": "IREN-B3",
           "if": "Next-generation frontier systems increase rack density, power delivery, cooling and networking requirements.",
           "material_when": "The effect becomes material if new system requirements exceed existing designs or if cooling, networking or electrical equipment becomes the critical path for contracted deployments.",
@@ -3900,7 +3767,6 @@
         {
           "direction": "upside",
           "exposure": "The NVIDIA customer contract includes orchestration and cluster management, while the platform has received NVIDIA performance validation for B300 training workloads.",
-          "horizon": "near_term",
           "id": "IREN-B4",
           "if": "Frontier workloads increasingly require cluster-scale reliability, orchestration and managed services rather than bare-metal GPU access alone.",
           "material_when": "Customers must pay for managed functionality and the platform must sustain reference-level performance and contractual uptime as clusters scale.",
@@ -3927,7 +3793,6 @@
         {
           "direction": "mixed",
           "exposure": "The company has committed to a large forward GPU procurement program while signing multiyear customer contracts and constructing long-lived data-center assets.",
-          "horizon": "medium_term",
           "id": "IREN-B5",
           "if": "Accelerator release cycles shorten as frontier labs demand the newest performance-per-dollar systems.",
           "material_when": "The effect becomes material if a new generation delivers a large performance-per-dollar improvement before contracted revenue has amortized the existing fleet.",
@@ -4075,11 +3940,6 @@
           "url": "https://bitcap.com/en/news/fondsmanager-beckers-das-nvidia-monopol-beginnt-zu-brockeln"
         }
       ],
-      "stated_magnitudes": [
-        "As of 2026-07-20, management targeted more than $4 billion of year-end AI Cloud annualized run-rate revenue and said approximately 85% was contracted.",
-        "Deploy a 150,000-GPU fleet and convert signed demand into more than $4 billion of targeted year-end 2026 AI Cloud annualized run-rate revenue.",
-        "On 2026-03-04, management reported $9.3 billion of funding secured during the preceding eight months and approximately $3.5 billion of additional expected second-half 2026 capital expenditure for announced orders."
-      ],
       "summary": "Vertically integrated owner-operator of power-dense data centers, controlling grid-connected land, power infrastructure, facility development, GPU deployment and cloud operations. Monetization is shifting from Bitcoin mining toward contracted and on-demand AI compute, with colocation and build-to-suit offered as additional infrastructure products.",
       "summary_sources": [
         {
@@ -4102,7 +3962,6 @@
         {
           "direction": "upside",
           "exposure": "The assistant can sit inside a high-frequency Super App with access to commerce, payments and financial-service workflows, subject to consent and product controls.",
-          "horizon": "medium_term",
           "id": "KSPI-B1",
           "if": "More capable multimodal and agentic models improve the usefulness of the Kasper personal assistant.",
           "material_when": "The effect becomes material only if a significant user cohort adopts the assistant and demonstrates sustained incremental transaction or retention uplift after model-serving costs, without higher complaints, refunds or harmful financial outcomes.",
@@ -4129,7 +3988,6 @@
         {
           "direction": "upside",
           "exposure": "Proprietary AI tools have already been used to enrich product presentation, and the marketplace monetizes both transaction conversion and merchant advertising.",
-          "horizon": "near_term",
           "id": "KSPI-B2",
           "if": "Generative models improve catalog creation, product-data enrichment and advertising creative for merchants.",
           "material_when": "Merchant adoption must become broad enough to improve conversion or advertising spend at scale, with incremental revenue exceeding model, moderation and remediation costs.",
@@ -4152,7 +4010,6 @@
         {
           "direction": "mixed",
           "exposure": "The platform makes real-time credit decisions and links payments, commerce and lending data; errors or adversarial attacks can propagate across multiple services.",
-          "horizon": "medium_term",
           "id": "KSPI-B3",
           "if": "Frontier models improve or disrupt underwriting, fraud detection, identity verification and collections.",
           "material_when": "The models must be deployed across a material share of loans or transactions and demonstrate superior out-of-sample loss and fraud performance through macroeconomic and adversarial changes.",
@@ -4179,7 +4036,6 @@
         {
           "direction": "upside",
           "exposure": "Management is already prioritizing personalization, relevant search and marketing efficiency in Türkiye, while the newly acquired bank provides a route to commerce-finance cross-selling.",
-          "horizon": "medium_term",
           "id": "KSPI-B4",
           "if": "AI-driven search, personalization, marketing and service automation are localized for Hepsiburada and the Turkish financial-services build-out.",
           "material_when": "The effect is material if AI-enabled cohorts produce sustained improvements in engagement and contribution profit and the Turkish operation achieves durable positive adjusted EBITDA without disproportionate funding or credit risk.",
@@ -4202,7 +4058,6 @@
         {
           "direction": "mixed",
           "exposure": "Direct Super App engagement and on-platform discovery support advertising, merchant conversion and cross-selling. External agents could bypass those surfaces, although integration could also deliver incremental transactions.",
-          "horizon": "long_term",
           "id": "KSPI-B5",
           "if": "Third-party AI shopping or financial agents become the primary customer interface and route transactions across competing providers.",
           "material_when": "The pathway becomes material if a meaningful share of commerce or financial-product selection in Kazakhstan or Türkiye shifts to agents not controlled by, or economically integrated with, the ecosystem.",
@@ -4322,7 +4177,6 @@
           "url": "https://info.bitcap.com/hubfs/Fact%20Sheets/2024-09-September/2024-09%20BIT%20Global%20Technology%20Opportunities%20SICAV%20I%20E.pdf?_hsmi=328553595"
         }
       ],
-      "stated_magnitudes": [],
       "summary": "A two-sided consumer and merchant Super App ecosystem in Kazakhstan integrates payments, commerce and financial services, allowing engagement and transaction data from one service to reinforce the others. The company also controls the Hepsiburada e-commerce platform in Türkiye and, on 2026-07-15, completed the acquisition of a fully licensed Turkish bank. Türkiye represented half of e-commerce GMV in 1Q 2026, making international execution a material operating condition rather than an optional adjacency. The core Kazakhstan platforms remain transaction- and data-driven, while Turkish banking and lending will increase funding, balance-sheet and regulatory exposure.",
       "summary_sources": [
         {
@@ -4345,7 +4199,6 @@
         {
           "direction": "upside",
           "exposure": "The portfolio includes 100G and 200G EMLs, CW lasers and 800G or 1.6T transceiver modules used in short- and medium-reach AI data-center links.",
-          "horizon": "near_term",
           "id": "LITE-B1",
           "if": "Frontier training and inference systems expand accelerator counts and bandwidth requirements in scale-out networks.",
           "material_when": "The effect becomes material if multiple major customers move 1.6T and 200G-per-lane designs into sustained volume production and orders remain above inventory replacement while capacity and yields support shipment growth.",
@@ -4372,7 +4225,6 @@
         {
           "direction": "mixed",
           "exposure": "The company supplies CW and ultra-high-power lasers and ELSFP external laser modules for CPO and is collaborating with NVIDIA on advanced optics. It also sells pluggable modules that CPO could partially displace.",
-          "horizon": "medium_term",
           "id": "LITE-B2",
           "if": "Co-packaged optics moves optical engines closer to switch ASICs to reduce power and improve bandwidth density.",
           "material_when": "The effect becomes material if the disclosed first-half-2027 CPO order ships on schedule, production deployments expand beyond one customer and retained laser content exceeds any lost pluggable-module contribution.",
@@ -4399,7 +4251,6 @@
         {
           "direction": "upside",
           "exposure": "The R300 OCS applies the company's MEMS optical-switching technology to AI clusters, and management reported substantial OCS backlog before large-scale revenue contribution.",
-          "horizon": "medium_term",
           "id": "LITE-B3",
           "if": "AI operators adopt optical circuit switching to reconfigure large fabrics with lower network power and fewer electrical packet-switch stages.",
           "material_when": "The effect becomes material if backlog converts into recognized revenue across several customers, deployments produce repeat orders and field reliability and power savings meet customer targets.",
@@ -4422,7 +4273,6 @@
         {
           "direction": "upside",
           "exposure": "A demonstrated 1060-nanometer VCSEL array is co-packaged with a host ASIC for scale-up protocols and leverages the high-volume manufacturing base previously developed for sensing emitters.",
-          "horizon": "long_term",
           "id": "LITE-B4",
           "if": "Electrical scale-up links inside racks and systems encounter bandwidth-density, reach and thermal limits, encouraging optical I/O near accelerator or ASIC packages.",
           "material_when": "The effect becomes material if a major accelerator, switch or hyperscale platform qualifies the VCSEL architecture for production and committed volumes justify incremental packaging and test investment.",
@@ -4445,7 +4295,6 @@
         {
           "direction": "downside",
           "exposure": "AI and cloud growth is increasingly important, customers are concentrated, and substantial laser and module capacity is being committed against expected future demand.",
-          "horizon": "medium_term",
           "id": "LITE-B5",
           "if": "Frontier-model efficiency gains, slower hyperscaler capital spending, inventory corrections or topology changes reduce optical links required per unit of compute.",
           "material_when": "The effect becomes material if customer infrastructure spending or deployed accelerator volume decelerates for several quarters while optical orders fall faster, pricing weakens and capacity commitments remain unchanged.",
@@ -4579,10 +4428,6 @@
           "url": "https://bitcap.com/en/news/faz-ki-blase-wenn-alle-davon-reden-dann-ist-es-keine"
         }
       ],
-      "stated_magnitudes": [
-        "A nonexclusive multiyear agreement announced in March 2026 includes advanced-optics R&D collaboration, an NVIDIA multibillion-dollar purchase commitment, future capacity-access rights and a $2 billion investment supporting capacity and U.S. manufacturing.",
-        "At fiscal Q2 2026, management reported OCS backlog above $400 million and an incremental multi-hundred-million-dollar CPO order scheduled for delivery in the first half of calendar 2027."
-      ],
       "summary": "The business sells optical and photonic components, modules, subsystems and laser systems into two broad pools: Cloud and Networking, spanning AI data-center connectivity, data-center interconnect and telecom networks; and Industrial Tech, spanning precision manufacturing and 3D sensing. Economics are governed by customer qualifications, optical port and wavelength volumes, speed and architecture transitions, product mix, manufacturing yield and utilization, and concentrated customer ordering.",
       "summary_sources": [
         {
@@ -4601,7 +4446,6 @@
         {
           "direction": "mixed",
           "exposure": "The mobile-first purchase flow provides transaction tools and customer context; AI Lucky was developed with VolcEngine and integrated into Qwen, WeChat and Alipay ecosystems.",
-          "horizon": "near_term",
           "id": "LKNCY-B1",
           "if": "More capable conversational and multimodal agents with reliable tool use, ordering and payment execution",
           "material_when": "Material only if agent-originated orders become a meaningful share of transactions and show higher retention or contribution profit after promotions, platform fees and error-related costs.",
@@ -4624,7 +4468,6 @@
         {
           "direction": "upside",
           "exposure": "A large store network and high-frequency digital transactions generate granular store, product, time and customer data; management states that AI is being applied across supply-chain and retail operations.",
-          "horizon": "near_term",
           "id": "LKNCY-B2",
           "if": "Improved foundation models for local demand forecasting, causal promotion analysis and automated replenishment",
           "material_when": "Material if models are deployed across a substantial portion of stores and produce persistent reductions in forecast error, waste or stockouts versus controlled baselines.",
@@ -4647,7 +4490,6 @@
         {
           "direction": "mixed",
           "exposure": "Management's product framework combines customer feedback, market analysis, launch timing and flavor trends; the company already operates a high-frequency launch model across coffee and non-coffee categories.",
-          "horizon": "near_term",
           "id": "LKNCY-B3",
           "if": "Multimodal trend detection, consumer-feedback synthesis and generative product-development tools",
           "material_when": "Material if AI-supported launches deliver higher post-promotion repeat rates and contribution margins than conventional launches without increasing obsolete ingredients or SKU complexity disproportionately.",
@@ -4670,7 +4512,6 @@
         {
           "direction": "mixed",
           "exposure": "Store operations are digitally managed and use intelligent equipment; the standardized pick-up format offers repeatable workflows for preparation, scheduling, maintenance and quality monitoring.",
-          "horizon": "medium_term",
           "id": "LKNCY-B4",
           "if": "More reliable vision models, edge agents and autonomous workflow systems for store execution",
           "material_when": "Material if systems progress from monitoring to safe operational action and measurably reduce labor or downtime per order across a broad store cohort without increasing quality failures.",
@@ -4697,7 +4538,6 @@
         {
           "direction": "mixed",
           "exposure": "The company is building a large automated roasting network and says AI spans sourcing, warehousing, logistics and roasting across the coffee value chain.",
-          "horizon": "medium_term",
           "id": "LKNCY-B5",
           "if": "AI optimization and digital twins for sourcing, roasting, warehousing and logistics",
           "material_when": "Material if utilization rises while per-ton energy, scrap, freight and processing costs decline sufficiently to earn an acceptable return on the committed manufacturing capital.",
@@ -4792,7 +4632,6 @@
           "url": "https://bitcap.com/en"
         }
       ],
-      "stated_magnitudes": [],
       "summary": "A technology-driven beverage retailer combining app-based ordering, digital customer engagement and a dense pick-up-store network. Most revenue is generated by self-operated retail stores; the partnership-store model monetizes materials, equipment, services, royalties and profit sharing while reducing direct store capital requirements. Scale, product innovation and supply-chain integration support growth, but rapid openings and promotions create tension between network expansion and mature-store margins.",
       "summary_sources": [
         {
@@ -4815,7 +4654,6 @@
         {
           "direction": "mixed",
           "exposure": "Lemonade acquires and services customers digitally and uses automated systems to collect claims information, triage cases, detect fraud indicators, and route work to people.",
-          "horizon": "near_term",
           "id": "LMND-B1",
           "if": "Frontier models improve reliable document, image, voice, and conversational understanding for regulated service workflows.",
           "material_when": "Automation must increase verified end-to-end resolution without raising reversals, complaints, claim leakage, safety incidents, or hidden human review.",
@@ -4842,7 +4680,6 @@
         {
           "direction": "mixed",
           "exposure": "Lemonade's direct platform collects first-party quote, policy, claims, behavior, and product-interaction data and uses proprietary models in underwriting and customer operations.",
-          "horizon": "medium_term",
           "id": "LMND-B2",
           "if": "More capable predictive and generative models improve risk segmentation, pricing, retention, and cross-sell decisions.",
           "material_when": "Model-led decisions must improve mature, cohort-adjusted underwriting and acquisition economics after controlling for rate changes, reinsurance, product mix, and catastrophe experience.",
@@ -4865,7 +4702,6 @@
         {
           "direction": "mixed",
           "exposure": "Lemonade uses permissioned Tesla Fleet API data to distinguish FSD-engaged from human-driven miles and price the modes separately.",
-          "horizon": "medium_term",
           "id": "LMND-B3",
           "if": "Autonomous-driving systems take a larger share of miles and expose machine-specific safety performance.",
           "material_when": "The autonomous cohort must scale across states while generating credible, mature loss experience and adequate unit economics after the advertised discount.",
@@ -4888,7 +4724,6 @@
         {
           "direction": "downside",
           "exposure": "Lemonade accepts digital applications and claims and relies on models, customer-supplied data, mobile interfaces, and automated triage.",
-          "horizon": "near_term",
           "id": "LMND-B4",
           "if": "Frontier AI lowers the cost of sophisticated fraud generation, identity manipulation, and adversarial attacks on automated insurance workflows.",
           "material_when": "The risk becomes material if fraud and security losses or manual-review rates rise faster than premiums and offset automation gains.",
@@ -4969,7 +4804,6 @@
           "url": "https://www.lemonade.com/investor/news/lemonade-brings-autonomous-car-insurance-to-indiana"
         }
       ],
-      "stated_magnitudes": [],
       "summary": "Lemonade is a direct, full-stack insurer offering renters, homeowners, car, pet, and life products in the United States and parts of Europe. Customers buy policies through digital interfaces; Lemonade earns insurance revenue by retaining a portion of premiums and bearing insured risk, while ceded reinsurance changes premium retention, volatility, capital needs, and reported revenue. Proprietary data and automation are intended to improve acquisition, pricing, underwriting, servicing, and claims economics.",
       "summary_sources": [
         {
@@ -4988,7 +4822,6 @@
         {
           "direction": "upside",
           "exposure": "Feeds, Reels, Threads, and other discovery surfaces rely on AI systems to match users with relevant content and advertisements.",
-          "horizon": "near_term",
           "id": "META-B1",
           "if": "More capable multimodal recommendation, translation, and content-understanding models",
           "material_when": "The effect becomes material if model upgrades produce sustained incremental time spent or content satisfaction across large surfaces and convert into additional impressions without equivalent declines in retention, trust, or regulatory permission.",
@@ -5015,7 +4848,6 @@
         {
           "direction": "upside",
           "exposure": "The advertising stack directly uses AI for campaign setup, asset generation, audience and ad selection, optimization, and conversion measurement.",
-          "horizon": "near_term",
           "id": "META-B2",
           "if": "Generative creative, campaign agents, improved attribution, and larger ad-ranking models",
           "material_when": "The effect becomes material if adoption is broad, measured conversion or return-on-spend improvements are incremental rather than substitutional, and higher advertiser demand exceeds the compute cost of generating and ranking ads.",
@@ -5042,7 +4874,6 @@
         {
           "direction": "mixed",
           "exposure": "The company operates large internal training and inference fleets and has committed to external accelerator capacity while accelerating its MTIA roadmap.",
-          "horizon": "medium_term",
           "id": "META-B3",
           "if": "Rapid progress in accelerator efficiency and custom silicon, offset by increasingly compute-intensive frontier-model scaling",
           "material_when": "The upside becomes material if performance per dollar and watt, utilization, and custom-silicon deployment improve faster than workload growth. The downside becomes material if infrastructure spending and depreciation grow persistently faster than AI-linked revenue.",
@@ -5077,7 +4908,6 @@
         {
           "direction": "mixed",
           "exposure": "The AI assistant can leverage consumer distribution, social context, Marketplace, messaging, and connected applications, while paid business messaging provides a possible commercial channel.",
-          "horizon": "medium_term",
           "id": "META-B4",
           "if": "Agentic assistants that can plan, research, create, and act through connected services",
           "material_when": "The path becomes material if repeat agentic usage reaches broad scale, businesses or consumers pay for measurable value, and cost per completed task declines sufficiently while privacy and safety controls remain acceptable.",
@@ -5104,7 +4934,6 @@
         {
           "direction": "mixed",
           "exposure": "AI glasses combine cameras, audio, an assistant, social applications, and EssilorLuxottica's eyewear brands and distribution.",
-          "horizon": "long_term",
           "id": "META-B5",
           "if": "Smaller, faster multimodal models enabling useful always-available AI glasses",
           "material_when": "The path becomes material if daily usage converts into sustained shipments and upgrades, broader geographic and prescription availability, and positive hardware or service contribution at a scale sufficient to narrow segment losses.",
@@ -5238,10 +5067,6 @@
           "url": "https://bitcap.com/en/news/ki-roi-research-memo-ist-es-das-alles-wert"
         }
       ],
-      "stated_magnitudes": [
-        "Advertising dominates the economics: 2025 revenue was $200.97 billion, with full-year ad impressions up 12% and average price per ad up 9%.",
-        "That cash engine funds an increasingly infrastructure-intensive AI and wearables strategy; capital expenditures including finance-lease principal were $72.22 billion in 2025 and $19.84 billion in Q1 2026."
-      ],
       "summary": "Family of Apps converts user and creator activity across Facebook, Instagram, Messenger, WhatsApp, Threads, and related services into advertising inventory and business interactions. Reality Labs develops immersive hardware, software, and content. Advertising dominates the economics: 2025 revenue was $200.97 billion, with full-year ad impressions up 12% and average price per ad up 9%. That cash engine funds an increasingly infrastructure-intensive AI and wearables strategy; capital expenditures including finance-lease principal were $72.22 billion in 2025 and $19.84 billion in Q1 2026.",
       "summary_sources": [
         {
@@ -5264,7 +5089,6 @@
         {
           "direction": "mixed",
           "exposure": "The company supplies custom-silicon IP, design services, advanced packaging expertise and production devices for hyperscale infrastructure.",
-          "horizon": "medium_term",
           "id": "MRVL-B1",
           "if": "Frontier-model training and inference increasingly shift from merchant accelerators toward hyperscaler-designed XPUs optimized for cost, power and specific workloads.",
           "material_when": "The effect becomes material only when additional programs progress beyond announcements into qualified production at sustained volumes, preferably across more than one customer.",
@@ -5291,7 +5115,6 @@
         {
           "direction": "upside",
           "exposure": "NVLink Fusion allows company-designed custom XPUs and compatible scale-up networking to connect into NVIDIA infrastructure.",
-          "horizon": "medium_term",
           "id": "MRVL-B2",
           "if": "Frontier AI clusters become more heterogeneous, combining custom accelerators with NVIDIA rack-scale systems and networking.",
           "material_when": "The partnership must produce qualified customer systems, purchase commitments and production revenue; technical compatibility or an ecosystem announcement alone is insufficient.",
@@ -5314,7 +5137,6 @@
         {
           "direction": "upside",
           "exposure": "The portfolio includes 800G and 1.6T optical DSPs, active electrical cable silicon, silicon-photonics engines, CPO/NPO solutions, Ethernet switches and data-center-interconnect products.",
-          "horizon": "near_term",
           "id": "MRVL-B3",
           "if": "Larger frontier-model clusters push link bandwidth, reach and power beyond the practical limits of existing copper and lower-speed optical connections.",
           "material_when": "Hyperscalers must adopt the new products in volume and the company's content per cluster must rise rather than migrate to an integrated competitor or lower-value architecture.",
@@ -5341,7 +5163,6 @@
         {
           "direction": "mixed",
           "exposure": "The company owns PCIe/CXL switching products through XConn and is developing CXL and UALink-oriented connectivity alongside its custom platform.",
-          "horizon": "medium_term",
           "id": "MRVL-B4",
           "if": "Frontier workloads increase memory capacity and accelerator-to-accelerator communication requirements, encouraging disaggregated memory and open scale-up fabrics.",
           "material_when": "CXL, UALink or related open fabrics must secure production deployments at major operators, and company devices must win meaningful sockets rather than remain evaluation products.",
@@ -5364,7 +5185,6 @@
         {
           "direction": "downside",
           "exposure": "Revenue is increasingly concentrated in data-center products and a small number of large customers that can alter architectures, delay programs or design more silicon internally.",
-          "horizon": "medium_term",
           "id": "MRVL-B5",
           "if": "Algorithmic efficiency, smaller models, lower-cost inference or customer insourcing reduces the amount of external accelerator and networking silicon required per unit of AI output.",
           "material_when": "Efficiency improvements must translate into lower infrastructure purchases, delayed clusters or insourced programs rather than simply enabling more AI usage and offsetting demand.",
@@ -5494,9 +5314,6 @@
           "url": "https://fondswelt.hansainvest.com/uploads/documents/fs_retail/HI_DE000A2N8127_retail_2026_07_20_en.pdf"
         }
       ],
-      "stated_magnitudes": [
-        "At May 2, 2026, minimum capacity-reservation purchase commitments were estimated at $448.1 million through fiscal 2033."
-      ],
       "summary": "A fabless data-infrastructure semiconductor supplier whose revenue is primarily product sales into data-center and communications markets. The portfolio combines custom compute silicon with optical/electrical interconnect, Ethernet and scale-up switching, storage controllers, processors and security products. Management said in May 2026 that more than 97% of revenue was tied to data-infrastructure markets; fiscal 2026 growth was led by AI-related custom products and electro-optics.",
       "summary_sources": [
         {
@@ -5519,7 +5336,6 @@
         {
           "direction": "mixed",
           "exposure": "Azure and Foundry provide infrastructure and model services, while GitHub, 365, data, and security products can originate and retain workloads across the stack.",
-          "horizon": "medium_term",
           "id": "MSFT-B1",
           "if": "More capable reasoning, multimodal, and agentic models generate larger training, inference, tool-use, data, and orchestration workloads.",
           "material_when": "The path becomes materially positive only if billable workload growth, utilization, and pricing exceed the combined increase in cost per workload, depreciation, component pricing, and capacity held ahead of demand over multiple quarters.",
@@ -5550,7 +5366,6 @@
         {
           "direction": "upside",
           "exposure": "The company can distribute Copilot and agents through 365, Dynamics, GitHub, Teams, security, Copilot Studio, and Agent 365 to an existing enterprise installed base.",
-          "horizon": "near_term",
           "id": "MSFT-B2",
           "if": "Agents become reliable enough for recurring knowledge-work, software-development, and business-process workflows.",
           "material_when": "The effect becomes material if production deployments expand beyond pilots, lift revenue per user or usage-based revenue, improve retention, and produce gross profit exceeding inference, engineering, support, and sales costs.",
@@ -5577,7 +5392,6 @@
         {
           "direction": "mixed",
           "exposure": "GitHub, Azure, and developer tools benefit from greater software creation, but established productivity, business-application, security, and workflow products face more customer self-build and vendor overlap.",
-          "horizon": "medium_term",
           "id": "MSFT-B3",
           "if": "Frontier coding agents materially reduce the cost and time required to create, customize, and replace business software.",
           "material_when": "The downside becomes material if enterprises replace or consolidate licensed applications with agent-built workflows, renewal pricing weakens, and the associated Azure or GitHub consumption fails to offset lost application gross profit.",
@@ -5604,7 +5418,6 @@
         {
           "direction": "mixed",
           "exposure": "The company remains OpenAI's primary cloud partner and shareholder and holds a non-exclusive IP license through 2032, but it is also building a multi-model platform spanning proprietary, partner, and open models.",
-          "horizon": "medium_term",
           "id": "MSFT-B4",
           "if": "Frontier-model leadership fragments across providers, while OpenAI expands its ability to serve products on multiple clouds.",
           "material_when": "The effect becomes material if OpenAI or customers shift a substantial share of training, inference, or API demand away from Azure, or if multi-model choice and lower-cost alternatives generate enough new consumption and margin to offset that shift.",
@@ -5631,7 +5444,6 @@
         {
           "direction": "mixed",
           "exposure": "Enterprise cloud, identity, security, productivity, public-sector, and agent-governance products depend on trust; the company is implementing the Secure Future Initiative and positioning Agent 365 and Foundry controls as governance layers.",
-          "horizon": "near_term",
           "id": "MSFT-B5",
           "if": "Frontier AI strengthens both cyber defenders and attackers and increases governance requirements for autonomous agents and sensitive data.",
           "material_when": "The effect becomes material if an AI-enabled incident or regulatory decision changes procurement, licensing, interoperability, or deployment requirements, or if governance and security become decisive paid features in large production deployments.",
@@ -5794,12 +5606,6 @@
           "url": "https://connect.cma.gov.uk/consultations/microsoft-business-software-itc/"
         }
       ],
-      "stated_magnitudes": [
-        "The company announced general availability from May 1, 2026, with explicit per-user pricing of $15 for Agent 365 and $99 for E7.",
-        "Management expected roughly $190 billion of calendar-2026 capital expenditures, including about $25 billion from higher component pricing.",
-        "Invest $2.5 billion in a customer-facing Frontier Company organization with 6,000 industry and engineering experts.",
-        "The utilization and return profile of the approximately $190 billion calendar-2026 capital-spending plan is not yet observable."
-      ],
       "summary": "An integrated enterprise and consumer technology platform monetized through cloud consumption, recurring per-user subscriptions, software licenses and support, advertising and recruiting tools, gaming content and subscriptions, and devices. Its core economic advantage is distribution and cross-sell across productivity, identity, security, data, developer tools, and cloud infrastructure. AI can create incremental consumption and revenue per user, but also raises serving, depreciation, research, and capacity costs.",
       "summary_sources": [
         {
@@ -5818,7 +5624,6 @@
         {
           "direction": "upside",
           "exposure": "AI accelerators require HBM stacks to hold model state and move data at high bandwidth; the company supplies HBM3E and HBM4 for accelerator platforms.",
-          "horizon": "near_term",
           "id": "MU-B1",
           "if": "Frontier models use more parameters, mixture-of-experts routing, longer contexts, multimodal inputs, and greater test-time reasoning.",
           "material_when": "Material if growth in accelerator units and HBM capacity per accelerator outpaces industry HBM supply while the company remains qualified on high-volume platforms.",
@@ -5841,7 +5646,6 @@
         {
           "direction": "upside",
           "exposure": "The same manufacturing network supplies HBM and conventional DRAM, so HBM allocation and its effective wafer trade ratio can restrict output available for server, mobile, and client DRAM.",
-          "horizon": "near_term",
           "id": "MU-B2",
           "if": "AI accelerator growth increases demand for HBM, whose production consumes leading-edge DRAM wafers and advanced-packaging capacity.",
           "material_when": "Material if HBM's capacity consumption removes conventional DRAM bits faster than node transitions and new wafer capacity replace them.",
@@ -5868,7 +5672,6 @@
         {
           "direction": "upside",
           "exposure": "Those application servers use conventional server DRAM, high-capacity DIMMs, low-power server memory, and NVMe storage in addition to accelerator memory.",
-          "horizon": "medium_term",
           "id": "MU-B3",
           "if": "Agentic AI shifts part of inference orchestration, tool execution, retrieval, and application logic onto CPU-based servers.",
           "material_when": "Material if deployed agents increase application-server count or DRAM capacity per server faster than virtualization, caching, and model-efficiency improvements reduce infrastructure needs.",
@@ -5891,7 +5694,6 @@
         {
           "direction": "mixed",
           "exposure": "The company sells TLC and QLC NAND and data-center SSDs designed for high-throughput, low-latency, and dense AI storage deployments.",
-          "horizon": "medium_term",
           "id": "MU-B4",
           "if": "Training, retrieval-augmented generation, checkpoints, vector databases, KV-cache handling, and AI data retention increase high-performance and high-density storage requirements.",
           "material_when": "Material if incremental AI-related NAND consumption and premium SSD adoption exceed NAND industry bit-supply growth and reductions in bytes stored per workload.",
@@ -5914,7 +5716,6 @@
         {
           "direction": "downside",
           "exposure": "A growing share of capacity and product strategy is directed toward AI memory and storage, particularly HBM and advanced data-center products.",
-          "horizon": "medium_term",
           "id": "MU-B5",
           "if": "Model compression, quantization, sparse architectures, memory-efficient attention, or custom accelerators reduce memory required per unit of useful AI work.",
           "material_when": "Material if bytes of memory or bandwidth required per unit of AI output decline faster than total AI workloads and deployed accelerator capacity grow.",
@@ -6051,10 +5852,6 @@
           "url": "https://bitcap.com/en/news/85-fondsmanager-beckers-wie-der-memory-supercycle-weitergeht"
         }
       ],
-      "stated_magnitudes": [
-        "On July 9, 2026, the company raised planned U.S. fab and technology investment to more than $250 billion through 2035 and reiterated a long-term goal of producing 40% of its DRAM in the United States.",
-        "Micron Announces Up to $3 Billion Strategic Investment to Strengthen U.S."
-      ],
       "summary": "A vertically integrated producer of DRAM and NAND technologies and products. Revenue is driven by bits shipped, average selling prices, and product mix; profitability also depends on manufacturing cost per bit, yields, utilization, packaging costs, and inventory conditions. Differentiated products such as HBM, high-capacity server memory, managed NAND, and enterprise SSDs can earn premiums over commodity components, but the business remains capital-intensive and exposed to memory supply cycles.",
       "summary_sources": [
         {
@@ -6073,7 +5870,6 @@
         {
           "direction": "upside",
           "exposure": "The installed SSE/SASE platform can attach AI Guardrails, Agentic Broker, AI Gateway, AI Red Teaming and AI Command Center around users, models, applications, agents, tools and data.",
-          "horizon": "medium_term",
           "id": "NTSK-B1",
           "if": "Enterprise adoption of public, private and agentic AI expands sensitive-data flows, shadow AI and governance requirements.",
           "material_when": "The effect becomes material only if launched products convert into paid production use and generate measurable expansion or competitive wins without merely replacing revenue from existing bundles.",
@@ -6100,7 +5896,6 @@
         {
           "direction": "mixed",
           "exposure": "Agentic Broker is designed to inspect and control MCP transactions, while AI Gateway and cloud-platform integrations can apply controls to API-based agent workflows.",
-          "horizon": "medium_term",
           "id": "NTSK-B2",
           "if": "MCP and other agent-to-tool, agent-to-model and agent-to-agent protocols become standard in production systems.",
           "material_when": "Production agent traffic must reach meaningful scale, and the products must remain generally available, interoperable and low latency across leading models, clouds, tools and protocol versions.",
@@ -6123,7 +5918,6 @@
         {
           "direction": "mixed",
           "exposure": "AgentSkope and AI Command Center automate DLP triage, investigation, policy creation, configuration review, risk queries, remediation and troubleshooting.",
-          "horizon": "medium_term",
           "id": "NTSK-B3",
           "if": "Frontier models improve tool use, reasoning and autonomy for security and network operations.",
           "material_when": "Customers must delegate meaningful production workflows while measurable accuracy, throughput and resolution-time improvements exceed the cost and risk of human review, errors and rollback.",
@@ -6146,7 +5940,6 @@
         {
           "direction": "mixed",
           "exposure": "NewEdge AI Fast Path optimizes routes and peering between users, sites, agents and AI destinations while applying security services at the edge.",
-          "horizon": "near_term",
           "id": "NTSK-B4",
           "if": "AI applications, RAG systems and multi-step agents create latency-sensitive, high-volume network traffic.",
           "material_when": "AI traffic must become material to purchasing decisions, and latency or transit savings must exceed the incremental capital and operating cost required to scale capacity and resilience.",
@@ -6169,7 +5962,6 @@
         {
           "direction": "mixed",
           "exposure": "The platform competes with adjacent enforcement layers and depends on continued access to model, cloud and protocol telemetry. Partner integrations can extend coverage but may not prevent bundling pressure.",
-          "horizon": "medium_term",
           "id": "NTSK-B5",
           "if": "Frontier labs, cloud platforms, browsers, identity providers and security incumbents embed native AI guardrails, agent permissions, DLP and observability.",
           "material_when": "The effect becomes material if buyers prefer bundled native controls or platform owners restrict access faster than cross-platform visibility, data context and network performance can differentiate the offering.",
@@ -6268,9 +6060,6 @@
           "url": "https://bitcap.com/beckers-bets-podcast"
         }
       ],
-      "stated_magnitudes": [
-        "ARR was $845 million at April 30, 2026, up 29% year over year, providing a dated anchor for the scale of the recurring business."
-      ],
       "summary": "The business sells a unified, cloud-native security, networking, analytics and AI-security platform to large enterprises and mid-sized organizations, primarily through recurring subscriptions and an indirect channel. The economic model depends on winning customers, retaining them, attaching additional products, and operating the NewEdge private network with sufficient performance, reliability and cost efficiency.",
       "summary_sources": [
         {
@@ -6289,7 +6078,6 @@
         {
           "direction": "upside",
           "exposure": "The company supplies the rack-scale accelerators, CPUs, interconnects and networking used by frontier labs and the clouds hosting them.",
-          "horizon": "near_term",
           "id": "NVDA-B1",
           "if": "Frontier models require larger multimodal training runs, more post-training and greater test-time reasoning compute.",
           "material_when": "Aggregate spending on training, post-training and test-time compute must grow faster than hardware price-performance gains and must not migrate materially to customer-designed or competing accelerators.",
@@ -6316,7 +6104,6 @@
         {
           "direction": "upside",
           "exposure": "Blackwell Ultra and Rubin are designed for low-latency, long-context and agentic inference, with networking, storage processing and inference software sold as a coordinated platform.",
-          "horizon": "medium_term",
           "id": "NVDA-B2",
           "if": "Agentic applications create persistent, long-context inference and generate more reasoning tokens per completed task.",
           "material_when": "Production agents must achieve economic utility and sustained token volumes, with lower cost per token expanding usage faster than it reduces hardware needed per token.",
@@ -6339,7 +6126,6 @@
         {
           "direction": "mixed",
           "exposure": "Demand is tied to total accelerator consumption, while the software stack also helps customers implement these optimizations and may stimulate lower-cost use cases.",
-          "horizon": "medium_term",
           "id": "NVDA-B3",
           "if": "Distillation, quantization, sparsity, routing and better model architectures reduce compute required for a given capability.",
           "material_when": "The effect turns negative if compute per useful task falls faster than usage, model size, inference frequency and new application demand expand.",
@@ -6362,7 +6148,6 @@
         {
           "direction": "downside",
           "exposure": "The largest customers have the resources and workload scale to design alternatives, and fiscal 2026 revenue was concentrated in two large direct customers.",
-          "horizon": "medium_term",
           "id": "NVDA-B4",
           "if": "Frontier labs and hyperscalers optimize models for TPUs, custom ASICs or competing GPUs, while software becomes more hardware-portable.",
           "material_when": "Alternatives must reach acceptable performance, availability, developer support and total cost across production workloads, then win material deployments at major customers.",
@@ -6385,7 +6170,6 @@
         {
           "direction": "downside",
           "exposure": "Advanced data-center products and related customer shipments are subject to U.S. licensing rules, and restricted products can leave inventory and non-cancellable purchase obligations.",
-          "horizon": "near_term",
           "id": "NVDA-B5",
           "if": "Rising frontier-model capability intensifies national-security concern and produces tighter controls on advanced-computing exports or end users.",
           "material_when": "Restrictions or license denials must cover products and markets large enough that demand cannot be redirected elsewhere without price, timing or margin loss.",
@@ -6466,10 +6250,6 @@
           "url": "https://bitcap.com/news/fondsmanager-beckers-das-nvidia-monopol-beginnt-zu-brockeln"
         }
       ],
-      "stated_magnitudes": [
-        "Manufacturing, supply and capacity commitments were $119 billion as of April 26, 2026.",
-        "The $119 billion manufacturing, supply and capacity commitment creates substantial operating leverage in both directions."
-      ],
       "summary": "A fabless accelerated-computing platform vendor spanning processors, interconnects, networking, rack-scale systems, software and services. Third parties manufacture its products, while customers deploy them across hyperscale data centers, AI clouds, enterprise and sovereign AI factories, PCs, workstations, robotics and automotive. Its current commercial framework separates Data Center into Hyperscale and AI Clouds, Industrial and Enterprise, with other devices grouped as Edge Computing.",
       "summary_sources": [
         {
@@ -6488,7 +6268,6 @@
         {
           "direction": "upside",
           "exposure": "OmadaSpark already provides real-time nutrition and motivational support, shares conversation context with care teams, and runs on a fine-tuned Llama/SageMaker stack. The broader Care Team Platform is designed to magnify human-care capacity.",
-          "horizon": "medium_term",
           "id": "OMDA-B1",
           "if": "More capable, lower-cost language models and healthcare-aligned agents improve conversational guidance, summarization, and care-workflow orchestration.",
           "material_when": "The effect becomes material only if AI users show sustained incremental retention or clinical improvement and care-team hours per member decline without more safety events, escalations, or customer complaints.",
@@ -6515,7 +6294,6 @@
         {
           "direction": "upside",
           "exposure": "Meal Map uses AI-powered instant feedback and photo-recognition capabilities, while OmadaSpark can use member condition, program, dietary preference, allergy, and age-range context.",
-          "horizon": "medium_term",
           "id": "OMDA-B2",
           "if": "Advances in multimodal vision and personalized recommendation systems improve food recognition and nutrition feedback.",
           "material_when": "Engagement gains must persist across diverse cohorts and translate into measurable weight, metabolic, medication-adherence, or medical-cost outcomes rather than merely more app interactions.",
@@ -6538,7 +6316,6 @@
         {
           "direction": "downside",
           "exposure": "OmadaSpark uses sensitive context including health program, allergies, preferences, age range, and member conversations; care-team access to transcripts creates clinical utility but also expands protected-data and automation-risk surfaces.",
-          "horizon": "near_term",
           "id": "OMDA-B3",
           "if": "Patient-facing health agents become more autonomous or expand faster than clinical evaluation, privacy controls, and escalation systems mature.",
           "material_when": "Materiality would require a systematic error pattern, significant adverse event, reportable privacy or security incident, regulator action, or customer-imposed restriction rather than isolated low-severity feedback.",
@@ -6565,7 +6342,6 @@
         {
           "direction": "mixed",
           "exposure": "Some visible AI features can be replicated, while Omada relies heavily on large channel partners that could promote competing products or internal capabilities. Omada's proprietary care workflows, clinical evidence, longitudinal data, and human teams may provide an offsetting advantage.",
-          "horizon": "medium_term",
           "id": "OMDA-B4",
           "if": "General-purpose models make baseline coaching, food logging, and personalized education inexpensive for competitors, health plans, PBMs, and employers to build or bundle.",
           "material_when": "Downside becomes material if buyer-built or competing AI products achieve acceptable clinical governance and ROI, leading to weaker renewal, lower prices, or channel insourcing. Upside requires Omada to adopt cost declines faster than differentiation erodes.",
@@ -6664,7 +6440,6 @@
           "url": "https://bitcap.com/en/news"
         }
       ],
-      "stated_magnitudes": [],
       "summary": "A virtual-first, between-visit care platform sold principally through employers, health plans, pharmacy benefit managers, and health systems. Human care teams combine with software, connected devices, and AI-enabled tools across cardiometabolic, GLP-1, and musculoskeletal programs. Economics are dominated by service revenue associated with billed enrolled members; hardware is ancillary. Growth depends on distribution reach, enrollment, persistence, multi-program adoption, clinical outcomes, and customer retention, while margins depend heavily on care-team productivity and technology-enabled operating leverage.",
       "summary_sources": [
         {
@@ -6687,7 +6462,6 @@
         {
           "direction": "upside",
           "exposure": "Oswell retrieves from member medical records, care-guide interactions, and benefit documents and can route users to Oscar clinicians and in-network providers.",
-          "horizon": "near_term",
           "id": "OSCR-B1",
           "if": "More reliable, long-context, tool-using health agents with stronger grounding and escalation behavior",
           "material_when": "The effect becomes material only if a substantial share of members use Oswell, it resolves meaningful service or navigation demand without merely shifting work to clinicians, and controlled cohorts show lower contact or utilization costs without worse outcomes.",
@@ -6710,7 +6484,6 @@
         {
           "direction": "upside",
           "exposure": "Oscar is scaling bilingual voice agents for care navigation and using AI across operational and member workflows.",
-          "horizon": "near_term",
           "id": "OSCR-B2",
           "if": "Improved speech models and agentic workflow automation",
           "material_when": "Savings must exceed model, integration, monitoring, and clinical-oversight costs while service quality, regulatory compliance, and member satisfaction remain stable or improve.",
@@ -6733,7 +6506,6 @@
         {
           "direction": "downside",
           "exposure": "Oswell handles highly sensitive health and benefit information and is positioned to discuss symptoms, medications, drug interactions, test results, coverage, costs, and provider selection.",
-          "horizon": "near_term",
           "id": "OSCR-B3",
           "if": "Frontier-model hallucinations, prompt injection, data leakage, or overconfident clinical and benefit guidance",
           "material_when": "The risk becomes material if deployment scales faster than grounding, access controls, monitoring, clinician escalation, and incident response, or if a recurring error affects medication, urgent symptoms, coverage, or network guidance.",
@@ -6764,7 +6536,6 @@
         {
           "direction": "mixed",
           "exposure": "Lucie is intended to help consumers and brokers compare and bundle medical and supplemental products, while Oscar's ICHRA strategy moves employer benefits toward individual selection.",
-          "horizon": "medium_term",
           "id": "OSCR-B4",
           "if": "Agentic comparison, recommendation, and enrollment systems for health benefits",
           "material_when": "Lucie must attract meaningful employer, broker, and consumer volume, improve conversion or attachment versus conventional enrollment tools, and preserve credible carrier neutrality and compliant recommendations.",
@@ -6791,7 +6562,6 @@
         {
           "direction": "mixed",
           "exposure": "+Oscar sells Campaign Builder to payors and providers, but improving general-purpose AI may both enhance the product and make internal or competing alternatives easier to build.",
-          "horizon": "medium_term",
           "id": "OSCR-B5",
           "if": "Cheaper, more capable enterprise agents for healthcare engagement and workflow creation",
           "material_when": "The path matters only if external contract wins, client lives, and services revenue grow enough to become financially visible and the healthcare-specific workflow advantage exceeds implementation and model costs.",
@@ -6900,7 +6670,6 @@
           "url": "https://bitcap.com/en/news"
         }
       ],
-      "stated_magnitudes": [],
       "summary": "The economic core is risk-bearing ACA individual-market insurance, not software licensing. Premium scale is governed by enrollment, approved rates, product and geographic mix, risk adjustment, medical costs, and administrative expense. ICHRA is primarily a distribution route into individual plans, while +Oscar and Lucie are adjacent technology, engagement, brokerage, and marketplace businesses whose standalone economics remain less visible. Oscar reported 3.17 million members as of 2026-03-31, making AI potentially material only where it measurably changes membership, retention, medical loss ratio, SG&A, or adjacent-services revenue.",
       "summary_sources": [
         {
@@ -6919,7 +6688,6 @@
         {
           "direction": "mixed",
           "exposure": "Prisma AIRS, Portkey's AI Gateway, and Idira are designed to discover agents, mediate AI traffic, enforce runtime policy, and govern human, machine, and agentic identities.",
-          "horizon": "medium_term",
           "id": "PANW-B1",
           "if": "Autonomous agents gain broader tool use, memory, machine-to-machine communication, and privileged access.",
           "material_when": "Agentic workloads must move into material production use, customers must assign security and identity budgets to an independent control plane, and Palo Alto Networks must prove cross-environment coverage and acceptable latency.",
@@ -6946,7 +6714,6 @@
         {
           "direction": "mixed",
           "exposure": "Cortex XSIAM and Unit 42-managed services use shared telemetry, analytics, and automation to detect, investigate, and respond across attack surfaces.",
-          "horizon": "near_term",
           "id": "PANW-B2",
           "if": "Frontier models increase attacker speed, phishing quality, malware adaptation, vulnerability discovery, and automated campaign scale.",
           "material_when": "AI-enabled attacks must materially exceed legacy workflows while XSIAM demonstrates better detection and response outcomes at lower total operating cost than incumbent or cloud-native alternatives.",
@@ -6969,7 +6736,6 @@
         {
           "direction": "mixed",
           "exposure": "Prisma AIRS must discover and evaluate models and applications across heterogeneous environments and adapt runtime and red-team defenses to changing attack surfaces.",
-          "horizon": "medium_term",
           "id": "PANW-B3",
           "if": "Open and proprietary model ecosystems proliferate, with new model artifacts, prompt interfaces, agent protocols, and deployment environments.",
           "material_when": "Customers must operate heterogeneous AI stacks at scale and value consistent third-party controls more than native model or cloud-provider security.",
@@ -6992,7 +6758,6 @@
         {
           "direction": "mixed",
           "exposure": "Agentic endpoint activity creates new process, credential, software-supply-chain, and data-exfiltration surfaces across Cortex, Prisma AIRS, and Idira.",
-          "horizon": "medium_term",
           "id": "PANW-B4",
           "if": "AI coding agents and autonomous infrastructure tools become common on employee endpoints and inside software-delivery workflows.",
           "material_when": "Enterprises must permit agents to take consequential actions and require enforceable identity, endpoint, and runtime policy beyond controls embedded in operating systems, coding tools, and cloud platforms.",
@@ -7015,7 +6780,6 @@
         {
           "direction": "mixed",
           "exposure": "Native controls can substitute for parts of Prisma AIRS, cloud security, observability, or identity, while Palo Alto Networks depends on access to provider APIs and telemetry.",
-          "horizon": "medium_term",
           "id": "PANW-B5",
           "if": "Cloud and frontier-model providers make native AI-security, observability, identity, and policy controls sufficiently comprehensive for enterprise use.",
           "material_when": "Native controls must reach comparable cross-domain efficacy and governance, or heterogeneous customer estates must remain complex enough to sustain demand for an independent platform.",
@@ -7110,10 +6874,6 @@
           "url": "https://bitcap.com/fonds/bit-global-technology-leaders"
         }
       ],
-      "stated_magnitudes": [
-        "CyberArk alone carried $21.1 billion of purchase consideration.",
-        "Autonomous agents expand privileged identity and access demand, but the $21.1 billion CyberArk acquisition raises the required scale of integration, cross-sell, retention, and financial return."
-      ],
       "summary": "Palo Alto Networks sells integrated cybersecurity platforms spanning network security, cloud security, security operations, AI security, observability, and identity. The economic model combines upfront hardware and software-license revenue with a much larger recurring base of subscriptions and support. Its platformization strategy seeks to replace fragmented point products with shared data, policy, and workflow layers, increasing product attachment and contract breadth while making execution, integration, and customer trust central to renewal and margin outcomes.",
       "summary_sources": [
         {
@@ -7136,7 +6896,6 @@
         {
           "direction": "upside",
           "exposure": "FlashBlade//EXA and Evergreen//One for AI provide shared high-throughput file and object storage intended to keep accelerator clusters supplied with data.",
-          "horizon": "medium_term",
           "id": "PSTG-B1",
           "if": "Frontier models become more multimodal and data-intensive, increasing dataset size, checkpoint traffic, metadata operations and concurrent retrieval.",
           "material_when": "The effect becomes material only if independent or customer benchmarks show storage improves accelerator utilization and customers move from pilots to repeat, production-scale deployments.",
@@ -7163,7 +6922,6 @@
         {
           "direction": "upside",
           "exposure": "Data Stream, Data Intelligence and Enterprise Data Cloud address data discovery, classification, semantic context, governance and movement into AI infrastructure.",
-          "horizon": "medium_term",
           "id": "PSTG-B2",
           "if": "Enterprise adoption shifts from model pilots toward production retrieval, agentic workflows and inference over proprietary data.",
           "material_when": "The products must become generally available, attract paid production customers and demonstrate incremental attach or expansion rather than being included without separate economic value.",
@@ -7194,7 +6952,6 @@
         {
           "direction": "mixed",
           "exposure": "A top-four hyperscaler selected DirectFlash technology, and management is pursuing expansion with the current customer and qualification of additional hyperscalers.",
-          "horizon": "medium_term",
           "id": "PSTG-B3",
           "if": "AI data growth and data-center power constraints improve the relative case for replacing hyperscale disk systems with dense flash.",
           "material_when": "The existing design must progress to sustained production volume and at least one additional hyperscaler must validate the flash-versus-disk operating economics.",
@@ -7217,7 +6974,6 @@
         {
           "direction": "downside",
           "exposure": "The company purchases large quantities of these components for enterprise, AI and hyperscale storage systems and has already raised prices in response to cost inflation.",
-          "horizon": "near_term",
           "id": "PSTG-B4",
           "if": "Accelerator-led semiconductor demand absorbs fabrication capacity and raises prices for flash, DRAM, CPUs and related components.",
           "material_when": "The effect is material if supplier allocations constrain shipment volume or input-cost increases exceed realized price and mix benefits for multiple quarters.",
@@ -7244,7 +7000,6 @@
         {
           "direction": "downside",
           "exposure": "The AI growth case assumes that accelerator clusters and enterprise AI pipelines require substantial external file or object storage content.",
-          "horizon": "medium_term",
           "id": "PSTG-B5",
           "if": "Model, checkpoint and retrieval efficiency improves, or AI builders favor local NVMe and custom cloud-native object stores over shared external storage.",
           "material_when": "The downside becomes material if shared-storage content per AI cluster declines and product orders fail to grow alongside industry AI compute capacity.",
@@ -7406,10 +7161,6 @@
           "url": "https://bitcap.com/en/news"
         }
       ],
-      "stated_magnitudes": [
-        "Product remains a separate, material commercial motion: for the quarter ended 2026-05-03, product revenue was $577 million versus $476 million of subscription-services revenue.",
-        "Subscription ARR was $2.0 billion and RPO was $3.8 billion as of 2026-05-03."
-      ],
       "summary": "A unified all-flash data-storage and management platform spanning block, file, object, Kubernetes, on-premises, hosted and public-cloud environments. Economics combine upfront systems sales with recurring support, software and consumption-based services. Installed-base expansion and non-disruptive Evergreen upgrades extend customer relationships, while newer hyperscaler and AI offerings target DirectFlash licensing, high-throughput storage and AI-data preparation.",
       "summary_sources": [
         {
@@ -7436,7 +7187,6 @@
         {
           "direction": "upside",
           "exposure": "Agent Cloud is designed to discover agents across platforms, ingest their telemetry, enrich actions with data and identity context, enforce semantic policies and reverse unwanted changes.",
-          "horizon": "medium_term",
           "id": "RBRK-B1",
           "if": "Frontier models and agent frameworks become reliable enough for broad autonomous production work.",
           "material_when": "The effect becomes material only if a meaningful share of existing or new customers purchase Agent Cloud for production estates, renew it, and expand coverage across multiple agent platforms and applications.",
@@ -7463,7 +7213,6 @@
         {
           "direction": "mixed",
           "exposure": "The core platform protects and recovers data and identity after compromise, while the company is also testing frontier models to find and patch vulnerabilities in its own products.",
-          "horizon": "near_term",
           "id": "RBRK-B2",
           "if": "Frontier models materially reduce the time and cost required to discover vulnerabilities, write exploits and automate attacks.",
           "material_when": "Demand upside is material only if AI-driven threats shift enterprise spending toward independently validated recovery and resilience. Downside is material if the company's own attack surface or recovery performance fails under machine-speed attacks.",
@@ -7486,7 +7235,6 @@
         {
           "direction": "upside",
           "exposure": "Autonomous Business Recovery is intended to reconstruct applications across data, identity, code, network and configuration dependencies rather than restore isolated backups.",
-          "horizon": "medium_term",
           "id": "RBRK-B3",
           "if": "Frontier models improve planning, tool use and verification enough to automate complex, dependency-aware recovery workflows.",
           "material_when": "The pathway becomes material when production customers demonstrate materially shorter recovery times and lower manual effort without higher error, reinfection or service-incident rates.",
@@ -7509,7 +7257,6 @@
         {
           "direction": "upside",
           "exposure": "The platform already indexes protected data and application metadata and combines data, identity and application context; Predibase adds model-tuning and inference capabilities intended to pair governed data with optimized models.",
-          "horizon": "medium_term",
           "id": "RBRK-B4",
           "if": "Long-context retrieval and enterprise agents make governed access to proprietary structured and unstructured data a production requirement.",
           "material_when": "The opportunity is material only if customers route production AI data access or model workflows through paid services and expand protected datasets, rather than relying solely on hyperscaler, database or model-vendor governance.",
@@ -7536,7 +7283,6 @@
         {
           "direction": "downside",
           "exposure": "Agent Cloud depends on platform telemetry and competes for an emerging control-layer role that may also be addressed by model vendors, cloud providers, security suites, identity vendors and observability platforms.",
-          "horizon": "medium_term",
           "id": "RBRK-B5",
           "if": "Cloud and model platforms embed native agent observability, governance and rollback, or open standards make these controls interchangeable.",
           "material_when": "The effect becomes material if native tools meet enterprise cross-platform requirements, restrict third-party API access, or consistently displace the product in competitive evaluations.",
@@ -7698,10 +7444,6 @@
           "url": "https://bitcap.com/en/news"
         }
       ],
-      "stated_magnitudes": [
-        "The model is increasingly recurring and cloud-delivered: as of April 30, 2026, subscription ARR was $1.57 billion, average subscription dollar-based net retention was approximately 120%, and 2,946 customers generated at least $100,000 of subscription ARR.",
-        "The most useful recurring indicators are subscription ARR growth, net new ARR, dollar-based retention and customers exceeding $100,000 of ARR."
-      ],
       "summary": "The business sells a subscription platform for cyber and AI resilience across enterprise data, cloud and SaaS workloads, identity systems, applications and AI agents. Distributors and resellers are generally the contractual customers, while enterprises and public-sector organizations are the economic end users. The model is increasingly recurring and cloud-delivered: as of April 30, 2026, subscription ARR was $1.57 billion, average subscription dollar-based net retention was approximately 120%, and 2,946 customers generated at least $100,000 of subscription ARR. Growth therefore depends primarily on new-customer acquisition, workload and module expansion, retention, and successful monetization of identity and AI operations; legacy appliance and perpetual-license revenue is diminishing.",
       "summary_sources": [
         {
@@ -7728,7 +7470,6 @@
         {
           "direction": "mixed",
           "exposure": "The company controls approved API access to a large, continually refreshed archive and already supplies leading model and search providers.",
-          "horizon": "near_term",
           "id": "RDDT-B1",
           "if": "Frontier models and answer engines place greater value on fresh, structured human conversations for training, evaluation, grounding, and retrieval.",
           "material_when": "Material if renewed or new agreements change annual other revenue by an amount large enough to affect consolidated growth or margins, rather than merely replacing expiring contracts.",
@@ -7755,7 +7496,6 @@
         {
           "direction": "downside",
           "exposure": "A meaningful portion of discovery can originate with external search engines, while the advertising model requires visits, engagement, and ad impressions on the company's own surfaces.",
-          "horizon": "near_term",
           "id": "RDDT-B2",
           "if": "AI answer products increasingly satisfy user questions without sending users to the underlying discussion pages.",
           "material_when": "Material if sustained declines in search-referred users or ad impressions are not offset by direct traffic, logged-in growth, native search, or incremental licensing revenue.",
@@ -7782,7 +7522,6 @@
         {
           "direction": "upside",
           "exposure": "The company has merged AI answers into search and deployed machine-learning localization across many countries.",
-          "horizon": "medium_term",
           "id": "RDDT-B3",
           "if": "Improved reasoning, retrieval, and multilingual models raise the quality of native search, answers, recommendations, and translation.",
           "material_when": "Material if users exposed to the features show sustained gains in retention, contribution, or monetizable sessions after accounting for model-serving costs.",
@@ -7809,7 +7548,6 @@
         {
           "direction": "upside",
           "exposure": "Advertising products increasingly use the conversational corpus and AI automation through Max Campaigns and Community Intelligence.",
-          "horizon": "near_term",
           "id": "RDDT-B4",
           "if": "Frontier models improve automated campaign construction, contextual targeting, creative generation, conversion prediction, and advertiser insight extraction.",
           "material_when": "Material if automated products deliver repeatable conversion or return improvements that increase advertiser spend and ARPU net of incentives, support, and inference costs.",
@@ -7836,7 +7574,6 @@
         {
           "direction": "mixed",
           "exposure": "The core product and licensable corpus depend on authentic human participation; the company and volunteer moderators operate a layered moderation system augmented by LLMs and other automated tools.",
-          "horizon": "near_term",
           "id": "RDDT-B5",
           "if": "Generative AI lowers the cost of producing spam, astroturfing, fake engagement, and superficially plausible but inauthentic content, while also improving automated detection.",
           "material_when": "Material if synthetic abuse measurably changes spam exposure, legitimate contribution, moderator participation, advertiser brand-safety behavior, or the perceived reliability of licensed data.",
@@ -7984,9 +7721,6 @@
           "url": "https://bitcap.com/en"
         }
       ],
-      "stated_magnitudes": [
-        "For 2025, advertising revenue was $2.1 billion and other revenue was $140 million; in Q1 2026 they were $625 million and $39 million, respectively."
-      ],
       "summary": "A community platform monetized overwhelmingly through advertising. Commercial access to its archive of public conversations, plus smaller consumer subscriptions and services, is reported as other revenue. For 2025, advertising revenue was $2.1 billion and other revenue was $140 million; in Q1 2026 they were $625 million and $39 million, respectively.",
       "summary_sources": [
         {
@@ -8009,7 +7743,6 @@
         {
           "direction": "upside",
           "exposure": "The company sells high-performance compute-class SSDs and high-capacity storage-class SSDs used across the AI data cycle.",
-          "horizon": "near_term",
           "id": "SNDK-B1",
           "if": "Frontier models increase training corpora, checkpoints, retrieval stores, generated content and inference-serving data.",
           "material_when": "The effect becomes material if named hyperscale and enterprise qualifications convert into sustained production volumes and Datacenter exabytes outgrow total company bit shipments for multiple quarters, rather than revenue rising primarily from spot NAND pricing.",
@@ -8036,7 +7769,6 @@
         {
           "direction": "upside",
           "exposure": "HBF is a NAND-based architecture being developed to augment HBM with greater capacity at targeted comparable read bandwidth and cost.",
-          "horizon": "medium_term",
           "id": "SNDK-B2",
           "if": "Inference architectures require much larger memory capacity and bandwidth for model weights, mixture-of-experts routing and long-context workloads.",
           "material_when": "The effect becomes material only if samples meet bandwidth, latency, endurance, power and packaging requirements and at least one accelerator or system customer moves HBF into a production roadmap.",
@@ -8059,7 +7791,6 @@
         {
           "direction": "mixed",
           "exposure": "High-capacity QLC enterprise SSDs can replace or supplement hard disks in selected data-lake, retrieval and content-generation storage tiers.",
-          "horizon": "medium_term",
           "id": "SNDK-B3",
           "if": "AI data centers prioritize rack density, energy efficiency and fast access to large, frequently read datasets.",
           "material_when": "The mechanism is material if qualified 100TB-plus SSDs win recurring nearline or data-lake deployments based on measured power, rack-space and operating-cost savings, not solely temporary disk shortages.",
@@ -8078,7 +7809,6 @@
         {
           "direction": "upside",
           "exposure": "The Edge portfolio supplies embedded flash and client SSDs to PC, mobile, automotive, gaming and industrial OEMs.",
-          "horizon": "medium_term",
           "id": "SNDK-B4",
           "if": "On-device multimodal and generative models increase local model files, caches and user-generated data on AI PCs, smartphones and edge devices.",
           "material_when": "The effect becomes material if major OEMs raise standard storage capacities for AI devices and the company wins qualified sockets without equivalent declines in price per gigabyte.",
@@ -8101,7 +7831,6 @@
         {
           "direction": "downside",
           "exposure": "The company and Kioxia are scaling Kitakami Fab2 and BiCS10 while competitors can also expand bit supply.",
-          "horizon": "medium_term",
           "id": "SNDK-B5",
           "if": "Strong AI-storage demand encourages the NAND industry to add wafer capacity and accelerate higher-density nodes.",
           "material_when": "The effect becomes material if industry bit-supply growth exceeds end-demand growth, inventories rise and both contract and spot prices weaken as Kitakami and competing capacity ramp.",
@@ -8228,9 +7957,6 @@
           "url": "https://investor.sandisk.com/news-releases/news-release-details/sandisk-report-fiscal-fourth-quarter-and-fiscal-year-2026"
         }
       ],
-      "stated_magnitudes": [
-        "At April 3, 2026, three agreements contributed approximately $41.6 billion of remaining performance obligations; management subsequently reported two more agreements."
-      ],
       "summary": "A standalone, pure-play NAND flash business since its February 2025 separation from Western Digital. It designs NAND, controllers, firmware and finished storage products, while obtaining substantially all flash wafers through manufacturing joint ventures with Kioxia in Japan. Revenue is generated across Datacenter, Edge and Consumer end markets. Core economics remain sensitive to NAND pricing, bit shipments, technology-driven cost reductions and product mix, although multi-year customer commitments are intended to reduce demand volatility.",
       "summary_sources": [
         {
@@ -8253,7 +7979,6 @@
         {
           "direction": "upside",
           "exposure": "Customers use leading-edge processes to manufacture GPUs, ASICs, CPUs and networking chips, with HPC already the largest revenue platform.",
-          "horizon": "near_term",
           "id": "TSM-B1",
           "if": "Frontier models require more training, inference and reasoning compute, increasing accelerator and custom-silicon deployments.",
           "material_when": "Cloud and enterprise AI spending must translate into sustained production orders that fill incremental N3 and N2 capacity at economically attractive pricing; announced data-center budgets alone are insufficient.",
@@ -8280,7 +8005,6 @@
         {
           "direction": "upside",
           "exposure": "CoWoS, SoIC and related turnkey services integrate leading-edge logic, chiplets and HBM into finished computing packages.",
-          "horizon": "near_term",
           "id": "TSM-B2",
           "if": "AI accelerators become larger multi-die systems with more HBM and increasingly complex chiplet interconnects.",
           "material_when": "The company must retain a high share of customer packaging, add capacity in step with demand and secure sufficient HBM, substrates and other inputs without persistent cycle-time or yield penalties.",
@@ -8307,7 +8031,6 @@
         {
           "direction": "mixed",
           "exposure": "Wafer demand depends on customer die area, chip count, process choice and deployment volume; design shifts may also redistribute demand among a concentrated customer base.",
-          "horizon": "medium_term",
           "id": "TSM-B3",
           "if": "Algorithmic efficiency, smaller models, inference optimization or architecture changes reduce silicon required per unit of useful AI work.",
           "material_when": "The downside becomes material if improvement in useful compute per chip persistently outpaces growth in AI usage and new applications, leaving committed leading-edge or packaging capacity underutilized.",
@@ -8334,7 +8057,6 @@
         {
           "direction": "mixed",
           "exposure": "The company supplies advanced mobile logic and a broad portfolio of automotive, IoT and specialty processes.",
-          "horizon": "medium_term",
           "id": "TSM-B4",
           "if": "Frontier models are distilled, quantized or redesigned for phones, PCs, vehicles and other edge devices.",
           "material_when": "Incremental AI silicon area and advanced-node adoption must exceed any reduction in device units, component consolidation or model-compute requirements.",
@@ -8361,7 +8083,6 @@
         {
           "direction": "mixed",
           "exposure": "Customer products and manufacturing equipment are subject to export rules, while the company is committing substantial capital to Taiwan, the U.S., Japan and Europe.",
-          "horizon": "medium_term",
           "id": "TSM-B5",
           "if": "Governments tighten AI-chip controls or subsidize sovereign and localized AI supply chains.",
           "material_when": "The effect becomes material if controls restrict major customer products or critical equipment, or if localized fabs fail to reach sufficient utilization and cost performance after subsidies.",
@@ -8467,9 +8188,6 @@
           "url": "https://bitcap.com/en/news/bit-capital-ki-whitepaper-infrastruktur-des-ki-zeitalters"
         }
       ],
-      "stated_magnitudes": [
-        "Management raised the 2026 capital budget to US$60-64 billion and announced a further US$100 billion Arizona investment on 2026-07-16."
-      ],
       "summary": "A pure-play foundry that manufactures customers' proprietary semiconductor designs rather than competing with them through branded chips. Revenue comes primarily from wafer fabrication across leading-edge and specialty processes, augmented by advanced packaging, testing, mask-making and design-enablement services. The model is capital- and fixed-cost-intensive: technology differentiation, yield, utilization, product mix, pricing and packaging throughput determine whether large fabrication investments generate attractive margins and cash flow.",
       "summary_sources": [
         {
@@ -8492,7 +8210,6 @@
         {
           "direction": "upside",
           "exposure": "The quoting workflow already analyzes uploaded part files and uses geometry, manufacturability and contextual data to recommend processes and configurations.",
-          "horizon": "near_term",
           "id": "XMTR-B1",
           "if": "Advances in multimodal and geometric reasoning improve understanding of CAD geometry, drawings, materials, tolerances and application context.",
           "material_when": "The new capability must deliver sustained conversion or support-cost improvement beyond the currently disclosed recommendation-acceptance level, without increasing downstream quality failures or manual review.",
@@ -8515,7 +8232,6 @@
         {
           "direction": "mixed",
           "exposure": "The company quotes prices and delivery options before production, then routes jobs across a distributed supplier network. Forecast errors can therefore flow directly into fulfillment economics and customer experience.",
-          "horizon": "near_term",
           "id": "XMTR-B2",
           "if": "Stronger predictive and optimization models improve cost estimation, lead-time forecasting and real-time supplier matching.",
           "material_when": "Reported model-error improvements must translate into realized marketplace gross-margin, delivery and remediation gains across meaningful order volume rather than isolated test sets or one manufacturing process.",
@@ -8542,7 +8258,6 @@
         {
           "direction": "mixed",
           "exposure": "The company distributes quoting through CAD integrations and plans native design-to-source integration with Siemens. Platform owners or agents could either route more orders to the marketplace or compare multiple providers and commoditize access.",
-          "horizon": "medium_term",
           "id": "XMTR-B3",
           "if": "Engineering and procurement agents become capable of iterating designs, evaluating manufacturability and initiating sourcing inside CAD and product-lifecycle workflows.",
           "material_when": "The mechanism becomes material only when native integrations generate measurable, attributable order volume or alter commercial terms and provider selection at scale.",
@@ -8565,7 +8280,6 @@
         {
           "direction": "upside",
           "exposure": "The supplier network supports machining, sheet metal, additive manufacturing and molding used across electronics, semiconductor and data-center applications, but publicly disclosed data-center exposure is not quantified.",
-          "horizon": "medium_term",
           "id": "XMTR-B4",
           "if": "Frontier-model scaling and inference growth drive data-center construction, hardware iteration and demand for custom mechanical components.",
           "material_when": "The channel is material only if disclosures show sustained growth in data-center or related electronics orders, repeat production volumes and acceptable realized margins—not merely prototype activity or broad end-market eligibility.",
@@ -8588,7 +8302,6 @@
         {
           "direction": "downside",
           "exposure": "The company's differentiation depends on proprietary transaction and production data, network liquidity, workflow integration and execution—not solely access to machine-learning techniques. Competitors and suppliers can adopt improved digital tools.",
-          "horizon": "medium_term",
           "id": "XMTR-B5",
           "if": "Widely available foundation models, coding agents and manufacturing software reduce the cost of building digital quoting, estimation and supplier-matching tools.",
           "material_when": "The risk becomes material if competitors or direct suppliers demonstrate comparable quote reliability and fulfillment while buyer repeat rates, pricing spreads or supplier participation deteriorate.",
@@ -8729,7 +8442,6 @@
           "url": "https://bitcap.com/beckers-bets-podcast"
         }
       ],
-      "stated_magnitudes": [],
       "summary": "The company operates an asset-light, two-sided marketplace for custom-manufactured parts and assemblies. Buyers receive automated pricing, manufacturability feedback and lead-time options; the company selects and manages third-party production suppliers and remains accountable for fulfillment. A smaller services business monetizes industrial discovery, advertising, shop-management software and financial services. Marketplace orders are the dominant revenue and gross-profit engine, while proprietary transaction and production data support pricing, sourcing and delivery models.",
       "summary_sources": [
         {
