@@ -581,14 +581,14 @@ export function CollectionCostFigure() {
 
   const once = [
     {
-      name: 'Crawl the follow graph',
-      sub: 'who the trusted accounts follow',
-      calc: 'cold crawl of ~2,200 sources',
-      total: '~$28',
+      name: 'Ask every Registry account who it follows',
+      sub: 'the answer becomes the trust ranking · 2.8M follow edges',
+      calc: '~2,200 accounts crawled',
+      total: '~$32',
     },
     {
       name: 'Look up every profile',
-      sub: 'screening accounts into the Registry',
+      sub: 'screening candidates into the Registry',
       calc: '~2,600 lookups × 18 credits',
       total: '~$0.47',
     },
@@ -612,7 +612,7 @@ export function CollectionCostFigure() {
     })
 
   return (
-    <svg viewBox="0 0 1080 660" role="img" aria-label="The X collection cost, split into recurring and one-off. The provider bills in credits where one hundred thousand credits is a dollar. Every day costs about forty cents to sweep the whole network. Building the network was a one-off of about thirty dollars, already paid.">
+    <svg viewBox="0 0 1080 660" role="img" aria-label="The X collection cost, split into recurring and one-off. The provider bills in credits where one hundred thousand credits is a dollar. Every day costs about forty cents to sweep the whole network. Building the network was a one-off of about thirty-three dollars, already paid.">
       <rect x="0" y="0" width="1080" height="660" fill="#fff" />
       <text x="30" y="34" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.08em">COLLECTION COST · A RULE OF THUMB</text>
       <text x="1050" y="34" textAnchor="end" fontFamily={MONO} fontSize="9.5" fill={MUTED} letterSpacing="0.06em">100,000 PROVIDER CREDITS = $1</text>
@@ -650,7 +650,7 @@ export function CollectionCostFigure() {
       <line x1="30" y1="506" x2="1050" y2="506" stroke={MUTED} strokeWidth="1" opacity="0.3" />
       {band(once, 506)}
       <text x="50" y="634" fontFamily={UI} fontSize="14" fontWeight="600" fill={INK}>Setup, already paid</text>
-      <text x="1050" y="636" textAnchor="end" fontFamily={UI} fontSize="21" fontWeight="600" fill={MUTED}>≈ $30 once</text>
+      <text x="1050" y="636" textAnchor="end" fontFamily={UI} fontSize="21" fontWeight="600" fill={MUTED}>≈ $33 once</text>
       <text x="240" y="634" fontFamily={UI} fontSize="12.5" fill={MUTED}>the network is not re-crawled to publish a brief</text>
     </svg>
   )

@@ -449,10 +449,17 @@ export default function HowNarrative({
           <p>
             The daily bill is about forty cents. That is one sweep across
             roughly 2,600 accounts, plus the handful of long-form posts worth
-            freezing. Building the network in the first place was a separate
-            one-off of about thirty dollars, and it is already paid &mdash;
-            publishing a brief does not re-crawl the follow graph or re-check
-            profiles.
+            freezing.
+          </p>
+          <p>
+            The one-off underneath it is the follow graph. Once, every account
+            in the Registry was asked a single question &mdash; who do you
+            follow? &mdash; which returned about 2.8 million follow edges
+            pointing at roughly half a million distinct accounts. That crawl is
+            what the trust ranking in step 1c counts, and it is also how the
+            Registry discovers people beyond the obvious names. It has run
+            twice, costs about thirty-three dollars in total, and is already
+            paid. Publishing a brief never re-crawls it.
           </p>
           <p>
             One detail is worth knowing when you think about scale: a sweep
