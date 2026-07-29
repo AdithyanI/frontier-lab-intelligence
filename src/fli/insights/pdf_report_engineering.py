@@ -58,7 +58,7 @@ from .pdf_report import (
     _valid_cached_pdf,
 )
 
-REPORT_SCHEMA_VERSION = "engineering-agent-pdf-v2"
+REPORT_SCHEMA_VERSION = "engineering-agent-pdf-v3"
 DEFAULT_CACHE_ROOT = REPO_ROOT / "data" / "derived" / "insights" / "pdf-cache-engineering"
 
 
@@ -348,8 +348,6 @@ def _cover(payload: dict[str, Any], styles: dict[str, ParagraphStyle]) -> list[A
         Spacer(1, 5 * mm),
         Paragraph(f'AI ENGINEERING  <font color="#5BC5F2">/</font>  {_markup(_display_day(day))}', styles["cover_meta"]),
         Spacer(1, 7 * mm),
-        HRFlowable(width="100%", thickness=0.9, color=INK, spaceAfter=0),
-        Spacer(1, 6 * mm),
     ]
 
     story.extend(_section_heading("Today's brief", "CLICK A TITLE TO OPEN ITS ANALYSIS", styles))

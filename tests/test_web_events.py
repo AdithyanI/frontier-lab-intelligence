@@ -497,6 +497,32 @@ def test_event_dates_reuse_persisted_exact_summary(tmp_path, monkeypatch):
     assert second == first
 
 
+def test_development_dates_reuse_persisted_exact_summary(tmp_path, monkeypatch):
+    _event_fixture(tmp_path, monkeypatch)
+    cache_root = tmp_path / "web-event-cache"
+    monkeypatch.setattr(event_store, "DEFAULT_EVENT_VIEW_CACHE_ROOT", cache_root)
+    development_store._developments_day_cached.cache_clear()
+    development_store._dates_payload_cached.cache_clear()
+
+    first = development_store.dates_payload()
+    assert (cache_root / "development-dates.json.gz").is_file()
+
+    development_store._developments_day_cached.cache_clear()
+    development_store._dates_payload_cached.cache_clear()
+
+    def fail_day_projection(**_kwargs):
+        raise AssertionError("persisted summary should avoid rebuilding Development days")
+
+    monkeypatch.setattr(
+        development_store,
+        "_developments_day_cached",
+        fail_day_projection,
+    )
+    second = development_store.dates_payload()
+
+    assert second == first
+
+
 def test_event_warmup_builds_each_day_in_the_published_window(monkeypatch):
     monkeypatch.setattr(
         event_store,

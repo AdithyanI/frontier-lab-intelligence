@@ -7,6 +7,7 @@ import json
 import sqlite3
 from functools import lru_cache
 from pathlib import Path
+from threading import Lock
 from typing import Any
 
 from fli.evidence import developments as development_groups
@@ -19,6 +20,7 @@ from fli.web import feed as feed_store
 
 
 DEFAULT_ARTIFACT_DB = artifact_store.DEFAULT_DB
+_dates_payload_lock = Lock()
 
 
 def _cache_token(day: str) -> tuple[tuple[str, int, int, int, int], ...]:
@@ -26,6 +28,40 @@ def _cache_token(day: str) -> tuple[tuple[str, int, int, int, int], ...]:
         *event_store._cache_token(day),
         feed_store._db_version(DEFAULT_ARTIFACT_DB),
     )
+
+
+@lru_cache(maxsize=1)
+def _projection_code_sha256() -> str:
+    """Bind persisted Development summaries to their projection code."""
+    digest = hashlib.sha256()
+    for path in (
+        Path(__file__),
+        Path(development_groups.__file__),
+        Path(artifact_store.__file__),
+        Path(development_attention.__file__),
+    ):
+        digest.update(path.name.encode())
+        digest.update(path.read_bytes())
+    return digest.hexdigest()
+
+
+def _dates_persisted_cache_key(
+    cache_token: tuple[tuple[str, int, int, int, int], ...],
+) -> str:
+    upstream_key = event_store._persisted_cache_key(
+        kind="development-dates",
+        cache_token=cache_token,
+    )
+    return hashlib.sha256(
+        json.dumps(
+            {
+                "upstream_key": upstream_key,
+                "development_projection_code_sha256": _projection_code_sha256(),
+            },
+            separators=(",", ":"),
+            sort_keys=True,
+        ).encode()
+    ).hexdigest()
 
 
 def _rank_input_sha256(*, day: str, items: list[dict[str, Any]]) -> str:
@@ -569,10 +605,16 @@ def developments_payload(
 def _dates_payload_cached(
     cache_token: tuple[tuple[str, int, int, int, int], ...],
 ) -> dict[str, Any]:
-    del cache_token
     exact_dates = event_store.dates_payload()
     if not exact_dates.get("available"):
         return exact_dates
+    cache_key = _dates_persisted_cache_key(cache_token)
+    persisted = event_store._read_persisted_payload(
+        name="development-dates.json.gz",
+        cache_key=cache_key,
+    )
+    if persisted is not None:
+        return persisted
     dates = []
     for row in exact_dates.get("dates") or []:
         day = str(row["day"])
@@ -590,7 +632,7 @@ def _dates_payload_cached(
                 ),
             }
         )
-    return {
+    payload = {
         **{
             key: value
             for key, value in exact_dates.items()
@@ -608,12 +650,23 @@ def _dates_payload_cached(
         ),
         "dates": dates,
     }
+    event_store._write_persisted_payload(
+        name="development-dates.json.gz",
+        cache_key=cache_key,
+        payload=payload,
+    )
+    return payload
 
 
 def dates_payload() -> dict[str, Any]:
-    return _dates_payload_cached(
-        (
-            *event_store._dates_cache_token(),
-            feed_store._db_version(DEFAULT_ARTIFACT_DB),
-        )
+    cache_token = (
+        *event_store._dates_cache_token(),
+        feed_store._db_version(DEFAULT_ARTIFACT_DB),
     )
+    # functools.lru_cache does not suppress duplicate concurrent misses. The
+    # service warmup and an early browser request can otherwise rebuild every
+    # Development day at the same time.
+    with _dates_payload_lock:
+        return _dates_payload_cached(
+            cache_token,
+        )

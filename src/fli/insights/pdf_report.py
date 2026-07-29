@@ -38,7 +38,7 @@ from reportlab.platypus import (
 )
 
 
-REPORT_SCHEMA_VERSION = "investment-agent-pdf-v14"
+REPORT_SCHEMA_VERSION = "investment-agent-pdf-v15"
 REPO_ROOT = Path(__file__).resolve().parents[3]
 COMPANY_MEMO_PATH = REPO_ROOT / "docs" / "references" / "company-memos.json"
 DEFAULT_CACHE_ROOT = REPO_ROOT / "data" / "derived" / "insights" / "pdf-cache"
@@ -608,8 +608,6 @@ def _cover(payload: dict[str, Any], styles: dict[str, ParagraphStyle]) -> list[A
             styles["cover_meta"],
         ),
         Spacer(1, 7 * mm),
-        HRFlowable(width="100%", thickness=0.9, color=INK, spaceAfter=0),
-        Spacer(1, 6 * mm),
     ]
     story.extend(
         _section_heading(

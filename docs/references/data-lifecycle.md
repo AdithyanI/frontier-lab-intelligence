@@ -37,14 +37,16 @@ set. It is safe to delete because a complete published Investment cohort
 deterministically rebuilds every file.
 
 `data/derived/web-event-cache/` is also disposable. It retains compressed exact
-Event-day projections and their compact date summary so process restarts do not
-rebuild every historical day before serving a click. Cache keys bind the source
-database versions and projection code; deleting it affects latency only.
+Event-day projections plus compact Event and Development date summaries so
+process restarts do not rebuild every historical day before serving a click.
+Cache keys bind the source database versions and owning projection code;
+deleting it affects latency only.
 
 Developments do not have a separate database. They are a deterministic,
 in-process read projection over the current exact Event and accepted-artifact
-stores. Restarting the web process or changing either source rebuilds them;
-there is no Development store to preserve, restore, or clean up.
+stores. Full day views rebuild after a restart or source change; only their
+compact date/count summary survives process restarts as disposable acceleration.
+There is no Development store to preserve, restore, or clean up.
 
 Before a destructive cleanup, trace every default path in code, inspect tracked
 manifests/lineage, and run `PRAGMA quick_check` on the replacement store. Move a

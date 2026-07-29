@@ -355,7 +355,7 @@ def test_report_api_downloads_the_current_engineering_brief(tmp_path, monkeypatc
             filename="fli-daily-brief-2026-07-17-ai-engineering.pdf",
             etag="b" * 64,
             cache_hit=False,
-            report_version="engineering-agent-pdf-v2",
+            report_version="engineering-agent-pdf-v3",
         ),
     )
 
@@ -367,4 +367,4 @@ def test_report_api_downloads_the_current_engineering_brief(tmp_path, monkeypatc
         'filename="fli-daily-brief-2026-07-17-ai-engineering.pdf"'
         in response.headers["content-disposition"]
     )
-    assert response.headers["x-fli-report-version"] == "engineering-agent-pdf-v2"
+    assert response.headers["x-fli-report-version"] == "engineering-agent-pdf-v3"
