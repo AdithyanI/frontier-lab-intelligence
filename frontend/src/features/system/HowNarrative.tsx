@@ -418,9 +418,9 @@ export default function HowNarrative({
             $0.0033444. Other requests vary with the amount of evidence.
           </p>
           <p>
-            <Link className="how-beat-link" to="/system/architecture">
-              See the technical architecture &rarr;
-            </Link>
+            <a className="how-beat-link" href="#technical-appendix">
+              Open the technical appendix &rarr;
+            </a>
           </p>
         </article>
 

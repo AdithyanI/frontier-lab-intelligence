@@ -11,7 +11,7 @@ const styles = readStyles()
 
 test('BIT Lens keeps research and company context in one ruled workspace', () => {
   assert.ok(app.indexOf('>Insights</NavLink>') < app.indexOf('>BIT Lens</NavLink>'))
-  assert.ok(app.indexOf('>BIT Lens</NavLink>') < app.indexOf('>System</NavLink>'))
+  assert.doesNotMatch(app, />System<\/NavLink>/)
   assert.match(app, /path="\/bit-lens" element=\{<BitLensLayout \/>\}/)
   assert.match(app, /<Route index element=\{<Navigate to="companies" replace \/>\} \/>/)
   assert.match(app, /<Route path="companies" element=\{<CompanyUniversePage \/>\} \/>/)

@@ -3,8 +3,9 @@
 ## Goal
 
 Raise the evidence bar of published Investment Insights so that a surfaced item
-always rests on evidence strong enough to act on, measured by eliminating the
-29% of surfaced Insights whose own `what_changed` text disqualifies them.
+always rests on evidence a fund could act on, without suppressing the
+provider-reported and shipped-fact evidence that legitimately drives investment
+research.
 
 ## Why / Impact
 
@@ -12,19 +13,22 @@ Signal-vs-noise carries 20% of the case-study rubric and is the single question
 the prompt names as most important: *"did this surface something we'd genuinely
 want to know, and did it keep the noise out?"*
 
-The system currently surfaces items it has itself judged to be unsupported. The
-clearest example is rank 1 on 2026-07-26 — the latest published day, which is
-what the product opens on, so it is the first Insight a BIT reviewer sees:
+Three measured defect classes are recorded in the Progress Log. The clearest is
+rank 1 on 2026-07-26 — the latest published day, which is what the product
+opens on, so it is the first Insight a BIT reviewer sees:
 
 > Headline: "ChatGPT's travel workflow raises the bar for Google Search"
 > `what_changed`: "... This is a first-party anecdote, not a measured
 > evaluation, and it does not establish repeatability, adoption, or completed
 > reservations."
 
-The model wrote the disqualifier and surfaced anyway. If done wrong, the fix
-suppresses genuinely useful early signals and the brief becomes empty; the
-existing suppression rate is already 35%, so the bar must rise for unevidenced
-claims only, not for early or unquantified ones.
+The model wrote the disqualifier and surfaced anyway.
+
+The failure mode to avoid is over-correction. A blanket rule against
+first-party or unquantified evidence would suppress provider-reported
+benchmarks, launches, price changes, and disclosed incidents — the ordinary raw
+material of investment research — and would leave the brief empty. The
+suppression rate is already 35%.
 
 ## Scope / Non-Goals
 
@@ -75,8 +79,11 @@ claims only, not for early or unquantified ones.
 
 ## Done When
 
-- [ ] A surfaced Investment Insight never contains a sentence in `what_changed`
-      that disqualifies its own evidence.
+- [ ] The unmeasured self-demonstration class no longer surfaces — the six
+      instances in the Progress Log are suppressed with a stated reason.
+- [ ] Provider-reported benchmarks, launches, price and availability changes,
+      policy statements, and disclosed incidents still surface. This is the
+      control condition and matters more than the suppression itself.
 - [ ] The change is proven on at least one known-bad item and one known-good
       item before any published data changes.
 - [ ] The false-negative cost is measured and recorded: how many previously
@@ -222,9 +229,11 @@ claims only, not for early or unquantified ones.
 
 | Status | Work Item | Role | Resource |
 | --- | --- | --- | --- |
-| todo | M1 — apply the two Investment prompt edits and bump both version constants in lockstep | worker | |
-| todo | M2 — flip the known-bad item to `suppress` on a scratch DB and read the trace | worker | |
-| todo | M3 — confirm the known-good control still surfaces | worker | |
+| done | Finding 1 — unmeasured self-demonstration class, six instances | parent | Progress Log |
+| done | Finding 2 — 41 of 139 surfaced Insights rest on one Event with no artifact | parent | [zero-artifact-insights.md](resources/zero-artifact-insights.md) |
+| done | Finding 3 — three Insights rest on unattributed claims | parent | Progress Log |
+| todo | Continue auditing for further evidence-class defects before designing any rule | parent | |
+| todo | M1 — apply the Investment prompt edits and bump both version constants in lockstep | worker | |
 
 ## Backlog / Remaining Work
 
@@ -269,17 +278,63 @@ claims only, not for early or unquantified ones.
 
 ## Progress Log
 
+- 2026-07-29: [DONE] **Corrected an earlier overstatement.** The first pass
+  reported that 29% of surfaced Insights "self-flag weak evidence", derived
+  from a regex over `what_changed`. Reading all 55 matches showed the number is
+  misleading. Most flags are the system behaving correctly: it labels
+  provider-reported figures about a genuinely shipped product, or first-party
+  statements where the statement itself is the fact (a launch, a policy
+  warning, a disclosed incident). Investors act on company-reported numbers
+  routinely, so labelling them is good epistemics rather than a leak. The
+  regex measured honesty, not error. Do not use the 29% figure as a defect
+  count.
+- 2026-07-29: [DONE] **Finding 1 — unmeasured self-demonstration is the real
+  leak, and it is small.** The defect class is narrower than first reported:
+  an unmeasured anecdote in which the author describes their own product
+  performing well. Six instances in 22 days:
+  - 2026-07-26 r1 — ChatGPT travel workflow (`AMZN,GOOGL,META,PANW`),
+    no artifact. Rank 1 on the latest published day, so it is the product's
+    default view and the first Insight a reviewer sees.
+  - 2026-07-25 r4 — AI paper-review gains (`MSFT`), no artifact.
+  - 2026-07-11 r9 — AI-directed lab work (`03800.HK`), no artifact.
+  - 2026-07-20 r5 — agent workloads, reported anecdotes plus company figures.
+  - 2026-07-19 r30 — Claude Code longer loops, interview account.
+  - 2026-07-17 r13 — autonomous coding agents, self-reported practitioner
+    account.
+  A rule targeting this class should not touch provider-reported benchmarks or
+  shipped-fact announcements.
+- 2026-07-29: [DONE] **Finding 2 — 41 of 139 surfaced Insights (29%) rest on a
+  single Event with zero retrievable artifacts.** Measured structurally from
+  `/api/developments` (`source_events` length and `development_artifacts`
+  length), not from model prose, so it is deterministic and replayable. These
+  Insights are built on one X post with no paper, blog post, model card, or
+  article behind them, yet they generate company connections on `NVDA`, `MSFT`,
+  `PANW`, `GOOGL`, `AMZN` and others. This is a stronger and more defensible
+  measure than any regex over model output, and it is the same class of
+  deterministic signal the router already uses in its evidence-readiness gate,
+  which resolved 325 packets with no model call. Note that zero artifacts is
+  not automatically disqualifying: a first-party price or availability change
+  stated in a post is decisive without any document. It is a precondition that
+  should raise the bar, not a filter on its own. Full list of the 41 recorded
+  during this session.
+- 2026-07-29: [DONE] **Finding 3 — three Insights rest on genuinely
+  unattributed claims.** Distinct from first-party evidence, because no
+  identifiable party is standing behind the claim:
+  - 2026-07-18 r15 — "a non-technical user reported" (`MSFT`).
+  - 2026-07-24 r2 — "early-access users reported" (`MSFT`, plus Xometry).
+  - 2026-07-20 r18 — "Hugging Face reportedly ran ... after unnamed U.S." (
+    `AVGO,PANW,RBRK`).
+  Small in number, but this is the class most likely to embarrass the system in
+  front of an investment team, because the source cannot be checked at all.
+  An earlier regex reported 38 here; that was wrong, caused by matching the
+  word "reportedly" in correctly attributed sentences. Verified by reading.
+- 2026-07-29: [DONE] Measured concentration for completeness, not as a defect
+  to fix in this project: 306 connections span 25 of 37 companies, the top
+  three tickers hold 44%, `PANW` appears on 18 of 22 days, and 60 of 176
+  standing bets have ever fired. Adi owns this observation separately.
 - 2026-07-29: [DONE] Measured the leak against live data. 142 of 220 Investment
-  candidates surfaced across 22 days (65%). 42 of 142 surfaced Insights (29%)
-  contain a self-flagged evidence weakness in `what_changed` — 19 name a
-  first-party claim, 10 note the absence of independent confirmation, 7 note
-  missing benchmarks or undisclosed data, 5 note the absence of measurement,
-  4 call the evidence an anecdote. Of 306 company connections, exactly 1 has
-  `threshold_met: true`.
-- 2026-07-29: [DONE] Identified the worst instance. Development
-  `b72d460234bd…` is rank 1 on 2026-07-26, the latest published day and the
-  product's default view, and its own `what_changed` calls it "a first-party
-  anecdote, not a measured evaluation".
+  candidates surfaced across 22 days (65%). Of 306 company connections, exactly
+  1 has `threshold_met: true`.
 - 2026-07-29: [DONE] Confirmed the threshold gate is functional rather than
   dead. The single `threshold_met: true` case is 2026-07-20 rank 2 on
   `MSFT-B5`, where OpenAI paused deployment and required new controls. The

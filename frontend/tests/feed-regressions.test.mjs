@@ -91,7 +91,7 @@ test('Feed search matches the compact ruled control language', () => {
 })
 
 test('Feed preserves daily rank across search and discloses its layers on demand', () => {
-  assert.match(feedSource, /href="\/system\/architecture#ranking-methods"/)
+  assert.match(feedSource, /href="\/how#why-rank"/)
   assert.match(feedSource, /<strong>#\{rank\}<\/strong>/)
   assert.match(feedSource, /rank=\{item\.daily_rank\}/)
   assert.match(feedSource, /Daily rank #\{rank\} of \{total\.toLocaleString/)

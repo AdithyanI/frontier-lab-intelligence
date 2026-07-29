@@ -1,5 +1,4 @@
 import { Navigate, NavLink, Route, Routes } from 'react-router-dom'
-import Architecture from '../features/architecture/ArchitecturePage'
 import BitLensLayout from '../features/bit-lens/BitLensLayout'
 import BitLensPage from '../features/bit-lens/BitLensPage'
 import AionStackPage from '../features/bit-lens/AionStackPage'
@@ -12,9 +11,7 @@ import AddProfile from '../features/network/AddProfilePage'
 import Network from '../features/network/NetworkLayout'
 import Ranking from '../features/network/RankingPage'
 import Registry from '../features/network/RegistryPage'
-import Status from '../features/system/StatusPage'
 import HowItWorks from '../features/system/HowItWorksPage'
-import System from '../features/system/SystemLayout'
 import { useAuditDatePath } from '../shared/date/auditDateStore'
 
 export default function App() {
@@ -34,7 +31,6 @@ export default function App() {
           <NavLink to="/network">Network</NavLink>
           <NavLink to="/how">How it works</NavLink>
           <NavLink to="/bit-lens">BIT Lens</NavLink>
-          <NavLink to="/system">System</NavLink>
         </nav>
       </header>
       <main className="content">
@@ -58,12 +54,6 @@ export default function App() {
             <Route path="companies" element={<CompanyUniversePage />} />
             <Route path="aion" element={<AionStackPage />} />
             <Route path="research" element={<BitLensPage />} />
-          </Route>
-          <Route path="/system" element={<System />}>
-            <Route index element={<Navigate to="architecture" replace />} />
-            <Route path="how-it-works" element={<Navigate to="/how" replace />} />
-            <Route path="status" element={<Status />} />
-            <Route path="architecture" element={<Architecture />} />
           </Route>
           <Route path="*" element={<Navigate to="/insights" replace />} />
         </Routes>

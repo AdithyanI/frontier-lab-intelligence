@@ -1122,7 +1122,7 @@ export default function Feed() {
           position and the strongest one-post public engagement break ties.
         </p>
         <p className="page-method-line mono">
-          <a href="/system/architecture#ranking-methods">How ranking works ↗</a>
+          <a href="/how#why-rank">How ranking works ↗</a>
         </p>
       </header>
 

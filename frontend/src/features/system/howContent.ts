@@ -117,7 +117,7 @@ export function createReviewRubric({
       weight: '20%',
       name: 'Scoring rigor',
       text: 'Attention ranking and audience judgments are separate steps, each with its inputs and reasoning inspectable per Event.',
-      to: '/system/architecture#ranking-methods',
+      to: '/how#why-rank',
       linkLabel: 'Methods',
     },
     {
@@ -145,8 +145,8 @@ export function createReviewRubric({
       weight: '5%',
       name: 'Web interface',
       text: 'You are in it. The live product reads the published SQLite models produced by the same pipeline.',
-      to: '/system/status',
-      linkLabel: 'Checkpoint',
+      to: '/how#technical-appendix',
+      linkLabel: 'Technical appendix',
     },
   ]
 }

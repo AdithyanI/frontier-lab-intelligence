@@ -18,6 +18,51 @@
   text-wrap: pretty;
 }
 
+.how-contents {
+  display: grid;
+  grid-template-columns: minmax(120px, 0.8fr) repeat(5, minmax(130px, 1fr));
+  margin-top: 32px;
+  border-top: 1px solid var(--border-strong);
+  border-bottom: 1px solid var(--border);
+}
+
+.how-contents > * {
+  display: flex;
+  min-height: 48px;
+  align-items: center;
+  padding: 0 14px;
+  border-right: 1px solid var(--border);
+}
+
+.how-contents > :last-child { border-right: 0; }
+
+.how-contents > span {
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.how-contents a {
+  color: var(--ink);
+  font-size: 12.5px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background 150ms var(--ease-out), color 150ms var(--ease-out);
+}
+
+.how-contents a:hover {
+  background: var(--surface);
+  color: var(--blue-ink);
+}
+
+.how-contents a:focus-visible {
+  position: relative;
+  z-index: 1;
+  outline: 2px solid var(--blue-mid);
+  outline-offset: -2px;
+}
+
 .how-canvas {
   display: grid;
   grid-template-columns: minmax(0, 1.25fr) minmax(300px, 0.75fr);
@@ -536,7 +581,98 @@
   line-height: 1.65;
 }
 
+/* ---- Technical appendix: selected figures, closed until requested ---- */
+
+.how-technical-appendix {
+  margin-top: 40px;
+  border-top: 1px solid var(--border-strong);
+  border-bottom: 1px solid var(--border-strong);
+  scroll-margin-top: 24px;
+}
+
+.how-technical-appendix > summary {
+  display: flex;
+  min-height: 74px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.how-technical-appendix > summary::-webkit-details-marker { display: none; }
+
+.how-technical-appendix > summary > span:first-child {
+  display: grid;
+  gap: 7px;
+}
+
+.how-technical-appendix > summary strong {
+  color: var(--ink);
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+
+.how-technical-appendix > summary > .mono {
+  color: var(--muted);
+  font-size: 10.5px;
+}
+
+.how-technical-appendix > summary::after {
+  content: '+';
+  color: var(--blue-ink);
+  font-family: var(--font-mono);
+  font-size: 18px;
+}
+
+.how-technical-appendix[open] > summary::after { content: '−'; }
+
+.how-technical-appendix-body {
+  padding: 8px 0 40px;
+}
+
+.how-technical-appendix-body > section {
+  padding-top: 36px;
+  scroll-margin-top: 24px;
+}
+
+.how-technical-appendix-body > section + section {
+  margin-top: 40px;
+  border-top: 1px solid var(--border);
+}
+
+.how-technical-appendix-body header {
+  max-width: 68ch;
+}
+
+.how-technical-appendix-body h3 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+
+.how-technical-appendix-body header p {
+  margin: 10px 0 0;
+  color: var(--ink-soft);
+  font-size: 14.5px;
+  line-height: 1.65;
+  text-wrap: pretty;
+}
+
+.how-technical-appendix .arch-canvas { margin-top: 22px; }
+
 @media (max-width: 1000px) {
+  .how-contents {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .how-contents > * {
+    border-bottom: 1px solid var(--border);
+  }
+  .how-contents > :nth-child(3n) { border-right: 0; }
+  .how-contents > :nth-last-child(-n + 3) { border-bottom: 0; }
   .how-canvas {
     grid-template-columns: 1fr;
     gap: 0;
@@ -579,10 +715,28 @@
 }
 
 @media (max-width: 700px) {
+  .how-contents {
+    grid-template-columns: 1fr 1fr;
+  }
+  .how-contents > :nth-child(3n) { border-right: 1px solid var(--border); }
+  .how-contents > :nth-child(2n) { border-right: 0; }
+  .how-contents > :nth-last-child(-n + 3) { border-bottom: 1px solid var(--border); }
+  .how-contents > :nth-last-child(-n + 2) { border-bottom: 0; }
   .how-showcase li {
     grid-template-columns: 28px minmax(0, 1fr);
   }
   .how-showcase li > span {
     grid-column: 2;
   }
+  .how-technical-appendix > summary {
+    min-height: 66px;
+  }
+  .how-technical-appendix-body h3 {
+    font-size: 19px;
+  }
+  .how-technical-appendix .model-table-row {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .how-technical-appendix .model-table-head { display: none; }
 }

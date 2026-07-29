@@ -5,7 +5,6 @@ const styleOrder = [
   'base',
   'architecture',
   'how-it-works',
-  'status',
   'registry',
   'workspaces',
   'ranking',

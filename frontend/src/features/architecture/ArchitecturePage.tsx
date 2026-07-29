@@ -74,7 +74,7 @@ function ArrowDefs({ id }: { id: string }) {
 
 /* ---- 1 · System at a glance ---- */
 
-function SystemOverview() {
+export function SystemOverview() {
   const stages = [
     { x: 30, w: 178, kicker: 'SOURCE', title: 'Public sources', detail: 'X · primary documents', tone: 'plain' as const },
     { x: 236, w: 178, kicker: 'PROCESS', title: 'Python pipeline', detail: 'collect · group · rank', tone: 'dark' as const },
@@ -97,17 +97,17 @@ function SystemOverview() {
       <FlowArrow x1={622} y1={86} x2={644} y2={86} marker="overview-arrow" />
       <FlowArrow x1={838} y1={86} x2={860} y2={86} marker="overview-arrow" />
 
-      {/* the two model boundaries hang off the pipeline */}
+      {/* the shared model boundary hangs off the deterministic pipeline */}
       <path d="M325 138 V172" fill="none" stroke={BLUE_MID} strokeWidth="1.4" markerEnd="url(#overview-arrow)" />
       <path d="M531 180 V146" fill="none" stroke={BLUE_MID} strokeWidth="1.4" markerEnd="url(#overview-arrow)" />
       <rect x="236" y="180" width="384" height="62" fill={SAND} stroke={BLUE_MID} strokeWidth="1.2" />
       <text x="254" y="205" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.08em">MODEL BOUNDARY</text>
-      <text x="254" y="230" fontFamily={UI} fontSize="15" fontWeight="600" fill={INK}>LiteLLM + Codex</text>
-      <text x="406" y="230" fontFamily={UI} fontSize="11.5" fill={MUTED}>routing telemetry · Insight agent</text>
+      <text x="254" y="230" fontFamily={UI} fontSize="15" fontWeight="600" fill={INK}>LiteLLM + OpenAI Responses</text>
+      <text x="468" y="230" fontFamily={UI} fontSize="11.5" fill={MUTED}>routing · Investment · Engineering</text>
 
       <line x1="30" y1="270" x2="1050" y2="270" stroke={MUTED} strokeWidth="1" strokeDasharray="4 5" opacity="0.35" />
       <text x="30" y="292" fontFamily={UI} fontSize="11.5" fill={MUTED}>
-        Deterministic first. Every model judgment stays auditable. The same code restores a frozen local reviewer release.
+        Deterministic first. Every model judgment stays traceable to its exact evidence and stored response.
       </text>
     </svg>
   )
@@ -119,16 +119,23 @@ const DAILY_MODEL_BOUNDARIES = [
   {
     task: 'Audience routing',
     where: 'LiteLLM',
-    model: 'gpt-5.4-mini',
-    effort: 'high',
-    why: 'A 900-decision evaluation completed without failures. The xhigh comparison changed no decisions and used 5.4× the tokens.',
+    model: 'gpt-5.6-luna',
+    effort: 'medium',
+    why: 'One structured call makes independent, reason-bearing Investment and AI Engineering relevance decisions.',
   },
   {
     task: 'Investment agent',
     where: 'LiteLLM',
     model: 'gpt-5.6-sol',
     effort: 'xhigh',
-    why: 'This stage screens 37 companies, decides which research memos are worth opening, and writes the company read-through. It averages two model turns and about $0.31 per Insight.',
+    why: 'Screens 37 companies, opens only justified research memos, and writes bet-linked company read-throughs.',
+  },
+  {
+    task: 'AI Engineering agent',
+    where: 'LiteLLM',
+    model: 'gpt-5.6-sol',
+    effort: 'high',
+    why: 'Maps a Development to at most two engineering surfaces and states the technical decision it could change.',
   },
 ]
 
@@ -495,7 +502,7 @@ function CurrentDataModel() {
   )
 }
 
-function AccountIntake() {
+export function AccountIntake() {
   const stages = [
     { x: 34, title: 'X handle', detail: 'one supplied account', tone: 'dark' as const },
     { x: 272, title: 'Profile gate', detail: 'public · collectable', tone: 'sand' as const },
