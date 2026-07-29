@@ -255,7 +255,9 @@ def deterministic_evidence_gate(
         }
     )
     if media_types:
-        readable_types = ", ".join(media_type.replace("_", " ") for media_type in media_types)
+        readable_types = ", ".join(
+            media_type.replace("_", " ") for media_type in media_types
+        )
         return EvidenceGateDecision(
             code="unsupported_media",
             reason=(

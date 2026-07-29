@@ -345,7 +345,12 @@ def media_types(tweet: dict[str, Any]) -> tuple[str, ...]:
                     media_type = str(item.get("type") or "").strip().lower()
                     if media_type == "image":
                         media_type = "photo"
-                    if media_type in {"photo", "video", "animated_gif", "audio"}:
+                    if media_type in {
+                        "photo",
+                        "video",
+                        "animated_gif",
+                        "audio",
+                    }:
                         detected.add(media_type)
 
             for child in value.values():
