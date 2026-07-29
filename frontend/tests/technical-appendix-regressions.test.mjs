@@ -44,8 +44,8 @@ test('The appendix keeps only the three selected, current figures', () => {
   assert.match(figures, /LiteLLM \+ OpenAI Responses/)
   assert.match(figures, /routing · Investment · Engineering/)
   assert.match(figures, /task: 'Audience routing'[\s\S]*?model: 'gpt-5\.6-luna'[\s\S]*?effort: 'medium'/)
-  assert.match(figures, /task: 'Investment agent'[\s\S]*?model: 'gpt-5\.6-sol'[\s\S]*?effort: 'xhigh'/)
-  assert.match(figures, /task: 'AI Engineering agent'[\s\S]*?model: 'gpt-5\.6-sol'[\s\S]*?effort: 'high'/)
+  assert.match(figures, /task: 'Investment agent'[\s\S]*?model: 'gpt-5\.6-terra'[\s\S]*?effort: 'xhigh'/)
+  assert.match(figures, /task: 'AI Engineering agent'[\s\S]*?model: 'gpt-5\.6-terra'[\s\S]*?effort: 'high'/)
   assert.match(figures, /WHEN AN X ACCOUNT IS SUPPLIED/)
   assert.match(figures, /Profile gate/)
   assert.match(figures, /Resolve identity/)
@@ -53,7 +53,7 @@ test('The appendix keeps only the three selected, current figures', () => {
 
 test('The written model explanation agrees with the appendix', () => {
   assert.match(howNarrative, /gpt-5\.6-luna<\/code> at medium effort/)
-  assert.match(howNarrative, /gpt-5\.6-sol<\/code> at xhigh effort/)
+  assert.match(howNarrative, /gpt-5\.6-terra<\/code> at xhigh effort/)
   assert.match(howNarrative, /same\s+model at high effort/)
   assert.doesNotMatch(howNarrative, /gpt-5\.4-mini/)
   assert.doesNotMatch(howNarrative, /only 2 model steps/)

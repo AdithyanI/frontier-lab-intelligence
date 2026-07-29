@@ -446,7 +446,7 @@ export function RankLayersFigure() {
 export function CostFigure() {
   const meter = [
     { model: 'gpt-5.6-luna', role: 'routing · the volume model', input: '$0.10', output: '$6' },
-    { model: 'gpt-5.6-sol', role: 'the two analysts · the few, done well', input: '$0.50', output: '$30' },
+    { model: 'gpt-5.6-terra', role: 'the two analysts · the few, done well', input: '$0.50', output: '$30' },
   ]
 
   const units = [
@@ -459,14 +459,14 @@ export function CostFigure() {
     },
     {
       name: 'One AI Engineering Insight',
-      sub: 'sol · high · one call',
+      sub: 'terra · high · one call',
       inTok: '6k', inRate: '× $0.50/M', inCost: '$0.003',
       outTok: '1k', outRate: '× $30/M', outCost: '$0.03',
       total: '~$0.03',
     },
     {
       name: 'One Investment Insight',
-      sub: 'sol · xhigh · screen + memos',
+      sub: 'terra · xhigh · screen + memos',
       inTok: '50k', inRate: '× $0.50/M', inCost: '$0.025',
       outTok: '4k', outRate: '× $30/M', outCost: '$0.12',
       total: '~$0.15',
@@ -548,6 +548,97 @@ export function CostFigure() {
       })()}
       <text x="1050" y="613" textAnchor="end" fontFamily={UI} fontSize="21" fontWeight="600" fill={INK}>≈ $2 a day</text>
       <text x="30" y="678" fontFamily={MONO} fontSize="9" fill={MUTED} letterSpacing="0.06em">X SIDE · $0.18 PER 1,000 PROFILES · ~$0.001 PER FROZEN ARTICLE BODY · FOLLOW-GRAPH EXTENSION IS A SEPARATE ONE-OFF</text>
+    </svg>
+  )
+}
+
+/* Stage 6b: the collection side of the bill, in the same shape as the model
+   cost figure. The provider bills in credits, and one hundred thousand
+   credits is a dollar, so every unit price is a small division. The point
+   worth carrying away is at the bottom: a sweep costs roughly one request per
+   account, so the bill tracks how many accounts are watched, not how many
+   days are asked for. */
+export function CollectionCostFigure() {
+  const meter = [
+    { unit: 'One timeline page request', note: 'up to 20 posts', credits: '15', cost: '$0.00015' },
+    { unit: 'One profile lookup', note: 'used to refresh the network', credits: '18', cost: '$0.00018' },
+    { unit: 'One X article body', note: 'long-form posts only', credits: '100', cost: '$0.001' },
+  ]
+
+  const pulls = [
+    {
+      name: 'One account, one day',
+      sub: 'usually a single page',
+      calc: '~1 request × 15 credits',
+      total: '~$0.0002',
+    },
+    {
+      name: 'The whole network, one day',
+      sub: '~2,600 accounts swept',
+      calc: '~2,800 requests × 15 credits',
+      total: '~$0.40',
+    },
+    {
+      name: 'The whole network, five days',
+      sub: 'one sweep, longer horizon',
+      calc: '~3,800 requests × 15 credits',
+      total: '~$0.60',
+    },
+    {
+      name: 'Re-check every profile',
+      sub: 'network refresh, not a daily cost',
+      calc: '~2,600 lookups × 18 credits',
+      total: '~$0.47',
+    },
+  ]
+
+  return (
+    <svg viewBox="0 0 1080 644" role="img" aria-label="The X collection cost as a rule of thumb: the provider bills in credits where one hundred thousand credits is a dollar, a timeline page is fifteen credits, and sweeping the whole network for one day costs about forty cents because the bill tracks the number of accounts rather than the number of days.">
+      <rect x="0" y="0" width="1080" height="644" fill="#fff" />
+      <text x="30" y="34" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.08em">COLLECTION COST · A RULE OF THUMB</text>
+      <text x="1050" y="34" textAnchor="end" fontFamily={MONO} fontSize="9.5" fill={MUTED} letterSpacing="0.06em">100,000 PROVIDER CREDITS = $1</text>
+
+      {/* 1 · the meter */}
+      <text x="30" y="80" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.06em">1 · THE METER · WHAT THE PROVIDER CHARGES</text>
+      <text x="700" y="106" textAnchor="middle" fontFamily={MONO} fontSize="8.5" fill={MUTED} letterSpacing="0.06em">CREDITS</text>
+      <text x="940" y="106" textAnchor="middle" fontFamily={MONO} fontSize="8.5" fill={MUTED} letterSpacing="0.06em">COST</text>
+      <line x1="30" y1="116" x2="1050" y2="116" stroke={MUTED} strokeWidth="1" opacity="0.3" />
+      {meter.map((row, index) => {
+        const y = 116 + index * 52
+        return (
+          <g key={row.unit}>
+            <rect x="30" y={y} width="1020" height="52" fill={index % 2 === 1 ? SAND : '#fff'} opacity={index % 2 === 1 ? 0.7 : 1} />
+            <text x="50" y={y + 24} fontFamily={UI} fontSize="14.5" fontWeight="600" fill={INK}>{row.unit}</text>
+            <text x="50" y={y + 41} fontFamily={UI} fontSize="12" fill={MUTED}>{row.note}</text>
+            <text x="700" y={y + 32} textAnchor="middle" fontFamily={MONO} fontSize="14" fill={INK}>{row.credits}</text>
+            <text x="940" y={y + 32} textAnchor="middle" fontFamily={UI} fontSize="16" fontWeight="600" fill={BLUE_INK}>{row.cost}</text>
+            <line x1="30" y1={y + 52} x2="1050" y2={y + 52} stroke={MUTED} strokeWidth="1" opacity="0.3" />
+          </g>
+        )
+      })}
+
+      {/* 2 · what one pull costs */}
+      <text x="30" y="316" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.06em">2 · WHAT ONE PULL COSTS</text>
+      <line x1="30" y1="330" x2="1050" y2="330" stroke={MUTED} strokeWidth="1" opacity="0.3" />
+      {pulls.map((pull, index) => {
+        const y = 330 + index * 54
+        return (
+          <g key={pull.name}>
+            <text x="50" y={y + 25} fontFamily={UI} fontSize="15" fontWeight="600" fill={INK}>{pull.name}</text>
+            <text x="50" y={y + 42} fontFamily={MONO} fontSize="9" fill={MUTED} letterSpacing="0.05em">{pull.sub}</text>
+            <text x="880" y={y + 31} textAnchor="end" fontFamily={MONO} fontSize="11.5" fill={MUTED}>{pull.calc}</text>
+            <text x="1050" y={y + 33} textAnchor="end" fontFamily={UI} fontSize="19" fontWeight="600" fill={BLUE_INK}>{pull.total}</text>
+            <line x1="30" y1={y + 54} x2="1050" y2={y + 54} stroke={MUTED} strokeWidth="1" opacity="0.22" />
+          </g>
+        )
+      })}
+
+      {/* 3 · the shape of the bill */}
+      <text x="30" y="576" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.06em">3 · THE BILL TRACKS ACCOUNTS, NOT DAYS</text>
+      <text x="30" y="598" fontFamily={UI} fontSize="13" fill={MUTED}>
+        A sweep pages each account&rsquo;s timeline until it passes the horizon, so asking for five days costs little more than asking for one.
+      </text>
+      <text x="30" y="620" fontFamily={MONO} fontSize="9" fill={MUTED} letterSpacing="0.06em">WIDENING THE REGISTRY IS THE DECISION THAT COSTS MONEY · EXTENDING THE FOLLOW GRAPH IS A SEPARATE ONE-OFF</text>
     </svg>
   )
 }

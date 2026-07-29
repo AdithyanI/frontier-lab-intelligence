@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import litellmRequestLog from '../../assets/litellm-request-log.webp'
 import { EvidenceInputMap } from '../architecture/ArchitecturePage'
 import NetworkRankFigure from '../architecture/NetworkRankFigure'
-import { CollectFigure, CostFigure, JudgeFigure, PublishFigure, RankFigure, RankLayersFigure, SourceChoiceFigure, TrustedSetFigure } from './DecisionFigures'
+import { CollectFigure, CollectionCostFigure, CostFigure, JudgeFigure, PublishFigure, RankFigure, RankLayersFigure, SourceChoiceFigure, TrustedSetFigure } from './DecisionFigures'
 import { VIDEO_WALKTHROUGH_URL } from './howContent'
 
 /* Decision figures open fullscreen on click, so they can be presented
@@ -397,7 +397,7 @@ export default function HowNarrative({
             Audience routing uses <code>gpt-5.6-luna</code> at medium effort.
             One structured call reads an Event and returns an independent
             decision for investment and AI engineering. Investment then uses{' '}
-            <code>gpt-5.6-sol</code> at xhigh effort to screen the portfolio
+            <code>gpt-5.6-terra</code> at xhigh effort to screen the portfolio
             and open only justified company memos. AI Engineering uses the same
             model at high effort to map the Development to concrete technical
             decisions.
@@ -423,6 +423,12 @@ export default function HowNarrative({
             &mdash; a cheap model does the volume, an expensive one is spent
             only on the few that survive.
           </p>
+          <p className="how-cost-note">
+            These are rounded planning figures, not a price list. Assuming a
+            full cache hit makes them a floor: prompt caching is best-effort,
+            so an uncached run costs more, and the uncached input price stays
+            the safe upper bound when estimating a refresh.
+          </p>
           <p>
             The ratio worth remembering is that output costs about sixty times
             cached input. Most of that output is reasoning rather than prose,
@@ -431,20 +437,32 @@ export default function HowNarrative({
             thousand tokens of company cards in the Investment prompt are
             nearly free after the first run of the day.
           </p>
+          <p className="how-read-sub mono">6b · What it costs to collect</p>
           <p>
-            On the collection side, X profile lookups run about eighteen cents
-            per thousand and a frozen article body is about a tenth of a cent.
-            Extending the follow graph is the one genuinely lumpy cost, and it
-            is a one-off rather than part of a daily brief.
+            The other half of the bill is the data itself. The X provider
+            bills in credits rather than dollars, and a hundred thousand
+            credits is a dollar, so every unit price is a small division.
           </p>
-          <p className="how-cost-note">
-            These are rounded planning figures, not a price list. Assuming a
-            full cache hit makes them a floor: prompt caching is best-effort,
-            so an uncached run costs more, and the uncached input price stays
-            the safe upper bound when estimating a refresh.
+          <FigureFrame label="Expand the collection cost rule of thumb">
+            <CollectionCostFigure />
+          </FigureFrame>
+          <p>
+            Sweeping the whole network for one day costs about forty cents,
+            and one account for one day is two hundredths of a cent. The part
+            worth noticing is the last line: a sweep pages each account&rsquo;s
+            timeline until it passes the horizon, so five days costs barely
+            more than one. The bill tracks how many accounts are watched, not
+            how many days are asked for &mdash; which is why backfilling the
+            month was cheap and widening the Registry is the decision that
+            actually costs money.
+          </p>
+          <p>
+            Extending the follow graph is the one genuinely lumpy cost. It is
+            a one-off that runs when the network is grown, not part of a daily
+            brief.
           </p>
 
-          <p className="how-read-sub mono">6b · One real request</p>
+          <p className="how-read-sub mono">6c · One real request</p>
           <p>
             Audience-routing calls pass through LiteLLM. It handles retries
             and records the model, tokens, time, and cost for every request.

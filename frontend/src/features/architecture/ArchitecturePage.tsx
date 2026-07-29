@@ -126,14 +126,14 @@ const DAILY_MODEL_BOUNDARIES = [
   {
     task: 'Investment agent',
     where: 'LiteLLM',
-    model: 'gpt-5.6-sol',
+    model: 'gpt-5.6-terra',
     effort: 'xhigh',
     why: 'Screens 37 companies, opens only justified research memos, and writes bet-linked company read-throughs.',
   },
   {
     task: 'AI Engineering agent',
     where: 'LiteLLM',
-    model: 'gpt-5.6-sol',
+    model: 'gpt-5.6-terra',
     effort: 'high',
     why: 'Maps a Development to at most two engineering surfaces and states the technical decision it could change.',
   },
