@@ -1528,32 +1528,10 @@
   color: var(--muted);
 }
 
-.investment-agent-source-material {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px 22px;
-  padding: 13px 0 15px;
-  border-top: 1px solid var(--border);
-}
-
-.investment-agent-source-material > span,
 .investment-agent-process > summary .mono {
   color: var(--muted);
   font-size: 9px;
   font-weight: 400;
-}
-
-.investment-agent-source-material a {
-  color: var(--blue-ink);
-  font-size: 10.5px;
-  text-decoration: none;
-}
-
-.investment-agent-source-material a:hover,
-.investment-agent-source-material a:focus-visible {
-  text-decoration: underline;
-  text-underline-offset: 3px;
 }
 
 .investment-agent-sources > summary,
@@ -1703,14 +1681,6 @@
   margin: 6px 0 0;
   color: var(--ink-soft);
   font-size: 11.5px;
-  line-height: 1.55;
-}
-
-.investment-agent-repair-note {
-  max-width: 74ch;
-  margin: 14px 0 0;
-  color: var(--muted);
-  font-size: 10.5px;
   line-height: 1.55;
 }
 
