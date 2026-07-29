@@ -1484,7 +1484,7 @@
 
 .aion-surface > details > summary {
   display: grid;
-  grid-template-columns: 56px minmax(0, 200px) minmax(0, 1fr);
+  grid-template-columns: 56px minmax(0, 200px) minmax(0, 1fr) 18px;
   gap: 4px 28px;
   align-items: baseline;
   padding: 17px 0;
@@ -1498,11 +1498,11 @@
 
 .aion-surface > details > summary::after {
   content: "＋";
-  grid-column: 3;
+  grid-column: 4;
+  grid-row: 1;
   justify-self: end;
-  align-self: start;
   color: var(--muted);
-  font: 12px/1.55 var(--font-mono);
+  font: 12px/1.65 var(--font-mono);
 }
 
 .aion-surface > details[open] > summary::after { content: "−"; }
@@ -1565,7 +1565,10 @@
     gap: 6px 20px;
   }
   .aion-surface-what { grid-column: 2; }
-  .aion-surface > details > summary::after { grid-column: 2; }
+  .aion-surface > details > summary::after {
+    grid-column: 2;
+    grid-row: 1;
+  }
   .aion-surface-detail {
     grid-template-columns: 1fr;
     margin-left: 56px;
