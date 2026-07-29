@@ -631,54 +631,58 @@ export function CollectionCostFigure() {
   )
 }
 
-/* Stage 5a: the agent loop. The model screens on triggers only, has to name
-   the company and the bet in the tool call, and only then does the
-   application open those memos. */
+/* Stage 5a: the agent loop, in the standard shape. The model either answers
+   or calls its one tool, and the tool result returns to the same
+   conversation. What is specific here is the tool: it has to name the
+   standing bet before the memo opens. */
 export function AgentLoopFigure() {
   return (
     <svg
-      viewBox="0 0 1080 400"
+      viewBox="0 0 1080 440"
       role="img"
-      aria-label="The investment agent loop. The model first sees only a one-line trigger for each standing bet, with no research behind it. To open a memo it must name the company, the bet it thinks is firing, and the mechanism. Only then does the application open those memos, and the model writes its cited output, dropping a company when the memo breaks the connection."
+      aria-label="The agent loop. Today's Development and one short card per company go into the model. The model either writes the brief, or calls its single tool, get_company_memo, which requires it to name the company, the bet it thinks is firing, and the mechanism. The opened memo returns into the same conversation and the model decides again."
     >
       <defs>
         <marker id="loop-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-          <path d="M0,0 L8,4 L0,8 z" fill={BLUE_MID} />
+          <path d="M0,0 L8,4 L0,8 z" fill={INK} />
         </marker>
       </defs>
-      <text x="30" y="34" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.08em">THE AGENT LOOP · IT NAMES THE BET BEFORE THE FILE OPENS</text>
+      <text x="30" y="34" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.08em">THE AGENT LOOP</text>
+      <text x="1050" y="34" textAnchor="end" fontFamily={MONO} fontSize="9.5" fill={MUTED} letterSpacing="0.06em">ONE TOOL · THE CLAIM COMES FIRST</text>
 
-      <rect x="30" y="72" width="288" height="112" fill="#fff" stroke={MUTED} strokeWidth="1.2" />
-      <text x="54" y="106" fontFamily={UI} fontSize="15" fontWeight="600" fill={INK}>It sees every bet</text>
-      <text x="54" y="132" fontFamily={UI} fontSize="12.5" fill={MUTED}>one trigger line each, nothing more</text>
-      <text x="54" y="164" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.06em">NO RESEARCH BEHIND THEM YET</text>
+      {/* input */}
+      <rect x="350" y="72" width="380" height="58" rx="29" fill={SAND} stroke={BLUE_MID} strokeWidth="1.2" />
+      <text x="540" y="107" textAnchor="middle" fontFamily={MONO} fontSize="12.5" fill={INK} letterSpacing="0.06em">ONE DEVELOPMENT</text>
+      <text x="740" y="95" fontFamily={UI} fontSize="12.5" fill={MUTED}>with a short card per company:</text>
+      <text x="740" y="115" fontFamily={UI} fontSize="12.5" fill={MUTED}>its standing bets, one line each</text>
 
-      <line x1="318" y1="128" x2="414" y2="128" stroke={BLUE_MID} strokeWidth="1.5" markerEnd="url(#loop-arrow)" />
+      <line x1="540" y1="130" x2="540" y2="164" stroke={INK} strokeWidth="1.4" markerEnd="url(#loop-arrow)" />
 
-      <rect x="422" y="72" width="300" height="112" fill={SAND} stroke={BLUE_MID} strokeWidth="1.4" />
-      <text x="446" y="104" fontFamily={MONO} fontSize="13" fontWeight="600" fill={INK}>get_company_memo()</text>
-      <text x="446" y="132" fontFamily={UI} fontSize="12.5" fill={MUTED}>name the company, the bet,</text>
-      <text x="446" y="152" fontFamily={UI} fontSize="12.5" fill={MUTED}>and the mechanism</text>
-      <text x="446" y="174" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.06em">ALL THREE REQUIRED</text>
+      {/* inference */}
+      <rect x="310" y="172" width="460" height="58" fill={SAND} stroke={BLUE_MID} strokeWidth="1.2" />
+      <line x1="326" y1="172" x2="326" y2="230" stroke={BLUE_MID} strokeWidth="1.2" />
+      <line x1="754" y1="172" x2="754" y2="230" stroke={BLUE_MID} strokeWidth="1.2" />
+      <text x="540" y="207" textAnchor="middle" fontFamily={MONO} fontSize="12.5" fill={INK} letterSpacing="0.06em">MODEL INFERENCE</text>
 
-      <line x1="722" y1="128" x2="818" y2="128" stroke={BLUE_MID} strokeWidth="1.5" markerEnd="url(#loop-arrow)" />
+      {/* split */}
+      <path d="M540,230 L540,258 L270,258 L270,292" fill="none" stroke={INK} strokeWidth="1.4" markerEnd="url(#loop-arrow)" />
+      <path d="M540,230 L540,258 L830,258 L830,292" fill="none" stroke={INK} strokeWidth="1.4" markerEnd="url(#loop-arrow)" />
 
-      <rect x="826" y="72" width="224" height="112" fill="#fff" stroke={MUTED} strokeWidth="1.2" />
-      <text x="850" y="106" fontFamily={UI} fontSize="15" fontWeight="600" fill={INK}>Now it reads</text>
-      <text x="850" y="132" fontFamily={UI} fontSize="12.5" fill={MUTED}>the memos it argued for</text>
-      <text x="850" y="164" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.06em">USUALLY TWO OR THREE</text>
+      {/* response */}
+      <rect x="90" y="300" width="360" height="58" rx="29" fill={INK} />
+      <text x="270" y="335" textAnchor="middle" fontFamily={MONO} fontSize="12.5" fill="#fff" letterSpacing="0.06em">THE CITED BRIEF</text>
+      <text x="90" y="384" fontFamily={UI} fontSize="12.5" fill={MUTED}>or a written suppression, with its reason</text>
 
-      <line x1="938" y1="184" x2="938" y2="242" stroke={BLUE_MID} strokeWidth="1.5" markerEnd="url(#loop-arrow)" />
+      {/* tool call */}
+      <rect x="650" y="300" width="360" height="58" fill="#fff" stroke={BLUE_MID} strokeWidth="1.2" />
+      <line x1="666" y1="300" x2="666" y2="358" stroke={BLUE_MID} strokeWidth="1.2" />
+      <line x1="994" y1="300" x2="994" y2="358" stroke={BLUE_MID} strokeWidth="1.2" />
+      <text x="830" y="335" textAnchor="middle" fontFamily={MONO} fontSize="12.5" fill={INK} letterSpacing="0.04em">get_company_memo()</text>
+      <text x="650" y="384" fontFamily={UI} fontSize="12.5" fill={MUTED}>it must name the company, the bet, and the mechanism</text>
+      <text x="650" y="404" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.06em">ONLY THEN DOES THE MEMO OPEN</text>
 
-      <rect x="30" y="250" width="1020" height="94" fill={INK} />
-      <text x="54" y="286" fontFamily={UI} fontSize="15" fontWeight="600" fill="#fff">Then it writes the cited output</text>
-      <text x="54" y="314" fontFamily={UI} fontSize="12.5" fill="#fff" opacity="0.78">a company is kept only if the full memo still supports the claim it made</text>
-      <text x="1026" y="286" textAnchor="end" fontFamily={MONO} fontSize="9.5" fill="#fff" opacity="0.55" letterSpacing="0.06em">ABOUT ONE IN TEN IS DROPPED HERE</text>
-
-      <line x1="30" y1="372" x2="1050" y2="372" stroke={MUTED} strokeWidth="1" strokeDasharray="4 5" opacity="0.35" />
-      <text x="30" y="394" fontFamily={UI} fontSize="11.5" fill={MUTED}>
-        The claim comes before the evidence, so the memo tests an argument instead of supplying one.
-      </text>
+      {/* loop back */}
+      <path d="M1010,329 L1046,329 L1046,201 L774,201" fill="none" stroke={INK} strokeWidth="1.4" markerEnd="url(#loop-arrow)" />
     </svg>
   )
 }
