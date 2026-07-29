@@ -300,9 +300,9 @@ def main(
             message=str(exc),
             retryable=True,
             hint=(
-                "Rerun the identical command; completed runs are reused and "
-                "failed ranks retry. A day publishes only when every requested "
-                "rank succeeds."
+                "Inspect the written failures and rerun the identical command. "
+                "The requested targets run again, and a day publishes only "
+                "when every requested rank succeeds in one complete batch."
             ),
             request_id=request_id,
             started=started,

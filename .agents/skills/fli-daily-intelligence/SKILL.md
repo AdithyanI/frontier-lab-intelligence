@@ -63,11 +63,23 @@ none has ever bound in production.
    A company profile is prior context, never proof that an Event affects the
    company.
 
-4. Run the day:
+4. Preview the exact cohort without model calls or writes:
 
    ```bash
-   .venv/bin/python -m fli.insights.investment_agent \
-     --through YYYY-MM-DD --days 1 --top-ranked 10 --workers 6
+   .venv/bin/fli insights run-investment-agent \
+     --through YYYY-MM-DD --days 1 --top-ranked 10 \
+     --dry-run --json --no-input
+   ```
+
+   Inspect the selected Development IDs, daily ranks, prompt version, model,
+   and request count before spending.
+
+5. Run the day through the canonical machine client:
+
+   ```bash
+   .venv/bin/fli insights run-investment-agent \
+     --through YYYY-MM-DD --days 1 --top-ranked 10 --workers 6 \
+     --json --no-input
    ```
 
    It completes one warm request for the stable prompt prefix, runs the
@@ -76,7 +88,7 @@ none has ever bound in production.
    `data/derived/insights/investment-agent-traces/<day>/`, and imports each
    validated result.
 
-5. Confirm the day actually published:
+6. Confirm the day actually published:
 
    ```bash
    .venv/bin/fli insights summary --json --no-input
@@ -86,9 +98,11 @@ none has ever bound in production.
    requested rank succeeds. One failed Insight leaves the whole day invisible
    even though its rows are stored. This is deliberate — it is what stops a
    partial re-run from mixing prompt versions on one page. If `published_days`
-   omits the date, read the traces to find which rank failed and re-run.
+   omits the date, read the traces to find which rank failed. Retrying the
+   batch runs its requested targets again; do not assume completed calls are
+   automatically reused or free.
 
-6. Verify the reader surface, not just the database:
+7. Verify the reader surface, not just the database:
 
    ```bash
    curl -s "http://127.0.0.1:8797/api/insights?audience=investment&status=kept&date=YYYY-MM-DD"

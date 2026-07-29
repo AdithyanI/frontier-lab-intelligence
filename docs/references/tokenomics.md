@@ -1,75 +1,89 @@
 # Workflow Economics
 
-Last verified: 2026-07-28
+Last verified: 2026-07-29
 
 This is the glanceable cost map for the current Frontier Lab Intelligence
-workflow. It separates measured spend from provider estimates and from local
-work that has no incremental API cost. Exact run telemetry remains
-authoritative; these numbers are a dated operating snapshot, not a price
-guarantee.
+workflow. It separates measured spend from provider estimates and local replay
+work. Exact run telemetry is authoritative; these are dated checkpoints, not
+price guarantees.
 
-## Current Development-Router Pass
+## Current Development Routing
 
-The July 5–21 `audience-routing-v14` top-100 pass used `gpt-5.6-luna` at
-medium reasoning and saved Development evidence. It made no X or
-artifact-provider requests.
+The July 5–21 `audience-routing-v15` top-100 pass used `gpt-5.6-luna` at medium
+reasoning. A deterministic evidence-readiness gate handled 325 weak or
+unavailable packets without an LLM call.
 
-| Scope | Requests | Input tokens | Cached tokens | Output tokens | Measured cost |
+| Scope | Developments | Model requests | Cached tokens | Cache-hit requests | Measured cost |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| Seventeen complete days | 1,647 | 6,990,192 | 2,791,936 | 432,579 | $7.079129 |
+| Seventeen complete days | 1,647 | 1,322 | 759,808 | 424 | $7.762206 |
 
-The pass completed with zero failures. The provider reported a cache read on
-1,558 requests and a 39.94% aggregate token read ratio. This is measured
-production telemetry, not an assumed cache discount; future refreshes can
-observe different reuse even with the same request layout.
+The pass completed with zero terminal failures: 618 both audiences, 200
+AI-Engineering-only, 88 Investment-only, and 741 neither. It reused stored X
+and artifact evidence and made no provider collection calls.
 
-## Current 17-Day Rank Migration
+## Current Investment Agent
 
-The July 5–21 `daily-rank-v2` migration reused the saved X evidence. It made no
-X provider request.
+The company-aware agent uses `gpt-5.6-sol` at xhigh reasoning. Each Development
+screens the compact 37-company universe, then opens only the complete memos
+needed to test causal matches.
 
-| Stage | Scope | Reuse | New external work | Measured incremental cost |
-| --- | --- | --- | --- | ---: |
-| Daily Event rank | 19,657 Events; 1,700 top-100 positions | Complete local replay | None | $0 |
-| Audience routing | Final cohort: 1,674 Events | Final tie-aware correction reused 1,647 exact judgments; initial migration reused 976 | 725 GPT-5.4-mini/high calls across both migration passes; 27 in the final correction | $3.050746 total; $0.089051 in the final correction |
-| Per-Event working Insights | Final cohort: 1,474 Event/audience pairs across 965 Events | Final correction reused 1,451 exact outputs; initial migration reused 524 | 981 GPT-5.6-terra/high calls across both migration passes; 23 in the final correction | $15.923542 total; $0.361769 in the final correction |
-| Artifact projection | 6,298 observations; 5,378 artifacts | Existing bodies and snapshots | None | $0 |
-| Semantic index | 524 stored `text-embedding-3-large` vectors | Existing packet-keyed vectors | None in this replay | Aggregate historical cost was not durably reconciled |
-| Daily editorial briefs | 17 complete GPT-5.6-sol/xhigh tasks; 965 Events and 1,474 audience pairs reviewed | Existing exact evidence and current per-Event annotations | One persisted agent task per day; 199 published Insights with 353 citations | App Server does not report dollar spend for these tasks |
-| PDFs and UI projections | Two audiences across all 17 days; 34 current PDFs | Deterministic local rendering and content-addressed cache | None | $0 |
+| Checkpoint | Developments | Input tokens | Cached tokens | Output tokens | Measured cost |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Published July 19–21 top tens, v8/v9 | 30 | 1,386,679 | 472,576 | 97,796 | $7.740683 |
+| Unpublished v11 proof rows | 2 | 99,184 | 23,040 | 8,384 | $0.643760 |
 
-The measured LiteLLM increment before the daily editorial tasks is
-**$18.974288** across the initial clean migration and the final tie-aware
-percentile correction. The corresponding known stored cost of the complete
-current routing and per-Event Insight cohorts, including compatible reused
-outputs produced in earlier runs, is **$31.797248**. One reused routing row lacks
-historical cost telemetry, so this is a recorded known-cost total rather than a
-complete replacement-cost estimate. It was not charged again during this
-migration.
+The active prompt is v11. The visible July 19–21 cohorts still use v8/v9 and
+must be refreshed before presenting the v11 contract as the live result.
 
-The final corrective routing pass reported 62,349 input tokens, of which
-41,216 were cached, and 15,580 output tokens. The final corrective per-Event
-Insight pass reported 73,725 input tokens, of which 24,064 were cached, and
-15,440 output tokens. These are incremental-call counters; reused rows
-correctly contribute zero new tokens.
+The runner warms one request before bounded parallel fan-out. Every turn stores
+its request, response ID, tool calls, retry history, usage, and reported cost.
+Prompt caching is measured best-effort behavior; the uncached input price
+remains the safe planning bound.
+
+PDF generation, UI projection, and delivery preview are deterministic local
+work over the published cohort and add no model cost.
 
 ## What a Normal Refresh Pays For
 
-The marginal cost depends on which boundary changed:
+The marginal cost depends on the boundary that changed:
 
-- A rank formula or Registry-derived rank input change can replay from saved
-  evidence locally. It pays only for downstream model rows whose exact input
-  hashes are no longer reusable.
-- A new complete day normally pays for new X timeline pages, routing for up to
-  the top 100 fresh Events, routed-positive editorial work, and only the
-  artifact bodies not already cached.
-- Extending the Registry or refreshing the following graph is a separate,
-  slower X-provider operation. It is not required for a normal daily brief.
-- PDF generation and the web projections are deterministic local work.
+- A ranking implementation change replays locally from saved evidence.
+- A routing prompt or evidence-readiness change pays only for model-eligible
+  Developments in the selected ranked cohort.
+- An Investment prompt or company-packet change pays for every selected
+  Investment-routed Development that is run again.
+- A new complete day normally pays for new X timeline pages, new artifact
+  bodies, routing for up to the top 100 Developments, and the selected
+  Investment cohort.
+- Extending the Registry or following graph is a separate operation and is not
+  required for a normal daily brief.
+- PDF rendering and the web read models remain local.
 
-Exact reuse is deliberately strict: the Event, audience, evidence, prompt, and
-model contracts must all match. This makes the cost reduction auditable rather
-than a heuristic cache claim.
+Use the Investment dry-run before paid analysis:
+
+```bash
+.venv/bin/fli insights run-investment-agent \
+  --through YYYY-MM-DD --days N --top-ranked 10 \
+  --dry-run --json --no-input
+```
+
+The dry-run resolves the exact target count, prompt, model, and reasoning level
+without model calls, trace writes, database writes, or publication.
+
+## Historical Cost Evidence
+
+Earlier Event-rank, per-Event annotation, and App Server editorial experiments
+remain useful build-history evidence but are no longer production stages. Their
+measured LiteLLM increment was $18.974288, with $31.797248 of known stored
+cohort cost including compatible historical outputs. Do not add those numbers
+to a current Investment refresh estimate.
+
+The immutable chronological record, including model experiments and reported
+spend, lives in the build log. Query it with:
+
+```bash
+.venv/bin/python scripts/build-log.py recent
+```
 
 ## X Provider Units
 
@@ -81,25 +95,20 @@ unless a command can calculate a defensible estimate.
 | --- | --- |
 | Profile lookup | Approximately $0.00018 per profile at the documented $0.18 per 1,000 profiles used by the repository's estimators. |
 | Timeline collection | Historical complete refreshes recorded 3,147 and 4,246 provider requests. The provider did not expose attributable run spend; returned-tweet pricing and cache reuse make request count alone an unsafe dollar conversion. |
-| X Article body | 100 credits per Article, or approximately $0.001 with the repository's `credits / 100,000` estimate. The live store currently records 353 requests and 35,300 estimated credits, about $0.353 cumulatively; cache hits make later replays free. |
-| Outgoing-follow graph | The current incremental World's Fair expansion was estimated at $4.37070. The earlier projected full 2,231-source crawl from cold state was $27.83826. Page caches make later extensions materially cheaper than a cold rebuild. |
+| X Article body | 100 credits per Article, or approximately $0.001 with the repository's `credits / 100,000` estimate. The checkpoint store recorded 353 requests and 35,300 estimated credits, about $0.353 cumulatively. Cache hits make later replays free. |
+| Outgoing-follow graph | The incremental World's Fair expansion was estimated at $4.37070. The earlier projected full 2,231-source crawl from cold state was $27.83826. Page caches make later extensions materially cheaper than a cold rebuild. |
 
 Provider prices can change. Recheck the live provider contract before approving
-a new broad crawl; never infer exact billed spend from an endpoint count when
-the provider did not return it.
+a broad crawl; never infer exact billed spend from endpoint count when the
+provider did not return it.
 
 ## Reading the Numbers
 
-Three figures answer different questions:
+1. **Incremental cost** is what one exact run charged.
+2. **Published-cohort cost** is the recorded cost of the rows currently visible
+   to the reader.
+3. **Replacement cost** is a planning estimate and must include an uncached
+   input bound.
 
-1. **Incremental replay cost** is what this exact change charged after valid
-   reuse.
-2. **Current-cohort known cost** adds the recorded cost of outputs reused from
-   earlier compatible runs; telemetry gaps remain explicit.
-3. **Fresh-day operating cost** is variable because the number of new X pages,
-   routed-positive Events, cache hits, and editorial research steps changes by
-   day.
-
-Model choice and reasoning effort remain quality decisions. Cost is telemetry
-used to explain and improve the workflow, not a reason to silently weaken an
-in-scope brief.
+Cost is telemetry used to explain and improve the workflow. It is not a reason
+to silently lower the model or reasoning quality of an in-scope run.
