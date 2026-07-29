@@ -1,4 +1,4 @@
-"""Manual Slack and email delivery for one canonical Investment brief."""
+"""Manual Slack and email delivery for one canonical audience brief."""
 
 from __future__ import annotations
 
@@ -19,7 +19,7 @@ from urllib.parse import urlencode
 
 import httpx
 
-from fli.insights import company_context, pdf_report
+from fli.insights import company_context, pdf_report, pdf_report_engineering
 
 
 SCHEMA_VERSION = "daily-brief-delivery-v2"
@@ -155,11 +155,14 @@ def _summary(item: dict[str, Any]) -> str:
 
 
 def _next_check(item: dict[str, Any]) -> str:
-    """The first company-specific implication in the compact result."""
+    """The first audience-specific implication in the compact result."""
     for connection in item.get("connections") or []:
         for company in connection.get("companies") or []:
             if company.get("impact"):
                 return str(company["impact"])
+    for landing in item.get("lands") or []:
+        if landing.get("why"):
+            return str(landing["why"])
     return ""
 
 
@@ -270,6 +273,21 @@ def _slack_company_lines(
     return lines
 
 
+def _slack_engineering_lines(item: dict[str, Any]) -> list[str]:
+    lines: list[str] = []
+    seen: set[str] = set()
+    for landing in item.get("lands") or []:
+        surface_id = _plain(landing.get("surface_id"))
+        surface_name = _plain(landing.get("surface_name"))
+        label = surface_name or surface_id
+        if not label or label in seen:
+            continue
+        seen.add(label)
+        suffix = f" ({surface_id})" if surface_id and surface_id != label else ""
+        lines.append(f"• *{_slack_escape(label + suffix)}*")
+    return lines
+
+
 def _slack_payload(payload: dict[str, Any]) -> dict[str, Any]:
     items = sorted(
         list(payload.get("items") or []),
@@ -278,7 +296,8 @@ def _slack_payload(payload: dict[str, Any]) -> dict[str, Any]:
     day = str(payload.get("date") or payload.get("requested_date") or "")
     audience = _audience_label(str(payload.get("audience") or "investment"))
     brief_url, _ = _urls(payload)
-    bets = company_context.investment_bet_index()
+    is_investment = payload.get("content_kind") == "investment_agent"
+    bets = company_context.investment_bet_index() if is_investment else {}
     fallback_lines = [
         f"Frontier Lab Intelligence | {audience} brief | {_display_day(day)}",
     ]
@@ -308,7 +327,16 @@ def _slack_payload(payload: dict[str, Any]) -> dict[str, Any]:
         brief_position = index + 1
         title = _slack_escape(_title(item))
         summary = _summary(item)
-        company_lines = _slack_company_lines(item, bets)
+        landing_lines = (
+            _slack_company_lines(item, bets)
+            if is_investment
+            else _slack_engineering_lines(item)
+        )
+        landing_label = (
+            "How this reaches companies"
+            if is_investment
+            else "Engineering surfaces"
+        )
         fallback_lines.extend(
             [
                 "",
@@ -333,20 +361,20 @@ def _slack_payload(payload: dict[str, Any]) -> dict[str, Any]:
                     f"*What changed*\n{prose_blocks[0]['text']['text']}"
                 )
             blocks.extend(prose_blocks)
-        if company_lines:
+        if landing_lines:
             blocks.append(
                 {
                     "type": "section",
                     "text": {
                         "type": "mrkdwn",
                         "text": (
-                            "*How this reaches companies*\n"
-                            + "\n".join(company_lines)
+                            f"*{landing_label}*\n"
+                            + "\n".join(landing_lines)
                         ),
                     },
                 }
             )
-            fallback_lines.extend(["How this reaches companies", *company_lines])
+            fallback_lines.extend([landing_label, *landing_lines])
     blocks.extend(
         [
             {"type": "divider"},
@@ -383,17 +411,21 @@ def _email_content(payload: dict[str, Any]) -> tuple[str, str, str]:
         "",
     ]
     html_items: list[str] = []
-    for item in items:
-        rank = _rank(item)
+    for position, item in enumerate(items, start=1):
         title = _plain(_title(item))
         interpretation = _plain(_summary(item))
         next_step = _plain(_next_check(item))
+        detail_label = (
+            "Company read-through"
+            if payload.get("content_kind") == "investment_agent"
+            else "Engineering relevance"
+        )
         event_url = _event_url(item, day)
         plain_lines.extend(
             [
-                f"{rank}. {title}",
+                f"{position}. {title}",
                 interpretation,
-                f"Next: {next_step}",
+                f"{detail_label}: {next_step}",
                 f"Evidence: {event_url}",
                 "",
             ]
@@ -402,9 +434,9 @@ def _email_content(payload: dict[str, Any]) -> tuple[str, str, str]:
             "".join(
                 [
                     '<li style="margin:0 0 24px;padding:0 0 20px;border-bottom:1px solid #e4e4e2">',
-                    f'<h2 style="margin:0 0 8px;font-size:18px;line-height:1.3"><a href="{html.escape(event_url)}" style="color:#235165;text-decoration:none">{rank}. {html.escape(title)}</a></h2>',
+                    f'<h2 style="margin:0 0 8px;font-size:18px;line-height:1.3"><a href="{html.escape(event_url)}" style="color:#235165;text-decoration:none">{position}. {html.escape(title)}</a></h2>',
                     f'<p style="margin:0 0 8px;color:#434343;line-height:1.55">{html.escape(interpretation)}</p>',
-                    f'<p style="margin:0;color:#151515;line-height:1.55"><strong>Next:</strong> {html.escape(next_step)}</p>',
+                    f'<p style="margin:0;color:#151515;line-height:1.55"><strong>{html.escape(detail_label)}:</strong> {html.escape(next_step)}</p>',
                     "</li>",
                 ]
             )
@@ -503,7 +535,10 @@ def delivery_status_payload(
     settings: DeliverySettings | None = None,
 ) -> dict[str, Any]:
     resolved = settings or DeliverySettings.from_environment()
-    available = bool(payload.get("content_kind") == "investment_agent" and payload.get("available"))
+    available = bool(
+        payload.get("content_kind") in {"investment_agent", "engineering_agent"}
+        and payload.get("available")
+    )
     total_insight_count = len(list(payload.get("items") or [])) if available else 0
     channels = []
     for channel, label, pdf_delivery in (
@@ -538,12 +573,13 @@ def deliver_daily_brief(
     *,
     channel: DeliveryChannel,
     settings: DeliverySettings | None = None,
-    cache_root: Path = pdf_report.DEFAULT_CACHE_ROOT,
+    cache_root: Path | None = None,
     slack_transport: httpx.BaseTransport | None = None,
     smtp_factory: Callable[..., Any] = smtplib.SMTP,
 ) -> dict[str, Any]:
     resolved = settings or DeliverySettings.from_environment()
-    if payload.get("content_kind") != "investment_agent" or not payload.get("available"):
+    content_kind = payload.get("content_kind")
+    if content_kind not in {"investment_agent", "engineering_agent"} or not payload.get("available"):
         raise DeliveryNotConfigured(
             str(payload.get("reason") or "No complete Daily Brief is available for delivery.")
         )
@@ -555,7 +591,15 @@ def deliver_daily_brief(
         artifact = None
         pdf_delivery = "none"
     else:
-        artifact = pdf_report.get_or_create_report(payload, cache_root=cache_root)
+        renderer = (
+            pdf_report
+            if content_kind == "investment_agent"
+            else pdf_report_engineering
+        )
+        artifact = renderer.get_or_create_report(
+            payload,
+            cache_root=cache_root or renderer.DEFAULT_CACHE_ROOT,
+        )
         provider_id = _send_email(
             resolved,
             payload,

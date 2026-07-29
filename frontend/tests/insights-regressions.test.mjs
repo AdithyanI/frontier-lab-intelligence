@@ -168,6 +168,12 @@ test('Insights reuses the Feed week strip without explanatory reader clutter', (
   assert.match(appStyles, /\.insight-calendar \.feed-day:only-child \{ grid-column: 7; \}/)
 })
 
+test('Insights header omits redundant cohort and connection summaries', () => {
+  assert.doesNotMatch(insightSource, /InvestmentAgentYield/)
+  assert.doesNotMatch(engineeringInsightSource, /EngineeringAgentYield/)
+  assert.doesNotMatch(appStyles, /\.insight-yield/)
+})
+
 test('Insights keeps status in the audit URL and exposes a compact suppression review switch', () => {
   assert.match(insightSource, /const status = parseStatus\(searchParams\.get\('status'\)\)/)
   assert.match(insightSource, /nextParams\.set\('status', nextStatus\)/)
@@ -239,7 +245,7 @@ test('Insights exposes guarded manual Slack and email delivery beside the PDF ac
   assert.match(insightSource, /\/api\/insights\/delivery\?audience=/)
   assert.match(insightSource, /fetch\('\/api\/insights\/delivery'/)
   assert.match(insightSource, /All \$\{status\.total_insight_count\} Insights \+ brief link/)
-  assert.match(insightSource, /with what changed and the company directions/)
+  assert.match(insightSource, /'the company directions' : 'the engineering surfaces'/)
   assert.match(insightSource, /Send is available for complete kept daily briefs\./)
   assert.match(insightSource, /<DailyBriefActions/)
   assert.doesNotMatch(insightSource, /Send is only available for the Investment brief\./)

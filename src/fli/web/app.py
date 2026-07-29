@@ -44,6 +44,7 @@ from fli.insights import investment_agent_runs as investment_agent_store
 from fli.insights import engineering_agent_runs as engineering_agent_store
 from fli.insights import company_context
 from fli.insights import pdf_report
+from fli.insights import pdf_report_engineering
 from fli.network import view as rankings_store
 from fli.registry import channels
 from fli.registry import classification as entity_kinds
@@ -635,12 +636,6 @@ def _investment_agent_provenance(
     }
 
 
-_AI_ENGINEERING_REASON = (
-    "The AI Engineering audience has no PDF or delivery path on the current "
-    "Insight path yet."
-)
-
-
 def _engineering_insights(*, day: str | None, status: str) -> dict[str, Any]:
     """One complete published AI Engineering cohort with owned provenance."""
     payload = engineering_agent_store.insights_payload(day=day, status=status)
@@ -691,15 +686,18 @@ def insight_report_pdf(
     insight_date: calendar_date | None = Query(None, alias="date"),
     audience: Literal["investment", "ai_engineering"] = "investment",
 ) -> Response:
-    """Download one cached PDF from the published daily Investment cohort."""
-    if audience != "investment":
-        raise HTTPException(status_code=404, detail=_AI_ENGINEERING_REASON)
+    """Download one cached PDF from the published daily audience cohort."""
     day = insight_date.isoformat() if insight_date else None
-    payload = _investment_insights(day=day, status="kept")
+    if audience == "investment":
+        payload = _investment_insights(day=day, status="kept")
+        renderer = pdf_report
+    else:
+        payload = _engineering_insights(day=day, status="kept")
+        renderer = pdf_report_engineering
     try:
-        artifact = pdf_report.get_or_create_report(
+        artifact = renderer.get_or_create_report(
             payload,
-            cache_root=pdf_report.DEFAULT_CACHE_ROOT,
+            cache_root=renderer.DEFAULT_CACHE_ROOT,
         )
     except pdf_report.ReportUnavailable as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
@@ -728,9 +726,11 @@ def insight_delivery_status(
     audience: Literal["investment", "ai_engineering"] = "investment",
 ) -> JSONResponse:
     """Describe safe, configured manual delivery choices for one complete brief."""
-    if audience != "investment":
-        raise HTTPException(status_code=404, detail=_AI_ENGINEERING_REASON)
-    payload = _investment_insights(day=insight_date.isoformat(), status="kept")
+    payload = (
+        _investment_insights(day=insight_date.isoformat(), status="kept")
+        if audience == "investment"
+        else _engineering_insights(day=insight_date.isoformat(), status="kept")
+    )
     settings = None
     if _read_only_mode():
         settings = brief_delivery.DeliverySettings.from_environment(
@@ -753,10 +753,10 @@ def send_insight_delivery(
     """Send one explicitly confirmed Daily Brief through a configured adapter."""
     _require_writable()
     _require_same_origin_delivery(request)
-    if delivery_request.audience != "investment":
-        raise HTTPException(status_code=404, detail=_AI_ENGINEERING_REASON)
-    payload = _investment_insights(
-        day=delivery_request.date.isoformat(), status="kept"
+    payload = (
+        _investment_insights(day=delivery_request.date.isoformat(), status="kept")
+        if delivery_request.audience == "investment"
+        else _engineering_insights(day=delivery_request.date.isoformat(), status="kept")
     )
     try:
         result = brief_delivery.deliver_daily_brief(

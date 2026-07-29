@@ -56,6 +56,33 @@ def _payload() -> dict:
     return payload
 
 
+def _engineering_payload() -> dict:
+    return {
+        "content_kind": "engineering_agent",
+        "available": True,
+        "reason": None,
+        "date": DAY,
+        "requested_date": DAY,
+        "audience": "ai_engineering",
+        "run": {"result_sha256": "b" * 64},
+        "items": [
+            {
+                "daily_rank": 4,
+                "headline": "Layered checks make costly research claims auditable",
+                "what_changed": "A research agent combined formal proof and reduced-system tests.",
+                "lands": [
+                    {
+                        "surface_id": "EVAL",
+                        "surface_name": "Evaluation",
+                        "why": "Use layered checks when an end-to-end experiment is too expensive.",
+                    }
+                ],
+                "provenance": {"primary_event_id": "engineering-event"},
+            }
+        ],
+    }
+
+
 def _settings() -> daily_brief.DeliverySettings:
     return daily_brief.DeliverySettings(
         slack_webhook_url="https://hooks.slack.test/services/redacted",
@@ -151,6 +178,21 @@ def test_slack_uses_brief_positions_instead_of_feed_ranks():
     assert "*25. Insight 4*" not in rendered
 
 
+def test_engineering_slack_is_simple_and_lists_surfaces():
+    rendered = json.dumps(
+        daily_brief._slack_payload(_engineering_payload()),
+        ensure_ascii=False,
+    )
+
+    assert "AI Engineering brief" in rendered
+    assert "*1. Layered checks make costly research claims auditable*" in rendered
+    assert "What changed" in rendered
+    assert "Engineering surfaces" in rendered
+    assert "Evaluation (EVAL)" in rendered
+    assert "How this reaches companies" not in rendered
+    assert "Download PDF" not in rendered
+
+
 def test_email_delivery_attaches_pdf_and_contains_only_top_five(tmp_path):
     sent: list[EmailMessage] = []
 
@@ -195,6 +237,84 @@ def test_email_delivery_attaches_pdf_and_contains_only_top_five(tmp_path):
     assert len(attachments) == 1
     assert attachments[0].get_content_type() == "application/pdf"
     assert attachments[0].get_filename() == "fli-daily-brief-2026-07-17-investment.pdf"
+
+
+def test_email_uses_brief_positions_for_both_audiences():
+    investment = _payload()
+    for item, feed_rank in zip(
+        investment["items"],
+        (4, 12, 24, 25, 30, 31),
+        strict=True,
+    ):
+        item["daily_rank"] = feed_rank
+
+    _, investment_plain, investment_html = daily_brief._email_content(investment)
+    _, engineering_plain, engineering_html = daily_brief._email_content(
+        _engineering_payload()
+    )
+
+    assert "1. Insight 1" in investment_plain
+    assert "2. Insight 2" in investment_plain
+    assert "12. Insight 2" not in investment_plain
+    assert ">1. Insight 1</a>" in investment_html
+    assert "1. Layered checks make costly research claims auditable" in engineering_plain
+    assert ">1. Layered checks make costly research claims auditable</a>" in engineering_html
+
+
+def test_engineering_email_uses_the_engineering_pdf_renderer(tmp_path, monkeypatch):
+    artifact = _artifact(tmp_path)
+    captured: list[tuple[dict, Path]] = []
+
+    def engineering_report(payload, *, cache_root):
+        captured.append((payload, cache_root))
+        return artifact
+
+    class FakeSMTP:
+        def __init__(self, *_args, **_kwargs):
+            pass
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_args):
+            return False
+
+        def ehlo(self):
+            return None
+
+        def starttls(self, **_kwargs):
+            return None
+
+        def login(self, *_args):
+            return None
+
+        def send_message(self, *_args, **_kwargs):
+            return None
+
+    monkeypatch.setattr(
+        daily_brief.pdf_report_engineering,
+        "get_or_create_report",
+        engineering_report,
+    )
+    monkeypatch.setattr(
+        daily_brief.pdf_report_engineering,
+        "DEFAULT_CACHE_ROOT",
+        tmp_path / "engineering-cache",
+    )
+
+    result = daily_brief.deliver_daily_brief(
+        _engineering_payload(),
+        channel="email",
+        settings=_settings(),
+        smtp_factory=FakeSMTP,
+    )
+
+    assert result["status"] == "sent"
+    assert result["audience"] == "ai_engineering"
+    assert result["pdf_delivery"] == "attachment"
+    assert captured == [
+        (_engineering_payload(), tmp_path / "engineering-cache")
+    ]
 
 
 def test_status_discloses_labels_but_not_delivery_secrets():
@@ -262,6 +382,54 @@ def test_delivery_api_exposes_status_and_forwards_explicit_confirmation(monkeypa
     assert response.json()["status"] == "sent"
     assert cross_site.status_code == 403
     assert calls == [{"channel": "slack"}]
+
+
+def test_delivery_api_supports_engineering_status_and_send(monkeypatch):
+    payload = _engineering_payload()
+    monkeypatch.setattr(
+        "fli.web.app._engineering_insights",
+        lambda **_kwargs: payload,
+    )
+    monkeypatch.setattr(
+        "fli.web.app.brief_delivery.DeliverySettings.from_environment",
+        lambda: _settings(),
+    )
+    calls: list[dict] = []
+
+    def deliver(_payload, **kwargs):
+        calls.append({"payload": _payload, **kwargs})
+        return {
+            "schema_version": daily_brief.SCHEMA_VERSION,
+            "status": "sent",
+            "channel": kwargs["channel"],
+            "destination": "#frontier-lab-intelligence",
+            "audience": "ai_engineering",
+            "date": DAY,
+            "insight_count": 1,
+            "pdf_delivery": "none",
+            "pdf_filename": None,
+            "report_version": None,
+            "delivery_id": "delivery-id",
+            "provider_id": "provider-id",
+            "sent_at": "2026-07-19T12:00:00+00:00",
+        }
+
+    monkeypatch.setattr("fli.web.app.brief_delivery.deliver_daily_brief", deliver)
+
+    status = CLIENT.get(
+        f"/api/insights/delivery?audience=ai_engineering&date={DAY}"
+    )
+    response = CLIENT.post(
+        "/api/insights/delivery",
+        headers={"Origin": "http://testserver"},
+        json={"audience": "ai_engineering", "date": DAY, "channel": "slack"},
+    )
+
+    assert status.status_code == 200
+    assert status.json()["available"] is True
+    assert status.json()["total_insight_count"] == 1
+    assert response.status_code == 200
+    assert calls == [{"payload": payload, "channel": "slack"}]
 
 
 def test_delivery_is_unconfigured_and_blocked_in_read_only_mode(monkeypatch):

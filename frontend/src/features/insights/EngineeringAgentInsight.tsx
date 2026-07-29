@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom'
 import CopyEventId from '../../shared/components/CopyEventId'
 import { decodeTextEntities } from '../../shared/textEntities'
 import type {
-  EngineeringAgentInsightsResponse,
   EngineeringAgentItem,
 } from '../../shared/api/insights'
 
@@ -113,26 +112,5 @@ export function EngineeringAgentInsight({ item }: { item: EngineeringAgentItem }
         </details>
       </div>
     </article>
-  )
-}
-
-export function EngineeringAgentYield({
-  data,
-}: {
-  data: EngineeringAgentInsightsResponse
-}) {
-  const run = data.run
-  if (!run) return null
-  return (
-    <p className="insight-yield">
-      <span className="insight-yield-part">
-        <strong>{run.surfaced_development_count}</strong> of {run.development_count}{' '}
-        Developments surfaced
-      </span>
-      <span className="insight-yield-sep" aria-hidden="true">·</span>
-      <span className="insight-yield-part">
-        <strong>{run.surface_landing_count}</strong> surface landings
-      </span>
-    </p>
   )
 }

@@ -282,7 +282,30 @@ def test_report_api_downloads_and_revalidates_cached_pdf(tmp_path, monkeypatch):
     assert conditional.content == b""
 
 
-def test_report_api_refuses_an_audience_without_a_current_run():
+def test_report_api_downloads_the_current_engineering_brief(tmp_path, monkeypatch):
+    pdf_path = tmp_path / "engineering.pdf"
+    pdf_path.write_bytes(b"%PDF-1.4\n%%EOF\n")
+    monkeypatch.setattr(
+        "fli.web.app._engineering_insights",
+        lambda **_: {"content_kind": "engineering_agent", "available": True},
+    )
+    monkeypatch.setattr(
+        "fli.web.app.pdf_report_engineering.get_or_create_report",
+        lambda *_args, **_kwargs: pdf_report.ReportArtifact(
+            path=pdf_path,
+            filename="fli-daily-brief-2026-07-17-ai-engineering.pdf",
+            etag="b" * 64,
+            cache_hit=False,
+            report_version="engineering-agent-pdf-v1",
+        ),
+    )
+
     response = CLIENT.get(f"/api/insights/report.pdf?audience=ai_engineering&date={DAY}")
 
-    assert response.status_code == 404
+    assert response.status_code == 200
+    assert response.headers["content-type"] == "application/pdf"
+    assert (
+        'filename="fli-daily-brief-2026-07-17-ai-engineering.pdf"'
+        in response.headers["content-disposition"]
+    )
+    assert response.headers["x-fli-report-version"] == "engineering-agent-pdf-v1"

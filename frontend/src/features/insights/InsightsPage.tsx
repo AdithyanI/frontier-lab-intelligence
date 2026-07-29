@@ -26,10 +26,7 @@ import {
 } from '../../shared/date/dateWindow'
 import { decodeTextEntities } from '../../shared/textEntities'
 import { useAuditDate } from '../../shared/date/auditDateStore'
-import {
-  EngineeringAgentInsight,
-  EngineeringAgentYield,
-} from './EngineeringAgentInsight'
+import { EngineeringAgentInsight } from './EngineeringAgentInsight'
 
 const DEFAULT_AUDIENCE: InsightAudience = 'investment'
 const DEFAULT_STATUS: InsightStatus = 'kept'
@@ -374,7 +371,9 @@ function DailyBriefDelivery({
         disabled={disabled}
         aria-expanded={open}
         aria-controls={open ? panelId : undefined}
-        title={disabled ? 'Send is available for complete kept daily briefs.' : 'Send this Daily Brief'}
+        title={disabled
+          ? 'Send is available for complete kept daily briefs.'
+          : 'Send this Daily Brief'}
         ref={buttonRef}
       >
         <svg aria-hidden="true" viewBox="0 0 20 20">
@@ -448,7 +447,7 @@ function DailyBriefDelivery({
             <div className="insight-delivery-confirm">
               {selected === 'slack' ? (
                 <p>
-                  Send all {status.total_insight_count} Insights, with what changed and the company directions, to <strong>{selectedStatus.destination}</strong>.
+                  Send all {status.total_insight_count} Insights, with what changed and {audience === 'investment' ? 'the company directions' : 'the engineering surfaces'}, to <strong>{selectedStatus.destination}</strong>.
                   The message will link to the full brief.
                 </p>
               ) : (
@@ -497,18 +496,20 @@ function DailyBriefDelivery({
 function DailyBriefActions({
   audience,
   day,
-  available,
+  pdfAvailable,
+  deliveryAvailable,
   loading,
 }: {
   audience: InsightAudience
   day: string
-  available: boolean
+  pdfAvailable: boolean
+  deliveryAvailable: boolean
   loading: boolean
 }) {
   return (
     <div className="insight-brief-actions">
-      <DailyBriefDelivery audience={audience} day={day} available={available} loading={loading} />
-      <DailyBriefDownload audience={audience} day={day} available={available} loading={loading} />
+      <DailyBriefDelivery audience={audience} day={day} available={deliveryAvailable} loading={loading} />
+      <DailyBriefDownload audience={audience} day={day} available={pdfAvailable} loading={loading} />
     </div>
   )
 }
@@ -809,26 +810,6 @@ function InvestmentAgentInsight({
   )
 }
 
-function InvestmentAgentYield({
-  data,
-}: {
-  data: InvestmentAgentInsightsResponse
-}) {
-  const run = data.run
-  if (!run) return null
-  return (
-    <p className="insight-yield">
-      <span className="insight-yield-part">
-        <strong>{run.surfaced_development_count}</strong> Development surfaced
-      </span>
-      <span className="insight-yield-sep" aria-hidden="true">·</span>
-      <span className="insight-yield-part">
-        <strong>{run.company_connection_count}</strong> company connections
-      </span>
-    </p>
-  )
-}
-
 export default function Insights() {
   const [searchParams, setSearchParams] = useSearchParams()
   const { rememberDate } = useAuditDate()
@@ -1033,17 +1014,14 @@ export default function Insights() {
         <div className="insight-page-intro">
           <h1 className="page-title">{copy.title}</h1>
           <p className="page-sub">{copy.subtitle}</p>
-          {investmentAgentData?.available && investmentAgentData.items.length > 0 && (
-            <InvestmentAgentYield data={investmentAgentData} />
-          )}
-          {engineeringAgentData?.available && engineeringAgentData.items.length > 0 && (
-            <EngineeringAgentYield data={engineeringAgentData} />
-          )}
         </div>
         <DailyBriefActions
           audience={audience}
           day={selectedDate}
-          available={audience === 'investment'
+          pdfAvailable={audience === 'investment'
+            ? Boolean(investmentAgentData?.available)
+            : Boolean(engineeringAgentData?.available)}
+          deliveryAvailable={audience === 'investment'
             ? Boolean(investmentAgentData?.available)
             : Boolean(engineeringAgentData?.available)}
           loading={datesLoading || dataLoading}
