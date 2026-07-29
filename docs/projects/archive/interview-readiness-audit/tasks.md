@@ -7,7 +7,8 @@ that every original interview-preparation task was completed. The audit's
 measurements, defenses, and unfinished ideas remain preserved here as
 historical reference, while active implementation moves to the narrower
 `auditable-development-insights` project against the current Development and
-Luna-routing lineage.
+Luna-routing lineage. That successor is now also preserved under
+`docs/projects/archive/auditable-development-insights/`.
 
 ## Goal
 
@@ -411,8 +412,8 @@ corpus, so the demo is unaffected.**
 ## Backlog / Remaining Work
 
 - All remaining work in this audit is explicitly descoped here. Relevant
-  Development-to-company and Insight-contract work moves to
-  `docs/projects/auditable-development-insights/`; interview rehearsal,
+  Development-to-company and Insight-contract work moved to
+  `docs/projects/archive/auditable-development-insights/`; interview rehearsal,
   source-expansion, recall-below-rank-100, cross-day novelty, stability, and
   broader citation verification remain historical follow-ups in
   `resources/findings.md`.

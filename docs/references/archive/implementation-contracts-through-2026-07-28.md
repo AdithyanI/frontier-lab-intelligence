@@ -482,9 +482,9 @@ Active derived storage uses Event-native names throughout:
 `semantic_snapshot_sha256`. `artifact-store-v2`, new
 `daily-intelligence-workspace-v3` workspaces, and
 `daily-intelligence-store-v4` editorial rows own that contract.
-`scripts/migrate-event-storage.py` upgrades every published store in place and
-emits a JSON audit result; normal application reads accept only the migrated
-schema and do not carry dual-read fallbacks. Frozen run IDs,
+The now-removed `scripts/migrate-event-storage.py` upgraded every published
+store in place and emitted a JSON audit result; normal application reads
+accept only the migrated schema and do not carry dual-read fallbacks. Frozen run IDs,
 workspace files, and build-log records keep their original values and hashes as
 immutable provenance rather than being rewritten.
 
