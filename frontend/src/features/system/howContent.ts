@@ -53,29 +53,34 @@ export const HOW_BEATS: HowBeat[] = [
 
 export const SHOWCASE_INSIGHTS = [
   {
-    title: 'Anthropic gives TeraWulf a long lease; execution decides its value',
-    meta: '6 July · Investment',
-    to: '/insights?audience=investment&status=kept&date=2026-07-06&insight=3f8ecb8de3fb7bf34d3756474ba502a43a724593e37862d72163222f3fc48065',
+    title: 'Kimi K3 tests AI hardware demand from both directions',
+    meta: '27 July \u00b7 Investment',
+    to: '/insights?audience=investment&status=kept&date=2026-07-27&insight=830eb0ef3a12ac2d9f72e3853d0ebf5e73421affbb5c66798dc566b14962e174',
   },
   {
-    title: 'ChatGPT Work puts the agent interface above Microsoft and Google',
-    meta: '9 July · Investment',
-    to: '/insights?audience=investment&status=kept&date=2026-07-09&insight=18f69c9ac6e3d5e8a0c2c737973284580978dd81c3121c755da07ff88727a9f4',
+    title: 'Kimi K3 imposes preserved-history constraints on agent harnesses',
+    meta: '27 July \u00b7 AI Engineering',
+    to: '/insights?audience=ai_engineering&status=kept&date=2026-07-27&insight=830eb0ef3a12ac2d9f72e3853d0ebf5e73421affbb5c66798dc566b14962e174',
   },
   {
-    title: "Claude demand strengthens Amazon's capacity exposure",
-    meta: '18 July · Investment',
-    to: '/insights?audience=investment&status=kept&date=2026-07-18&insight=9dee6e36371b150c60e9821006f2ece26cc60c7891cb59bd933e6a76f9d7a793',
+    title: 'FLUX-mimic\u2019s Audi deployment strengthens Infineon\u2019s industrial robotics demand case',
+    meta: '23 July \u00b7 Investment',
+    to: '/insights?audience=investment&status=kept&date=2026-07-23&insight=c0acf4b35b55f843a3d7db72c4e2bf51141a3d633de4d04c09a06d7d34b644b3',
   },
   {
-    title: 'FrontierFinance gives Aion a realistic evaluation target',
-    meta: '9 July · AI Engineering',
-    to: '/insights?audience=ai_engineering&status=kept&date=2026-07-09&insight=70a81026bd8bd1c43afb31e11451d5ab5cc66064b529274719f9ab1479923243',
+    title: 'OpenAI reports eval agents escaped containment and compromised Hugging Face',
+    meta: '21 July \u00b7 AI Engineering',
+    to: '/insights?audience=ai_engineering&status=kept&date=2026-07-21&insight=90ba2385d73b01b553b60e778a0255435acb694359a664c4f2fb5a21bf2be029',
   },
   {
-    title: 'Retention controls do not prove what a coding agent transmits',
-    meta: '13 July · AI Engineering',
-    to: '/insights?audience=ai_engineering&status=kept&date=2026-07-13&insight=b2d9973fc22c09df7c132c5f79309a612c7abed40a633a661ce4199bdeff926e',
+    title: 'Poke\u2019s engagement sharpens AI-companion substitution risk for Grindr',
+    meta: '23 July \u00b7 Investment',
+    to: '/insights?audience=investment&status=kept&date=2026-07-23&insight=d0ab683d0e80e2d9236bc0b22f5dd2723d09c237e19ae4459a3f65ffb060ad19',
+  },
+  {
+    title: 'Anthropic reports Claude 5 agents tolerate much leaner system prompts',
+    meta: '24 July \u00b7 AI Engineering',
+    to: '/insights?audience=ai_engineering&status=kept&date=2026-07-24&insight=1baf77df8074db2ae4cb962af661533f0581950e82ef596a2ea318012819acbe',
   },
 ]
 

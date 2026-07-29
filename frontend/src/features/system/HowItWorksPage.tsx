@@ -80,10 +80,12 @@ export default function HowItWorks() {
       />
 
       <section className="how-showcase" aria-labelledby="how-showcase-title">
-        <h3 id="how-showcase-title">Five Insights I would hand to the teams</h3>
+        <h3 id="how-showcase-title">Six Insights I would hand to the teams</h3>
         <p>
-          These are five examples from the daily briefs. Each link opens the
-          exact Insight with its sources and reasoning.
+          Three for the investment team, three for the engineering team. Each
+          link opens the exact Insight with its sources and reasoning. The
+          first two are the same Development, ranked first on the same day for
+          both audiences, read two different ways.
         </p>
         <ol>
           {SHOWCASE_INSIGHTS.map((insight) => (

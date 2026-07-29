@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import litellmRequestLog from '../../assets/litellm-request-log.webp'
 import { EvidenceInputMap } from '../architecture/ArchitecturePage'
 import NetworkRankFigure from '../architecture/NetworkRankFigure'
-import { CollectFigure, CollectionCostFigure, CostFigure, JudgeFigure, PublishFigure, RankFigure, RankLayersFigure, SourceChoiceFigure, TrustedSetFigure } from './DecisionFigures'
+import { AgentLoopFigure, CollectFigure, CollectionCostFigure, CostFigure, JudgeFigure, PublishFigure, RankFigure, RankLayersFigure, SourceChoiceFigure, TrustedSetFigure } from './DecisionFigures'
 import { VIDEO_WALKTHROUGH_URL } from './howContent'
 
 /* Decision figures open fullscreen on click, so they can be presented
@@ -339,9 +339,21 @@ export default function HowNarrative({
             The agent screens all 37 companies in BIT's disclosed portfolio
             from a single compact card set. It can then open a full research
             memo on any of them &mdash; but the tool call requires it to state
-            the mechanism, the affected operating driver, and why it needs the
-            memo <em>before</em> the file opens. It has to commit to a claim
-            first.
+            the mechanism, the standing bet it thinks is firing, and why it
+            needs the memo <em>before</em> the file opens. It has to commit to
+            a claim first.
+          </p>
+          <FigureFrame>
+            <AgentLoopFigure />
+          </FigureFrame>
+          <p>
+            That ordering is the whole design. Handing the model 37 research
+            memos would cost about six times more per run and let it write a
+            plausible story around whichever company it happened to notice.
+            Making it argue first, and only then opening the file, means the
+            memo is evidence tested against a claim rather than material to
+            build one from. In practice it opens one to three memos, and the
+            loop closes in a single round.
           </p>
           <p>
             Every memo it opens must end in one of two places: the company
