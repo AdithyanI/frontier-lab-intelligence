@@ -411,36 +411,25 @@ def _email_content(payload: dict[str, Any]) -> tuple[str, str, str]:
         "",
     ]
     html_items: list[str] = []
+    is_investment = payload.get("content_kind") == "investment_agent"
     for position, item in enumerate(items, start=1):
         title = _plain(_title(item))
         interpretation = _plain(_summary(item))
         next_step = _plain(_next_check(item))
-        detail_label = (
-            "Company read-through"
-            if payload.get("content_kind") == "investment_agent"
-            else "Engineering relevance"
-        )
         event_url = _event_url(item, day)
-        plain_lines.extend(
-            [
-                f"{position}. {title}",
-                interpretation,
-                f"{detail_label}: {next_step}",
-                f"Evidence: {event_url}",
-                "",
-            ]
-        )
-        html_items.append(
-            "".join(
-                [
-                    '<li style="margin:0 0 24px;padding:0 0 20px;border-bottom:1px solid #e4e4e2">',
-                    f'<h2 style="margin:0 0 8px;font-size:18px;line-height:1.3"><a href="{html.escape(event_url)}" style="color:#235165;text-decoration:none">{position}. {html.escape(title)}</a></h2>',
-                    f'<p style="margin:0 0 8px;color:#434343;line-height:1.55">{html.escape(interpretation)}</p>',
-                    f'<p style="margin:0;color:#151515;line-height:1.55"><strong>{html.escape(detail_label)}:</strong> {html.escape(next_step)}</p>',
-                    "</li>",
-                ]
+        plain_item = [f"{position}. {title}", interpretation]
+        html_item = [
+            '<li style="margin:0 0 24px;padding:0 0 20px;border-bottom:1px solid #e4e4e2">',
+            f'<h2 style="margin:0 0 8px;font-size:18px;line-height:1.3"><a href="{html.escape(event_url)}" style="color:#235165;text-decoration:none">{position}. {html.escape(title)}</a></h2>',
+            f'<p style="margin:0 0 8px;color:#434343;line-height:1.55">{html.escape(interpretation)}</p>',
+        ]
+        if is_investment:
+            plain_item.append(f"Company read-through: {next_step}")
+            html_item.append(
+                f'<p style="margin:0;color:#151515;line-height:1.55"><strong>Company read-through:</strong> {html.escape(next_step)}</p>'
             )
-        )
+        plain_lines.extend([*plain_item, f"Evidence: {event_url}", ""])
+        html_items.append("".join([*html_item, "</li>"]))
     plain_lines.extend([f"Open brief: {brief_url}", f"Download PDF: {report_url}"])
     html_body = "".join(
         [

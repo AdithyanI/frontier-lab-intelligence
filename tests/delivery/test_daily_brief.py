@@ -259,6 +259,8 @@ def test_email_uses_brief_positions_for_both_audiences():
     assert ">1. Insight 1</a>" in investment_html
     assert "1. Layered checks make costly research claims auditable" in engineering_plain
     assert ">1. Layered checks make costly research claims auditable</a>" in engineering_html
+    assert "Engineering relevance" not in engineering_plain
+    assert "Engineering relevance" not in engineering_html
 
 
 def test_engineering_email_uses_the_engineering_pdf_renderer(tmp_path, monkeypatch):

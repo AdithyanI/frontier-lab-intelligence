@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import sqlite3
 from typing import Any
 
 from fli.evidence.artifacts import store as artifacts
@@ -11,6 +12,13 @@ from fli.web import developments as development_store
 
 DEFAULT_ARTIFACT_DB = artifacts.DEFAULT_DB
 DEFAULT_REPO_ROOT = artifacts.REPO_ROOT
+
+
+def _open_readonly(path: Path) -> sqlite3.Connection:
+    """Open the catalog without running writer schema or WAL setup."""
+    conn = sqlite3.connect(f"file:{path.resolve().as_posix()}?mode=ro", uri=True)
+    conn.row_factory = sqlite3.Row
+    return conn
 
 
 def _fetch_state(status: str | None) -> str:
@@ -92,7 +100,7 @@ def artifact_text_payload(
             "reason": "No artifact catalog has been materialized yet.",
         }
 
-    conn = artifacts.connect(path)
+    conn = _open_readonly(path)
     try:
         row = conn.execute(
             """SELECT artifact.artifact_id, artifact.title,
@@ -160,7 +168,7 @@ def artifact_dates_payload(
             "dates": [],
         }
 
-    conn = artifacts.connect(path)
+    conn = _open_readonly(path)
     try:
         rows = conn.execute(
             """SELECT substr(source_published_at, 1, 10) AS day,
@@ -207,7 +215,7 @@ def artifacts_payload(
             offset=offset,
         )
 
-    conn = artifacts.connect(path)
+    conn = _open_readonly(path)
     try:
         selected_day = day or conn.execute(
             "SELECT MAX(substr(source_published_at, 1, 10)) "

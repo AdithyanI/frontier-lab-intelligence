@@ -307,6 +307,20 @@ def test_artifact_dates_are_source_dates_with_distinct_counts(tmp_path, monkeypa
     }
 
 
+def test_artifact_reads_do_not_mutate_the_catalog_file(tmp_path, monkeypatch):
+    db = tmp_path / "artifacts.db"
+    _artifact_fixture(db)
+    monkeypatch.setattr(artifact_store, "DEFAULT_ARTIFACT_DB", db)
+    wal = tmp_path / "artifacts.db-wal"
+    before_version = (db.stat().st_mtime_ns, db.stat().st_size)
+
+    assert client.get("/api/artifacts/dates").status_code == 200
+    assert client.get("/api/artifacts?date=2026-07-11&limit=20").status_code == 200
+
+    assert (db.stat().st_mtime_ns, db.stat().st_size) == before_version
+    assert not wal.exists() or wal.stat().st_size == 0
+
+
 def test_artifacts_api_filters_exact_source_day_and_search(tmp_path, monkeypatch):
     db = tmp_path / "artifacts.db"
     _artifact_fixture(db)
