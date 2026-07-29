@@ -321,6 +321,49 @@ def _embedded(tweet: dict[str, Any], relation: str) -> dict[str, Any] | None:
     return None
 
 
+def media_types(tweet: dict[str, Any]) -> tuple[str, ...]:
+    """Return native media types carried by one X post payload.
+
+    This is intentionally a structural check over provider metadata, not an
+    inference from post prose. Embedded quote and retweet payloads are included
+    because their media is visible as part of the supplied post.
+    """
+    detected: set[str] = set()
+
+    def visit(value: Any) -> None:
+        if isinstance(value, dict):
+            for entities_key in ("extendedEntities", "extended_entities"):
+                entities = value.get(entities_key)
+                if not isinstance(entities, dict):
+                    continue
+                media = entities.get("media")
+                if not isinstance(media, list):
+                    continue
+                for item in media:
+                    if not isinstance(item, dict):
+                        continue
+                    media_type = str(item.get("type") or "").strip().lower()
+                    if media_type == "image":
+                        media_type = "photo"
+                    if media_type in {"photo", "video", "animated_gif", "audio"}:
+                        detected.add(media_type)
+
+            for child in value.values():
+                visit(child)
+            return
+        if isinstance(value, list):
+            for child in value:
+                visit(child)
+            return
+        if isinstance(value, str):
+            lowered = value.lower()
+            if "/i/spaces/" in lowered or "/i/broadcasts/" in lowered:
+                detected.add("audio")
+
+    visit(tweet)
+    return tuple(sorted(detected))
+
+
 def _insert_post(
     conn: sqlite3.Connection,
     run_id: str,

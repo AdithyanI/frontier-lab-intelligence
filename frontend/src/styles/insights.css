@@ -969,6 +969,11 @@
   gap: 5px;
 }
 
+.investment-agent-process-detail {
+  display: grid;
+  gap: 14px;
+}
+
 .investment-agent-process-company strong {
   font-size: 12.5px;
 }

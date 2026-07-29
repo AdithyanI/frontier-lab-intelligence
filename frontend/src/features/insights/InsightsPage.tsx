@@ -688,9 +688,15 @@ function InvestmentAgentProcess({ item }: { item: InvestmentAgentItem }) {
                 <strong>{item.company_names[call.arguments.ticker] ?? call.arguments.ticker}</strong>
                 <span className="mono">{call.arguments.ticker} · {call.arguments.connection_type}</span>
               </div>
-              <div>
-                <h4 className="mono">Why its memo was opened</h4>
-                <p>{decodeTextEntities(call.arguments.why_memo_is_needed)}</p>
+              <div className="investment-agent-process-detail">
+                <div>
+                  <h4 className="mono">The connection it claimed</h4>
+                  <p>{decodeTextEntities(call.arguments.mechanism)}</p>
+                </div>
+                <div>
+                  <h4 className="mono">Why its memo was opened</h4>
+                  <p>{decodeTextEntities(call.arguments.why_memo_is_needed)}</p>
+                </div>
               </div>
             </li>
           ))}

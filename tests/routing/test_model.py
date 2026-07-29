@@ -203,6 +203,52 @@ def test_evidence_gate_marks_unavailable_link_or_media_evidence():
 
 
 @pytest.mark.parametrize(
+    ("media_types", "expected_label"),
+    [
+        (("photo",), "photo"),
+        (("video",), "video"),
+        (("animated_gif",), "animated gif"),
+        (("audio",), "audio"),
+    ],
+)
+def test_evidence_gate_skips_any_packet_with_unread_media(
+    media_types, expected_label
+):
+    packet = make_packet()
+    packet = replace(
+        packet,
+        sources=(
+            replace(
+                packet.sources[0],
+                text="This post also contains enough prose to route on its own. " * 8,
+                media_types=media_types,
+            ),
+            *packet.sources[1:],
+        ),
+    )
+
+    decision = routing_model.deterministic_evidence_gate(packet)
+
+    assert decision is not None
+    assert decision.code == "unsupported_media"
+    assert decision.reason.startswith("Not evaluated —")
+    assert expected_label in decision.reason
+
+
+def test_media_types_are_bound_into_the_evidence_hash():
+    packet = make_packet()
+    with_photo = replace(
+        packet,
+        sources=(
+            replace(packet.sources[0], media_types=("photo",)),
+            *packet.sources[1:],
+        ),
+    )
+
+    assert with_photo.evidence_sha256 != packet.evidence_sha256
+
+
+@pytest.mark.parametrize(
     "sources",
     [
         (

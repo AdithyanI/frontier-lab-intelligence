@@ -23,7 +23,7 @@ from fli import llm_responses
 
 PROMPT_VERSION = "audience-routing-v15"
 SCHEMA_VERSION = "audience-routing-output-v1"
-EVIDENCE_GATE_VERSION = "deterministic-evidence-gate-v1"
+EVIDENCE_GATE_VERSION = "deterministic-evidence-gate-v2"
 DEFAULT_MODEL = "gpt-5.6-luna"
 DEFAULT_REASONING_EFFORT = "medium"
 MAX_OUTPUT_TOKENS = 32_768
@@ -99,6 +99,7 @@ class EvidenceSource:
     section_ordinal: int | None = None
     source_char_start: int | None = None
     source_char_end: int | None = None
+    media_types: tuple[str, ...] = ()
     # Insight-only temporal context. Deliberately excluded from the routing
     # evidence hash and serialized routing packet so existing runs remain
     # immutable and replayable.
@@ -138,6 +139,7 @@ class RoutingPacket:
                     "section_ordinal": source.section_ordinal,
                     "source_char_start": source.source_char_start,
                     "source_char_end": source.source_char_end,
+                    "media_types": list(source.media_types),
                 }
                 for source in self.sources
             ],
@@ -245,6 +247,25 @@ def deterministic_evidence_gate(
         for source in visible_sources
         if source.source_type == "artifact"
     ]
+    media_types = sorted(
+        {
+            media_type
+            for source in visible_sources
+            for media_type in source.media_types
+        }
+    )
+    if media_types:
+        readable_types = ", ".join(media_type.replace("_", " ") for media_type in media_types)
+        return EvidenceGateDecision(
+            code="unsupported_media",
+            reason=(
+                "Not evaluated — the Development includes media the system "
+                f"does not inspect yet ({readable_types})."
+            ),
+            substantive_word_count=sum(
+                substantive_word_count(source.text) for source in x_sources
+            ),
+        )
     if (
         len(visible_sources) != 1
         or len(x_sources) != 1

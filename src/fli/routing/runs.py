@@ -15,6 +15,7 @@ from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
+from fli.evidence import feed as signal_feed
 from fli.evidence.artifacts import store as artifacts
 from fli.registry import classification as entity_kinds
 from fli.routing import freshness
@@ -672,6 +673,7 @@ def _source_payload(source: routing_model.EvidenceSource) -> dict[str, Any]:
         "section_ordinal": source.section_ordinal,
         "source_char_start": source.source_char_start,
         "source_char_end": source.source_char_end,
+        "media_types": list(source.media_types),
     }
 
 
@@ -708,7 +710,46 @@ def _x_source(post: dict[str, Any], *, relation: str) -> routing_model.EvidenceS
         text=str(post.get("text") or ""),
         author=author,
         relation=relation,
+        media_types=tuple(post.get("media_types") or ()),
     )
+
+
+def _media_types_by_post(
+    *, feed_run_id: str, post_ids: set[str]
+) -> dict[str, tuple[str, ...]]:
+    """Load structured native-media metadata from the exact frozen Feed run."""
+    if not post_ids or not signal_feed.DEFAULT_FEED_DB.is_file():
+        return {}
+    conn = _open_readonly(signal_feed.DEFAULT_FEED_DB)
+    try:
+        run = conn.execute(
+            "SELECT 1 FROM feed_run WHERE run_id = ?",
+            (feed_run_id,),
+        ).fetchone()
+        if run is None:
+            return {}
+        result: dict[str, tuple[str, ...]] = {}
+        ordered = sorted(post_ids)
+        for offset in range(0, len(ordered), 500):
+            chunk = ordered[offset : offset + 500]
+            placeholders = ",".join("?" for _ in chunk)
+            rows = conn.execute(
+                f"""SELECT post_id, raw_json
+                    FROM feed_post
+                    WHERE run_id = ? AND post_id IN ({placeholders})""",
+                (feed_run_id, *chunk),
+            ).fetchall()
+            for row in rows:
+                try:
+                    raw = json.loads(str(row["raw_json"]))
+                except (TypeError, json.JSONDecodeError):
+                    continue
+                detected = signal_feed.media_types(raw)
+                if detected:
+                    result[str(row["post_id"])] = detected
+        return result
+    finally:
+        conn.close()
 
 
 def _artifact_sources(
@@ -728,6 +769,7 @@ def _artifact_sources(
                            candidate.source_external_id,
                            candidate.source_snapshot_sha256,
                            artifact.canonical_url, artifact.title,
+                           artifact.artifact_kind,
                            latest.text_snapshot_ref, latest.text_sha256
            FROM artifact_import_candidate AS candidate
            JOIN artifact_import_run AS import_run USING (import_run_id)
@@ -789,6 +831,11 @@ def _artifact_sources(
                     else "linked_artifact"
                 ),
                 source_sha256=str(row["text_sha256"] or _sha256(text)),
+                media_types=(
+                    ("video",)
+                    if str(row["artifact_kind"]) == "video"
+                    else ()
+                ),
             )
         )
     return sources
@@ -799,7 +846,9 @@ def packet_from_development(
     *,
     day: str,
     artifact_conn: sqlite3.Connection,
+    media_types_by_post: dict[str, tuple[str, ...]] | None = None,
 ) -> routing_model.RoutingPacket | None:
+    media_types_by_post = media_types_by_post or {}
     source_events = list(item.get("source_events") or [])
     source_events.sort(
         key=lambda source: (
@@ -819,6 +868,7 @@ def packet_from_development(
             "handle": str(root_author.get("handle") or ""),
             "text": str(root_item.get("text") or ""),
             "published_at": str(root_item.get("published_at") or ""),
+            "media_types": media_types_by_post.get(str(root_item["post_id"]), ()),
         }
         if (
             root["post_id"] not in seen_post_ids
@@ -852,6 +902,9 @@ def packet_from_development(
                 "handle": str(evidence_author.get("handle") or ""),
                 "text": str(evidence.get("text") or ""),
                 "published_at": str(evidence.get("published_at") or ""),
+                "media_types": media_types_by_post.get(
+                    str(evidence["post_id"]), ()
+                ),
             }
             if (
                 post["post_id"] not in seen_post_ids
@@ -960,6 +1013,21 @@ def freeze_run(
             + ", ".join(missing_hashes)
         )
 
+    source_post_ids = {
+        str(source["post"]["post_id"])
+        for item in items
+        for source in item.get("source_events") or []
+    } | {
+        str(evidence["post_id"])
+        for item in items
+        for source in item.get("source_events") or []
+        for evidence in source.get("evidence") or []
+    }
+    media_types_by_post = _media_types_by_post(
+        feed_run_id=str(source_run["feed_run_id"]),
+        post_ids=source_post_ids,
+    )
+
     artifact_conn = _open_readonly(artifact_db)
     try:
         frozen = [
@@ -970,6 +1038,7 @@ def freeze_run(
                     item,
                     day=day,
                     artifact_conn=artifact_conn,
+                    media_types_by_post=media_types_by_post,
                 )
             )
             is not None
@@ -1138,6 +1207,9 @@ def summary(conn: sqlite3.Connection) -> dict[str, Any]:
         f"{routing_model.EVIDENCE_GATE_VERSION}:"
         "unavailable_linked_or_media_evidence"
     )
+    unsupported_media_gate_model = (
+        f"{routing_model.EVIDENCE_GATE_VERSION}:unsupported_media"
+    )
     counts = dict(
         conn.execute(
             """SELECT COUNT(*) AS total,
@@ -1165,14 +1237,18 @@ def summary(conn: sqlite3.Connection) -> dict[str, Any]:
                           AS deterministic_short_text_filtered,
                       SUM(response_model = ?)
                           AS deterministic_unavailable_evidence_filtered,
-                      SUM(response_model IN (?, ?))
+                      SUM(response_model = ?)
+                          AS deterministic_unsupported_media_filtered,
+                      SUM(response_model IN (?, ?, ?))
                           AS deterministic_filtered
                FROM routing_item""",
             (
                 short_gate_model,
                 unavailable_gate_model,
+                unsupported_media_gate_model,
                 short_gate_model,
                 unavailable_gate_model,
+                unsupported_media_gate_model,
             ),
         ).fetchone()
     )

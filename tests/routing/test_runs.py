@@ -4,6 +4,7 @@ import sqlite3
 import pytest
 
 from fli.evidence.artifacts import store as artifacts
+from fli.routing import model as routing_model
 from fli.routing import runs as routing_runs
 from fli.scoring import attention
 from fli.web import developments as development_store
@@ -215,13 +216,49 @@ def test_freeze_run_completes_short_unsupported_text_without_model(
     assert frozen["investment_reason"] == frozen["ai_engineering_reason"]
     assert frozen["response_id"] is None
     assert frozen["response_model"] == (
-        "deterministic-evidence-gate-v1:short_unsupported_text"
+        "deterministic-evidence-gate-v2:short_unsupported_text"
     )
     assert frozen["input_tokens"] == 0
     assert frozen["output_tokens"] == 0
     assert result["counts"]["deterministic_short_text_filtered"] == 1
     assert result["counts"]["deterministic_unavailable_evidence_filtered"] == 0
+    assert result["counts"]["deterministic_unsupported_media_filtered"] == 0
     assert result["counts"]["deterministic_filtered"] == 1
+
+
+def test_packet_carries_exact_feed_media_metadata(tmp_path):
+    artifact_conn = artifacts.connect(tmp_path / "artifacts.db")
+    item = {
+        "development_id": "development-video",
+        "source_event_ids": ["event-video"],
+        "source_events": [
+            {
+                "event_id": "event-video",
+                "is_primary": True,
+                "post": {
+                    "post_id": "post-video",
+                    "author": {"handle": "alice"},
+                    "text": "A substantive text description accompanies the video.",
+                    "published_at": "2026-07-12T08:00:00+00:00",
+                },
+                "evidence": [],
+            },
+        ],
+    }
+
+    packet = routing_runs.packet_from_development(
+        item,
+        day="2026-07-12",
+        artifact_conn=artifact_conn,
+        media_types_by_post={"post-video": ("video",)},
+    )
+    artifact_conn.close()
+
+    assert packet is not None
+    assert packet.sources[0].media_types == ("video",)
+    assert routing_model.deterministic_evidence_gate(packet).code == (
+        "unsupported_media"
+    )
 
 
 def test_packet_promotes_a_current_author_update_when_root_is_old(tmp_path):

@@ -7,6 +7,30 @@ from fli.evidence import feed as signal_feed
 from fli.ingestion.x import content as x_content
 
 
+def test_media_types_reads_native_media_and_spaces_from_provider_payload():
+    payload = {
+        "extendedEntities": {
+            "media": [
+                {"type": "photo"},
+                {"type": "video"},
+                {"type": "animated_gif"},
+            ]
+        },
+        "entities": {
+            "urls": [
+                {"expanded_url": "https://x.com/i/spaces/1vOxwrExample"}
+            ]
+        },
+    }
+
+    assert signal_feed.media_types(payload) == (
+        "animated_gif",
+        "audio",
+        "photo",
+        "video",
+    )
+
+
 def _tweet(post_id, handle, when, text, *, relation=None, target=None):
     value = {
         "id": post_id,
