@@ -467,6 +467,56 @@ run and checking they are no longer interchangeable.
 
 ## Progress Log
 
+- 2026-07-29: [DONE] **AI Engineering audited (8 days, 80 candidates, 31
+  surfaced, 49 suppressed). It is in better shape than Investment on evidence
+  quality, but has one severe concentration defect and one honest coverage
+  gap.** Findings 9-11 below. Note this crosses the tracker's stated Investment
+  scope; recorded here because it is the same signal-to-noise question and Adi
+  asked for it directly.
+- 2026-07-29: [DONE] **Finding 9 — 27% of the entire AI Engineering corpus is
+  one incident.** 8 of 30 live surfaced Insights across 8 days are the OpenAI
+  evaluation-agent escape and the Hugging Face compromise. On 2026-07-24 it is
+  **3 of 6 items, half the day's brief**; on 2026-07-20 it is 2 of 4. Same root
+  cause as the Investment duplicate already written up on the How page: the
+  three 07-24 items are TIME (r4), the Guardian (r8), and Reuters (r10)
+  covering one incident, so exact canonical-URL grouping cannot merge them.
+  Worse here than in Investment because the Engineering corpus is a quarter the
+  size, so one story dominates it. Partial mitigation confirmed working: the
+  same `development_id` `d619ec0878a0` appears on both 07-20 and 07-22 in the
+  stored runs, but the live feed serves it on 07-20 only, so commit `ce083fe`
+  did fix the cross-day repeat. Only the same-day multi-publisher case remains.
+  In fairness the three accounts are not identical — TIME carries the exploit
+  path, the Guardian an expert characterization, Reuters the timeline and the
+  detail that an agent left notes for future versions of itself. They are
+  complementary, which is exactly why they were not caught.
+- 2026-07-29: [DONE] **Finding 10 — one of the seven declared Aion surfaces
+  never fires, and it is the one closest to BIT's daily work.** Surface
+  assignments across 31 surfaced Insights: `OPS` 18, `AGENT` 13, `EVAL` 6,
+  `MODEL` 6, `DATA` 4, `RETR` 1, **`EXTR` 0**. Extraction is defined in
+  `docs/references/aion-surfaces.json` as "turning documents and text into
+  structured, attributed fields an analyst can trace back to a source" — filings,
+  transcripts, citation fidelity, silent extraction error. That is the most
+  recognizable description of what an equity-research platform does every day,
+  and the feed said nothing about it in 8 days. `EXTR` and `RETR` together are
+  1 of 48 assignments while `OPS` and `AGENT` are 31 of 48 (65%).
+
+  Checked whether the agent was refusing to map to `EXTR` or whether the
+  material never arrived: no genuinely extraction-shaped candidate appears in
+  either the 31 surfaced or the 49 suppressed items. So this is a **source
+  limitation, not an agent defect** — frontier-lab X accounts post about model
+  releases, incidents, and agent capability, not about document parsing.
+  Presented honestly this is a strength rather than a weakness in the
+  interview: the system's declared surface map is what exposes the gap, and a
+  feed that silently skewed to security without naming the omission would be
+  worse. The stated limitation is that X alone cannot cover the extraction and
+  retrieval surfaces, and closing it needs a different source class.
+- 2026-07-29: [DONE] **Finding 11 — Engineering headline discipline is better
+  than Investment's.** 6 of 31 headlines (19%) use a soft or unfalsifiable verb
+  versus 21% for Investment, and most Engineering instances are legitimate
+  ("exposes sandboxing and detection risks" describes a real disclosed
+  weakness). Zero-artifact rate is also far better: 2 of 31 (6%) versus 41 of
+  139 (29%) for Investment. The Engineering evidence bar is working; its
+  problem is concentration and coverage, not credulity.
 - 2026-07-29: [BLOCKER] **The Investment product is currently serving zero
   Insights on every day.** `investment_agent.PROMPT_VERSION` is
   `investment-agent-v15-candidate` (commit `7f0cccb`) but the run store holds
