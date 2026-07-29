@@ -1073,6 +1073,7 @@ def run_range(
     days: int = 1,
     top_ranked: int = DEFAULT_TOP_RANKED,
     rank: int | None = None,
+    dry_run: bool = False,
     model: str = DEFAULT_MODEL,
     effort: str = DEFAULT_EFFORT,
     workers: int = DEFAULT_WORKERS,
@@ -1120,6 +1121,59 @@ def run_range(
             )
     if not targets:
         raise ValueError("No Investment analysis targets were selected.")
+
+    if dry_run:
+        return {
+            "schema_version": "investment-agent-batch-v2",
+            "selection": {
+                "audience": "investment",
+                "routing_state": "evaluated",
+                "relevant": True,
+                "order": "daily_rank",
+            },
+            "targets": [
+                {
+                    "day": day,
+                    "daily_rank": daily_rank,
+                    "development_id": development_id,
+                }
+                for day, daily_rank, development_id in targets
+            ],
+            "through": through,
+            "days": requested_days,
+            "top_ranked": None if rank is not None else top_ranked,
+            "rank": rank,
+            "dry_run": True,
+            "model": model,
+            "reasoning_effort": effort,
+            "workers": workers,
+            "prompt_version": PROMPT_VERSION,
+            "prompt_cache_key": PROMPT_CACHE_KEY,
+            "complete": True,
+            "counts": {
+                "requested": len(targets),
+                "complete": 0,
+                "failed": 0,
+                "surfaced": 0,
+                "suppressed": 0,
+                "memo_calls": 0,
+                "company_assessments": 0,
+                "rejected_after_memo": 0,
+            },
+            "telemetry": {
+                "input_tokens": 0,
+                "cached_tokens": 0,
+                "output_tokens": 0,
+                "reasoning_tokens": 0,
+                "request_retries": 0,
+                "reported_cost_usd": 0.0,
+            },
+            "items": [],
+            "publications": [],
+            "failures": [],
+            "db": str(db_path.resolve()),
+            "trace_root": str(trace_root.resolve()),
+        }
 
     results: list[dict[str, Any]] = []
     failures: list[dict[str, Any]] = []
@@ -1228,6 +1282,7 @@ def run_range(
         "days": requested_days,
         "top_ranked": None if rank is not None else top_ranked,
         "rank": rank,
+        "dry_run": False,
         "model": model,
         "reasoning_effort": effort,
         "workers": workers,

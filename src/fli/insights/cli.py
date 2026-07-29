@@ -187,6 +187,14 @@ def _parser() -> argparse.ArgumentParser:
             "Development must have a current positive Investment route."
         ),
     )
+    run.add_argument(
+        "--dry-run",
+        action="store_true",
+        help=(
+            "Resolve and validate the exact Investment-routed cohort without "
+            "model calls, traces, database writes, or publication."
+        ),
+    )
     run.add_argument("--model", default=investment_agent.DEFAULT_MODEL)
     run.add_argument("--reasoning-effort", default=investment_agent.DEFAULT_EFFORT)
     run.add_argument("--workers", type=int, default=investment_agent.DEFAULT_WORKERS)
@@ -259,6 +267,7 @@ def main(
                 days=args.days,
                 top_ranked=args.top_ranked,
                 rank=args.rank,
+                dry_run=args.dry_run,
                 model=args.model,
                 effort=args.reasoning_effort,
                 workers=args.workers,

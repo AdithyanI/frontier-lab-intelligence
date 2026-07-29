@@ -1,72 +1,116 @@
-# Insight Batch Refresh
+# Investment Insight Refresh
 
-Last verified: 2026-07-26
+Last verified: 2026-07-29
 
 ## Purpose
 
-`fli insights refresh` turns the current positive audience routes into durable
-Insight requests. It is deliberately downstream of Evidence and audience
-routing: it does not collect posts, rebuild Events, retrieve artifacts, or
-invent another Event representation.
+One path produces current Insights: the company-aware Investment agent. It
+starts from Developments with a current positive Investment route, screens the
+37-company compact universe, opens only causally plausible company memos, and
+publishes one complete daily cohort.
 
-The normal calibration loop is:
+This workflow does not collect X posts, rebuild Events or Developments, retrieve
+artifacts, or run audience routing. Those upstream stages must already be
+current.
+
+AI Engineering has no current Insight generator. Its API returns an explicit
+unavailable reason rather than older content.
+
+## Inspect before spending
+
+Read the live contract instead of assuming a prompt or schema version:
 
 ```bash
-fli insights refresh \
+.venv/bin/fli insights contract --json --no-input
+.venv/bin/fli insights summary --json --no-input
+```
+
+Resolve the exact Investment-routed cohort without model calls, trace writes,
+database writes, or publication:
+
+```bash
+.venv/bin/fli insights run-investment-agent \
   --through 2026-07-21 \
-  --days 17 \
-  --limit-per-day 10 \
+  --days 3 \
+  --top-ranked 10 \
   --dry-run \
-  --json
-
-fli insights refresh \
-  --through 2026-07-21 \
-  --days 17 \
-  --limit-per-day 10 \
-  --workers 8 \
-  --json
+  --json \
+  --no-input
 ```
 
-After reviewing those results, expand the same day without repeating them:
+The dry-run output is the spend boundary. Inspect `targets`, `prompt_version`,
+`model`, `reasoning_effort`, and `counts.requested` before removing
+`--dry-run`.
+
+## Run the cohort
 
 ```bash
-fli insights refresh \
+.venv/bin/fli insights run-investment-agent \
   --through 2026-07-21 \
-  --days 17 \
-  --all-routed \
-  --workers 8 \
-  --json
+  --days 3 \
+  --top-ranked 10 \
+  --workers 6 \
+  --json \
+  --no-input
 ```
 
-The limit counts positively routed Events per day. An Event relevant to both
-audiences produces two independent requests, so `request_count` can be larger
-than `event_count`.
+The runner:
 
-## Contract
+1. warms the stable prompt prefix with one Development;
+2. fans out the remaining targets with bounded parallelism;
+3. writes every request, response, tool call, response ID, retry, token count,
+   and reported cost under
+   `data/derived/insights/investment-agent-traces/<day>/`;
+4. validates and imports each completed result; and
+5. publishes a day only when every selected Development completes.
 
-- Only complete `daily-rank-v2` routing databases whose Event and Feed run IDs
-  match the current publication are eligible.
-- Selection is Feed-rank ordered and includes only positive routes for the
-  requested audience or audiences.
-- The same Event appearing on two requested days is a contract failure, not a
-  silent deduplication; canonical Event publication must be repaired first.
-- Every Event/audience run ID is derived from the Event, exact routing run,
-  prompt/schema identity, model, and reasoning effort. Batch size is excluded.
-- The complete cohort's exact request JSON freezes in
-  `data/derived/insights/insights.db` before any model call starts. Completion
-  or failure is then committed immediately per request.
-- Rerunning the same command reuses completed local results and retries failed
-  requests. Expanding from ten Events to all routed Events reuses the overlap.
-  A new routing lineage may also reuse an exact prior Event/audience result
-  when input, prompt, schema, model, and reasoning effort all match; reuse
-  provenance remains stored on the successor row.
-- Requests execute in bounded parallel. Progress goes to stderr; the final
-  stable JSON object goes to stdout.
-- `--dry-run` reads and validates the cohort but does not create the Insight DB,
-  request dumps, or model calls.
-- Result telemetry separates new `model_requests` and incremental cost/tokens
-  from `reused_results`; historical spend is never counted as new batch spend.
+Publication is atomic. A partial batch may store successful rows and traces,
+but it cannot replace the visible daily cohort.
 
-The default model remains `gpt-5.6-terra` with high reasoning while calibration
-is active. A new routing publication, prompt version, model, or reasoning effort
-creates new immutable request identities rather than relabeling old results.
+A retry runs the requested targets again and writes new traces. It does not
+claim that completed model calls are free or automatically reused. Use
+`--rank N` only for focused diagnosis of one current Investment-routed daily
+rank; a single-rank run does not publish the whole day.
+
+## Verify after the run
+
+Confirm durable state:
+
+```bash
+.venv/bin/fli insights summary --json --no-input
+```
+
+Confirm the live read model:
+
+```bash
+curl -s \
+  "http://127.0.0.1:8797/api/insights?audience=investment&status=all&date=2026-07-21"
+```
+
+Check that:
+
+- the date appears in `published_days`;
+- the published `prompt_version` matches the live contract;
+- the candidate count matches the dry-run target count;
+- surfaced and suppressed Developments sum to the complete cohort;
+- every opened memo is used or appears in `rejected_after_memo`; and
+- the UI, PDF, and delivery preview read the same published cohort.
+
+## Current checkpoint
+
+The published July 19–21 top-ten cohorts still use Investment agent v8/v9. The
+active contract is v11, and only two unpublishing v11 proof rows currently
+exist. The next refresh should therefore preview and then replace those three
+published cohorts with one complete v11 run.
+
+## Failure handling
+
+- Authentication failures are terminal until the shared LiteLLM credential is
+  repaired.
+- Timeouts, connection failures, HTTP 408/409/429/499, and 5xx Responses
+  failures use bounded, trace-preserving retries inside each target.
+- A target that still fails leaves its day unpublished.
+- Never infer success from stored rows alone; the publication and live API are
+  the reader boundary.
+- Never send Slack or email output without Adi's explicit approval in the
+  current session.

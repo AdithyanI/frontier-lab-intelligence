@@ -16,6 +16,10 @@ def main(argv: list[str] | None = None) -> int:
         from fli.diagnostics import prompt_cache
 
         return prompt_cache.main(raw_args[1:])
+    if raw_args and raw_args[0] == "insights":
+        from fli.insights import cli as insight_cli
+
+        return insight_cli.main(raw_args[1:])
     parser = argparse.ArgumentParser(
         prog="fli",
         description="Frontier Lab Intelligence pipeline.",

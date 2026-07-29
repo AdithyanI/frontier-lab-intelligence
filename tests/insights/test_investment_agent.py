@@ -249,10 +249,55 @@ def test_run_range_warms_one_target_then_fans_out(monkeypatch, tmp_path: Path):
     assert result["telemetry"]["request_retries"] == 0
     assert result["selection"]["audience"] == "investment"
     assert result["schema_version"] == "investment-agent-batch-v2"
+    assert result["dry_run"] is False
     assert result["publications"] == [
         {"day": "2026-07-19", "candidate_count": 3},
         {"day": "2026-07-20", "candidate_count": 3},
     ]
+
+
+def test_run_range_dry_run_resolves_targets_without_writes_or_model_calls(
+    monkeypatch, tmp_path: Path
+):
+    monkeypatch.setattr(
+        investment_agent,
+        "_investment_candidates",
+        lambda **_kwargs: [
+            {"daily_rank": 1, "development_id": "a" * 64},
+            {"daily_rank": 4, "development_id": "b" * 64},
+        ],
+    )
+    monkeypatch.setattr(
+        investment_agent,
+        "run_one",
+        lambda **_kwargs: pytest.fail("dry-run started a model call"),
+    )
+    monkeypatch.setattr(
+        investment_agent.investment_agent_runs,
+        "publish_day",
+        lambda **_kwargs: pytest.fail("dry-run published a day"),
+    )
+    trace_root = tmp_path / "traces"
+    db_path = tmp_path / "investment-agent.db"
+
+    result = investment_agent.run_range(
+        through="2026-07-21",
+        top_ranked=2,
+        dry_run=True,
+        trace_root=trace_root,
+        db_path=db_path,
+    )
+
+    assert result["complete"] is True
+    assert result["dry_run"] is True
+    assert result["counts"]["requested"] == 2
+    assert result["counts"]["complete"] == 0
+    assert result["telemetry"]["reported_cost_usd"] == 0
+    assert [item["daily_rank"] for item in result["targets"]] == [1, 4]
+    assert result["items"] == []
+    assert result["publications"] == []
+    assert not trace_root.exists()
+    assert not db_path.exists()
 
 
 def test_run_range_preserves_individual_failures(monkeypatch, tmp_path: Path):
