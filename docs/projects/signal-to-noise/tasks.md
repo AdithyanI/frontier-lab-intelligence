@@ -96,29 +96,99 @@ suppression rate is already 35%.
 
 ## Milestones
 
-- [ ] M1 — Evidence bar added to the Investment prompt. Acceptance: the two
-      edits in Decisions are applied and `PROMPT_VERSION` is bumped in lockstep
-      with `CURRENT_PROMPT_VERSION`. Validate: `./scripts/check-fast.sh`.
-- [ ] M2 — Single known-bad item flips. Acceptance: Development
-      `b72d460234bd5322e8fdabc069a7cf0b1d323e0b500c6fca03d07b5f39f0c9d8`
-      (2026-07-26 rank 1) returns `decision: suppress` with a reason naming the
-      unevidenced first-party claim. Validate: run to a scratch DB and read the
-      trace. Cost about $0.22.
-- [ ] M3 — Known-good control holds. Acceptance: an item whose evidence is
-      first-party but decisive still surfaces — for example 2026-07-20 rank 2
-      (`MSFT-B5`), the only `threshold_met: true` connection in the corpus,
-      where OpenAI paused deployment and changed requirements. Validate: same
-      scratch-DB path. Cost about $0.22.
+- [ ] M1 — Rotate the evidence axis. Five edits, two files, no version bump
+      yet. Acceptance: the five edits in *The five edits* below are applied
+      verbatim and `./scripts/check-fast.sh` prints OK. Do **not** bump
+      `PROMPT_VERSION` during M1; testing runs against a scratch DB, and the
+      version bump is a publication decision that belongs to M6.
+- [ ] M2 — Four pre-registered single-item tests, about $0.88 total, all to a
+      scratch DB so nothing published changes. Every expected outcome is
+      written down *before* running. Acceptance: all four match.
+
+      | Day | Rank | Item | Now | Expected |
+      | --- | ---: | --- | --- | --- |
+      | 2026-07-23 | 5 | Etched $300M at $10.3B, inference ASICs | suppress | **surface** — false negative fixed |
+      | 2026-07-26 | 1 | ChatGPT travel workflow anecdote | surface | **suppress** — false positive fixed |
+      | 2026-07-20 | 2 | OpenAI paused deployment, `MSFT-B5` | surface, `threshold_met: true` | **unchanged** — control |
+      | 2026-07-17 | 20 | Reported Huawei SuperPoD, `NVDA-B4` | surface | **unchanged** — the evidence twin of Etched, must not move |
+
+      If either control moves, the edit is wrong. Stop and re-diagnose rather
+      than adjusting the expectations.
+- [ ] M3 — Schema reorder tested separately from the prompt edits. Acceptance:
+      run the same four items with only the `decision`-first schema change and
+      no prompt change, so the two effects are not confounded. Records whether
+      field ordering matters for a reasoning model at all. About $0.88.
 - [ ] M4 — Two-day false-negative measurement. Acceptance: 2026-07-24 and
       2026-07-26 re-run to a scratch DB; every changed decision is read by a
       human and classified as correct or a false negative. Validate: diff
       decisions against the published corpus. Cost about $4.50.
-- [ ] M5 — Narrow Investment-only router rule, only if M2–M4 pass. Acceptance:
+- [ ] M5 — Narrow Investment-only router rule, only if M2-M4 pass. Acceptance:
       the rule sits inside `## The Investment routing boundary` and the
       Engineering judgment is provably unchanged on a sample. Validate:
       `fli audience-routing run --dry-run` then a bounded scratch run.
-- [ ] M6 — Publication decision. Acceptance: an explicit go or no-go on
-      re-running all 22 days, with the cost and the risk recorded here.
+- [ ] M6 — Publication decision, all-or-nothing. Acceptance: an explicit go or
+      no-go on bumping both version constants and re-running all 22 days at
+      about $49, with the risk recorded here. There is no partial option: see
+      the version-pin trap in Validation.
+
+## The five edits
+
+Written out in full so the work can be handed to an engineer without
+re-deriving anything. Two files. Edits 1-4 are the axis rotation; edit 5 is the
+independent schema change tested separately in M3.
+
+**Edit 1 — carve-out, inserted immediately after the opening line of
+`# Suppression and rejection`** (about line 409 of
+`src/fli/insights/prompts/investment_company_analysis.txt`). Placed inside the
+suppression block on purpose, following the escape-hatch pattern in the GPT-5
+prompting guide, so it is read at the point where the conflicting rule lives.
+
+```text
+Suppression tests whether the Development establishes a real, attributable fact
+that reaches a company. It never tests whether the consequence can be sized
+today. If you can name the business variable that may move, publish and set
+`threshold_met` to false, even when scale, price, timing, counterparty, or
+supplier are undisclosed. Inability to quantify is not grounds for suppression.
+That is exactly what `threshold_met: false` records.
+```
+
+**Edit 2 — split naming from sizing in the bullet that killed Etched.**
+
+Replace:
+
+```text
+- no named operating driver can be stated;
+```
+
+with:
+
+```text
+- no operating driver can be named at all, as distinct from a driver you can
+  name but cannot yet size, source, price, or date;
+```
+
+**Edit 3 — add the missing early-evidence class** to the list of "early but
+potentially useful evidence" at about line 305.
+
+```text
+- a named, dated corporate action by an organization whose product, capacity,
+  or capital position is the direct subject of a standing bet — financing, a
+  capacity limit, a supply agreement, deal talks, or an acquisition — even when
+  the terms are undisclosed;
+```
+
+**Edit 4 — add the tightening bullet to `# Suppression and rejection`.** This is
+the noise half, so the change is not a one-way loosening.
+
+```text
+- the only new evidence is the author demonstrating their own product working
+  well, with no measurement, no independent account, and no retrievable
+  artifact.
+```
+
+**Edit 5 — schema field order** in `src/fli/insights/investment_agent.py` at
+about line 276. Move `decision` to first position in both `properties` and
+`required`, ahead of `headline`. Tested on its own in M3.
 
 ## Execution Rules
 
@@ -134,6 +204,76 @@ suppression rate is already 35%.
   run.
 
 ## Decisions
+
+- **The bar is on the wrong axis. Rotate it, do not just tighten it.** This is
+  the organizing idea for the whole project and supersedes the earlier framing
+  of "two prompt edits that tighten the bar". The prompt currently filters on
+  *how quantified the read-through is*. It should filter on *whether the
+  underlying fact is real and attributable*. Evidence: the rejection text for
+  Etched (2026-07-23 r5) reads "no ... **measurable** operating driver", but the
+  prompt's own criterion 3 at line 272 says only "You can **name** the business
+  variable that may move". The word "measurable" appears nowhere in that
+  criterion. The model silently upgraded *name* to *measure*, which is precisely
+  the judgment that `threshold_met: false` exists to absorb. Rotating the axis
+  fixes both defect classes with one coherent change: the unmeasured
+  self-demonstrations fail because the fact is not real or attributable, and
+  Etched, Kimi capacity, and Meta/Anthropic pass because the fact is real even
+  though the consequence cannot be sized. Two patches would have been a weaker
+  story than one rotation.
+
+- **The defect is a prompt contradiction, and OpenAI documents this exact
+  failure mode.** The GPT-5 prompting guide, section *Instruction following*,
+  states that contradictory or vague instructions are more damaging to GPT-5
+  than to earlier models because the model "expends reasoning tokens searching
+  for a way to reconcile the contradictions rather than picking one instruction
+  at random". Our contradiction: line 294 grants permission — "The Development
+  does not need to satisfy a bet's `threshold` today ... Early evidence can be
+  published" — while line 407 issues an imperative — "Suppress the whole
+  Development when ... no named operating driver can be stated". Permissive
+  language loses to imperative language, and the later block wins. The guide's
+  own remedy is to resolve the contradiction *and* add an explicit carve-out
+  clause at the site of the conflicting rule (their example: "Do not do lookup
+  in the emergency case, proceed immediately to providing 911 guidance"). The
+  guide calls this an escape hatch. That is why edit 1 below sits inside the
+  suppression list rather than in the preamble — an earlier draft of this plan
+  put it in the preamble, which would have reproduced the original ordering
+  problem.
+
+  Weak corroboration, offered as consistent-with rather than proof: suppressions
+  average 766 reasoning tokens (median 508), but the Kimi capacity item burned
+  **2,958**, the fourth-highest of all 78 suppressions, before killing it. A
+  hard case could also explain that.
+
+- **Rejected the three-tool redesign; reordered the output schema instead.**
+  Adi proposed replacing the single structured output with tools — `suppress`,
+  `write_insight`, `get_company_memo` — so the agent picks a door and exits.
+  The instinct identified a real flaw. The strict JSON schema currently orders
+  its properties `headline`, `what_changed`, `decision`, `connections`,
+  `no_match_reason`, and structured-output generation follows schema order, so
+  the model writes a 6-14 word headline and the full narrative *before* emitting
+  the decision token. All 78 suppression headlines follow one verdict-shaped
+  template ("X lacks a concrete public-company implication"), so the visible
+  commitment does precede the decision field.
+
+  Rejected the tools for three measured reasons:
+  1. **Tools do not fix the diagnosed bug.** The model meets the identical
+     contradictory criteria whether it walks through a door or fills a field.
+     Changing the output channel does not change the decision rule.
+  2. **The branch-consistency benefit already exists.**
+     `investment_agent.py:563-572` already enforces surface implies non-empty
+     connections and a null reason, and suppress implies no connections and a
+     non-empty reason. Branch-specific tool schemas would buy nothing new.
+  3. **No cost win.** All ~20k input tokens are in the first request, and
+     suppression already exits at 1.05 turns for $0.125. No tool can exit
+     earlier than immediately.
+
+  The minimal change that captures the real flaw is moving `decision` to first
+  position in the schema. One line, no architecture change, testable for $0.22.
+  Caveat recorded against my own argument: for a reasoning model the decision is
+  settled in the reasoning trace before any output token is emitted, so the
+  ordering effect may be small. Test it, do not assume it. The tool design goes
+  to Future work as considered-and-deferred, which is a stronger interview
+  answer than having built it.
 
 - **The Insight stage owns this fix, not the router.** The router is shared by
   both audiences and cannot make this call: deciding that a claim moves nothing
@@ -164,7 +304,12 @@ suppression rate is already 35%.
   known-bad item it described the reason to use it and surfaced anyway. That is
   a threshold problem, and thresholds live in prompts.
 
-- **The two Investment prompt edits.** The existing nine suppression bullets all
+- **The two Investment prompt edits.** *[SUPERSEDED 2026-07-29 by "The bar is on
+  the wrong axis" above and by `## The five edits`. Kept because the diagnosis
+  below is still correct and is the reason the axis rotation includes a
+  tightening bullet. The framing was wrong: this draft only tightened, which
+  would have deepened the false-negative problem found later the same day.]*
+  The existing nine suppression bullets all
   test the strength of the causal chain; none tests whether the underlying claim
   is evidenced at all. The known-bad item survives every one of them.
 
@@ -234,8 +379,10 @@ suppression rate is already 35%.
 | done | Finding 3 — three Insights rest on unattributed claims | parent | Progress Log |
 | done | Finding 4 — false negatives; inconsistent bar inside `NVDA-B4` | parent | Progress Log |
 | done | Finding 5 — suppressed material corporate events (Meta/Anthropic, Etched, Kimi capacity) | parent | Progress Log |
-| todo | Continue auditing for further evidence-class defects before designing any rule | parent | |
-| todo | M1 — apply the Investment prompt edits and bump both version constants in lockstep | worker | |
+| done | Diagnose root cause and write the five edits | parent | The five edits |
+| todo | M1 — apply the five edits, no version bump | worker | The five edits |
+| todo | M2 — run the four pre-registered tests to a scratch DB (~$0.88) | worker | Milestones |
+| todo | Continue auditing for further evidence-class defects | parent | |
 
 ## Backlog / Remaining Work
 
@@ -280,6 +427,28 @@ suppression rate is already 35%.
 
 ## Progress Log
 
+- 2026-07-29: [DONE] **Root cause found, and it is a prompt contradiction
+  rather than a missing rule.** Line 294 grants permission to publish early
+  evidence with `threshold_met: false`; line 407 orders suppression when no
+  named operating driver can be stated. Nothing states which governs, and the
+  imperative later block wins. Confirmed against the OpenAI GPT-5 prompting
+  guide via the developer-docs MCP, section *Instruction following*, which
+  documents this exact failure mode and prescribes resolving the contradiction
+  plus an explicit carve-out clause at the site of the conflicting rule. Also
+  found the drift that killed Etched: the prompt asks the model to **name** an
+  operating driver, and the model applied **measurable**. Full reasoning in
+  Decisions; the resulting work is written out in `## The five edits`.
+- 2026-07-29: [DONE] **Evaluated and rejected a three-tool redesign**
+  (`suppress`, `write_insight`, `get_company_memo` with early exit). The
+  instinct behind it was correct and found a real flaw — the strict schema
+  emits `headline` and `what_changed` before `decision`, so the narrative
+  precedes the verdict, and all 78 suppression headlines share one
+  verdict-shaped template. But tools do not resolve a contradiction, the
+  branch-consistency guarantee already exists at
+  `investment_agent.py:563-572`, and there is no cost win because all input
+  tokens are in the first request. Captured the real flaw as a one-line schema
+  reorder instead, tested separately in M3 so the two effects are not
+  confounded.
 - 2026-07-29: [DONE] **Finding 4 — the suppression side has false negatives, and
   the bar is inconsistent within a single standing bet.** First audit of the 78
   suppressed Investment candidates. The aggregate direction is correct and
