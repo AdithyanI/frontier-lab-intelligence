@@ -38,8 +38,8 @@ MAX_UNIQUE_MEMOS = 8
 MAX_MODEL_TURNS = 4
 MAX_RESPONSE_ATTEMPTS = 3
 RETRYABLE_RESPONSE_STATUS_CODES = frozenset({408, 409, 429, 499})
-PROMPT_VERSION = "investment-agent-v15-candidate"
-PROMPT_CACHE_KEY = "fli:investment-agent:v15-candidate"
+PROMPT_VERSION = "investment-agent-v15"
+PROMPT_CACHE_KEY = "fli:investment-agent:v15"
 PROMPT_PATH = (
     REPO_ROOT
     / "src"
