@@ -1,9 +1,11 @@
 # Architecture Overview
 
 Frontier Lab Intelligence turns public frontier-AI activity into inspectable
-evidence and two audience-specific intelligence views. The system deliberately
-separates deterministic evidence construction from model judgment: agents can
-rebuild and audit the evidence before asking a model what it means.
+evidence, independent audience-routing decisions, and company-aware Investment
+intelligence. The system deliberately separates deterministic evidence
+construction from model judgment: agents can rebuild and audit the evidence
+before asking a model what it means. AI Engineering remains a routing decision,
+but it has no current Insight generator or product fallback.
 
 Use the [code and data map](code-map.md) to locate an owner, command, store, or
 test. Exact schemas, run telemetry, and historical implementation facts live in
@@ -50,7 +52,7 @@ or reinterpret its upstream evidence.
 | Artifacts | `fli.evidence.artifacts` | Canonical source links, lineage, retrieval, and extracted text. |
 | Daily Development rank | `fli.scoring.development_attention` | Versioned, inspectable lexicographic ordering of same-day Developments. |
 | Audience routing | `fli.routing` | Independent AI Engineering and Investment relevance decisions with durable runs. |
-| Insights | `fli.insights` | Per-Event working annotations plus agent-authored daily synthesis, strict validation, atomic storage, and the canonical read model. |
+| Insights | `fli.insights` | Company-aware Investment agent loop, strict result validation, exact traces, atomic daily publication, and the canonical read model. |
 | Delivery | `fli.delivery` | Explicitly confirmed Slack and email adapters over one canonical Daily Brief; credentials and provider behavior remain server-side. |
 | Provider diagnostics | `fli.diagnostics` | Non-mutating machine-readable checks of shared provider behavior, including reusable-prefix cache telemetry. |
 | Product adapters | `fli.web`, `fli.cli` | HTTP/UI composition and non-interactive commands; no domain truth belongs here. |
@@ -170,13 +172,13 @@ composition.
   UTC day and updates only that date's Feed/Event publication. Earlier dates
   retain their source run identities, and daily artifact imports append rather
   than replace prior observations.
-- **Parallel historical authoring:** for an intentional historical-window
-  rebuild, publish Feed and Events once through the maximum requested date,
-  route the complete date range against that one snapshot, then fan out
-  immutable per-day workspaces and Codex tasks.
-  `daily-orchestration-v3` freezes the Event, Feed, routing, cohort, and
-  rank-input identities for each day. Several full `run-day` Evidence
-  publishers must not compete for the same date publication.
+- **Historical Investment refresh:** for an intentional historical window,
+  publish Feed and Events once through the maximum requested date, route the
+  complete range against that snapshot, preview the exact Investment cohorts,
+  then run the company-aware Investment agent. The runner warms the shared
+  prompt prefix once, fans out the remaining targets with bounded workers, and
+  publishes each day only after every requested target succeeds. Several
+  Evidence publishers must not compete for the same date publication.
 - **Exact Event identity:** quote, retweet, reply-parent, and first-party thread
   relationships may group evidence; shared topic or conversation text may not.
 - **Dynamic curation:** Feed and Event readers overlay current Registry state so
@@ -211,8 +213,9 @@ composition.
   immutable runs store prompt version, schema version, and prompt/input hashes.
 - **Shared model adapter:** every LLM call goes through the LiteLLM Responses
   boundary with stable metadata, measured cache telemetry, and captured cost.
-  Cache-key lanes serialize requests sharing one prefix while allowing bounded
-  parallelism across different prefixes.
+  The Investment runner completes one warm request for its stable prefix before
+  bounded parallel fanout; the provider remains the source of truth for whether
+  later requests actually reused cached input.
 - **No compatibility maze:** migrations use direct imports and canonical data
   paths. Old module aliases and dual reads are not retained by default.
 - **Artifact targets remain document-shaped:** exact generic `/search`

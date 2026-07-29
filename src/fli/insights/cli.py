@@ -103,42 +103,7 @@ class InvestmentAgentBatchIncomplete(RuntimeError):
 def _plain(payload: dict[str, Any]) -> str:
     if payload["status"] == "error":
         return f"{payload['error']['code']}: {payload['error']['message']}"
-    data = payload["data"]
-    if payload["command"] == "insights.contract":
-        return _canonical_json(data, pretty=True)
-    if payload["command"] in {
-        "insights.summary",
-        "insights.inspect",
-        "insights.import-result",
-        "insights.import-investment-trace",
-        "insights.run-investment-agent",
-    }:
-        return _canonical_json(data, pretty=True)
-    if payload["command"] == "insights.refresh":
-        if payload["status"] == "error":
-            return f"{payload['error']['code']}: {payload['error']['message']}"
-        if data["dry_run"]:
-            return (
-                f"{data['refresh_id']} · {data['event_count']} Events · "
-                f"{data['request_count']} requests · no model calls"
-            )
-        return (
-            f"{data['refresh_id']} · {data['counts']['complete']}/"
-            f"{data['counts']['requests']} complete · "
-            f"{data['telemetry']['model_requests']} model requests · "
-            f"${data['telemetry']['reported_cost_usd']:.6f}"
-        )
-    lines = [
-        f"event {data['event_id']} · {data['day']} · Feed rank {data['feed_rank']}",
-        f"model {data['model']} · dump {data['dump_dir']}",
-    ]
-    for evaluation in data["evaluations"]:
-        result = evaluation["result"]
-        lines.append(
-            f"{evaluation['audience']}: {result['decision']} — "
-            f"{result['suppression_reason'] or result['summary']}"
-        )
-    return "\n".join(lines)
+    return _canonical_json(payload["data"], pretty=True)
 
 
 

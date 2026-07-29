@@ -108,10 +108,12 @@ removing or archiving local data.
   `fli artifacts`
 - Route Evidence: `fli audience-routing`
 - Generate or inspect Insights: `fli insights`. Run the company-aware
-  Investment loop with `fli insights run-investment-agent`, import one already
-  completed trace with `fli insights import-investment-trace`, read the live
-  contract with `fli insights contract`, and inspect the company packet with
-  `fli insights company-context` or `fli insights company-universe`.
+  Investment loop with `fli insights run-investment-agent`; add `--dry-run` to
+  resolve and validate the exact cohort without model calls, traces, database
+  writes, or publication. Import one already completed trace with `fli insights
+  import-investment-trace`, read the live contract with `fli insights
+  contract`, and inspect the company packet with `fli insights
+  company-context` or `fli insights company-universe`.
 - Inspect the daily Development rank: `/api/developments` or the Feed. The
   historical `fli daily-rank evaluate` command still evaluates exact-Event
   `daily-rank-v2` lineage.

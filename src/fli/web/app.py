@@ -694,7 +694,7 @@ def insight_report_pdf(
     insight_date: calendar_date | None = Query(None, alias="date"),
     audience: Literal["investment", "ai_engineering"] = "investment",
 ) -> Response:
-    """Download one cached PDF from the canonical complete daily editorial run."""
+    """Download one cached PDF from the published daily Investment cohort."""
     if audience != "investment":
         raise HTTPException(status_code=404, detail=_AI_ENGINEERING_REASON)
     day = insight_date.isoformat() if insight_date else None
