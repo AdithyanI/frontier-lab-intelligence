@@ -428,11 +428,6 @@ Suppress the whole Development when:
 - every opened memo weakens or rejects the proposed connection;
 - the Development is generic commentary rather than a concrete change;
 - the evidence is too ambiguous to identify what changed;
-- the central claim depends on an untranscribed video, audio clip, image, or
-  other attachment whose substantive contents are not present in the packet;
-- the available text is only a teaser, headline, unsupported anecdote, or
-  second-hand paraphrase, with no concrete attributed facts or retrieved
-  primary artifact that make the claimed change inspectable;
 - the apparent connection depends on unsupported outside facts;
 - no operating driver can be named at all, as distinct from a driver that can
   be named but cannot yet be sized;
@@ -442,11 +437,6 @@ Suppress the whole Development when:
   well, with no measurement, no independent account, and no retrievable
   artifact; or
 - no observable next check can be named.
-
-The presence of media is not itself grounds for suppression. Judge whether the
-written posts and retrieved artifacts in the packet independently contain
-enough substance to support the Development and its company implication. Never
-infer what unseen or untranscribed media probably contains.
 
 # Final structured result
 

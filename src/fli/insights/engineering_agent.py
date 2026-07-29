@@ -41,8 +41,8 @@ DEFAULT_TOP_RANKED = 10
 DEFAULT_WORKERS = 9
 MAX_RESPONSE_ATTEMPTS = 3
 RETRYABLE_RESPONSE_STATUS_CODES = frozenset({408, 409, 429, 499})
-PROMPT_VERSION = "engineering-agent-v3"
-PROMPT_CACHE_KEY = "fli:engineering-agent:v3"
+PROMPT_VERSION = "engineering-agent-v2"
+PROMPT_CACHE_KEY = "fli:engineering-agent:v2"
 PROMPT_PATH = (
     REPO_ROOT
     / "src"
@@ -152,8 +152,8 @@ def _final_format(surface_ids: list[str]) -> dict[str, Any]:
                 "headline": {
                     "type": "string",
                     "description": (
-                        "A 6-14 word plain-English fragment stating the "
-                        "engineering takeaway rather than the announcement."
+                        "One factual sentence naming what changed and who did "
+                        "it, written for an engineer scanning a list."
                     ),
                 },
                 "what_changed": {

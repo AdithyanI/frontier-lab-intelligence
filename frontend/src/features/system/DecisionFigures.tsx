@@ -686,3 +686,46 @@ export function AgentLoopFigure() {
     </svg>
   )
 }
+
+/* Stage 5b: the engineering agent has no loop. The whole surface map is small
+   enough to send in full, so there is nothing to disclose progressively. */
+export function EngineeringLoopFigure() {
+  return (
+    <svg
+      viewBox="0 0 1080 400"
+      role="img"
+      aria-label="The AI Engineering agent has no tool loop. Today's Development goes in together with the complete map of seven Aion surfaces, and the model answers in one pass: either the Development lands on at most two named surfaces with a reason each, or it is suppressed with a reason. The surface map is small enough to send in full, so there is nothing to open on demand."
+    >
+      <defs>
+        <marker id="eng-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L8,4 L0,8 z" fill={INK} />
+        </marker>
+      </defs>
+      <text x="30" y="34" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.08em">THE SAME LOOP, WITHOUT THE TOOL</text>
+      <text x="1050" y="34" textAnchor="end" fontFamily={MONO} fontSize="9.5" fill={MUTED} letterSpacing="0.06em">NOTHING LEFT TO OPEN</text>
+
+      <rect x="350" y="72" width="380" height="58" rx="29" fill={SAND} stroke={BLUE_MID} strokeWidth="1.2" />
+      <text x="540" y="107" textAnchor="middle" fontFamily={MONO} fontSize="12.5" fill={INK} letterSpacing="0.06em">ONE DEVELOPMENT</text>
+      <text x="740" y="95" fontFamily={UI} fontSize="12.5" fill={MUTED}>with all seven surfaces of the</text>
+      <text x="740" y="115" fontFamily={UI} fontSize="12.5" fill={MUTED}>reference system, in full</text>
+
+      <line x1="540" y1="130" x2="540" y2="164" stroke={INK} strokeWidth="1.4" markerEnd="url(#eng-arrow)" />
+
+      <rect x="310" y="172" width="460" height="58" fill={SAND} stroke={BLUE_MID} strokeWidth="1.2" />
+      <line x1="326" y1="172" x2="326" y2="230" stroke={BLUE_MID} strokeWidth="1.2" />
+      <line x1="754" y1="172" x2="754" y2="230" stroke={BLUE_MID} strokeWidth="1.2" />
+      <text x="540" y="207" textAnchor="middle" fontFamily={MONO} fontSize="12.5" fill={INK} letterSpacing="0.06em">MODEL INFERENCE</text>
+
+      <path d="M540,230 L540,258 L270,258 L270,292" fill="none" stroke={INK} strokeWidth="1.4" markerEnd="url(#eng-arrow)" />
+      <path d="M540,230 L540,258 L830,258 L830,292" fill="none" stroke={INK} strokeWidth="1.4" markerEnd="url(#eng-arrow)" />
+
+      <rect x="90" y="300" width="360" height="58" rx="29" fill={INK} />
+      <text x="270" y="335" textAnchor="middle" fontFamily={MONO} fontSize="12.5" fill="#fff" letterSpacing="0.06em">LANDS ON A SURFACE</text>
+      <text x="90" y="384" fontFamily={UI} fontSize="12.5" fill={MUTED}>at most two, each with the decision it changes</text>
+
+      <rect x="650" y="300" width="360" height="58" rx="29" fill="#fff" stroke={MUTED} strokeWidth="1.2" strokeDasharray="5 4" />
+      <text x="830" y="335" textAnchor="middle" fontFamily={MONO} fontSize="12.5" fill={INK} letterSpacing="0.06em">SUPPRESSED</text>
+      <text x="650" y="384" fontFamily={UI} fontSize="12.5" fill={MUTED}>the reason is written down and kept</text>
+    </svg>
+  )
+}

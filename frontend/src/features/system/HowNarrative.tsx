@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import litellmRequestLog from '../../assets/litellm-request-log.webp'
 import { EvidenceInputMap } from '../architecture/ArchitecturePage'
 import NetworkRankFigure from '../architecture/NetworkRankFigure'
-import { AgentLoopFigure, CollectFigure, CollectionCostFigure, CostFigure, JudgeFigure, PublishFigure, RankFigure, RankLayersFigure, SourceChoiceFigure, TrustedSetFigure } from './DecisionFigures'
+import { AgentLoopFigure, CollectFigure, CollectionCostFigure, CostFigure, EngineeringLoopFigure, JudgeFigure, PublishFigure, RankFigure, RankLayersFigure, SourceChoiceFigure, TrustedSetFigure } from './DecisionFigures'
 import { VIDEO_WALKTHROUGH_URL } from './howContent'
 
 /* Decision figures open fullscreen on click, so they can be presented
@@ -385,10 +385,22 @@ export default function HowNarrative({
           </p>
           <p>
             An Insight has to land on one of those surfaces and say what an
-            engineer should now do differently. It is a single call with no
-            tool loop, because the surface map is small enough to send in
-            full. Where the evidence says nothing about a surface, that
-            surface simply stays empty rather than being reached for.
+            engineer should now do differently &mdash; at most two surfaces,
+            each with the decision it changes. Where the evidence says nothing
+            about a surface, that surface simply stays empty rather than being
+            reached for.
+          </p>
+          <FigureFrame>
+            <EngineeringLoopFigure />
+          </FigureFrame>
+          <p>
+            It is the same loop as the Investment agent with the tool removed.
+            The whole surface map is a few hundred tokens, so there is nothing
+            worth holding back &mdash; the model can see all seven at once and
+            still be specific. Progressive disclosure earns its keep when the
+            material is large enough that opening it should have to be
+            justified. Here it is not, so the design says so instead of
+            performing the ceremony.
           </p>
           <p>
             A day publishes only when every requested rank succeeds. A partial
