@@ -52,14 +52,13 @@ from .pdf_report import (
     ReportArtifact,
     ReportUnavailable,
     _cache_lock,
-    _host_suffix,
     _insight_app_url,
     _link,
     _markup,
     _valid_cached_pdf,
 )
 
-REPORT_SCHEMA_VERSION = "engineering-agent-pdf-v1"
+REPORT_SCHEMA_VERSION = "engineering-agent-pdf-v2"
 DEFAULT_CACHE_ROOT = REPO_ROOT / "data" / "derived" / "insights" / "pdf-cache-engineering"
 
 
@@ -173,9 +172,6 @@ def _styles() -> dict[str, ParagraphStyle]:
         ),
         "cover_meta": ParagraphStyle(
             "CoverMeta", parent=normal, fontName="Courier", fontSize=8.2, leading=12, textColor=INK_SOFT
-        ),
-        "cover_lede": ParagraphStyle(
-            "CoverLede", parent=normal, fontName="Helvetica", fontSize=11, leading=16.5, textColor=INK_SOFT
         ),
         "section": ParagraphStyle(
             "Section",
@@ -352,14 +348,6 @@ def _cover(payload: dict[str, Any], styles: dict[str, ParagraphStyle]) -> list[A
         Spacer(1, 5 * mm),
         Paragraph(f'AI ENGINEERING  <font color="#5BC5F2">/</font>  {_markup(_display_day(day))}', styles["cover_meta"]),
         Spacer(1, 7 * mm),
-        Paragraph(
-            _markup(
-                "The ranked developments most likely to change today's experiments, "
-                "implementation choices, and reliability work."
-            ),
-            styles["cover_lede"],
-        ),
-        Spacer(1, 6 * mm),
         HRFlowable(width="100%", thickness=0.9, color=INK, spaceAfter=0),
         Spacer(1, 6 * mm),
     ]
@@ -382,13 +370,13 @@ def _cover(payload: dict[str, Any], styles: dict[str, ParagraphStyle]) -> list[A
         return story
 
     toc_rows = []
-    for item in items:
+    for position, item in enumerate(items, start=1):
         surface_ids = " ".join(landing["surface_id"] for landing in item.get("lands") or [])
         toc_rows.append(
             [
-                Paragraph(f'#{int(item["daily_rank"])}', styles["toc_rank"]),
+                Paragraph(f"#{position}", styles["toc_rank"]),
                 Paragraph(
-                    f'<link href="#insight-{int(item["daily_rank"])}" color="#151515">'
+                    f'<link href="#insight-{position}" color="#151515">'
                     f'{_markup(item["headline"])}</link>',
                     styles["toc_title"],
                 ),
@@ -418,20 +406,27 @@ def _cover(payload: dict[str, Any], styles: dict[str, ParagraphStyle]) -> list[A
 
 
 def _sources_block(item: dict[str, Any], styles: dict[str, ParagraphStyle]) -> list[Any]:
-    block: list[Any] = list(_section_heading("Sources and audit trail", "", styles))
     app_url = _insight_app_url("ai_engineering", str(item.get("day") or ""), str(item.get("development_id") or ""))
-    block.append(
-        _rail(
-            "IN THE<br/>APP",
-            Paragraph(_link(app_url, "Open this Development, its sources, and its surface mapping \u2192"), styles["link"]),
-            styles,
+    return [
+        KeepTogether(
+            [
+                Spacer(1, 7 * mm),
+                HRFlowable(width="100%", thickness=0.4, color=BORDER, spaceAfter=2.8 * mm),
+                Paragraph(
+                    _link(
+                        app_url,
+                        "For references and sources, open this Insight in the app \u2192",
+                    ),
+                    styles["link"],
+                ),
+            ]
         )
-    )
-    return [KeepTogether(block)]
+    ]
 
 
-def _insight(item: dict[str, Any], styles: dict[str, ParagraphStyle]) -> list[Any]:
-    rank = int(item["daily_rank"])
+def _insight(
+    item: dict[str, Any], styles: dict[str, ParagraphStyle], position: int
+) -> list[Any]:
     provenance = item.get("provenance") or {}
     original = provenance.get("original_post") or {}
     trail = [
@@ -441,9 +436,12 @@ def _insight(item: dict[str, Any], styles: dict[str, ParagraphStyle]) -> list[An
     ]
     story: list[Any] = [
         _rail(
-            f"#{rank}",
+            f"#{position}",
             [
-                Paragraph(f'<a name="insight-{rank}"/>{_markup(item.get("headline"))}', styles["insight_title"]),
+                Paragraph(
+                    f'<a name="insight-{position}"/>{_markup(item.get("headline"))}',
+                    styles["insight_title"],
+                ),
                 Spacer(1, 2.8 * mm),
                 Paragraph(_markup("  ·  ".join(part for part in trail if part)), styles["meta"]),
             ],
@@ -462,30 +460,19 @@ def _insight(item: dict[str, Any], styles: dict[str, ParagraphStyle]) -> list[An
         for index, landing in enumerate(lands):
             if index:
                 story.append(Spacer(1, 4 * mm))
-            surface_head = Table(
-                [
-                    [
-                        Paragraph(_markup(landing["surface_id"]), styles["surface_id"]),
-                        Paragraph(_markup(landing["surface_name"]), styles["surface_name"]),
-                    ]
-                ],
-                colWidths=[16 * mm, BODY_WIDTH - 16 * mm],
-                style=TableStyle(
-                    [
-                        ("VALIGN", (0, 0), (-1, -1), "BOTTOM"),
-                        ("LEFTPADDING", (0, 0), (-1, -1), 0),
-                        ("RIGHTPADDING", (0, 0), (-1, -1), 0),
-                        ("TOPPADDING", (0, 0), (-1, -1), 0),
-                        ("BOTTOMPADDING", (0, 0), (-1, -1), 1.4 * mm),
-                    ]
-                ),
-            )
             story.append(
                 KeepTogether(
                     [
                         _rail(
                             "",
-                            [surface_head, Paragraph(_markup(landing["why"]), styles["body"])],
+                            [
+                                Paragraph(
+                                    _markup(landing["surface_name"]),
+                                    styles["surface_name"],
+                                ),
+                                Spacer(1, 1.4 * mm),
+                                Paragraph(_markup(landing["why"]), styles["body"]),
+                            ],
                             styles,
                         )
                     ]
@@ -526,9 +513,9 @@ def build_report_pdf(payload: dict[str, Any]) -> bytes:
         pageCompression=1,
     )
     story = _cover(payload, styles)
-    for item in payload.get("items") or []:
+    for position, item in enumerate(payload.get("items") or [], start=1):
         story.append(PageBreak())
-        story.extend(_insight(item, styles))
+        story.extend(_insight(item, styles, position))
 
     doc.build(
         story,

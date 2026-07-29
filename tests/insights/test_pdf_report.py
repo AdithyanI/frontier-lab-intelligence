@@ -6,7 +6,7 @@ from fastapi.testclient import TestClient
 from pypdf import PdfReader
 import pytest
 
-from fli.insights import pdf_report
+from fli.insights import pdf_report, pdf_report_engineering
 from fli.web.app import app
 
 
@@ -120,6 +120,43 @@ def _payload() -> dict:
     }
 
 
+def _engineering_payload() -> dict:
+    return {
+        "schema_version": "engineering-agent-read-v1",
+        "content_kind": "engineering_agent",
+        "available": True,
+        "reason": None,
+        "audience": "ai_engineering",
+        "status": "kept",
+        "date": DAY,
+        "requested_date": DAY,
+        "run": {"selection_sha256": "b" * 64},
+        "items": [
+            {
+                "daily_rank": rank,
+                "day": DAY,
+                "development_id": f"engineering-{rank}",
+                "headline": f"Engineering change {rank}",
+                "what_changed": "A concrete engineering change was reported.",
+                "lands": [
+                    {
+                        "surface_id": "EVAL",
+                        "surface_name": "Evaluation",
+                        "why": "This changes how the team should validate a system.",
+                    }
+                ],
+                "provenance": {
+                    "original_post": {
+                        "url": f"https://x.com/example/status/{rank}",
+                        "author": "Example",
+                    }
+                },
+            }
+            for rank in (4, 12)
+        ],
+    }
+
+
 def _pdf_text(pdf_bytes: bytes) -> str:
     reader = PdfReader(BytesIO(pdf_bytes))
     return "\n".join(page.extract_text() or "" for page in reader.pages)
@@ -147,7 +184,7 @@ def test_report_renders_the_complete_investment_workbook():
     assert "Today's brief" in text
     assert "HAPPENED" in text
     assert "Company read-through" in text
-    assert "SOURCES" in text
+    assert "For references and sources, open this Insight in the app" in text
     assert "昇腾950发布说明" in text
     # Superseded editorial sections must not reappear.
     assert "WHAT CHANGED" not in text
@@ -163,6 +200,7 @@ def test_cover_omits_pipeline_plumbing_analysts_do_not_need():
     assert "READ-THROUGHS" not in text
     assert "COMPANIES\nSCREENED" not in text
     assert "METHOD" not in text
+    assert "The ranked developments most likely to change today's investment work." not in text
     # Model, effort, prompt version, and turn counts are run plumbing, not reading.
     assert "GPT-5.6-SOL" not in text
     assert "XHIGH" not in text
@@ -203,10 +241,9 @@ def test_report_shows_every_company_with_its_direction_and_evidence():
 def test_report_keeps_sources_clean_and_points_to_the_live_audit_trail():
     text = _pdf_text(pdf_report.build_report_pdf(_payload()))
 
-    assert "Sources and audit trail" in text
-    assert "PRIMARY" in text
-    assert "SOURCES" in text
-    assert "Open the full company read-through and audit trail" in text
+    assert "Sources and audit trail" not in text
+    assert "PRIMARY\nSOURCES" not in text
+    assert "For references and sources, open this Insight in the app" in text
     # The memo screening funnel and per-memo rationale are pipeline noise;
     # analysts get the same detail interactively in the app link above.
     assert "SCREENED" not in text
@@ -217,11 +254,33 @@ def test_report_keeps_sources_clean_and_points_to_the_live_audit_trail():
     assert "Confirm Netskope's agent traffic controls map here." not in text
 
 
+def test_exported_pdfs_use_brief_positions_not_feed_ranks():
+    investment_payload = _payload()
+    investment_payload["items"] = [_item(13), _item(16)]
+
+    investment_text = _pdf_text(pdf_report.build_report_pdf(investment_payload))
+    engineering_text = _pdf_text(
+        pdf_report_engineering.build_report_pdf(_engineering_payload())
+    )
+
+    assert "#13" not in investment_text
+    assert "#16" not in investment_text
+    assert "#4" not in engineering_text
+    assert "#12" not in engineering_text
+    assert "#1" in investment_text
+    assert "#2" in investment_text
+    assert "#1" in engineering_text
+    assert "#2" in engineering_text
+    assert "EVAL Evaluation" not in engineering_text
+    assert "Evaluation" in engineering_text
+    assert "For references and sources, open this Insight in the app" in engineering_text
+
+
 def test_report_links_only_application_owned_sources():
     links = _pdf_links(pdf_report.build_report_pdf(_payload()))
 
-    assert "https://example.com/research" in links
-    assert "https://x.com/example/status/1" in links
+    assert "https://example.com/research" not in links
+    assert "https://x.com/example/status/1" not in links
     assert (
         "https://frontier-lab-intelligence.adithyan.io/bit-lens/companies"
         "?company=NTSK&bet=NTSK-B1" in links
@@ -296,7 +355,7 @@ def test_report_api_downloads_the_current_engineering_brief(tmp_path, monkeypatc
             filename="fli-daily-brief-2026-07-17-ai-engineering.pdf",
             etag="b" * 64,
             cache_hit=False,
-            report_version="engineering-agent-pdf-v1",
+            report_version="engineering-agent-pdf-v2",
         ),
     )
 
@@ -308,4 +367,4 @@ def test_report_api_downloads_the_current_engineering_brief(tmp_path, monkeypatc
         'filename="fli-daily-brief-2026-07-17-ai-engineering.pdf"'
         in response.headers["content-disposition"]
     )
-    assert response.headers["x-fli-report-version"] == "engineering-agent-pdf-v1"
+    assert response.headers["x-fli-report-version"] == "engineering-agent-pdf-v2"

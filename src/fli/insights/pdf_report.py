@@ -14,7 +14,7 @@ import re
 import tempfile
 from threading import Lock, get_ident
 from typing import Any
-from urllib.parse import urlencode, urlsplit
+from urllib.parse import urlencode
 from xml.sax.saxutils import escape
 
 from reportlab.lib.colors import HexColor
@@ -38,7 +38,7 @@ from reportlab.platypus import (
 )
 
 
-REPORT_SCHEMA_VERSION = "investment-agent-pdf-v13"
+REPORT_SCHEMA_VERSION = "investment-agent-pdf-v14"
 REPO_ROOT = Path(__file__).resolve().parents[3]
 COMPANY_MEMO_PATH = REPO_ROOT / "docs" / "references" / "company-memos.json"
 DEFAULT_CACHE_ROOT = REPO_ROOT / "data" / "derived" / "insights" / "pdf-cache"
@@ -302,14 +302,6 @@ def _styles() -> dict[str, ParagraphStyle]:
             fontName="Courier",
             fontSize=8.2,
             leading=12,
-            textColor=INK_SOFT,
-        ),
-        "cover_lede": ParagraphStyle(
-            "CoverLede",
-            parent=normal,
-            fontName="Helvetica",
-            fontSize=11,
-            leading=16.5,
             textColor=INK_SOFT,
         ),
         "section": ParagraphStyle(
@@ -604,11 +596,6 @@ def _cover(payload: dict[str, Any], styles: dict[str, ParagraphStyle]) -> list[A
     audience = str(payload["audience"])
     day = str(payload["date"])
     items = list(payload.get("items") or [])
-    lede = (
-        "The ranked developments most likely to change today's investment work."
-        if audience == "investment"
-        else "The ranked developments most likely to change today's engineering work."
-    )
     story: list[Any] = [
         HRFlowable(width=14 * mm, thickness=2.6, color=BLUE, hAlign="LEFT", spaceAfter=3.4 * mm),
         Paragraph('<a name="brief-index"/>FRONTIER LAB INTELLIGENCE', styles["brand"]),
@@ -621,20 +608,6 @@ def _cover(payload: dict[str, Any], styles: dict[str, ParagraphStyle]) -> list[A
             styles["cover_meta"],
         ),
         Spacer(1, 7 * mm),
-        Table(
-            [[Paragraph(_markup(lede), styles["cover_lede"])]],
-            colWidths=[118 * mm],
-            hAlign="LEFT",
-            style=TableStyle(
-                [
-                    ("LEFTPADDING", (0, 0), (-1, -1), 0),
-                    ("RIGHTPADDING", (0, 0), (-1, -1), 0),
-                    ("TOPPADDING", (0, 0), (-1, -1), 0),
-                    ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
-                ]
-            ),
-        ),
-        Spacer(1, 8 * mm),
         HRFlowable(width="100%", thickness=0.9, color=INK, spaceAfter=0),
         Spacer(1, 6 * mm),
     ]
@@ -669,15 +642,15 @@ def _cover(payload: dict[str, Any], styles: dict[str, ParagraphStyle]) -> list[A
         return story
     toc_rows = [
         [
-            Paragraph(f'#{int(item["daily_rank"])}', styles["toc_rank"]),
+            Paragraph(f"#{position}", styles["toc_rank"]),
             Paragraph(
-                f'<link href="#insight-{int(item["daily_rank"])}" color="#235165">'
+                f'<link href="#insight-{position}" color="#235165">'
                 f'{_markup(item["headline"])}</link>',
                 styles["toc_title"],
             ),
             Paragraph(_markup(" ".join(_item_tickers(item))), styles["toc_tickers"]),
         ]
-        for item in items
+        for position, item in enumerate(items, start=1)
     ]
     story.append(
         Table(
@@ -858,61 +831,29 @@ def _mechanism_block(
 
 
 def _sources_block(item: dict[str, Any], styles: dict[str, ParagraphStyle]) -> list[Any]:
-    """Primary reading links, plus one pointer into the live, interactive audit trail."""
-    provenance = item.get("provenance") or {}
-
-    sources: list[Any] = []
-    original = provenance.get("original_post") or {}
-    if original.get("url"):
-        sources.append(
-            Paragraph(
-                f'{_link(original.get("url"), original.get("author") or original.get("url"))}'
-                f'{_host_suffix(original.get("url"))}',
-                styles["link"],
-            )
-        )
-    for artifact in provenance.get("artifacts") or []:
-        if sources:
-            sources.append(Spacer(1, 2.2 * mm))
-        sources.append(
-            Paragraph(
-                f'{_link(artifact.get("url"), artifact.get("title"))}'
-                f'{_host_suffix(artifact.get("url"))}',
-                styles["link"],
-            )
-        )
-
-    heading = _section_heading("Sources and audit trail", "", styles, space_before=9 * mm)
-    block: list[Any] = list(heading)
-    if sources:
-        block.append(_rail("PRIMARY<br/>SOURCES", sources, styles))
-        block.append(Spacer(1, 6 * mm))
     app_url = _insight_app_url(
         "investment", str(item.get("day") or ""), str(item.get("development_id") or "")
     )
-    block.append(
-        _rail(
-            "IN THE<br/>APP",
-            Paragraph(
-                _link(app_url, "Open the full company read-through and audit trail \u2192"),
-                styles["link"],
-            ),
-            styles,
+    return [
+        KeepTogether(
+            [
+                Spacer(1, 7 * mm),
+                HRFlowable(width="100%", thickness=0.4, color=BORDER, spaceAfter=2.8 * mm),
+                Paragraph(
+                    _link(
+                        app_url,
+                        "For references and sources, open this Insight in the app \u2192",
+                    ),
+                    styles["link"],
+                ),
+            ]
         )
-    )
-    # The audit trail is one unit: never strand the app link on its own page.
-    return [KeepTogether(block)]
+    ]
 
 
-def _host_suffix(url: Any) -> str:
-    host = urlsplit(str(url or "")).netloc.removeprefix("www.")
-    if not host:
-        return ""
-    return f'  <font name="Courier" size="7" color="#6B6B68">{_markup(host)}</font>'
-
-
-def _insight(item: dict[str, Any], styles: dict[str, ParagraphStyle]) -> list[Any]:
-    rank = int(item["daily_rank"])
+def _insight(
+    item: dict[str, Any], styles: dict[str, ParagraphStyle], position: int
+) -> list[Any]:
     company_names = item.get("company_names") or {}
     provenance = item.get("provenance") or {}
     original = provenance.get("original_post") or {}
@@ -925,10 +866,10 @@ def _insight(item: dict[str, Any], styles: dict[str, ParagraphStyle]) -> list[An
     ]
     story: list[Any] = [
         _rail(
-            f"#{rank}",
+            f"#{position}",
             [
                 Paragraph(
-                    f'<a name="insight-{rank}"/>{_markup(item.get("headline"))}',
+                    f'<a name="insight-{position}"/>{_markup(item.get("headline"))}',
                     styles["insight_title"],
                 ),
                 Spacer(1, 2.8 * mm),
@@ -994,9 +935,9 @@ def build_report_pdf(payload: dict[str, Any]) -> bytes:
         pageCompression=1,
     )
     story = _cover(payload, styles)
-    for item in payload.get("items") or []:
+    for position, item in enumerate(payload.get("items") or [], start=1):
         story.append(PageBreak())
-        story.extend(_insight(item, styles))
+        story.extend(_insight(item, styles, position))
 
     doc.build(
         story,
