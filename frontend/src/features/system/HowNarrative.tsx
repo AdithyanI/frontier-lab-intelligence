@@ -289,15 +289,15 @@ export default function HowNarrative({
           <h4><span className="mono">4</span> Judge: useful for whom?</h4>
           <p>
             Something can rank highly and still not be useful to either
-            reader. So each Event is now asked two separate questions. Could
+            reader. So each Development is now asked two separate questions. Could
             this change an investment position? And is there something here
             that an engineering team should act on?
           </p>
           <p>
             One structured call produces two independent audience decisions.
             Each answer is a yes or no with a reason, and neither answer
-            affects the other. An Event can be useful to both audiences, to
-            one, or to neither. You can read both decisions on the Event
+            affects the other. A Development can be useful to both audiences, to
+            one, or to neither. You can read both decisions on the Development
             itself.
           </p>
           <p>
@@ -422,7 +422,7 @@ export default function HowNarrative({
           </p>
           <p>
             Audience routing uses <code>gpt-5.6-luna</code> at medium effort.
-            One structured call reads an Event and returns an independent
+            One structured call reads a Development and returns an independent
             decision for investment and AI engineering. Investment then uses{' '}
             <code>gpt-5.6-terra</code> at xhigh effort to screen the portfolio
             and open only justified company memos. AI Engineering uses the same

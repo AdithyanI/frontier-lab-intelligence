@@ -251,14 +251,14 @@ export function RankFigure() {
   )
 }
 
-/* Stage 4: two independent questions. One Event, two separate verdicts,
+/* Stage 4: two independent questions. One Development, two separate verdicts,
    never a blended score. */
 export function JudgeFigure() {
   return (
     <svg
       viewBox="0 0 1080 340"
       role="img"
-      aria-label="One Event is asked two separate questions: does this change an investment position, and should an engineering team act on it. Each gets its own yes or no with reasons. Both, one, or neither can apply."
+      aria-label="One Development is asked two separate questions: does this change an investment position, and should an engineering team act on it. Each gets its own yes or no with reasons. Both, one, or neither can apply."
     >
       <defs>
         <marker id="judge-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
@@ -269,7 +269,7 @@ export function JudgeFigure() {
       <text x="1050" y="34" textAnchor="end" fontFamily={MONO} fontSize="9.5" fill={MUTED} letterSpacing="0.06em">FRESH FIRST-PARTY EVIDENCE ONLY</text>
 
       <rect x="70" y="140" width="190" height="84" fill={INK} />
-      <text x="94" y="176" fontFamily={UI} fontSize="16" fontWeight="600" fill="#fff">One Event</text>
+      <text x="94" y="176" fontFamily={UI} fontSize="16" fontWeight="600" fill="#fff">One Development</text>
       <text x="94" y="200" fontFamily={UI} fontSize="12" fill="#fff" opacity="0.78">with its evidence</text>
 
       <line x1="260" y1="168" x2="392" y2="112" stroke={BLUE_MID} strokeWidth="1.5" markerEnd="url(#judge-arrow)" />
@@ -289,7 +289,7 @@ export function JudgeFigure() {
 
       <line x1="30" y1="312" x2="1050" y2="312" stroke={MUTED} strokeWidth="1" strokeDasharray="4 5" opacity="0.35" />
       <text x="30" y="334" fontFamily={UI} fontSize="11.5" fill={MUTED}>
-        An Event can matter to both audiences, to one, or to neither. Each verdict keeps its reasoning.
+        A Development can matter to both audiences, to one, or to neither. Each verdict keeps its reasoning.
       </text>
     </svg>
   )
