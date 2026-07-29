@@ -1,4 +1,9 @@
-# Research Notes
+# Historical research notes through 28 July 2026
+
+This is the original case-study discovery ledger. It contains useful source
+provenance alongside submission-era assumptions and deadlines. It is not a
+current operating contract. Use [`docs/STATUS.md`](../../STATUS.md) for current
+proof and the scoped references one directory above for implementation facts.
 
 Durable research facts for this build: assumptions, source provenance, and
 candidate-discovery leads. Keep this compact. The tracker decides what to do

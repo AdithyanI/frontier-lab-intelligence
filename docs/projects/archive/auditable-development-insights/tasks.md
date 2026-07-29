@@ -87,6 +87,30 @@ negative decisions, rather than hiding it inside one opaque editorial call.
 - No external send or publication without Adi's explicit approval in the
   current session.
 
+## Closeout
+
+Closed on 2026-07-29 at Adi's request.
+
+The project delivered the company-aware Investment boundary: exact
+Development lineage, complete-universe screening, bounded memo retrieval,
+strict structured judgments, stored negative decisions, atomic daily
+publication, CLI/API/UI inspection, PDF projection, and manual delivery.
+The July 19–21 top-ten Investment cohorts are the completed calibration proof.
+
+The following original scope is explicitly deferred rather than reported as
+complete:
+
+- an AI Engineering Insight generator and build-surface roster;
+- a full July 21 top-100 Insight run;
+- a separate Insight score or rating beyond application-owned daily Feed rank;
+- cohort-level deduplication and broader calibration.
+
+Those are future product choices, not blockers to the current Investment
+system. They require a new explicitly invoked project if resumed. The current
+contracts live in `docs/STATUS.md`,
+`docs/references/implementation-contracts.md`, and
+`docs/references/insight-refresh.md`.
+
 ## Done When
 
 - [ ] One documented current-lineage input/output contract exists for each
@@ -198,12 +222,13 @@ negative decisions, rather than hiding it inside one opaque editorial call.
 
 ## Open Questions / Blockers
 
-- Should mapping and final surface/suppress judgment be one structured Terra
-  call or two explicit stages? Resolve with the fixed Investment sample by
-  comparing inspectability, evidence use, and cost—not architectural taste.
-- What is the smallest Insight rating contract that adds rigor without
-  laundering model judgment into a pseudo-objective number? Resolve before the
-  full top-100 run.
+- None for the delivered Investment boundary.
+- The model loop keeps screening, memo retrieval, and final judgment in one
+  traceable Responses workflow.
+- No separate scalar Insight score was introduced. Daily Feed rank remains the
+  application-owned order.
+- AI Engineering generation and full-cohort expansion are deferred future
+  scope.
 
 ## Current Batch
 
@@ -211,18 +236,13 @@ negative decisions, rather than hiding it inside one opaque editorial call.
 | --- | --- | --- | --- |
 | done | Implement and validate the current-lineage Investment contract, store, CLI, API, and UI | parent | `src/fli/insights/investment_agent.py` |
 | done | Publish the ten highest positive Investment routes for July 19–21 and reconcile lineage, labels, cache, cost, and failures | parent | `data/derived/insights/investment-agent.db` |
-| in progress | Qualitatively audit the 30 Investment decisions and choose the next calibration changes | parent | live Insights UI |
-| todo | Define the symmetric current-lineage AI Engineering contract and build-surface roster | parent | `resources/engineering-contract.md` |
+| done | Consolidate the current Investment architecture and operator contracts | parent | `docs/references/implementation-contracts.md` |
+| done | Explicitly defer AI Engineering generation, full top-100 expansion, and additional calibration to a future project | parent | Closeout section |
 
 ## Backlog / Remaining Work
 
-- [ ] Calibrate the AI Engineering build-surface roster and output contract.
-- [ ] Choose and validate the Insight rating/ordering contract.
-- [ ] Implement the clean resumable current-lineage store, CLI, API, and UI.
-- [ ] Run the complete July 21 routable top-100 cohort.
-- [ ] Reconcile cost/cache telemetry and qualitative errors.
-- [ ] Update durable architecture/status/model/cost docs.
-- [ ] Finalize `learnings.md`, run full validation, and archive the project.
+None inside this project. Deferred items are recorded in the Closeout section
+and require a new explicitly invoked project.
 
 ## Validation / Test Plan
 
@@ -257,3 +277,7 @@ negative decisions, rather than hiding it inside one opaque editorial call.
   and led to bounded, trace-preserving transport retries in the production
   runner. API reconciliation proved every published Development is a current
   positive Investment route and exactly matches its daily publication.
+- 2026-07-29: [CLOSED] Consolidated the repository onto the company-aware
+  Investment path. Adi explicitly deferred the incomplete AI Engineering,
+  top-100, scoring, and broader calibration scope and requested project
+  closure. Final repository validation is recorded at archive handoff.

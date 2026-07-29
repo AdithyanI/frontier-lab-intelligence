@@ -59,7 +59,11 @@
 
 ## Recommended Follow-Ups
 
-- None yet. Update after the first fixed-cohort calibration.
+- Start a new project only if AI Engineering generation, full top-100
+  Investment expansion, cohort-level deduplication, or a new ordering contract
+  becomes a current priority.
+- Keep the current application-owned Feed rank unless a reviewed cohort proves
+  that a second ordering boundary improves analyst usefulness.
 
 ## Notes For Future Runs
 
@@ -67,3 +71,6 @@
   weakness belongs to mapping, company/build context, evidence, suppression,
   or ordering.
 - Negative verdicts are part of the audit trail and must survive publication.
+- A narrow Investment-only path was easier to inspect and defend than restoring
+  the earlier two-audience editorial system. Deferred breadth should return as
+  a new project, not as a compatibility fallback.
