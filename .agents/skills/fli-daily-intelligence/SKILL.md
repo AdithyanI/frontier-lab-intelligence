@@ -1,323 +1,136 @@
 ---
 name: fli-daily-intelligence
-description: Produces and persists one evidence-grounded Frontier Lab Intelligence daily brief by researching across positively routed Events, retrieving related packets, grouping supporting evidence, applying BIT Capital Investment or AI Engineering context, and validating complete cited outputs. Use when asked to generate, test, review, or improve a daily intelligence run for a specific date.
+description: Runs, inspects, and validates one day of Frontier Lab Intelligence company-aware Investment Insights. Use when asked to generate, re-run, audit, or debug the daily Investment brief for a specific date, or to inspect the BIT company packet the agent screens against.
 ---
 
 # FLI Daily Intelligence
 
-Use the repository's deterministic workbench for evidence and persistence. Use
-your own judgment for research, retrieval, grouping, and synthesis.
+One path produces every Insight: the company-aware Investment agent in
+`src/fli/insights/investment_agent.py`. There is no editorial lane, no Codex
+App Server handoff, and no fallback renderer. If a day is not published, the
+product says so rather than showing older content.
+
+The model owns judgment. The repository owns evidence, schema, persistence, and
+every URL the reader sees.
+
+## What the agent does
+
+For one day it selects the highest-ranked Developments with a positive
+Investment route, and for each one:
+
+1. Screens all 37 companies in the compact BIT universe from a single packet.
+2. Calls `get_company_memo` only for companies it can already name a causal
+   path to. The call requires the ticker plus the mechanism, the affected
+   operating driver, and why the memo is needed — so the claim exists before
+   the file opens. `ticker` is an enum over the covered holdings, so an
+   out-of-portfolio name is schema-impossible.
+3. Emits mechanism groups. Each group carries one causal path, the companies
+   exposed through it, and per company: direction, affected operating driver,
+   materiality, size basis, and impact.
+4. Declares every opened-but-unused company in `rejected_after_memo` with a
+   reason. Validation fails the run if a memo was opened and neither used nor
+   rejected.
+
+The loop ends when the model stops calling tools. Ceilings are
+`MAX_UNIQUE_MEMOS = 8`, `MAX_MODEL_TURNS = 4`, `MAX_RESPONSE_ATTEMPTS = 3`;
+none has ever bound in production.
 
 ## Required workflow
 
 1. Confirm the requested ISO date and work from the repository root.
-2. Read both audience contexts before inspecting candidates:
+2. Read the live contract before assuming any field exists:
 
    ```bash
-   .venv/bin/fli daily-intelligence context --audience investment --compact --json --no-input
-   .venv/bin/fli daily-intelligence context --audience ai_engineering --json --no-input
+   .venv/bin/fli insights contract --json --no-input
    ```
 
-   The Investment context is the structured
-   [BIT investment packet](references/bit-investment-context.json). It is the
-   authoritative skill reference for the fund's public thesis, complete audited
-   portfolio baseline, reusable company profiles, and the boundary for companies
-   outside that portfolio. Each company profile separates BIT's attributable
-   public view from FLI analyst context; never present the latter as BIT's thesis.
-   The compact profile index keeps all 37 sourced companies eligible. Use it to
-   shortlist zero or a few credible Event matches, then retrieve only those
-   complete profiles. A company profile is prior context, never proof that a
-   specific Event affects the company.
-   `source_scope` distinguishes firm-wide research, this flagship strategy,
-   another BIT product, or mixed commentary.
+   It reports the active prompt version, model identity, output schema, and
+   loop ceilings from the running code, not from documentation.
 
-   The AI Engineering context describes BIT's public Aion, research-signal,
-   evaluation, LLMOps, and data-platform mandate. Use its relevance map to
-   distinguish current or near-term engineering decisions from merely
-   interesting frontier work. FLI is a bounded case-study testbed for that class
-   of system; never imply that its implementation is BIT's private architecture.
-
-3. Freeze or reuse the day's union-positive workspace:
+3. Read the company packet the agent screens against:
 
    ```bash
-   .venv/bin/fli daily-intelligence prepare --day YYYY-MM-DD --json --no-input
+   .venv/bin/fli insights company-universe --json --no-input
+   .venv/bin/fli insights company-context --company NTSK --json --no-input
    ```
 
-   Use the returned `workspace` path for every later command. Read its
-   `manifest.json` and `draft.template.json`. Only the current workspace v3
-   contract is supported; never reuse or adapt an older packet after a schema
-   migration. Run `prepare` again from the same frozen routing lineage instead.
-   Workspace v3 retains only
-   first-party X sources published from the brief day through seven days
-   earlier. Raw Feed evidence is not deleted. If an old root has a current
-   same-author quote or reply, that current post becomes the packet root; if no
-   current first-party X source remains, the Event is absent from the workspace.
-   Artifacts are not automatically pruned with X sources. Their exact stored
-   `disclosures` remain inspectable even when a disclosure post is not part of
-   the compact semantic packet. Before citing one, check that its disclosure
-   timing is appropriate for the brief and that its content supports the claim.
-   A pruned packet deliberately withholds inherited routing prose and prior
-   per-Event annotations; judge it from the retained evidence.
-4. Investigate across the whole cohort. Start with deterministic retrieval,
-   then broaden only where it improves the judgment:
-   - for an Investment candidate, begin with the in-scope compact company index,
-     shortlist only companies with a plausible Event-specific mechanism, then
-     fetch each matching profile before web research. Use its identity,
-     operating drivers, AI exposure channels, and watchpoints as a starting lens
-     rather than a daily conclusion:
+   The packet is the structured
+   [BIT investment context](references/bit-investment-context.json) plus the
+   37 web-grounded memos in `docs/references/company-memos/`. Each profile
+   separates BIT's attributable public view from FLI analyst context; never
+   present the latter as BIT's thesis. `source_scope` distinguishes firm-wide
+   research, this flagship strategy, another BIT product, or mixed commentary.
+   A company profile is prior context, never proof that an Event affects the
+   company.
 
-     ```bash
-     .venv/bin/fli daily-intelligence company-context \
-       --company "NAME, TICKER, OR ALIAS" --json --no-input
-     ```
-   - inspect `exact_artifact_groups` in the manifest;
-   - use `search` for entities, products, concepts, and repeated claims;
-   - use `inspect-event` before relying on a candidate;
-   - use `index`, then `similar`, only when lexical and artifact retrieval may
-     miss materially different wording; a normal one-day run does not require it;
-   - perform broader web research when packets do not establish the relevant
-     company, technical, competitive, or portfolio transmission path.
-5. Write `draft.json` beside the template. Use
-   [references/editorial-standard.md](references/editorial-standard.md) for the
-   reasoning and field contract. Default distinct developments to separate
-   Insights or `not_selected`. Multiple Events may support one Insight only
-   when they support the same audience conclusion, causal mechanism, and
-   decision; do not create a separate development object.
-6. Before expanding the analysis, run one distinct causal-coherence and source-
-   pruning review over every selected Insight. State its core claim privately
-   in one sentence, then test every attached Event and citation: what exact
-   clause does it support or challenge, is any comparison genuinely like-for-
-   like, and would removing it materially weaken the conclusion or its
-   uncertainty? Remove, separate, or mark `not_selected` any source that shares
-   only a topic, trend, entity, or vocabulary. Complete cohort coverage never
-   requires attaching an Event to a selected Insight.
-7. Before validation, run one distinct missing-implication review over every
-   selected Insight. Ask: **What important consequence does this evidence
-   support that the draft has not carried through?** Follow the evidence one
-   additional causal step and revise only when the consequence is material and
-   supported. This review may deepen the existing causal chain; it must not
-   broaden the Insight into a second development or unrelated mechanism. When
-   the same development appears for both audiences, compare the two
-   interpretations so a relevant technical constraint can inform the
-   Investment consequence, or a business constraint can inform the Engineering
-   decision, without merging the audience outputs. If the missing bridge can be
-   resolved with bounded web research, resolve it; otherwise preserve it as an
-   uncertainty or watchpoint rather than speculation. This is a reasoning
-   review, not a reason to build or run an embedding index when the evidence is
-   already present.
-8. After the reasoning is complete, run one mandatory reader-facing writing
-   pass over every selected Insight. Load and apply the shared
-   [Adi writing skill](../adi-writing/SKILL.md), including its voice standard,
-   and follow the institutional adaptation in
-   [the editorial standard](references/editorial-standard.md#reader-facing-writing).
-   Apply it to every field the reader sees, not only the title. Assume the
-   reader has not opened the Event, artifact, or source. `what_changed` must
-   supply enough context to understand what happened, how the central result
-   was established, and its important boundary. `interpretation` must explain
-   the affected audience decision and causal mechanism. Preserve the facts,
-   causal chain, technical precision, and honest uncertainty; simplify the
-   language and sentence structure, not the judgment. Concise means no wasted
-   words, not missing setup.
-
-   Close the pass with the editorial standard's mechanical checks on every
-   selected Insight; treat any failure as unfinished writing, not style:
-
-   - the cold-analyst check on `what_changed`: named actor, named thing,
-     each term of art explained once, and the three-to-five-sentence floor;
-   - the Aion replace-test on every Engineering `interpretation`: if "Aion"
-     can become "any agent" without changing the sentence, rewrite it around
-     the specific public workflow or remove the name; and
-   - no "FLI needs X" phrasing addressed to the BIT reader.
-9. Run the read-only coverage preflight, then validate repeatedly until the
-   complete cohort passes:
+4. Run the day:
 
    ```bash
-   .venv/bin/fli daily-intelligence preflight \
-     --workspace <workspace> --draft <workspace>/draft.json --json --no-input
-   .venv/bin/fli daily-intelligence validate \
-     --workspace <workspace> --draft <workspace>/draft.json --json --no-input
+   .venv/bin/python -m fli.insights.investment_agent \
+     --through YYYY-MM-DD --days 1 --top-ranked 10 --workers 6
    ```
 
-   Preflight is a compact coverage ledger, not an editorial judge. It must show
-   every expected Event/audience pair exactly once as either included or
-   `not_selected`, with zero missing, duplicate, or unexpected pairs. Use its
-   rows to locate omissions quickly; validation remains the authoritative
-   schema and evidence gate.
+   It completes one warm request for the stable prompt prefix, runs the
+   remaining ranks with bounded parallelism, writes the exact request and
+   response for every turn under
+   `data/derived/insights/investment-agent-traces/<day>/`, and imports each
+   validated result.
 
-10. For a requested daily brief, import the validated result atomically and
-   inspect the durable run:
+5. Confirm the day actually published:
 
    ```bash
-   .venv/bin/fli daily-intelligence import-result \
-     --workspace <workspace> --draft <workspace>/draft.json --json --no-input
-   .venv/bin/fli daily-intelligence inspect-run \
-     --run-id <returned-run-id> --projection summary --json --no-input
+   .venv/bin/fli insights summary --json --no-input
    ```
 
-   Review-only and client-evaluation tasks may stop after validation or use
-   `import-result --dry-run`. Never edit the SQLite store directly. Once a
-   complete run is imported, the Insights backend and UI select it
-   automatically for that date and audience. Use the additive `insights`,
-   `citations`, or `dispositions` projections for focused inspection; request
-   the default `full` payload only when the complete durable record is needed.
+   **Publication is all-or-nothing.** A day becomes visible only when every
+   requested rank succeeds. One failed Insight leaves the whole day invisible
+   even though its rows are stored. This is deliberate — it is what stops a
+   partial re-run from mixing prompt versions on one page. If `published_days`
+   omits the date, read the traces to find which rank failed and re-run.
 
-## Parallel historical dates
+6. Verify the reader surface, not just the database:
 
-Do not start several full `daily-intelligence run-day` Evidence stages in
-parallel. Feed and Event publication is one global deterministic snapshot, so
-competing publishers can invalidate one another even though later workspaces
-are independent.
+   ```bash
+   curl -s "http://127.0.0.1:8797/api/insights?audience=investment&status=kept&date=YYYY-MM-DD"
+   ```
 
-For a historical batch:
+   The always-on app serves the built SPA at `http://127.0.0.1:8797`. It caches
+   routing at process start; if a re-run changed routing, restart it.
 
-1. Publish Evidence once through the latest requested date with a retained
-   window that covers the earliest requested date.
-2. Run one `fli audience-routing refresh --through MAX --days N` command. Use
-   `--day-workers` for bounded per-day parallelism and do not use `--replace`.
-   The refresh reuses complete predecessor judgments only for exact matching
-   Event/evidence/model-input hashes under the same model contract, even when
-   the global publication ID changed.
-3. Prepare one immutable workspace per date. These local preparations may run
-   independently once the routing batch is complete.
-4. Launch one Codex task per exact workspace and let authoring, validation, and
-   import proceed in parallel. Never let a task inspect another date's draft or
-   workspace.
+## Quality bar
 
-This is a fan-out after one shared deterministic freeze, not several competing
-end-to-end publishers. A new or changed Event is evaluated; unchanged routed
-evidence is reused with explicit provenance.
+Enforced by `_validate_final`, so a violation fails the run:
 
-Do not schedule, publish, submit, or take another external action unless the
-user explicitly requests that action in the current session.
+- headline is at most 18 words and is a judgment, not a release name;
+- every opened memo is either used or explicitly rejected;
+- `splits` is consistent with the directions inside its mechanism group;
+- `size_basis` states a magnitude when materiality is `material`;
+- no model-authored URLs anywhere.
 
-## Retrieval commands
+Requested by prompt but not machine-checkable — inspect these by reading:
 
-```bash
-.venv/bin/fli daily-intelligence company-context \
-  --company "Microsoft" --json --no-input
+- plain English, short sentences, no unexplained jargon;
+- `impact` explains the company's position in the mechanism, and never refers
+  to rank;
+- `main_uncertainty` names what would falsify the read;
+- `prior_assumption` names the belief this Development moves.
 
-.venv/bin/fli daily-intelligence search \
-  --workspace <workspace> --query "Inkling" --limit 20 --json --no-input
+## Known limitations
 
-.venv/bin/fli daily-intelligence inspect-event \
-  --workspace <workspace> --event-id <event-id> --json --no-input
+Name these rather than hiding them:
 
-.venv/bin/fli daily-intelligence index \
-  --workspace <workspace> --progress plain --json --no-input
+- Each call sees one Development in isolation, so two Developments about the
+  same underlying shift can produce near-duplicate Insights on one day. There
+  is no cohort-level dedup pass.
+- `materiality: unknown` is common and usually correct: only 11 of 37 memos
+  carry a revenue base, so scale often cannot be stated honestly.
+- AI Engineering has no run on this path yet. The endpoint returns an explicit
+  reason instead of older content.
 
-.venv/bin/fli daily-intelligence similar \
-  --workspace <workspace> --event-id <event-id> \
-  --limit 15 --min-score 0.7 --json --no-input
-```
+## Boundaries
 
-The embedding index is a cached retrieval sidecar keyed by Event ID, rendered
-packet hash, embedding contract, and model. A cosine neighbor is only a
-candidate. Never treat a threshold, connected component, shared vocabulary, or
-shared theme as an automatic merge.
-
-## Editorial invariants
-
-- Keep every decision-useful Insight supported by the day, while preferring
-  precision over padding. Selecting the best three to five for a submission is
-  a separate later step, not a persistence limit.
-- Rank only the selected Insights. Rank is the audience's daily decision
-  priority, not Feed rank, popularity, confidence, or embedding similarity.
-  Give each selected Insight one concise `rank_rationale` that explains its
-  position relative to the rest of that audience's complete daily brief.
-- The title states a judgment. `what_changed` states the attributable facts.
-- Connect every Insight to one or more exact Events and at least one citation.
-- Assign each routed Event once per relevant audience: to one Insight or to
-  `not_selected` with a concrete reason.
-- Treat `not_selected` as a successful editorial disposition. Never attach an
-  Event merely because it is interesting, adjacent, or needed for cohort
-  accounting.
-- Prefer primary artifacts and first-party sources. Preserve provider
-  attribution and important contradictory evidence.
-- Never cite an artifact merely because it is attached to an Event. Read the
-  frozen artifact text, identify the exact claim it establishes, and include a
-  short verbatim `excerpt` plus a claim-specific `supports` explanation. If no
-  passage directly supports the Insight, omit that artifact citation. The
-  validator rejects missing excerpts and excerpts absent from frozen text.
-- Treat artifact disclosure timing as an editorial audit, not an automatic
-  code gate. Do not use a disclosure later than the brief day as if it were
-  available then; retain the later source only as auditable packet context.
-- Treat each retained X source's `posted` date as application-owned truth.
-  Never assign the brief day to an older source or cite a pruned URL. Event
-  citation dates are filled from the frozen workspace and conflicting dates
-  fail validation.
-- Use web research actively when it can resolve an unknown. A web citation must
-  retain its URL, retrieval time, supporting excerpt, and the claim it supports.
-- Never invent a BIT holding, private forecast, cost basis, trade, target, or
-  consensus view. For this version, treat the packet's audited portfolio as the
-  working portfolio context and keep its date and source in the packet rather
-  than repeating them in every reader-facing company row.
-- The audited portfolio report is page-level context, not a default Insight
-  citation. Do not attach it to an individual Insight merely to establish that
-  a named company belongs to the working portfolio. Cite it inside an Insight
-  only when a report passage directly supports a development-specific claim.
-- Treat a company profile as reusable background, not evidence that today's
-  development has an effect. Attribute a view to BIT only when
-  `bit_public_view.grade` is `explicit_thesis` or `commentary` and cite its BIT
-  source. Respect `source_scope`: commentary from another BIT product is not the
-  flagship fund's thesis. When the grade is `none`, use the analyst context only
-  to guide diligence and derive direction from development-specific evidence.
-- For Investment company matching, review the compact index before retrieving
-  full profiles. Classify each reviewed pair as `direct`, `indirect`, or `none`;
-  an indirect match must name its intermediate causal step. Publish only direct
-  or well-evidenced material indirect connections. Suppress `none` and weak
-  indirect matches rather than filling the output.
-- When a company is retained, state whether the Event `supports`, `challenges`,
-  or has a `mixed` or `unclear` effect on the attributable public thesis. Use
-  `no_public_thesis` when no company-specific BIT view is in the packet; do not
-  convert FLI analyst context into a BIT thesis.
-- For Investment, classify every named company as `portfolio` or
-  `outside_portfolio`. Consider the portfolio first. Include an outside company
-  only when a direct public-equity transmission path is defensible; omit that
-  section rather than padding it.
-- For Investment, write one coherent `interpretation` that makes the
-  operating-to-financial-to-thesis chain explicit or states that the link is
-  unknown. Keep the strongest challenge in `key_uncertainty` and use one to
-  three measurable `watchpoints`; do not split the same argument across
-  parallel mechanics fields.
-- For Investment, use `impact` as the potential development-specific company
-  direction, not as proof of a realized financial result or a stock call. Use
-  `positive` or `negative` only when one material operating or thesis direction
-  is better supported than its opposite; keep realization and magnitude in the
-  key uncertainty and watchpoints. Use `mixed` only when the current development
-  supports material benefit and harm. Use `uncertain` only when no defensible
-  net direction exists because opposite branches remain comparably plausible or
-  an unresolved variable determines the sign. Generic exposure, company-profile
-  context, rival financing, or risk disclosures do not establish direction.
-  Omit mappings without a direct material transmission path; `uncertain` is not
-  a safe harbor for weak mappings. Never optimize toward a target distribution.
-- For Investment, keep internal research-method controls under AI Engineering
-  or `not_selected` unless they produce a defensible fund-thesis, company, or
-  portfolio consequence. A shared model, company, or market theme is not such
-  a consequence by itself.
-- For Engineering, put the concrete bounded action in `next_step` and combine
-  its measurable proceed and stop conditions into one concise `decision_rule`.
-  Keep affected surfaces, implications, hypotheses, and material constraints
-  in the interpretation rather than duplicating them as parallel fields.
-- For Engineering, select a development only when it changes a concrete current
-  or plausible near-term decision for Aion, research-signal production,
-  evaluation, safe data or tool access, LLMOps, or the supporting data platform.
-  The fact that an agent could use a technology is not a transfer path. Send
-  distant, generic, or merely interesting work to `not_selected` unless a
-  bounded experiment can resolve a named operating decision.
-- For Engineering, naming Aion or FLI is not enough. The interpretation must
-  identify the exact public BIT workflow or system surface affected, explain
-  how the development changes that workflow, and state the engineering decision
-  at stake. If “Aion” can be replaced with “any agent” without changing the
-  paragraph, rewrite it. Use FLI as a bounded testbed when useful, not as a
-  substitute for explaining the BIT reader's decision.
-- For Engineering, derive numerical gates from an existing baseline or label
-  them explicitly as provisional criteria to calibrate in the proposed test.
-  Do not present agent-chosen percentages or sample counts as validated
-  thresholds. When several controls change at once, stage or ablate them so the
-  result can identify which intervention helped; otherwise state that causal
-  attribution will remain unresolved.
-- Existing per-Event Insights are working annotations, not editorial truth.
-  Re-evaluate them against the complete day.
-
-Use [references/evaluation-cases.md](references/evaluation-cases.md) when
-forward-testing changes to this skill or its client.
+- Route every model call through the shared LiteLLM endpoint. See
+  `docs/references/model-routing.md`.
+- Never commit `data/raw/`, `data/derived/`, or secrets.
+- Do not send, publish, or share output without Adi's explicit approval in the
+  current session.

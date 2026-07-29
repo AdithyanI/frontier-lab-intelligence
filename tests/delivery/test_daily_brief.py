@@ -18,7 +18,7 @@ CLIENT = TestClient(app)
 
 def _payload() -> dict:
     payload = {
-        "content_kind": "daily_editorial",
+        "content_kind": "investment_agent",
         "available": True,
         "reason": None,
         "date": DAY,
@@ -27,17 +27,22 @@ def _payload() -> dict:
         "run": {"result_sha256": "a" * 64},
         "items": [
             {
-                "rank": rank,
-                "title": f"Insight {rank}",
-                "what_changed": f"What changed for Insight {rank}.",
-                "interpretation": f"Decision-useful interpretation {rank}.",
-                "next_step": f"Take next step {rank}.",
-                "events": [{"event_id": f"event-{rank}"}],
+                "daily_rank": rank,
+                "investment_headline": f"Insight {rank}",
+                "development_summary": f"Decision-useful interpretation {rank}.",
+                "company_assessments": [
+                    {
+                        "mechanism_title": f"Causal path {rank}",
+                        "next_check": f"Take next step {rank}.",
+                        "exposures": [{"ticker": "NTSK"}],
+                    }
+                ],
+                "provenance": {"primary_event_id": f"event-{rank}"},
             }
             for rank in range(1, 7)
         ],
     }
-    payload["items"][0]["interpretation"] = (
+    payload["items"][0]["development_summary"] = (
         "This complete interpretation must remain visible in Slack. " * 60
         + "FULL_INTERPRETATION_END"
     )
@@ -179,7 +184,7 @@ def test_status_discloses_labels_but_not_delivery_secrets():
 def test_delivery_api_exposes_status_and_forwards_explicit_confirmation(monkeypatch):
     payload = _payload()
     monkeypatch.setattr(
-        "fli.web.app.editorial_store.editorial_insights_payload",
+        "fli.web.app._investment_insights",
         lambda **_kwargs: payload,
     )
     monkeypatch.setattr(
@@ -232,7 +237,7 @@ def test_delivery_api_exposes_status_and_forwards_explicit_confirmation(monkeypa
 def test_delivery_is_unconfigured_and_blocked_in_read_only_mode(monkeypatch):
     monkeypatch.setenv("FLI_READ_ONLY", "true")
     monkeypatch.setattr(
-        "fli.web.app.editorial_store.editorial_insights_payload",
+        "fli.web.app._investment_insights",
         lambda **_kwargs: _payload(),
     )
 

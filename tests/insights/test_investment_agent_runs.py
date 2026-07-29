@@ -112,9 +112,9 @@ def test_import_trace_preserves_company_assessments_rejections_and_telemetry(
             "day": DAY,
             "content_kind": "investment_agent",
             "item_count": 1,
-            "candidate_count": 1,
-            "included_candidate_count": 1,
-            "not_selected_candidate_count": 0,
+            "development_count": 1,
+            "surfaced_development_count": 1,
+            "suppressed_development_count": 0,
         }
     ]
     assert payload["content_kind"] == "investment_agent"
@@ -225,9 +225,9 @@ def test_investment_api_prefers_company_aware_successor(monkeypatch):
                     "day": DAY,
                     "content_kind": "investment_agent",
                     "item_count": 1,
-                    "candidate_count": 1,
-                    "included_candidate_count": 1,
-                    "not_selected_candidate_count": 0,
+                    "development_count": 1,
+                    "surfaced_development_count": 1,
+                    "suppressed_development_count": 0,
                 }
             ],
         },

@@ -1,6 +1,6 @@
 interface:
   display_name: "FLI Daily Intelligence"
-  short_description: "Author and persist one cited daily intelligence brief"
-  default_prompt: "Use $fli-daily-intelligence to research, validate, and persist the daily brief for a specific date."
+  short_description: "Run and audit one day of company-aware Investment Insights"
+  default_prompt: "Use $fli-daily-intelligence to run, validate, and audit the Investment brief for a specific date."
 policy:
   allow_implicit_invocation: false

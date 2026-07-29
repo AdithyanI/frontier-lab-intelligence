@@ -27,7 +27,7 @@ flowchart TD
     V --> Q["Audience routing<br/>AI Engineering and Investment"]
     A --> Q
     S --> Q
-    Q --> I["Daily editorial agent<br/>ranked, cited Insights per audience"]
+    Q --> I["Company-aware Investment agent<br/>ranked, cited Insights"]
     I --> W["Web and CLI<br/>inspection and operation"]
     I --> D["Manual delivery<br/>Slack full brief or email with PDF"]
     E --> W
@@ -137,52 +137,20 @@ composition.
    immediately. Sol/xhigh top-ten passes now cover
    July 19–21 as the persisted calibration proof of this successor boundary;
    full-day replay remains future work.
-10. A daily editorial agent reviews the complete routed-positive cohort, reads
-   the skill-owned BIT thesis, audited 2025 portfolio, and source-graded company
-   profiles for Investment. Its compact index keeps all 37 profiles eligible.
-   The 37 web-grounded company memos live independently in
+10. The 37 web-grounded company memos live independently in
    `docs/references/company-memos/`; BIT Lens projects them with their exact
-   source ledger and generation provenance. The read contract still exposes a
-   visible pending state if a memo is ever absent rather than silently using
-   the legacy hypothesis view.
-   The agent shortlists zero or a few credible matches for the particular Event,
-   then retrieves complete profiles by canonical name, ticker, or alias. The
-   Event must establish a direct or well-evidenced material indirect
-   transmission path; a static company label never supplies relevance. It may use
-   per-Event notes as annotations, researches missing transmission paths, and
-   writes the ranked cited Insights that clear the audience bar. Each selected
-   Insight stores the qualitative rationale for its audience-local priority;
-   the rank is not a synthetic score. Every
-   candidate is linked once to an Insight or explicitly not selected. Its
-   workspace applies the same seven-day X-source projection defensively to
-   existing routing runs, attaches application-owned publication times, and
-   projects exact catalogued artifact disclosure lineage without automatically
-   pruning artifacts.
-11. Deterministic validation binds the draft to its frozen workspace and imports
-   Insights, Event roles, dispositions, and citations in one transaction.
-   Artifact citations require an excerpt verified against the frozen artifact
-   text; the agent still owns the semantic judgment that the passage supports
-   the Insight.
-   Optional embedding retrieval may find paraphrases but never decides a merge.
-   Investment Insights persist one causal interpretation, company read-through,
-   key uncertainty, watchpoints, and a diligence step; intermediate reasoning
-   scaffolds are not separate reader fields.
-12. The date-keyed daily runner checkpoints the existing Evidence, routing,
-   and strict-v3 workspace stages, then may hand the exact workspace to one
-   named Codex task. Model and reasoning may inherit Codex configuration, but
-   service speed defaults to an explicit Standard override (`serviceTier:
-   null`) so a user-level Fast preference cannot leak into an unattended run.
-   It records the effective model, reasoning effort, and service tier returned
-   by App Server and validates that frozen tuple before any resume work. A
-   complete imported editorial run is terminal product proof: retries close
-   from that durable row before opening App Server, so a task later reused by a
-   human is outside orchestration control.
-13. The web and CLI expose the frozen evidence, decisions, provenance, and
+   source ledger and generation provenance. `fli.insights.company_context` is
+   the only reader of that packet and validates every profile, holding, and
+   memo before it reaches the product. The read contract exposes a visible
+   pending state if a memo is ever absent rather than silently degrading.
+11. The web and CLI expose the frozen evidence, decisions, provenance, and
    operational status without becoming alternate data owners. For a complete
-   daily editorial run, the web adapter can deterministically render the same
-   audience/date projection as a linked A4 PDF. The content-addressed derived
-   cache is an acceleration layer, not another report or editorial store.
-14. An operator may explicitly deliver that same complete audience/date brief.
+   published Investment cohort, the web adapter can deterministically render the
+   same audience/date projection as a linked A4 PDF. The content-addressed
+   derived cache is an acceleration layer, not another report or Insight store.
+   The AI Engineering audience has no run on this path yet and says so
+   explicitly rather than falling back to a superseded lane.
+12. An operator may explicitly deliver that same complete audience/date brief.
    Slack presents every cited Insight with its complete interpretation, then
    links to the complete brief and PDF. Email
    receives up to five ranked Insights with the cached PDF attached.
@@ -232,7 +200,7 @@ composition.
 - **Derived delivery cache:** a PDF cache key binds the report renderer version,
   canonical read schema, selected day and audience, and imported result hash.
   Cache files are atomically replaceable and may be deleted without losing
-  editorial truth; the normalized run remains the only report input.
+  Insight truth; the normalized run remains the only report input.
 - **Explicit delivery boundary:** delivery reads only the canonical complete
   brief and its derived PDF. A human confirmation owns each send; Slack, SMTP,
   and email credentials are runtime secrets and never part of product data.
@@ -283,4 +251,3 @@ builds the production SPA.
 - [Model routing policy](../references/model-routing.md)
 - [Prompt-cache contract and live proof](../references/prompt-caching.md)
 - [Insight refresh/client](../references/insight-refresh.md)
-- [Daily agent/editorial contract](../references/daily-intelligence.md)

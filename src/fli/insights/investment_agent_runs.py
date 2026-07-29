@@ -474,17 +474,17 @@ def dates_payload(
                 "day": day,
                 "content_kind": "investment_agent",
                 "item_count": 0,
-                "candidate_count": 0,
-                "included_candidate_count": 0,
-                "not_selected_candidate_count": 0,
+                "development_count": 0,
+                "surfaced_development_count": 0,
+                "suppressed_development_count": 0,
             },
         )
-        value["candidate_count"] += 1
+        value["development_count"] += 1
         if str(row["decision"]) == "surface":
             value["item_count"] += 1
-            value["included_candidate_count"] += 1
+            value["surfaced_development_count"] += 1
         else:
-            value["not_selected_candidate_count"] += 1
+            value["suppressed_development_count"] += 1
     ordered = [dates[day] for day in sorted(dates)]
     return {
         "available": bool(ordered),
@@ -657,3 +657,68 @@ def insights_payload(
         "run": run,
         "items": items,
     }
+
+
+def summary_payload(path: Path = DEFAULT_DB) -> dict[str, Any]:
+    """Aggregate durable run state for operator inspection."""
+    conn = _open_readonly(path)
+    if conn is None:
+        return {
+            "schema_version": READ_SCHEMA_VERSION,
+            "available": False,
+            "reason": "No company-aware Investment run has been stored yet.",
+            "run_count": 0,
+            "published_days": [],
+        }
+    try:
+        totals = conn.execute(
+            """
+            SELECT COUNT(*) AS run_count,
+                   COUNT(DISTINCT day) AS day_count,
+                   COALESCE(SUM(reported_cost_usd), 0) AS cost_usd,
+                   COALESCE(SUM(input_tokens), 0) AS input_tokens,
+                   COALESCE(SUM(cached_tokens), 0) AS cached_tokens,
+                   COALESCE(SUM(output_tokens), 0) AS output_tokens
+              FROM investment_agent_run
+            """
+        ).fetchone()
+        versions = [
+            {"prompt_version": str(row["prompt_version"]), "run_count": int(row["n"])}
+            for row in conn.execute(
+                """
+                SELECT prompt_version, COUNT(*) AS n
+                  FROM investment_agent_run
+                 GROUP BY prompt_version
+                 ORDER BY prompt_version
+                """
+            )
+        ]
+        published = [
+            {
+                "day": str(row["day"]),
+                "candidate_count": int(row["candidate_count"]),
+                "published_at": str(row["published_at"]),
+            }
+            for row in conn.execute(
+                """
+                SELECT day, candidate_count, published_at
+                  FROM investment_agent_day_publication
+                 ORDER BY day
+                """
+            )
+        ]
+        return {
+            "schema_version": READ_SCHEMA_VERSION,
+            "available": True,
+            "reason": None,
+            "run_count": int(totals["run_count"]),
+            "day_count": int(totals["day_count"]),
+            "reported_cost_usd": round(float(totals["cost_usd"]), 6),
+            "input_tokens": int(totals["input_tokens"]),
+            "cached_tokens": int(totals["cached_tokens"]),
+            "output_tokens": int(totals["output_tokens"]),
+            "prompt_versions": versions,
+            "published_days": published,
+        }
+    finally:
+        conn.close()

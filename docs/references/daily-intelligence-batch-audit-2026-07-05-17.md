@@ -1,9 +1,10 @@
 # Daily Intelligence Batch Audit: 5–17 July 2026
 
-Reviewed 19 July 2026. This is an evaluation record, not an executable
-contract or an active project tracker. The current system contract remains in
-[`daily-intelligence.md`](daily-intelligence.md), and the repo-local skill
-remains the operational playbook.
+Reviewed 19 July 2026. This is a historical evaluation record of the
+superseded editorial lane, not an executable contract or an active project
+tracker. That lane was deleted on 29 July when the product consolidated onto
+the company-aware Investment agent; see [`docs/STATUS.md`](../STATUS.md) and
+the repo-local `fli-daily-intelligence` skill for the current path.
 
 ## Post-rerun conclusion
 

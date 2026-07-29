@@ -10,7 +10,6 @@ from pathlib import Path
 from fli.evidence import events as event_store
 from fli.evidence import feed as feed_store
 from fli.evidence.artifacts import store as artifact_store
-from fli.insights import editorial_runs
 from fli.routing import runs as routing_runs
 
 
@@ -27,9 +26,6 @@ def _parser() -> argparse.ArgumentParser:
     )
     parser.add_argument(
         "--routing-root", type=Path, default=routing_runs.DEFAULT_RUN_ROOT
-    )
-    parser.add_argument(
-        "--editorial-db", type=Path, default=editorial_runs.DEFAULT_DB
     )
     return parser
 
@@ -61,12 +57,6 @@ def main() -> int:
             "migrated_count": sum(
                 routing_runs.migrate_run_storage(path)
                 for path in routing_databases
-            ),
-        },
-        "editorial_store": {
-            "path": str(args.editorial_db),
-            "migrated": editorial_runs.migrate_editorial_store(
-                args.editorial_db
             ),
         },
     }

@@ -47,7 +47,7 @@ export const HOW_BEATS: HowBeat[] = [
     id: 'publish',
     step: '5',
     title: 'Publish',
-    text: 'An editorial agent reviews everything that survived and must surface or explicitly suppress each candidate. What remains becomes two audience-specific briefs, and every claim in them cites its source.',
+    text: 'A company-aware agent screens each surviving Development against all 37 portfolio companies, and must either name the company in its output or write down why it was rejected. Every claim cites its source, and the application supplies every link.',
   },
 ]
 
@@ -123,7 +123,7 @@ export function createReviewRubric({
     {
       weight: '15%',
       name: 'Actionable delivery',
-      text: 'One brief per audience for each completed editorial day, investment and AI engineering, and every claim in them cites its source.',
+      text: 'One published Investment brief per completed day, with each Insight traced to the companies it reaches and the memos the agent opened to get there.',
       to: insightsPath,
       linkLabel: 'Insights',
     },

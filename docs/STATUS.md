@@ -58,9 +58,12 @@ explicitly discarded on 2026-07-15; its learnings remain archived in docs.
 The successor now starts from ranked Developments projected from exact Event
 evidence and accepted canonical artifacts. Exact Events remain immutable;
 same-day original posts merge only when they point to the same release-specific
-artifact. Historical `daily-rank-v2` routing, Insight, editorial, PDF, and
-delivery outputs remain preserved as prior proof but are not current
-Development-lineage outputs. Sol/xhigh top-ten passes for July 19–21 now prove
+artifact. Historical `daily-rank-v2` routing and Insight outputs remain preserved as
+prior proof but are not current Development-lineage outputs. On 29 July the
+three stacked Insight lanes were consolidated to one: the company-aware
+Investment agent is now the only path that generates, stores, renders, or
+delivers an Insight. The superseded editorial and candidate-decision modules,
+stores, prompts, API fallbacks, and UI were deleted rather than kept dormant. Sol/xhigh top-ten passes for July 19–21 now prove
 the successor Investment boundary: the agent screens all 37 compact company
 cards, opens only causally plausible company memos, and persists minimal,
 auditable company read-throughs. The current 30-Development comparison proves
@@ -94,8 +97,8 @@ Development projection.
 | Audience Insight generation | Company-aware Investment top-ten proof for July 19–21 | Historical Investment v10 and AI Engineering v7 outputs remain preserved, and current readers reject their superseded Event-rank lineage as successor output. The current Sol/xhigh projection selects the ten highest daily ranks with a positive Investment route—not the union-positive Feed—then screens all 37 companies. Across 30 Developments it surfaces 19, suppresses 11, retains 52 company assessments, and records five after-memo rejections. July 19 surfaces 4/10, July 20 9/10, and July 21 6/10. The three published cohorts reused 472,576 cached input tokens from 1,386,679 total and reported $7.740683. One transient LiteLLM 499 was recovered by an exact single-target rerun; the production loop now owns bounded retries for transient Responses failures and records each failed attempt in the exact trace. Complete daily cohorts publish atomically, so a failed or partial run cannot leak historical or out-of-lane rows into the UI. AI Engineering successor work and broader Investment calibration remain unproven. |
 | Prompt-cache operations | Implemented and live-verified | Cacheable jobs keep stable 1,024+ token prefixes first, use deterministic keys, serialize within a key, and record Responses `cached_tokens`. Registry jobs now use eight cache lanes instead of 64; audience routing is single-key/cache-first by default; Insight refresh runs one lane per audience prompt. The 27 July different-input canary observed 3/4 Luna and 4/4 Terra warm hits through the shared Azure-backed LiteLLM route. `fli prompt-cache-canary --no-input` makes the check repeatable; misses remain a measured best-effort provider condition rather than proof that a model lacks caching. The authoritative contract, current proof, incident history, and troubleshooting checklist live in [`prompt-caching.md`](references/prompt-caching.md). |
 | Investment company context | Complete 37-company research set plus three-day top-ten mapping proof | BIT Lens and the Investment read path expose a source-bearing memo for every company in the canonical candidate universe. Each packet separates company prior context from Event evidence and includes business economics, operating drivers, testable frontier-AI transmission paths, thesis tests, uncertainties, and an exact dated source ledger. The two-stage agent now proves structured Event-to-company judgment across the July 19–21 top ten, including reason-bearing suppression and after-memo rejection; the next boundary is replay across the routed cohort, not company cold start. |
-| Daily editorial agent | Historical 17-day proof preserved; Development replay not started | The complete July 5–21 `daily-orchestration-v3` proof remains bound to historical `daily-rank-v2` lineage. The agent and validation contracts remain implemented, but no Development-lineage daily brief, PDF, or delivery projection has been generated. |
-| Insights UI and delivery | Successor Investment inspection plus the historical daily reader | When a company-aware Investment run exists for a day, it takes precedence over the historical editorial projection. Each surfaced Development leads with its agent-written investment implication rather than unreliable webpage metadata. Its company rows are collapsed by default; opening one shows the bottom line, mechanism, affected business driver, main uncertainty, and one next check. Evidence links are application-owned and deterministic: one opens the exact Feed Development and one opens the exact company memo. Model text does not own those URLs. The older complete daily reader, cached A4 PDF workbook, and confirmed Slack/email delivery remain available for days without a successor run; AI Engineering still uses that historical path. |
+| Insight path consolidation | Complete; one path in code and data | The company-aware Investment agent is the only Insight generator. `fli.insights` now contains only `investment_agent`, `investment_agent_runs`, `company_context`, `pdf_report`, and `cli`; roughly 9,000 lines of superseded editorial, daily-runner, Codex App Server, consolidation, and candidate-decision code were deleted with their tests, prompts, and stores. `/api/insights` has no fallback tier, the SPA has no second renderer, and an audience without a current run returns an explicit reason instead of older content. |
+| Insights UI and delivery | One reader, PDF, and delivery projection over the published cohort | Each surfaced Development leads with its agent-written investment headline rather than unreliable webpage metadata. Company rows are collapsed by default; opening one shows the mechanism, each affected company with its direction, affected business driver, size basis, and per-company impact, plus one unproven claim and one next check. Evidence links are application-owned and deterministic: one opens the exact Feed Development and one opens the exact company memo. Model text does not own those URLs. The A4 PDF workbook and confirmed Slack/email delivery render the same published cohort. AI Engineering has no current-lineage run and says so explicitly. |
 | Submission package | Submitted 20 July 2026; live reviewer path remains available | The submitted email leads with the public product and video, links the written How it works report, provides five exact showcase Insights, links the public repository, and attaches one sample PDF. A clean checkout restores a checksummed read-only snapshot with one command. |
 
 Counts above are dated checkpoint evidence, not live contracts. Query the
@@ -148,8 +151,8 @@ routing proof is complete for the July 5–21 top-100 cohort, and the Investment
 successor is published for the ten highest positive Investment routes on July
 19–21. The next step is qualitative calibration of the current routes and
 Investment outputs, followed by an equivalent current-lineage AI Engineering
-contract. Editorial, PDF, and delivery replay remain deferred until both
-per-Development audience boundaries are credible.
+contract. The AI Engineering lane will be rebuilt on this same
+company-aware path rather than restored from the deleted editorial code.
 
 Repository housekeeping is complete and archived
 under [`docs/projects/archive/repo-housekeeping/`](projects/archive/repo-housekeeping/):
@@ -165,7 +168,7 @@ archived under
 It shipped deterministic X chronology, artifact disclosure lineage, verified
 artifact excerpts, resumable Codex handoff, calibrated company direction,
 and compact agent inspection. Its original submission checkpoint ran through
-19 July; the later ranking migration produced exact-lineage editorial runs
+19 July; the later ranking migration produced exact-lineage runs
 through 21 July. The final five-Insight submission proof remains locked in its
 [`submission selection`](projects/archive/daily-intelligence-quality/resources/submission-proof-selection-2026-07-19.md).
 Busy-day tail selection and cross-day novelty remain disclosed limitations,

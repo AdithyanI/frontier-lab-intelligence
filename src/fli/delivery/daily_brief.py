@@ -142,6 +142,26 @@ def _display_day(day: str) -> str:
     return f"{parsed.day} {parsed.strftime('%B %Y')}"
 
 
+def _rank(item: dict[str, Any]) -> int:
+    return int(item.get("daily_rank") or 0)
+
+
+def _title(item: dict[str, Any]) -> str:
+    return str(item.get("investment_headline") or "")
+
+
+def _summary(item: dict[str, Any]) -> str:
+    return str(item.get("development_summary") or "")
+
+
+def _next_check(item: dict[str, Any]) -> str:
+    """The first named observable an analyst can go and look for."""
+    for assessment in item.get("company_assessments") or []:
+        if assessment.get("next_check"):
+            return str(assessment["next_check"])
+    return ""
+
+
 def _audience_label(audience: str) -> str:
     return "Investment" if audience == "investment" else "AI Engineering"
 
@@ -149,7 +169,7 @@ def _audience_label(audience: str) -> str:
 def _top_items(payload: dict[str, Any]) -> list[dict[str, Any]]:
     return sorted(
         list(payload.get("items") or []),
-        key=lambda item: int(item.get("rank") or 0),
+        key=_rank,
     )[:TOP_INSIGHT_LIMIT]
 
 
@@ -165,12 +185,8 @@ def _urls(payload: dict[str, Any]) -> tuple[str, str]:
 
 
 def _event_url(item: dict[str, Any], day: str) -> str:
-    events = list(item.get("events") or [])
-    primary_event = next(
-        (event for event in events if event.get("role") == "primary"),
-        events[0] if events else {},
-    )
-    event_id = str(primary_event.get("event_id") or "")
+    provenance = item.get("provenance") or {}
+    event_id = str(provenance.get("primary_event_id") or "")
     if not event_id:
         return f"{pdf_report.PUBLIC_APP_URL}/insights"
     return (
@@ -229,7 +245,7 @@ def _slack_prose_blocks(value: Any) -> list[dict[str, Any]]:
 def _slack_payload(payload: dict[str, Any]) -> dict[str, Any]:
     items = sorted(
         list(payload.get("items") or []),
-        key=lambda item: int(item.get("rank") or 0),
+        key=_rank,
     )
     day = str(payload.get("date") or payload.get("requested_date") or "")
     audience = _audience_label(str(payload.get("audience") or "investment"))
@@ -256,14 +272,14 @@ def _slack_payload(payload: dict[str, Any]) -> dict[str, Any]:
     for index, item in enumerate(items):
         if index:
             blocks.append({"type": "divider"})
-        rank = int(item.get("rank") or 1)
-        title = _slack_escape(item.get("title"))
+        rank = _rank(item) or 1
+        title = _slack_escape(_title(item))
         event_url = _event_url(item, day)
         fallback_lines.extend(
             [
                 "",
-                f"{rank}. {_plain(item.get('title'))}",
-                _plain(item.get("interpretation")),
+                f"{rank}. {_plain(_title(item))}",
+                _plain(_summary(item)),
             ]
         )
         blocks.append(
@@ -275,8 +291,8 @@ def _slack_payload(payload: dict[str, Any]) -> dict[str, Any]:
                 },
             }
         )
-        if item.get("interpretation"):
-            blocks.extend(_slack_prose_blocks(item.get("interpretation")))
+        if _summary(item):
+            blocks.extend(_slack_prose_blocks(_summary(item)))
     blocks.extend(
         [
             {"type": "divider"},
@@ -319,10 +335,10 @@ def _email_content(payload: dict[str, Any]) -> tuple[str, str, str]:
     ]
     html_items: list[str] = []
     for item in items:
-        rank = int(item.get("rank") or 0)
-        title = _plain(item.get("title"))
-        interpretation = _plain(item.get("interpretation"))
-        next_step = _plain(item.get("next_step"))
+        rank = _rank(item)
+        title = _plain(_title(item))
+        interpretation = _plain(_summary(item))
+        next_step = _plain(_next_check(item))
         event_url = _event_url(item, day)
         plain_lines.extend(
             [
@@ -438,7 +454,7 @@ def delivery_status_payload(
     settings: DeliverySettings | None = None,
 ) -> dict[str, Any]:
     resolved = settings or DeliverySettings.from_environment()
-    available = bool(payload.get("content_kind") == "daily_editorial" and payload.get("available"))
+    available = bool(payload.get("content_kind") == "investment_agent" and payload.get("available"))
     total_insight_count = len(list(payload.get("items") or [])) if available else 0
     channels = []
     for channel, label, pdf_delivery in (
@@ -478,7 +494,7 @@ def deliver_daily_brief(
     smtp_factory: Callable[..., Any] = smtplib.SMTP,
 ) -> dict[str, Any]:
     resolved = settings or DeliverySettings.from_environment()
-    if payload.get("content_kind") != "daily_editorial" or not payload.get("available"):
+    if payload.get("content_kind") != "investment_agent" or not payload.get("available"):
         raise DeliveryNotConfigured(
             str(payload.get("reason") or "No complete Daily Brief is available for delivery.")
         )

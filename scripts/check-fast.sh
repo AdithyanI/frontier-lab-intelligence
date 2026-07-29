@@ -55,8 +55,7 @@ for prompt in \
   src/fli/registry/prompts/evaluation.txt \
   src/fli/registry/prompts/relevance.txt \
   src/fli/routing/prompts/audience_routing.txt \
-  src/fli/insights/prompts/ai_engineering.txt \
-  src/fli/insights/prompts/investment.txt; do
+  src/fli/insights/prompts/investment_company_analysis.txt; do
   test -f "$prompt"
 done
 versioned_active_prompts=$(find src/fli -path '*/prompts/*' -type f \

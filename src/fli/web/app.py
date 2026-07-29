@@ -30,7 +30,7 @@ from datetime import date as calendar_date
 import os
 from pathlib import Path
 from threading import Thread
-from typing import Literal
+from typing import Any, Literal
 from urllib.parse import urlsplit
 
 from fastapi import FastAPI, HTTPException, Query, Request
@@ -40,10 +40,9 @@ from fastapi.staticfiles import StaticFiles
 
 from fli.ingestion import sources
 from fli.delivery import daily_brief as brief_delivery
-from fli.insights import editorial_runs as editorial_store
 from fli.insights import investment_agent_runs as investment_agent_store
+from fli.insights import company_context
 from fli.insights import pdf_report
-from fli.insights import view as insight_store
 from fli.network import view as rankings_store
 from fli.registry import channels
 from fli.registry import classification as entity_kinds
@@ -82,7 +81,6 @@ def _warm_recent_event_views() -> None:
 
 def _warm_current_read_views() -> None:
     """Prime Insight lineage and the newest Event pages in the background."""
-    editorial_store.warm_editorial_read_views()
     _warm_recent_event_views()
 
 
@@ -554,64 +552,28 @@ def artifact_text(artifact_id: str) -> PlainTextResponse:
 def insight_dates(
     audience: Literal["investment", "ai_engineering"] = "investment",
 ) -> JSONResponse:
-    """Available successor Insight dates for one audience."""
-    investment_agent = (
-        investment_agent_store.dates_payload()
-        if audience == "investment"
-        else {"available": False, "dates": []}
-    )
-    investment_agent_days = {
-        str(item["day"])
-        for item in investment_agent.get("dates", [])
-    }
-    editorial = editorial_store.editorial_insight_dates_payload(audience=audience)
-    editorial_days = {
-        str(item["day"])
-        for item in editorial.get("dates", [])
-        if str(item["day"]) not in investment_agent_days
-    }
-    payload = insight_store.insight_dates_payload(
-        audience=audience,
-        exclude_days=editorial_days | investment_agent_days,
-    )
-    candidate_dates = {
-        str(item["day"]): {
-            "day": str(item["day"]),
-            "content_kind": "candidate_decisions",
-            "item_count": int(item["item_count"]),
-            "candidate_count": int(item["evaluated_count"]),
-            "included_candidate_count": int(item["item_count"]),
-            "not_selected_candidate_count": int(item["suppressed_count"]),
-        }
-        for item in payload.get("dates", [])
-    }
-    dates = candidate_dates
-    for item in editorial["dates"]:
-        day = str(item["day"])
-        if day in investment_agent_days:
-            continue
-        dates[day] = {
-            "day": day,
-            "content_kind": "daily_editorial",
-            "item_count": int(item["item_count"]),
-            "candidate_count": int(item["candidate_count"]),
-            "included_candidate_count": int(item["included_candidate_count"]),
-            "not_selected_candidate_count": int(item["not_selected_candidate_count"]),
-        }
-    for item in investment_agent.get("dates", []):
-        dates[str(item["day"])] = item
-    ordered = [dates[day] for day in sorted(dates)]
-    if not ordered:
-        return JSONResponse({**payload, "dates": []})
+    """Available Insight dates for one audience."""
+    if audience != "investment":
+        return JSONResponse(
+            {
+                "schema_version": investment_agent_store.READ_SCHEMA_VERSION,
+                "audience": audience,
+                "available": False,
+                "reason": _AI_ENGINEERING_REASON,
+                "latest_date": None,
+                "dates": [],
+            }
+        )
+    payload = investment_agent_store.dates_payload()
+    dates = list(payload.get("dates") or [])
     return JSONResponse(
         {
             **payload,
-            "available": True,
-            "reason": None,
-            "latest_date": ordered[-1]["day"],
-            "dates": ordered,
+            "audience": audience,
+            "latest_date": dates[-1]["day"] if dates else None,
         }
     )
+
 
 
 def _investment_agent_provenance(
@@ -672,46 +634,58 @@ def _investment_agent_provenance(
     }
 
 
+_AI_ENGINEERING_REASON = (
+    "The AI Engineering audience has no company-aware run on the current "
+    "Insight path yet."
+)
+
+
+def _unavailable_insights(*, audience: str, status: str) -> dict[str, Any]:
+    """Explicit empty payload for an audience with no current-path run."""
+    return {
+        "schema_version": investment_agent_store.READ_SCHEMA_VERSION,
+        "content_kind": "investment_agent",
+        "audience": audience,
+        "status": status,
+        "available": False,
+        "reason": _AI_ENGINEERING_REASON,
+        "date": None,
+        "requested_date": None,
+        "run": None,
+        "items": [],
+    }
+
+
+def _investment_insights(*, day: str | None, status: str) -> dict[str, Any]:
+    """One complete published Investment cohort with application-owned provenance."""
+    payload = investment_agent_store.insights_payload(day=day, status=status)
+    if payload.get("available"):
+        for item in payload["items"]:
+            item["provenance"] = _investment_agent_provenance(
+                day=str(item["day"]),
+                development_id=str(item["development_id"]),
+            )
+    return payload
+
+
 @app.get("/api/insights")
 def insights(
     insight_date: calendar_date | None = Query(None, alias="date"),
     audience: Literal["investment", "ai_engineering"] = "investment",
     status: Literal["kept", "suppressed", "all"] = "kept",
 ) -> JSONResponse:
-    """Successor audience Insights ordered by application-owned Feed rank."""
+    """Company-aware Investment Insights ordered by application-owned Feed rank."""
+    if audience != "investment":
+        return JSONResponse(_unavailable_insights(audience=audience, status=status))
     day = insight_date.isoformat() if insight_date else None
-    if audience == "investment":
-        investment_agent = investment_agent_store.insights_payload(
-            day=day,
-            status=status,
-        )
-        if investment_agent["available"]:
-            for item in investment_agent["items"]:
-                item["provenance"] = _investment_agent_provenance(
-                    day=str(item["day"]),
-                    development_id=str(item["development_id"]),
-                )
-            return JSONResponse(investment_agent)
-    if status == "kept":
-        editorial = editorial_store.editorial_insights_payload(
-            audience=audience,
-            day=day,
-        )
-        if editorial["available"]:
-            return JSONResponse(editorial)
-    payload = insight_store.insights_payload(
-        audience=audience,
-        day=day,
-        status=status,
-    )
-    payload["content_kind"] = "candidate_decisions"
+    payload = _investment_insights(day=day, status=status)
     return JSONResponse(payload)
 
 
 @app.get("/api/bit-lens/companies")
 def bit_lens_companies() -> JSONResponse:
     """Complete auditable company context derived from the canonical packet."""
-    return JSONResponse(editorial_store.investment_company_universe_payload())
+    return JSONResponse(company_context.investment_company_universe_payload())
 
 
 @app.get("/api/insights/report.pdf")
@@ -721,11 +695,10 @@ def insight_report_pdf(
     audience: Literal["investment", "ai_engineering"] = "investment",
 ) -> Response:
     """Download one cached PDF from the canonical complete daily editorial run."""
+    if audience != "investment":
+        raise HTTPException(status_code=404, detail=_AI_ENGINEERING_REASON)
     day = insight_date.isoformat() if insight_date else None
-    payload = editorial_store.editorial_insights_payload(
-        audience=audience,
-        day=day,
-    )
+    payload = _investment_insights(day=day, status="kept")
     try:
         artifact = pdf_report.get_or_create_report(
             payload,
@@ -758,10 +731,9 @@ def insight_delivery_status(
     audience: Literal["investment", "ai_engineering"] = "investment",
 ) -> JSONResponse:
     """Describe safe, configured manual delivery choices for one complete brief."""
-    payload = editorial_store.editorial_insights_payload(
-        audience=audience,
-        day=insight_date.isoformat(),
-    )
+    if audience != "investment":
+        raise HTTPException(status_code=404, detail=_AI_ENGINEERING_REASON)
+    payload = _investment_insights(day=insight_date.isoformat(), status="kept")
     settings = None
     if _read_only_mode():
         settings = brief_delivery.DeliverySettings.from_environment(
@@ -784,9 +756,10 @@ def send_insight_delivery(
     """Send one explicitly confirmed Daily Brief through a configured adapter."""
     _require_writable()
     _require_same_origin_delivery(request)
-    payload = editorial_store.editorial_insights_payload(
-        audience=delivery_request.audience,
-        day=delivery_request.date.isoformat(),
+    if delivery_request.audience != "investment":
+        raise HTTPException(status_code=404, detail=_AI_ENGINEERING_REASON)
+    payload = _investment_insights(
+        day=delivery_request.date.isoformat(), status="kept"
     )
     try:
         result = brief_delivery.deliver_daily_brief(

@@ -18,7 +18,7 @@ flowchart TD
     A --> U["Audience routing"]
     V --> U
     S --> U
-    U --> I["Daily editorial agent<br/>ranked audience Insights"]
+    U --> I["Company-aware Investment agent<br/>ranked cited Insights"]
     I --> W["Web and CLI adapters"]
     I --> D["Manual Slack/email delivery"]
 ```
@@ -41,8 +41,8 @@ the Event read model moves out of `web`, not through new aliases.
 | Artifacts | `fli.evidence.artifacts.store`, `.fetch`, and `.cli` | Catalog/provenance persistence, retrieval/extraction, and the machine command adapter are separate boundaries. |
 | Daily Development rank | `fli.scoring.development_attention` | Versioned lexicographic Development ordering. Production uses `daily-development-rank-v1`; the earlier exact-Event `daily-rank-v2` remains historical lineage only. |
 | Audience routing | `fli.routing` | Independent Engineering/Investment relevance decisions, durable runs, audit view, and active prompt. |
-| Insights | `fli.insights` | Per-Development generation plus the `editorial`, `editorial_runs`, `daily_runner`, `codex_app_server`, and `editorial_cli` daily-agent boundary. `investment_agent` runs the cache-first company-aware loop and writes complete request/response traces; `investment_agent_runs` validates, stores, and projects them. The loop screens the compact universe, opens only plausible memos, then emits a minimal company assessment. Investment company selection follows `docs/references/investment-company-mapping.md`. |
-| Delivery | `fli.delivery.daily_brief` | Manual Slack all-Insight and email top-five formatting, provider adapters, a same-origin confirmation guard, and reuse of the canonical cached PDF. It does not own editorial data or scheduling. |
+| Insights | `fli.insights` | One path. `investment_agent` runs the cache-first company-aware loop and writes complete request/response traces; `investment_agent_runs` validates, stores, and projects them. The loop screens the compact universe, opens only plausible memos, then emits a minimal company assessment. `company_context` is the file-backed BIT/company read model; `pdf_report` renders one published cohort; `cli` is the machine adapter. Investment company selection follows `docs/references/investment-company-mapping.md`. |
+| Delivery | `fli.delivery.daily_brief` | Manual Slack all-Insight and email top-five formatting, provider adapters, a same-origin confirmation guard, and reuse of the canonical cached PDF. It does not own Insight data or scheduling. |
 | Web | `fli.web.app`, `fli.web.feed`, `fli.web.events`, `fli.web.developments`, `fli.web.artifact_library` | HTTP composition and read projections only. `/api/events` preserves exact Event inspection; `/api/developments` is the ranked Feed read model; `/api/developments/analysis-packet` renders the exact read-only routing input without a model call. Built SPA assets live in `fli.web.dist`; editable UI source is `frontend/`. |
 | Root client | `fli.cli` | Thin subcommand router only; domain behavior belongs to the owning area. |
 | Demo release | `demo.command`, `scripts/demo.py`, `scripts/build-demo-release.py` | Verified snapshot restore, read-only launch, and operator-only release construction. The release contract is `data/demo-release.json`. |
@@ -86,15 +86,13 @@ do not recreate generic `pages/` or `components/` buckets.
 | `data/derived/artifacts/artifacts.db` | Artifact catalog/fetch commands | Routing and artifact UI | Durable local catalog; daily imports append dated lineage, while raw bodies and clean text are content-addressed beside it. |
 | Development read model | No independent writer | Feed, routing, artifact UI | Deterministic projection over exact Events plus accepted canonical artifacts. It is cached in process and rebuilt when either source store changes; there is deliberately no separate Development database yet. |
 | `data/derived/audience-routing/*/routing.db` | `fli audience-routing` | Feed, Insights, rank evaluation | Immutable per-day runs. Current-compatible runs bind their source Feed/Event publication and full-day Development rank-input SHA. |
-| `data/derived/insights/insights.db` | `fli insights` | Insight read model/UI | Current audience Insight run store. |
 | `data/derived/insights/investment-agent-traces/<day>/*.json` | `fli insights run-investment-agent` | Investment import, operator audit | Durable exact request/response envelopes for every model turn, plus response IDs, retryable and terminal request failures, memo calls and packets, usage, cost, and the validated final result. |
 | `data/derived/insights/investment-agent.db` | `fli insights run-investment-agent` / `import-investment-trace` | Investment Insights API/UI | Durable company-aware successor runs. Each row binds the Development, prompt/model identity, compact-universe and evidence hashes, exact memo calls, token/cache/cost telemetry, and validated minimal result. A per-day publication records the complete current Investment-routed cohort; readers never infer the active day from every historical row. |
-| `data/derived/daily-intelligence/editorial.db` | `fli daily-intelligence import-result` / `run-day` | Daily Insight read model/UI and orchestration inspection | Complete agent-authored daily runs plus a `daily-orchestration-v3` date-keyed ledger that freezes source Event, Feed, routing, cohort, rank-input, and effective Codex model/reasoning/tier identities; strict v3 workspaces and the optional packet-keyed embedding cache live beside it. |
-| `data/derived/daily-intelligence/pdf-cache/` | `GET /api/insights/report.pdf` | Daily Insight PDF downloads | Rebuildable content-addressed PDFs keyed by report schema, read schema, date, audience, and editorial result hash; atomic writes make concurrent first requests safe. |
+| `data/derived/insights/pdf-cache/` | `GET /api/insights/report.pdf` | Daily Insight PDF downloads | Rebuildable content-addressed PDFs keyed by report schema, read schema, date, audience, and published-cohort result hash; atomic writes make concurrent first requests safe. |
 | `data/derived/web-event-cache/` | Event API read model | Event API and Feed UI | Optional compressed exact-view cache, automatically invalidated by source database versions and projection code. Safe to delete; source stores remain authoritative. |
 
 Manual delivery adds no second report or outbox store. It reads the complete
-editorial projection and reuses the PDF cache at confirmation time.
+published Investment projection and reuses the PDF cache at confirmation time.
 
 See [`data/README.md`](../../data/README.md) for directory lifecycle and
 [`docs/references/data-lifecycle.md`](../references/data-lifecycle.md) before
@@ -109,11 +107,11 @@ removing or archiving local data.
 - Materialize individual boundaries: `fli signal-feed`, `fli signal-events`,
   `fli artifacts`
 - Route Evidence: `fli audience-routing`
-- Generate or inspect Insights: `fli insights`; run the company-aware
-  Investment loop with `fli insights run-investment-agent`, or import one
-  already completed trace with `fli insights import-investment-trace`
-- Prepare, launch, author, validate, persist, or inspect one daily brief:
-  `fli daily-intelligence` (`run-day` is the end-to-end entry point)
+- Generate or inspect Insights: `fli insights`. Run the company-aware
+  Investment loop with `fli insights run-investment-agent`, import one already
+  completed trace with `fli insights import-investment-trace`, read the live
+  contract with `fli insights contract`, and inspect the company packet with
+  `fli insights company-context` or `fli insights company-universe`.
 - Inspect the daily Development rank: `/api/developments` or the Feed. The
   historical `fli daily-rank evaluate` command still evaluates exact-Event
   `daily-rank-v2` lineage.
@@ -150,7 +148,6 @@ All repeated LLM work uses the shared LiteLLM path and the exact contracts in
 - End-to-end Evidence refresh: [`evidence-refresh.md`](../references/evidence-refresh.md)
 - Artifact contract: [`artifact-library.md`](../references/artifact-library.md)
 - Insight refresh/client: [`insight-refresh.md`](../references/insight-refresh.md)
-- Daily agent/editorial contract: [`daily-intelligence.md`](../references/daily-intelligence.md)
 - Model routing contract: [`model-routing.md`](../references/model-routing.md)
 - Prompt-cache contract and live proof: [`prompt-caching.md`](../references/prompt-caching.md)
 - Measured workflow and provider economics: [`tokenomics.md`](../references/tokenomics.md)

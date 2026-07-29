@@ -119,19 +119,17 @@ mixing company and engineering concepts into one prompt.
 
 ## Inspection Commands
 
-Read the compact company index:
+Read the complete auditable company universe:
 
 ```bash
-.venv/bin/fli daily-intelligence context \
-  --audience investment --compact --json --no-input
+.venv/bin/fli insights company-universe --json --no-input
 ```
 
-Read one complete company lens:
+Read one complete company lens by name, ticker, or alias:
 
 ```bash
-.venv/bin/fli daily-intelligence company-context \
-  --company MSFT --json --no-input
+.venv/bin/fli insights company-context --company MSFT --json --no-input
 ```
 
-The complete context command remains available for audit and returns the
-canonical packet path and SHA-256.
+Both commands return the canonical packet path and SHA-256, so a reviewer can
+verify exactly which file the agent screened against.

@@ -323,34 +323,37 @@ export default function HowNarrative({
         </article>
 
         <article className="how-read-block how-read-block--wide" id="why-publish">
-          <h4><span className="mono">5</span> Write: turn the useful Events into two briefs</h4>
+          <h4><span className="mono">5</span> Write: connect each Development to actual companies</h4>
           <p>
-            At this point we have a much smaller set of Events that may matter.
-            I give all of them, along with their sources and audience
-            decisions, to the FLI daily-intelligence agent.
+            At this point we have a much smaller set of Developments that may
+            matter. The ten highest-ranked ones with a positive investment
+            route go to the company-aware Investment agent, one at a time.
           </p>
           <p>
-            The agent has separate context for the two readers: what may
-            matter to an investment position, and what a production AI team
-            can actually use. It reviews the Events together, combines
-            overlapping developments, and decides what belongs in each brief.
+            The agent screens all 37 companies in BIT's disclosed portfolio
+            from a single compact card set. It can then open a full research
+            memo on any of them &mdash; but the tool call requires it to state
+            the mechanism, the affected operating driver, and why it needs the
+            memo <em>before</em> the file opens. It has to commit to a claim
+            first.
           </p>
           <p>
-            Every candidate must end in one of two places: it becomes an
-            Insight, or the agent writes down why it was declined. Nothing
-            quietly disappears between the filter and the final brief.
+            Every memo it opens must end in one of two places: the company
+            appears in the output, or the agent writes down why it was
+            rejected. Validation fails the run otherwise. Nothing quietly
+            disappears between the screen and the brief.
           </p>
           <p>
-            For every Insight it keeps, the agent explains what happened, why
-            it matters to that reader, and what they may want to look at next.
-            It also links back to the posts and source artifacts it used.
-            Every cited excerpt is checked against the frozen source text. If
-            it cannot be matched, it does not ship.
+            The output is grouped by causal path, not by company. Each path
+            carries the companies exposed through it, and for each one: the
+            direction, the operating driver it touches, whether the scale can
+            be stated honestly, and what would have to be true. Application
+            code supplies every link. The model never writes a URL.
           </p>
           <p>
-            The result is two daily briefs: one for investment and one for AI
-            engineering. A person starts each dated run, and the system can
-            resume from its saved checkpoints if anything stops along the way.
+            A day publishes only when every requested rank succeeds. A partial
+            run stays invisible rather than mixing prompt versions on one
+            page.
           </p>
           <FigureFrame>
             <PublishFigure />
@@ -370,9 +373,9 @@ export default function HowNarrative({
           <p>
             Audience routing uses <code>gpt-5.4-mini</code>. One structured
             call reads an Event and returns a separate decision for investment
-            and AI engineering. The FLI daily-intelligence agent then uses{' '}
-            <code>gpt-5.6-sol</code> to review everything that passed, research
-            what is missing, and write both briefs.
+            and AI engineering. The company-aware Investment agent then uses{' '}
+            <code>gpt-5.6-sol</code> to screen the portfolio, pull the memos it
+            can justify, and write the read-through.
           </p>
           <div className="how-cost-table" role="table" aria-label="Models and measured cost">
             <div className="how-cost-row how-cost-head" role="row">
@@ -386,15 +389,16 @@ export default function HowNarrative({
               <span role="cell">$0.00388 average per Event</span>
             </div>
             <div className="how-cost-row" role="row">
-              <strong role="cell">FLI daily-intelligence agent</strong>
+              <strong role="cell">Investment agent</strong>
               <span role="cell" className="mono">gpt-5.6-sol · xhigh</span>
               <span role="cell">attached to each saved run</span>
             </div>
           </div>
           <p className="how-cost-note">
-            This average comes from 99 new Event calls on 19 July. The FLI
-            daily agent runs separately through Codex App Server, where its
-            model, reasoning, cost, and final brief stay attached to the run.
+            This average comes from 99 new Event calls on 19 July. The
+            Investment agent averages about $0.31 per Insight over two model
+            turns; its exact request and response for every turn is written to
+            disk before the result is imported.
           </p>
           <p>
             Audience-routing calls pass through LiteLLM. It handles retries

@@ -86,7 +86,7 @@ function SystemOverview() {
     <svg
       viewBox="0 0 1080 300"
       role="img"
-      aria-label="Deployed architecture. Public X evidence and linked documents enter a Python pipeline, which preserves raw, canonical, and derived data in SQLite. Bounded routing calls go through LiteLLM, while final brief authoring runs through Codex App Server. FastAPI serves the typed API and built React application, and Cloudflare Tunnel exposes the public reviewer URL."
+      aria-label="Deployed architecture. Public X evidence and linked documents enter a Python pipeline, which preserves raw, canonical, and derived data in SQLite. Both model stages go through LiteLLM. FastAPI serves the typed API and built React application, and Cloudflare Tunnel exposes the public reviewer URL."
     >
       <ArrowDefs id="overview-arrow" />
       {stages.map((s) => (
@@ -103,7 +103,7 @@ function SystemOverview() {
       <rect x="236" y="180" width="384" height="62" fill={SAND} stroke={BLUE_MID} strokeWidth="1.2" />
       <text x="254" y="205" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.08em">MODEL BOUNDARY</text>
       <text x="254" y="230" fontFamily={UI} fontSize="15" fontWeight="600" fill={INK}>LiteLLM + Codex</text>
-      <text x="406" y="230" fontFamily={UI} fontSize="11.5" fill={MUTED}>routing telemetry · editorial task</text>
+      <text x="406" y="230" fontFamily={UI} fontSize="11.5" fill={MUTED}>routing telemetry · Insight agent</text>
 
       <line x1="30" y1="270" x2="1050" y2="270" stroke={MUTED} strokeWidth="1" strokeDasharray="4 5" opacity="0.35" />
       <text x="30" y="292" fontFamily={UI} fontSize="11.5" fill={MUTED}>
@@ -124,11 +124,11 @@ const DAILY_MODEL_BOUNDARIES = [
     why: 'A 900-decision evaluation completed without failures. The xhigh comparison changed no decisions and used 5.4× the tokens.',
   },
   {
-    task: 'FLI daily-intelligence agent',
-    where: 'Codex App Server',
+    task: 'Investment agent',
+    where: 'LiteLLM',
     model: 'gpt-5.6-sol',
     effort: 'xhigh',
-    why: 'Submitted runs recorded this effective setting. This is the only stage that researches the complete cohort, resolves duplication, and writes both briefs.',
+    why: 'This stage screens 37 companies, decides which research memos are worth opening, and writes the company read-through. It averages two model turns and about $0.31 per Insight.',
   },
 ]
 
@@ -270,7 +270,7 @@ export function EvidenceInputMap({
       viewBox={includeDailyOutcome ? '0 0 1080 420' : '0 0 1080 226'}
       role="img"
       aria-label={includeDailyOutcome
-        ? 'Daily intelligence path. A screened Registry supplies dated X output. The system preserves exact Events, groups same-artifact posts into Developments, orders the day, and routes each Development for Investment and AI Engineering. Evidence relevant to either audience can then pass to the FLI daily agent.'
+        ? 'Daily intelligence path. A screened Registry supplies dated X output. The system preserves exact Events, groups same-artifact posts into Developments, orders the day, and routes each Development for Investment and AI Engineering. Evidence routed positive for Investment can then pass to the company-aware Investment agent.'
         : 'Evidence input path. A screened Registry supplies dated X output. The system preserves exact Events, groups same-artifact posts into Developments, and orders the day before any audience judgment.'}
     >
       <ArrowDefs id="flow-arrow" />
@@ -315,8 +315,8 @@ export function EvidenceInputMap({
             w={250}
             h={108}
             kicker="AGENT"
-            title="FLI daily agent"
-            detail="research · group · select · write"
+            title="Investment agent"
+            detail="screen · justify · open · write"
             tone="dark"
           />
           <FlowArrow x1={510} y1={334} x2={566} y2={334} marker="flow-arrow" />
@@ -326,8 +326,8 @@ export function EvidenceInputMap({
             w={250}
             h={108}
             kicker="OUTCOME"
-            title="Two daily briefs"
-            detail="Investment · AI Engineering"
+            title="Published cohort"
+            detail="Insights · company read-throughs"
           />
         </>
       )}
@@ -337,20 +337,20 @@ export function EvidenceInputMap({
 
 function DailyIntelligenceMap() {
   const stages = [
-    { x: 28, kicker: '1 · FREEZE', title: 'Daily workspace', detail: 'union-positive · seven days', tone: 'surface' as const },
-    { x: 232, kicker: '2 · HAND OFF', title: 'Persisted Codex task', detail: 'one date · one task', tone: 'sand' as const },
-    { x: 436, kicker: '3 · AUTHOR', title: 'FLI daily agent', detail: 'research · group · select', tone: 'dark' as const },
-    { x: 640, kicker: '4 · VERIFY', title: 'Strict draft gate', detail: 'coverage · citations', tone: 'surface' as const },
-    { x: 844, kicker: '5 · SERVE', title: 'Two daily briefs', detail: 'web · PDF · manual send', tone: 'plain' as const },
+    { x: 28, kicker: '1 · SELECT', title: 'Ranked cohort', detail: 'top ten · investment-routed', tone: 'surface' as const },
+    { x: 232, kicker: '2 · SCREEN', title: '37 company cards', detail: 'one compact packet', tone: 'sand' as const },
+    { x: 436, kicker: '3 · OPEN', title: 'Justified memo calls', detail: 'claim before file', tone: 'dark' as const },
+    { x: 640, kicker: '4 · VERIFY', title: 'Strict output gate', detail: 'every memo resolved', tone: 'surface' as const },
+    { x: 844, kicker: '5 · SERVE', title: 'Published cohort', detail: 'web · PDF · manual send', tone: 'plain' as const },
   ]
   return (
     <svg
       viewBox="0 0 1080 236"
       role="img"
-      aria-label="Daily brief path. The union-positive audience-routing cohort is frozen into one immutable workspace. One persisted Codex task runs the FLI daily-intelligence agent, which researches the complete cohort and writes both briefs. Deterministic validation checks coverage and citations before the run is imported for the web reader, PDF, and manual delivery."
+      aria-label="Daily brief path. The ten highest-ranked investment-routed Developments each go to the company-aware agent. It screens all 37 portfolio companies from one compact packet, then opens a research memo only where it can already state the mechanism. Validation requires every opened memo to be used or explicitly rejected before the day publishes atomically to the web reader, PDF, and manual delivery."
     >
       <ArrowDefs id="daily-arrow" />
-      <text x="28" y="30" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.08em">ONE DATE · ONE CHECKPOINTED DAILY RUN</text>
+      <text x="28" y="30" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.08em">ONE DEVELOPMENT · ONE COMPANY-AWARE RUN</text>
       {stages.map((stage) => (
         <Card key={stage.kicker} x={stage.x} y={54} w={180} h={108} kicker={stage.kicker} title={stage.title} detail={stage.detail} tone={stage.tone} />
       ))}
@@ -358,10 +358,9 @@ function DailyIntelligenceMap() {
       <FlowArrow x1={412} y1={108} x2={432} y2={108} marker="daily-arrow" />
       <FlowArrow x1={616} y1={108} x2={636} y2={108} marker="daily-arrow" />
       <FlowArrow x1={820} y1={108} x2={840} y2={108} marker="daily-arrow" />
-      <text x="222" y="44" fontFamily={MONO} fontSize="8.5" fill={BLUE_INK} textAnchor="middle">--launch-codex →</text>
       <line x1="28" y1="194" x2="1024" y2="194" stroke={MUTED} strokeWidth="1" strokeDasharray="4 5" opacity="0.4" />
       <text x="28" y="218" fontFamily={UI} fontSize="12" fill={MUTED}>
-        Without --launch-codex, run-day stops after freezing the workspace. A retry resumes the same dated run.
+        A day publishes only when every requested rank succeeds, so a partial re-run stays invisible rather than mixing prompt versions on one page.
       </text>
     </svg>
   )
@@ -374,14 +373,14 @@ const RECOVERY_BOUNDARIES = [
     invariant: 'The prompt version, input hash, and completed rows stay fixed.',
   },
   {
-    boundary: 'Daily editorial run',
-    response: 'The runner restarts from the last completed checkpoint and resumes the same persisted Codex task.',
-    invariant: 'The date, workspace, model settings, and task identity stay fixed.',
+    boundary: 'Daily Investment run',
+    response: 'Transient failures get at most three application-owned attempts, and every failed attempt is written to the trace before retry. A day publishes only when every requested rank succeeds.',
+    invariant: 'The date, prompt version, model settings, and company universe hash stay fixed.',
   },
   {
     boundary: 'Draft validation',
     response: 'An incomplete disposition or unmatched artifact excerpt rejects the draft before import.',
-    invariant: 'No partial brief replaces the last complete product state.',
+    invariant: 'No partial cohort replaces the last complete product state.',
   },
 ]
 
@@ -611,7 +610,7 @@ export default function Architecture() {
       <section className="arch-section" id="stack">
         <div className="arch-section-head">
           <h2 className="arch-h">The deployed system underneath it</h2>
-          <p className="arch-p">One Python pipeline owns collection, transformation, and orchestration. SQLite preserves raw evidence and every derived decision. FastAPI and React expose the same stored state through the reviewer interface, while LiteLLM and Codex App Server remain explicit model boundaries.</p>
+          <p className="arch-p">One Python pipeline owns collection, transformation, and orchestration. SQLite preserves raw evidence and every derived decision. FastAPI and React expose the same stored state through the reviewer interface, and LiteLLM remains the single explicit model boundary.</p>
         </div>
         <div className="arch-canvas"><SystemOverview /></div>
       </section>
@@ -619,7 +618,7 @@ export default function Architecture() {
       <section className="arch-section" id="models">
         <div className="arch-section-head">
           <h2 className="arch-h">Two model boundaries produce each daily brief</h2>
-          <p className="arch-p">Audience routing is one structured LiteLLM call per Event. Final selection and writing run once for the complete day as a persisted Codex App Server task.</p>
+          <p className="arch-p">Audience routing is one structured LiteLLM call per Event. The company read-through runs once per selected Development, with the exact request and response for every turn written to disk.</p>
         </div>
         <div className="arch-canvas arch-canvas--methods"><ModelTable /></div>
         <p className="arch-note">Registry intake runs separately from daily brief generation: <code>gpt-5.6-luna</code> at medium classifies entity kind, while high handles admission and identity research. The system stores the effective model and run identity at each boundary; LiteLLM also records prompt, token, cache, latency, and cost telemetry.</p>

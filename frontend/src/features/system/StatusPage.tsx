@@ -75,7 +75,7 @@ function countDatesInPublishedWindow(payload: FeedDates | null): number {
 
 function insightTotals(payload: InsightDates | null) {
   return (payload?.dates ?? []).filter(
-    (value) => value.content_kind === 'daily_editorial',
+    (value) => value.content_kind === 'investment_agent',
   ).reduce(
     (total, value) => ({
       dates: total.dates + 1,
@@ -169,7 +169,7 @@ export default function Status() {
     const artifactCounts = data.artifacts?.catalog_fetch_state_counts
     const investment = insightTotals(data.investmentInsights)
     const engineering = insightTotals(data.engineeringInsights)
-    const editorialDates = investment.dates + engineering.dates
+    const publishedDates = investment.dates + engineering.dates
     const publishedInsights = investment.insights + engineering.insights
     const insightsAvailable = Boolean(
       data.investmentInsights?.available && data.engineeringInsights?.available,
@@ -241,7 +241,7 @@ export default function Status() {
       },
       {
         name: 'Insights',
-        description: 'Complete daily editorial briefs published to both audience views.',
+        description: 'Complete daily briefs published to the audience views.',
         state: insightsAvailable ? 'available' : 'unavailable',
         stateLabel: insightsAvailable ? 'Published' : 'Unavailable',
         dataThrough: formatDay(
@@ -249,7 +249,7 @@ export default function Status() {
         ),
         lastUpdate: null,
         coverage: insightsAvailable
-          ? `${formatNumber(publishedInsights)} published Insights · ${formatNumber(editorialDates)} audience-days`
+          ? `${formatNumber(publishedInsights)} published Insights · ${formatNumber(publishedDates)} audience-days`
           : 'One or both audience views did not respond',
       },
     ]

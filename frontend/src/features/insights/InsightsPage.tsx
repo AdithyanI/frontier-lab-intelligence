@@ -1,27 +1,17 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import {
   getCachedJSON,
-  prefetchExactEvent,
   type BriefDeliveryChannel,
   type BriefDeliveryResult,
   type BriefDeliveryStatus,
-  type EditorialAnalysis,
-  type EditorialDeclinedItem,
-  type EditorialInsightItem,
-  type EditorialEventRole,
-  type EditorialInsightsResponse,
-  type EngineeringEditorialAnalysis,
   type InsightAudience,
   type InsightDates,
-  type InsightItem,
   type InsightStatus,
   type InsightsResponse,
   type InvestmentAgentCompanyAssessment,
   type InvestmentAgentInsightsResponse,
   type InvestmentAgentItem,
-  type InvestmentEditorialAnalysis,
-  type InvestmentImpactDirection,
 } from '../../shared/api'
 import CopyEventId from '../../shared/components/CopyEventId'
 import DateNavigator from '../../shared/components/DateNavigator'
@@ -85,17 +75,8 @@ const STATUS_COPY: Record<InsightStatus, { label: string; description: string }>
   all: { label: 'All', description: 'Every completed candidate evaluation' },
 }
 
-const DECLINED_SECTION_ID = 'insight-declined'
-
 type ReportDownloadState = 'idle' | 'generating' | 'ready' | 'error'
 type BriefDeliveryState = 'idle' | 'loading' | 'choose' | 'confirm' | 'sending' | 'sent' | 'error'
-
-const INVESTMENT_IMPACT_COPY = {
-  positive: { icon: '↗', label: 'Potential positive' },
-  negative: { icon: '↘', label: 'Potential negative' },
-  mixed: { icon: '↔', label: 'Mixed' },
-  uncertain: { icon: '?', label: 'Direction unclear' },
-} satisfies Record<InvestmentImpactDirection, { icon: string; label: string }>
 
 function parseAudience(value: string | null): InsightAudience {
   return value === 'ai_engineering' || value === 'investment'
@@ -109,35 +90,15 @@ function parseStatus(value: string | null): InsightStatus {
     : DEFAULT_STATUS
 }
 
-function legacyInsightIdFromHash(hash: string) {
-  return hash.match(/^#insight-([a-f0-9]{64})$/)?.[1] ?? ''
-}
-
 function displayInsightDay(day: string) {
   const parsed = new Date(`${day}T12:00:00Z`)
   return Number.isNaN(parsed.getTime()) ? day : insightDay.format(parsed)
-}
-
-function isEditorialResponse(payload: InsightsResponse): payload is EditorialInsightsResponse {
-  return payload.content_kind === 'daily_editorial'
 }
 
 function isInvestmentAgentResponse(
   payload: InsightsResponse,
 ): payload is InvestmentAgentInsightsResponse {
   return payload.content_kind === 'investment_agent'
-}
-
-function isInvestmentAnalysis(
-  analysis: EditorialAnalysis,
-): analysis is InvestmentEditorialAnalysis {
-  return 'key_uncertainty' in analysis
-}
-
-function isEngineeringAnalysis(
-  analysis: EditorialAnalysis,
-): analysis is EngineeringEditorialAnalysis {
-  return 'decision_rule' in analysis
 }
 
 function reportFilename(response: Response, audience: InsightAudience, day: string) {
@@ -573,482 +534,6 @@ function InsightState({
   )
 }
 
-function ExactEventLink({
-  day,
-  eventId,
-  children,
-  className,
-  ariaLabel,
-  title,
-}: {
-  day: string
-  eventId: string
-  children: ReactNode
-  className?: string
-  ariaLabel?: string
-  title?: string
-}) {
-  const eventUrl = `/evidence/feed?date=${day}&event_id=${encodeURIComponent(eventId)}`
-  const preload = () => prefetchExactEvent(day, eventId)
-
-  return (
-    <Link
-      className={className}
-      to={eventUrl}
-      aria-label={ariaLabel}
-      title={title}
-      onPointerEnter={preload}
-      onFocus={preload}
-      onTouchStart={preload}
-    >
-      {children}
-    </Link>
-  )
-}
-
-function InsightRow({ item }: { item: InsightItem }) {
-  const isKept = item.decision === 'surface'
-  const feedRankLabel = `Feed rank ${item.feed_rank}`
-  const title = item.title
-  const accessibleName = `${feedRankLabel}: ${decodeTextEntities(title)}`
-  const titleId = `${item.audience}-${item.candidate_id}-title`
-  return (
-    <article
-      className={`insight-row insight-row--${isKept ? 'kept' : 'suppressed'}`}
-      aria-labelledby={titleId}
-    >
-      <div className="insight-rank mono">
-        <ExactEventLink
-          day={item.day}
-          eventId={item.event_id}
-          className="insight-feed-link"
-          ariaLabel={`Open ${feedRankLabel.toLowerCase()} in its exact Feed Event`}
-          title="Open exact Feed Event"
-        >
-          <strong>#{item.feed_rank}</strong>
-          <span>Feed rank ↗</span>
-        </ExactEventLink>
-      </div>
-      <div className="insight-body">
-        <header className="insight-head">
-          <div className={`insight-decision-mark insight-decision-mark--${isKept ? 'kept' : 'suppressed'} mono`}>
-            {isKept ? 'Kept' : 'Suppressed'}
-          </div>
-          <h2 id={titleId}>{decodeTextEntities(title)}</h2>
-          <div className="insight-provenance mono">
-            <time dateTime={item.day}>{displayInsightDay(item.day)}</time>
-            <span>{item.model}</span>
-            <span>{item.prompt_version}</span>
-            <CopyEventId eventId={item.event_id} />
-            <ExactEventLink
-              day={item.day}
-              eventId={item.event_id}
-              ariaLabel={`Open the exact Feed Event for ${accessibleName}`}
-            >
-              Open Event ↗
-            </ExactEventLink>
-            {item.root_source_url && (
-              <a
-                href={item.root_source_url}
-                target="_blank"
-                rel="noreferrer"
-                aria-label={`Open the original source post for ${accessibleName}`}
-              >
-                Open source ↗
-              </a>
-            )}
-            {item.artifacts.map((artifact, index) => (
-              <a
-                href={artifact.url}
-                target="_blank"
-                rel="noreferrer"
-                title={decodeTextEntities(artifact.title)}
-                aria-label={`Read artifact: ${decodeTextEntities(artifact.title)}`}
-                key={artifact.url}
-              >
-                {item.artifacts.length === 1 ? 'Read artifact ↗' : `Read artifact ${index + 1} ↗`}
-              </a>
-            ))}
-          </div>
-        </header>
-
-        {isKept && item.summary && (
-          <section className="insight-summary" aria-label={`Summary for ${accessibleName}`}>
-            <h3 className="mono">Summary</h3>
-            <p>{decodeTextEntities(item.summary)}</p>
-          </section>
-        )}
-
-        <section
-          className={`insight-decision-reason insight-decision-reason--${isKept ? 'kept' : 'suppressed'}`}
-          aria-label={`${isKept ? 'Why it matters' : 'Why suppressed'}: ${accessibleName}`}
-        >
-          <h3 className="mono">{isKept ? 'Why it matters' : 'Why suppressed'}</h3>
-          <p>{decodeTextEntities(item.decision_reason)}</p>
-        </section>
-
-        {isKept && item.action && (
-          <section className="insight-analysis" aria-label={`${item.action_label} for ${accessibleName}`}>
-            <h3 className="mono">{item.action_label}</h3>
-            <p>{decodeTextEntities(item.action)}</p>
-          </section>
-        )}
-      </div>
-    </article>
-  )
-}
-
-function EditorialList({ items }: { items: string[] }) {
-  return (
-    <ul className="editorial-text-list">
-      {items.map((item, index) => (
-        <li key={`${index}-${item}`}>{decodeTextEntities(item)}</li>
-      ))}
-    </ul>
-  )
-}
-
-function InvestmentDecision({
-  analysis,
-  nextStep,
-}: {
-  analysis: InvestmentEditorialAnalysis
-  nextStep: string
-}) {
-  const portfolioEntities = analysis.affected_entities.filter(
-    (entity) => entity.scope === 'portfolio',
-  )
-  const outsideEntities = analysis.affected_entities.filter(
-    (entity) => entity.scope === 'outside_portfolio',
-  )
-
-  const entityList = (
-    entities: InvestmentEditorialAnalysis['affected_entities'],
-    label: string | null,
-  ) => (
-    <div className={`editorial-entities${label ? '' : ' editorial-entities--unlabelled'}`}>
-      {label && <h4 className="mono">{label}</h4>}
-      <ul>
-        {entities.map((entity) => {
-          const impact = INVESTMENT_IMPACT_COPY[entity.impact]
-          return (
-            <li key={`${entity.scope}-${entity.name}`}>
-              <strong className="editorial-entity-name">
-                {decodeTextEntities(entity.name)}
-              </strong>
-              <span className={`editorial-entity-impact editorial-entity-impact--${entity.impact}`}>
-                <span className="editorial-entity-impact-icon" aria-hidden="true">
-                  {impact.icon}
-                </span>
-                <span>{impact.label}</span>
-              </span>
-              <p>{decodeTextEntities(entity.mechanism)}</p>
-            </li>
-          )
-        })}
-      </ul>
-    </div>
-  )
-
-  const hasBothEntityScopes = portfolioEntities.length > 0 && outsideEntities.length > 0
-
-  return (
-    <>
-      {analysis.affected_entities.length > 0 && (
-        <section className="editorial-section editorial-decision" aria-label="Company read-through">
-          <h3>Company read-through</h3>
-          {portfolioEntities.length > 0 && entityList(
-            portfolioEntities,
-            hasBothEntityScopes ? 'Portfolio companies' : null,
-          )}
-          {outsideEntities.length > 0 && entityList(outsideEntities, 'Outside the disclosed portfolio')}
-        </section>
-      )}
-      <section className="editorial-section editorial-watch" aria-label="What would confirm or challenge this">
-        <h3>What would confirm or challenge this</h3>
-        <div className="editorial-validation-grid">
-          <div>
-            <h4 className="mono">Key uncertainty</h4>
-            <p>{decodeTextEntities(analysis.key_uncertainty)}</p>
-          </div>
-          <div>
-            <h4 className="mono">Signals</h4>
-            <EditorialList items={analysis.watchpoints} />
-          </div>
-          <div>
-            <h4 className="mono">Next diligence step</h4>
-            <p>{decodeTextEntities(nextStep)}</p>
-          </div>
-        </div>
-      </section>
-    </>
-  )
-}
-
-function EngineeringDecision({
-  analysis,
-  nextStep,
-}: {
-  analysis: EngineeringEditorialAnalysis
-  nextStep: string
-}) {
-  return (
-    <section className="editorial-section editorial-decision" aria-label="What to do next">
-      <h3>What to do next</h3>
-      <div className="editorial-decision-grid">
-        <div>
-          <h4 className="mono">Next step</h4>
-          <p>{decodeTextEntities(nextStep)}</p>
-        </div>
-        <div>
-          <h4 className="mono">Decision rule</h4>
-          <p>{decodeTextEntities(analysis.decision_rule)}</p>
-        </div>
-      </div>
-    </section>
-  )
-}
-
-const EDITORIAL_ROLE_COPY: Record<EditorialEventRole, string> = {
-  primary: 'Primary',
-  supporting: 'Supporting',
-  context: 'Context',
-  counterevidence: 'Counterevidence',
-}
-
-function EditorialSources({ item }: { item: EditorialInsightItem }) {
-  const researchSources = item.citations.filter(
-    (citation) => citation.kind !== 'event',
-  )
-  const titleId = `${item.insight_id}-sources`
-
-  return (
-    <section className="editorial-sources" aria-labelledby={titleId}>
-      <h3 id={titleId}>Sources</h3>
-      <div className="editorial-source-columns">
-        <section aria-label="Original feed sources">
-          <h4 className="mono">
-            Original feed
-            {item.events.length > 1 && (
-              <span className="editorial-source-count"> · {item.events.length} Events merged</span>
-            )}
-          </h4>
-          <ul className="editorial-source-list">
-            {item.events.map((event) => {
-              return (
-                <li key={event.event_id}>
-                  <div className="editorial-source-head">
-                    <span
-                      className={`editorial-source-role mono editorial-source-role--${event.role}`}
-                    >
-                      {EDITORIAL_ROLE_COPY[event.role] ?? event.role}
-                    </span>
-                    <ExactEventLink
-                      day={item.day}
-                      eventId={event.event_id}
-                      className="editorial-source-title"
-                    >
-                      Feed #{event.feed_rank} ↗
-                    </ExactEventLink>
-                  </div>
-                  <p>{decodeTextEntities(event.reason)}</p>
-                </li>
-              )
-            })}
-          </ul>
-        </section>
-        <section aria-label="Artifacts and research context">
-          <h4 className="mono">Artifacts &amp; context</h4>
-          <ul className="editorial-source-list">
-            {researchSources.map((citation) => (
-              <li key={citation.citation_id}>
-                <a className="editorial-source-title" href={citation.url} target="_blank" rel="noreferrer">
-                  {decodeTextEntities(citation.title)} ↗
-                </a>
-                <p>{decodeTextEntities(citation.supports)}</p>
-              </li>
-            ))}
-          </ul>
-        </section>
-      </div>
-    </section>
-  )
-}
-
-function CopyInsightReference({ item }: { item: EditorialInsightItem }) {
-  const [copyStatus, setCopyStatus] = useState<'idle' | 'copied' | 'failed'>('idle')
-
-  const copyReference = async () => {
-    const referenceUrl = new URL(window.location.href)
-    referenceUrl.searchParams.set('insight', item.insight_id)
-    referenceUrl.hash = ''
-
-    try {
-      await navigator.clipboard.writeText(referenceUrl.toString())
-      setCopyStatus('copied')
-    } catch {
-      setCopyStatus('failed')
-    }
-  }
-
-  return (
-    <button
-      className="editorial-copy-reference mono"
-      type="button"
-      onClick={copyReference}
-      aria-label={`Copy link to ${decodeTextEntities(item.title)}`}
-    >
-      <span role="status" aria-live="polite">
-        {copyStatus === 'copied'
-          ? 'Link copied'
-          : copyStatus === 'failed'
-            ? 'Copy failed'
-            : 'Copy link'}
-      </span>
-    </button>
-  )
-}
-
-function EditorialInsightRow({ item }: { item: EditorialInsightItem }) {
-  const titleId = `${item.insight_id}-title`
-  const rankExplanationId = `${item.insight_id}-rank-explanation`
-  const [rankExplanationOpen, setRankExplanationOpen] = useState(false)
-  const investmentAnalysis = isInvestmentAnalysis(item.analysis) ? item.analysis : null
-  const engineeringAnalysis = isEngineeringAnalysis(item.analysis) ? item.analysis : null
-  const permalinkId = `insight-${item.insight_id}`
-
-  return (
-    <article
-      className="insight-row editorial-insight-row"
-      id={permalinkId}
-      aria-labelledby={titleId}
-    >
-      <div className="insight-rank editorial-rank mono">
-        <button
-          type="button"
-          aria-controls={rankExplanationId}
-          aria-expanded={rankExplanationOpen}
-          aria-label={`${rankExplanationOpen ? 'Hide' : 'Explain'} brief rank ${item.rank}`}
-          onClick={() => setRankExplanationOpen((open) => !open)}
-        >
-          <strong>#{item.rank}</strong>
-          <span>
-            Brief rank
-            <i aria-hidden="true">i</i>
-          </span>
-        </button>
-      </div>
-      <div className="insight-body editorial-insight-body">
-        <header className="insight-head editorial-insight-head">
-          <h2 id={titleId}>{decodeTextEntities(item.title)}</h2>
-          <CopyInsightReference item={item} />
-        </header>
-
-        <div
-          className="editorial-rank-explanation"
-          id={rankExplanationId}
-          role="region"
-          aria-label={`Why brief rank ${item.rank}`}
-          hidden={!rankExplanationOpen}
-        >
-          <p>
-            <strong>Why #{item.rank}:</strong>{' '}
-            {decodeTextEntities(item.rank_rationale)}
-          </p>
-          <p className="mono">
-            Ranked across this audience’s full daily brief by decision consequence,
-            evidence strength, time sensitivity, actionability, and novelty. It is not
-            Feed rank, confidence, popularity, or similarity.
-          </p>
-        </div>
-
-        <div className="editorial-opening">
-          <section>
-            <h3 className="mono">What changed</h3>
-            <p>{decodeTextEntities(item.what_changed)}</p>
-          </section>
-          <section>
-            <h3 className="mono">
-              {investmentAnalysis ? 'Investment interpretation' : 'Engineering interpretation'}
-            </h3>
-            <p>{decodeTextEntities(item.interpretation)}</p>
-          </section>
-        </div>
-
-        {investmentAnalysis && (
-          <InvestmentDecision analysis={investmentAnalysis} nextStep={item.next_step} />
-        )}
-        {engineeringAnalysis && (
-          <EngineeringDecision analysis={engineeringAnalysis} nextStep={item.next_step} />
-        )}
-
-        <EditorialSources item={item} />
-      </div>
-    </article>
-  )
-}
-
-function DeclinedCandidates({
-  items,
-  reviewedCount,
-  day,
-  open,
-  onToggle,
-}: {
-  items: EditorialDeclinedItem[]
-  reviewedCount: number
-  day: string
-  open: boolean
-  onToggle: () => void
-}) {
-  return (
-    <section
-      className="insight-declined"
-      id={DECLINED_SECTION_ID}
-      aria-label="Candidates declined in writing"
-    >
-      <button
-        type="button"
-        className="insight-declined-toggle"
-        aria-expanded={open}
-        onClick={onToggle}
-      >
-        <span className="insight-declined-title mono">Declined in writing</span>
-        <span className="insight-declined-summary">
-          {reviewedCount} candidates reviewed · {items.length} declined with a written reason
-        </span>
-        <span className="insight-declined-caret mono" aria-hidden="true">{open ? '−' : '+'}</span>
-      </button>
-      {open && (
-        <ul className="insight-declined-list">
-          {items.map((item) => (
-            <li className="insight-declined-row" key={item.event_id}>
-              <div className="insight-declined-rank mono" aria-label={`Attention rank ${item.feed_rank}`}>
-                #{item.feed_rank}
-              </div>
-              <div className="insight-declined-cell">
-                <h4 className="mono">Event · root post</h4>
-                <Link
-                  className="insight-declined-author mono"
-                  to={`/evidence/feed?date=${day}&event_id=${encodeURIComponent(item.event_id)}`}
-                  aria-label={`Open the full event by ${item.author} on the evidence page`}
-                >
-                  {item.author} · open event ↗
-                </Link>
-                <p className="insight-declined-excerpt">“{decodeTextEntities(item.excerpt)}”</p>
-              </div>
-              <div className="insight-declined-cell">
-                <h4 className="mono">Why declined</h4>
-                <p className="insight-declined-reason">{decodeTextEntities(item.reason)}</p>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
-    </section>
-  )
-}
-
 const INVESTMENT_AGENT_DIRECTION = {
   positive: { icon: '↗', label: 'Potential positive' },
   negative: { icon: '↘', label: 'Potential negative' },
@@ -1315,51 +800,12 @@ function InvestmentAgentYield({
   )
 }
 
-function InsightYield({
-  keptCount,
-  reviewedCount,
-  declinedCount,
-  onRevealDeclined,
-}: {
-  keptCount: number
-  reviewedCount: number
-  declinedCount: number
-  onRevealDeclined: () => void
-}) {
-  return (
-    <p className="insight-yield">
-      <span className="insight-yield-part">
-        <strong>{keptCount}</strong> published
-      </span>
-      <span className="insight-yield-sep" aria-hidden="true">·</span>
-      <span className="insight-yield-part">
-        <strong>{reviewedCount}</strong> candidates reviewed
-      </span>
-      {declinedCount > 0 && (
-        <>
-          <span className="insight-yield-sep" aria-hidden="true">·</span>
-          <button
-            type="button"
-            className="insight-yield-part insight-yield-link"
-            onClick={onRevealDeclined}
-            aria-label={`Show the ${declinedCount} candidates declined in writing`}
-          >
-            <strong>{declinedCount}</strong> declined in writing
-          </button>
-        </>
-      )}
-    </p>
-  )
-}
-
 export default function Insights() {
   const [searchParams, setSearchParams] = useSearchParams()
   const { rememberDate } = useAuditDate()
   const audience = parseAudience(searchParams.get('audience'))
   const status = parseStatus(searchParams.get('status'))
   const selectedDate = searchParams.get('date') ?? ''
-  const legacyInsightId = legacyInsightIdFromHash(window.location.hash)
-  const selectedInsightId = searchParams.get('insight') ?? legacyInsightId
   const [dates, setDates] = useState<InsightDates | null>(null)
   const [dateWindowEnd, setDateWindowEnd] = useState(0)
   const [dataView, setDataView] = useState<{
@@ -1370,7 +816,6 @@ export default function Insights() {
   const [dataError, setDataError] = useState<string | null>(null)
   const [datesRetryKey, setDatesRetryKey] = useState(0)
   const [dataRetryKey, setDataRetryKey] = useState(0)
-  const [declinedOpen, setDeclinedOpen] = useState(false)
   const activeDatesViewRef = useRef('')
   const activeDataViewRef = useRef('')
   const searchParamsRef = useRef(searchParams)
@@ -1382,15 +827,8 @@ export default function Insights() {
       dataView.payload.audience === audience && dataView.payload.status === status
     ? dataView.payload
     : null
-  const editorialData = currentData && isEditorialResponse(currentData) ? currentData : null
   const investmentAgentData =
     currentData && isInvestmentAgentResponse(currentData) ? currentData : null
-  const candidateData =
-    currentData &&
-    !isEditorialResponse(currentData) &&
-    !isInvestmentAgentResponse(currentData)
-      ? currentData
-      : null
   const availableDates = useMemo(() => currentDates?.dates ?? [], [currentDates])
   const dateWindow = useMemo(
     () => getDateWindow(dateWindowEnd, availableDates.length),
@@ -1401,27 +839,19 @@ export default function Insights() {
     [availableDates, dateWindow],
   )
   const copy = AUDIENCE_COPY[audience]
-  const declinedItems = editorialData?.declined ?? []
-  const reviewedCandidateCount =
-    (editorialData?.run?.counts.included_candidates ?? 0) +
-    (editorialData?.run?.counts.not_selected_candidates ?? 0)
 
   useEffect(() => {
     if (
       searchParams.get('audience') === audience &&
       searchParams.get('status') === status &&
-      !searchParams.has('view') &&
-      !legacyInsightId
+      !searchParams.has('view')
     ) return
     const nextParams = new URLSearchParams(searchParams)
     nextParams.set('audience', audience)
     nextParams.set('status', status)
     nextParams.delete('view')
-    if (!nextParams.has('insight') && legacyInsightId) {
-      nextParams.set('insight', legacyInsightId)
-    }
     setSearchParams(nextParams, { replace: true })
-  }, [audience, legacyInsightId, searchParams, setSearchParams, status])
+  }, [audience, searchParams, setSearchParams, status])
 
   useEffect(() => {
     const viewKey = `dates:${audience}`
@@ -1490,14 +920,6 @@ export default function Insights() {
     return () => { live = false }
   }, [audience, copy.noun, currentDates, dataRetryKey, selectedDate, status])
 
-  useEffect(() => {
-    if (!editorialData || !selectedInsightId) return
-    const targetId = `insight-${selectedInsightId}`
-    const target = document.getElementById(targetId)
-    if (!target?.classList.contains('editorial-insight-row')) return
-    window.requestAnimationFrame(() => target.scrollIntoView({ block: 'start' }))
-  }, [editorialData, selectedInsightId])
-
   const setView = (
     nextAudience: InsightAudience,
     nextDate: string,
@@ -1512,15 +934,6 @@ export default function Insights() {
     if (nextDate) nextParams.set('date', nextDate)
     else nextParams.delete('date')
     setSearchParams(nextParams, { replace: true })
-  }
-
-  const revealDeclined = () => {
-    setDeclinedOpen(true)
-    window.requestAnimationFrame(() => {
-      document
-        .getElementById(DECLINED_SECTION_ID)
-        ?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    })
   }
 
   const moveDateWindow = (direction: DateWindowDirection) => {
@@ -1551,14 +964,6 @@ export default function Insights() {
         <div className="insight-page-intro">
           <h1 className="page-title">{copy.title}</h1>
           <p className="page-sub">{copy.subtitle}</p>
-          {editorialData?.available && editorialData.items.length > 0 && reviewedCandidateCount > 0 && (
-            <InsightYield
-              keptCount={editorialData.items.length}
-              reviewedCount={reviewedCandidateCount}
-              declinedCount={declinedItems.length}
-              onRevealDeclined={revealDeclined}
-            />
-          )}
           {investmentAgentData?.available && investmentAgentData.items.length > 0 && (
             <InvestmentAgentYield data={investmentAgentData} />
           )}
@@ -1566,7 +971,7 @@ export default function Insights() {
         <DailyBriefActions
           audience={audience}
           day={selectedDate}
-          available={Boolean(editorialData?.available)}
+          available={Boolean(investmentAgentData?.available)}
           loading={datesLoading || dataLoading}
         />
       </header>
@@ -1634,30 +1039,9 @@ export default function Insights() {
         />
       )}
       {currentData && !currentData.available && !dataError && (
-        <InsightState title={copy.emptyTitle} detail={currentData.reason || 'No editorial decision is available.'} />
+        <InsightState title={copy.emptyTitle} detail={currentData.reason || 'No company-aware Investment decision is available.'} />
       )}
 
-      {editorialData?.available && editorialData.items.length > 0 && (
-        <section className="insight-list" aria-label={`${copy.label} ${STATUS_COPY[status].label.toLowerCase()} insights`}>
-          {editorialData.items.map((item) => (
-            <EditorialInsightRow item={item} key={item.insight_id} />
-          ))}
-        </section>
-      )}
-      {editorialData?.available && editorialData.date && declinedItems.length > 0 && (
-        <DeclinedCandidates
-          items={declinedItems}
-          reviewedCount={reviewedCandidateCount}
-          day={editorialData.date}
-          open={declinedOpen}
-          onToggle={() => setDeclinedOpen((value) => !value)}
-        />
-      )}
-      {candidateData?.available && candidateData.items.length > 0 && (
-        <section className="insight-list" aria-label={`${copy.label} ${STATUS_COPY[status].label.toLowerCase()} insights`}>
-          {candidateData.items.map((item) => <InsightRow item={item} key={item.candidate_id} />)}
-        </section>
-      )}
       {investmentAgentData?.available && investmentAgentData.items.length > 0 && (
         <section
           className="insight-list investment-agent-list"

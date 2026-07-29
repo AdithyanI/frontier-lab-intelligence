@@ -1,4 +1,4 @@
-"""Production PDF rendering for one canonical daily editorial brief."""
+"""Production PDF rendering for one company-aware Investment daily brief."""
 
 from __future__ import annotations
 
@@ -36,11 +36,11 @@ from reportlab.platypus import (
     TableStyle,
 )
 
-from fli.insights import editorial_runs
 
 
-REPORT_SCHEMA_VERSION = "daily-intelligence-pdf-v9"
-DEFAULT_CACHE_ROOT = editorial_runs.DEFAULT_ROOT / "pdf-cache"
+REPORT_SCHEMA_VERSION = "investment-agent-pdf-v10"
+REPO_ROOT = Path(__file__).resolve().parents[3]
+DEFAULT_CACHE_ROOT = REPO_ROOT / "data" / "derived" / "insights" / "pdf-cache"
 PUBLIC_APP_URL = "https://frontier-lab-intelligence.adithyan.io"
 
 PAPER = HexColor("#FFFFFF")
@@ -226,8 +226,10 @@ def get_or_create_report(
     cache_root: Path = DEFAULT_CACHE_ROOT,
 ) -> ReportArtifact:
     """Return one immutable cached report, generating it atomically on first read."""
-    if payload.get("content_kind") != "daily_editorial" or not payload.get("available"):
-        raise ReportUnavailable(str(payload.get("reason") or "Daily editorial report unavailable."))
+    if payload.get("content_kind") != "investment_agent" or not payload.get("available"):
+        raise ReportUnavailable(
+            str(payload.get("reason") or "Company-aware Investment report unavailable.")
+        )
     key = _report_cache_key(payload)
     path = cache_root / f"{key}.pdf"
     filename = report_filename(payload)
@@ -528,10 +530,10 @@ def _cover(payload: dict[str, Any], styles: dict[str, ParagraphStyle]) -> list[A
         return story
     toc_rows = [
         [
-            Paragraph(f'#{int(item["rank"])}', styles["toc_rank"]),
+            Paragraph(f'#{int(item["daily_rank"])}', styles["toc_rank"]),
             Paragraph(
-                f'<link href="#insight-{int(item["rank"])}" color="#235165">'
-                f'{_markup(item["title"])}</link>',
+                f'<link href="#insight-{int(item["daily_rank"])}" color="#235165">'
+                f'{_markup(item["investment_headline"])}</link>',
                 styles["toc_title"],
             ),
         ]
@@ -570,347 +572,262 @@ def _section_title(title: str, styles: dict[str, ParagraphStyle]) -> list[Any]:
     ]
 
 
-def _opening_table(item: dict[str, Any], styles: dict[str, ParagraphStyle]) -> Table:
-    analysis = item.get("analysis") or {}
-    interpretation_label = (
-        "INVESTMENT INTERPRETATION"
-        if "key_uncertainty" in analysis
-        else "ENGINEERING INTERPRETATION"
-    )
-    cells = [
-        [
-            [
-                Paragraph("WHAT CHANGED", styles["label"]),
-                Spacer(1, 2 * mm),
-                Paragraph(_markup(item.get("what_changed")), styles["body"]),
-            ],
-            [
-                Paragraph(interpretation_label, styles["label"]),
-                Spacer(1, 2 * mm),
-                Paragraph(_markup(item.get("interpretation")), styles["body_strong"]),
-            ],
-        ]
+def _mechanism_block(
+    assessment: dict[str, Any],
+    styles: dict[str, ParagraphStyle],
+    company_names: dict[str, Any],
+) -> list[Any]:
+    """Render one causal path and every company hanging off it."""
+    direction_copy = {
+        "positive": ("Potential positive", POSITIVE),
+        "negative": ("Potential negative", NEGATIVE),
+        "mixed": ("Mixed", MUTED),
+        "unclear": ("Direction unclear", MUTED),
+    }
+    story: list[Any] = [
+        Paragraph(_markup(assessment.get("mechanism_title")), styles["body_strong"]),
+        Spacer(1, 1.6 * mm),
+        Paragraph(_markup(assessment.get("mechanism")), styles["body"]),
+        Spacer(1, 3.2 * mm),
     ]
-    return Table(
-        cells,
-        colWidths=[CONTENT_WIDTH / 2, CONTENT_WIDTH / 2],
-        style=TableStyle(
-            [
-                ("VALIGN", (0, 0), (-1, -1), "TOP"),
-                ("LINEBELOW", (0, 0), (-1, -1), 0.35, BORDER),
-                ("LINEBEFORE", (1, 0), (1, 0), 0.35, BORDER),
-                ("TOPPADDING", (0, 0), (-1, -1), 9),
-                ("BOTTOMPADDING", (0, 0), (-1, -1), 10),
-                ("LEFTPADDING", (0, 0), (0, 0), 0),
-                ("RIGHTPADDING", (0, 0), (0, 0), 9),
-                ("LEFTPADDING", (1, 0), (1, 0), 9),
-                ("RIGHTPADDING", (1, 0), (1, 0), 0),
-            ]
+    rows: list[list[Any]] = []
+    for index, exposure in enumerate(assessment.get("exposures") or [], start=1):
+        ticker = str(exposure.get("ticker") or "")
+        name = str(company_names.get(ticker) or ticker)
+        label, color = direction_copy.get(
+            str(exposure.get("direction") or "unclear"), direction_copy["unclear"]
+        )
+        direction_style = ParagraphStyle(
+            f"Direction-{ticker}-{index}",
+            parent=styles["impact"],
+            textColor=color,
+        )
+        body: list[Any] = [
+            Paragraph(f"{_markup(name)}  <font color='#6B6B68'>{_markup(ticker)}</font>", styles["body_strong"]),
+            Spacer(1, 1.2 * mm),
+            Paragraph(_markup(label), direction_style),
+            Spacer(1, 0.8 * mm),
+            Paragraph(_markup(exposure.get("affected_driver")), styles["body"]),
+        ]
+        impact = exposure.get("impact") or exposure.get("note")
+        if impact:
+            body.extend([Spacer(1, 1.4 * mm), Paragraph(_markup(impact), styles["small"])])
+        size_basis = exposure.get("size_basis")
+        if size_basis:
+            body.extend([Spacer(1, 1.2 * mm), Paragraph(_markup(size_basis), styles["small"])])
+        rows.append([Paragraph(str(index), styles["toc_rank"]), body])
+    if rows:
+        story.append(
+            Table(
+                rows,
+                colWidths=[10 * mm, CONTENT_WIDTH - 10 * mm],
+                splitByRow=1,
+                style=TableStyle(
+                    [
+                        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                        ("LINEBELOW", (0, 0), (-1, -2), 0.35, BORDER),
+                        ("TOPPADDING", (0, 0), (-1, -1), 7),
+                        ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
+                        ("LEFTPADDING", (0, 0), (-1, -1), 0),
+                        ("RIGHTPADDING", (0, 0), (0, -1), 6),
+                        ("RIGHTPADDING", (1, 0), (1, -1), 0),
+                    ]
+                ),
+            )
+        )
+    footer_rows = [
+        (label, assessment.get(key))
+        for label, key in (("UNPROVEN", "main_uncertainty"), ("WATCH", "next_check"))
+        if assessment.get(key)
+    ]
+    if footer_rows:
+        story.extend([Spacer(1, 2.5 * mm)])
+        story.append(
+            Table(
+                [
+                    [
+                        Paragraph(label, styles["label"]),
+                        Paragraph(_markup(value), styles["small"]),
+                    ]
+                    for label, value in footer_rows
+                ],
+                colWidths=[22 * mm, CONTENT_WIDTH - 22 * mm],
+                style=TableStyle(
+                    [
+                        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                        ("LINEABOVE", (0, 0), (-1, 0), 0.35, BORDER),
+                        ("TOPPADDING", (0, 0), (-1, -1), 6),
+                        ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+                        ("LEFTPADDING", (0, 0), (-1, -1), 0),
+                        ("RIGHTPADDING", (0, 0), (0, -1), 6),
+                    ]
+                ),
+            )
+        )
+    return story
+
+
+def _agent_sources_section(
+    item: dict[str, Any], styles: dict[str, ParagraphStyle]
+) -> list[Any]:
+    """Application-owned provenance: the Feed post, artifacts, and the memo funnel."""
+    provenance = item.get("provenance") or {}
+    telemetry = item.get("telemetry") or {}
+    company_names = item.get("company_names") or {}
+    story: list[Any] = [
+        Spacer(1, 9 * mm),
+        Paragraph(
+            '<font name="Helvetica-Bold" color="#5BC5F2">/</font> Sources and audit trail',
+            styles["section"],
         ),
-    )
-
-
-def _investment_sections(item: dict[str, Any], styles: dict[str, ParagraphStyle]) -> list[Any]:
-    analysis = item.get("analysis") or {}
-    entities = list(analysis.get("affected_entities") or [])
-    story: list[Any] = []
-    if entities:
-        story.extend(_section_title("Company read-through", styles))
-        impact_copy = {
-            "positive": ("↗", "Potential positive", POSITIVE),
-            "negative": ("↘", "Potential negative", NEGATIVE),
-            "mixed": ("↔", "Mixed", MUTED),
-            "uncertain": ("?", "Direction unclear", MUTED),
-        }
-        rendered_group_count = 0
-        for scope, scope_label in (
-            ("portfolio", "PORTFOLIO COMPANIES"),
-            ("outside_portfolio", "OUTSIDE THE DISCLOSED PORTFOLIO"),
-        ):
-            group = [
-                entity
-                for entity in entities
-                if str(entity.get("scope") or "outside_portfolio") == scope
+        Spacer(1, 3 * mm),
+    ]
+    original = provenance.get("original_post") or {}
+    if original.get("url"):
+        story.extend(
+            [
+                Paragraph("ORIGINAL POST", styles["label"]),
+                Spacer(1, 1.4 * mm),
+                Paragraph(
+                    _link(original.get("url"), original.get("author") or original.get("url")),
+                    styles["small_link"],
+                ),
+                Spacer(1, 4 * mm),
             ]
-            if not group:
-                continue
-            if rendered_group_count:
-                story.append(Spacer(1, 3.5 * mm))
+        )
+    artifacts = list(provenance.get("artifacts") or [])
+    if artifacts:
+        story.extend([Paragraph("LINKED ARTIFACTS", styles["label"]), Spacer(1, 1.4 * mm)])
+        for artifact in artifacts:
             story.extend(
                 [
-                    Paragraph(scope_label, styles["label"]),
-                    Spacer(1, 1.8 * mm),
+                    Paragraph(
+                        _link(artifact.get("url"), artifact.get("title")), styles["small_link"]
+                    ),
+                    Spacer(1, 2 * mm),
                 ]
             )
-            rows: list[list[Any]] = []
-            for entity in group:
-                impact = str(entity.get("impact") or "uncertain")
-                symbol, label, impact_color = impact_copy.get(
-                    impact, impact_copy["uncertain"]
-                )
-                impact_style = ParagraphStyle(
-                    f"Impact-{impact}",
-                    parent=styles["impact"],
-                    textColor=impact_color,
-                )
-                symbol_markup = (
-                    f'<font name="{UNICODE_FONT}" size="9">{escape(symbol)}</font>'
-                    if symbol != "?"
-                    else "?"
-                )
-                rows.append(
+        story.append(Spacer(1, 2 * mm))
+
+    memo_calls = list(item.get("memo_calls") or [])
+    if memo_calls:
+        retained = len(
+            {
+                str(exposure.get("ticker"))
+                for assessment in item.get("company_assessments") or []
+                for exposure in assessment.get("exposures") or []
+            }
+        )
+        rejected = len(item.get("rejected_after_memo") or [])
+        funnel = (
+            f'{telemetry.get("company_universe_count", 0)} screened'
+            f' / {telemetry.get("memo_count", 0)} memos opened'
+            f' / {retained} retained'
+        )
+        if rejected:
+            funnel = f"{funnel} / {rejected} rejected"
+        story.extend(
+            [
+                Paragraph("HOW THE AGENT GOT HERE", styles["label"]),
+                Spacer(1, 1.4 * mm),
+                Paragraph(_markup(funnel), styles["small"]),
+                Spacer(1, 3 * mm),
+            ]
+        )
+        rows = []
+        for call in memo_calls:
+            arguments = call.get("arguments") or {}
+            ticker = str(arguments.get("ticker") or "")
+            name = str(company_names.get(ticker) or ticker)
+            rows.append(
+                [
+                    Paragraph(
+                        f'{_markup(name)}<br/><font color="#6B6B68">{_markup(ticker)}</font>',
+                        styles["small"],
+                    ),
+                    Paragraph(_markup(arguments.get("why_memo_is_needed")), styles["small"]),
+                ]
+            )
+        story.append(
+            Table(
+                rows,
+                colWidths=[30 * mm, CONTENT_WIDTH - 30 * mm],
+                splitByRow=1,
+                style=TableStyle(
                     [
-                        Paragraph(_markup(entity.get("name")), styles["body_strong"]),
-                        Paragraph(f"{symbol_markup}  {_markup(label)}", impact_style),
-                        Paragraph(_markup(entity.get("mechanism")), styles["small"]),
+                        ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                        ("LINEABOVE", (0, 0), (-1, 0), 0.5, INK),
+                        ("LINEBELOW", (0, 0), (-1, -1), 0.35, BORDER),
+                        ("TOPPADDING", (0, 0), (-1, -1), 6),
+                        ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+                        ("LEFTPADDING", (0, 0), (-1, -1), 0),
+                        ("RIGHTPADDING", (0, 0), (0, -1), 8),
                     ]
-                )
-            story.append(
+                ),
+            )
+        )
+
+    rejected_rows = [
+        [
+            Paragraph(
+                _markup(company_names.get(str(entry.get("ticker"))) or entry.get("ticker")),
+                styles["small"],
+            ),
+            Paragraph(_markup(entry.get("reason")), styles["small"]),
+        ]
+        for entry in item.get("rejected_after_memo") or []
+    ]
+    if rejected_rows:
+        story.extend(
+            [
+                Spacer(1, 5 * mm),
+                Paragraph("OPENED AND REJECTED", styles["label"]),
+                Spacer(1, 1.4 * mm),
                 Table(
-                    rows,
-                    colWidths=[32 * mm, 37 * mm, CONTENT_WIDTH - 69 * mm],
+                    rejected_rows,
+                    colWidths=[30 * mm, CONTENT_WIDTH - 30 * mm],
+                    splitByRow=1,
                     style=TableStyle(
                         [
                             ("VALIGN", (0, 0), (-1, -1), "TOP"),
-                            ("LINEABOVE", (0, 0), (-1, 0), 0.35, BORDER),
                             ("LINEBELOW", (0, 0), (-1, -1), 0.35, BORDER),
-                            ("LINEBEFORE", (1, 0), (-1, -1), 0.35, BORDER),
                             ("TOPPADDING", (0, 0), (-1, -1), 6),
-                            ("BOTTOMPADDING", (0, 0), (-1, -1), 7),
-                            ("LEFTPADDING", (0, 0), (0, -1), 0),
-                            ("RIGHTPADDING", (0, 0), (0, -1), 7),
-                            ("LEFTPADDING", (1, 0), (-1, -1), 7),
-                            ("RIGHTPADDING", (1, 0), (-1, -1), 7),
-                            ("RIGHTPADDING", (-1, 0), (-1, -1), 0),
+                            ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+                            ("LEFTPADDING", (0, 0), (-1, -1), 0),
+                            ("RIGHTPADDING", (0, 0), (0, -1), 8),
                         ]
                     ),
-                )
-            )
-            rendered_group_count += 1
-    watchpoints = list(analysis.get("watchpoints") or [])
-    signals = [
-        Paragraph(f'<font color="#4391B4">/</font> {_markup(value)}', styles["small"])
-        for value in watchpoints
-    ]
-    story.extend(_section_title("What would confirm or challenge this", styles))
-    story.append(
-        Table(
-            [
-                [
-                    [
-                        Paragraph("KEY UNCERTAINTY", styles["label"]),
-                        Spacer(1, 1.5 * mm),
-                        Paragraph(_markup(analysis.get("key_uncertainty")), styles["small"]),
-                    ],
-                    [Paragraph("SIGNALS", styles["label"]), Spacer(1, 1.5 * mm), *signals],
-                    [
-                        Paragraph("NEXT DILIGENCE STEP", styles["label"]),
-                        Spacer(1, 1.5 * mm),
-                        Paragraph(_markup(item.get("next_step")), styles["small"]),
-                    ],
-                ]
-            ],
-            colWidths=[CONTENT_WIDTH * 0.31, CONTENT_WIDTH * 0.34, CONTENT_WIDTH * 0.35],
-            style=TableStyle(
-                [
-                    ("VALIGN", (0, 0), (-1, -1), "TOP"),
-                    ("LINEABOVE", (0, 0), (-1, -1), 0.35, BORDER),
-                    ("LINEBELOW", (0, 0), (-1, -1), 0.35, BORDER),
-                    ("LINEBEFORE", (1, 0), (-1, 0), 0.35, BORDER),
-                    ("TOPPADDING", (0, 0), (-1, -1), 7),
-                    ("BOTTOMPADDING", (0, 0), (-1, -1), 8),
-                    ("LEFTPADDING", (0, 0), (0, 0), 0),
-                    ("RIGHTPADDING", (0, 0), (0, 0), 7),
-                    ("LEFTPADDING", (1, 0), (-1, 0), 7),
-                    ("RIGHTPADDING", (1, 0), (-1, 0), 7),
-                ]
-            ),
-        )
-    )
-    return story
-
-
-def _engineering_sections(item: dict[str, Any], styles: dict[str, ParagraphStyle]) -> list[Any]:
-    analysis = item.get("analysis") or {}
-    story = _section_title("What to do next", styles)
-    story.append(
-        Table(
-            [
-                [
-                    [
-                        Paragraph("NEXT STEP", styles["label"]),
-                        Spacer(1, 1.5 * mm),
-                        Paragraph(_markup(item.get("next_step")), styles["body"]),
-                    ],
-                    [
-                        Paragraph("DECISION RULE", styles["label"]),
-                        Spacer(1, 1.5 * mm),
-                        Paragraph(_markup(analysis.get("decision_rule")), styles["body_strong"]),
-                    ],
-                ]
-            ],
-            colWidths=[CONTENT_WIDTH / 2, CONTENT_WIDTH / 2],
-            style=TableStyle(
-                [
-                    ("VALIGN", (0, 0), (-1, -1), "TOP"),
-                    ("LINEABOVE", (0, 0), (-1, -1), 0.35, BORDER),
-                    ("LINEBELOW", (0, 0), (-1, -1), 0.35, BORDER),
-                    ("LINEBEFORE", (1, 0), (1, 0), 0.35, BORDER),
-                    ("TOPPADDING", (0, 0), (-1, -1), 8),
-                    ("BOTTOMPADDING", (0, 0), (-1, -1), 9),
-                    ("LEFTPADDING", (0, 0), (0, 0), 0),
-                    ("RIGHTPADDING", (0, 0), (0, 0), 8),
-                    ("LEFTPADDING", (1, 0), (1, 0), 8),
-                    ("RIGHTPADDING", (1, 0), (1, 0), 0),
-                ]
-            ),
-        )
-    )
-    return story
-
-
-def _source_block(
-    value: dict[str, Any],
-    styles: dict[str, ParagraphStyle],
-    *,
-    events: bool,
-    day: str,
-) -> list[Any]:
-    if events:
-        support = value.get("supports") or value.get("reason")
-        title = str(value.get("title") or support or "Feed evidence")
-        event_id = str(value.get("event_id") or "")
-        url = (
-            f"{PUBLIC_APP_URL}/evidence/feed?"
-            f"{urlencode({'date': day, 'event_id': event_id})}"
-            if event_id
-            else value.get("url") or value.get("source_url")
-        )
-    else:
-        title = str(value.get("title") or "Untitled source")
-        url = value.get("url")
-        support = value.get("supports")
-    flowables: list[Any] = [
-        Paragraph(_link(url, title), styles["small_link"]),
-        Spacer(1, 1.2 * mm),
-    ]
-    if support and _plain(support) != _plain(title):
-        flowables.append(Paragraph(_markup(support), styles["small"]))
-    return flowables
-
-
-def _sources_section(item: dict[str, Any], styles: dict[str, ParagraphStyle]) -> list[Any]:
-    citations = list(item.get("citations") or [])
-    event_by_id = {
-        str(event.get("event_id")): event
-        for event in item.get("events", [])
-        if event.get("event_id")
-    }
-    events: list[dict[str, Any]] = []
-    cited_event_ids: set[str] = set()
-    for citation in citations:
-        if citation.get("kind") != "event":
-            continue
-        event_id = str(citation.get("event_id") or "")
-        event = event_by_id.get(event_id, {})
-        events.append(
-            {
-                **citation,
-                "feed_rank": event.get("feed_rank"),
-                "role": event.get("role"),
-                "event_reason": event.get("reason") if event_id not in cited_event_ids else None,
-            }
-        )
-        cited_event_ids.add(event_id)
-    for event_id, event in event_by_id.items():
-        if event_id not in cited_event_ids:
-            events.append(event)
-    research = [citation for citation in citations if citation.get("kind") != "event"]
-    story: list[Any] = [
-        Spacer(1, 9 * mm),
-        Paragraph("Evidence and sources", styles["title"]),
-        Spacer(1, 3 * mm),
-        Paragraph(
-            _markup(item.get("title")),
-            styles["cover_lede"],
-        ),
-        Spacer(1, 5 * mm),
-        HRFlowable(width="100%", thickness=0.8, color=BLUE, spaceBefore=0, spaceAfter=5 * mm),
-    ]
-    day = str(item.get("day") or "")
-    line_before: list[tuple[Any, ...]] = []
-    if events and research:
-        source_rows: list[list[Any]] = [
-            [
-                Paragraph("FEED EVIDENCE", styles["label"]),
-                Paragraph("DOCUMENTS &amp; CONTEXT", styles["label"]),
+                ),
             ]
-        ]
-        for event, source in zip_longest(events, research):
-            source_rows.append(
-                [
-                    _source_block(event, styles, events=True, day=day) if event else [],
-                    _source_block(source, styles, events=False, day=day) if source else [],
-                ]
-            )
-        col_widths = [CONTENT_WIDTH * 0.43, CONTENT_WIDTH * 0.57]
-        line_before = [("LINEBEFORE", (1, 0), (1, -1), 0.35, BORDER)]
-    else:
-        values = events or research
-        source_rows = [
+        )
+
+    if telemetry:
+        story.extend(
             [
+                Spacer(1, 6 * mm),
                 Paragraph(
-                    "FEED EVIDENCE" if events else "DOCUMENTS &amp; CONTEXT",
-                    styles["label"],
-                )
+                    _markup(
+                        f'{telemetry.get("model", "")} / {telemetry.get("reasoning_effort", "")}'
+                        f' / {telemetry.get("prompt_version", "")}'
+                        f' / {telemetry.get("turn_count", 0)} turns'
+                    ),
+                    styles["small"],
+                ),
             ]
-        ]
-        for value in values:
-            source_rows.append(
-                [
-                    _source_block(
-                        value,
-                        styles,
-                        events=bool(events),
-                        day=day,
-                    )
-                ]
-            )
-        col_widths = [CONTENT_WIDTH]
-    story.append(
-        Table(
-            source_rows,
-            colWidths=col_widths,
-            repeatRows=1,
-            splitByRow=1,
-            style=TableStyle(
-                [
-                    ("VALIGN", (0, 0), (-1, -1), "TOP"),
-                    ("LINEABOVE", (0, 0), (-1, -1), 0.35, BORDER),
-                    ("LINEBELOW", (0, 0), (-1, -1), 0.35, BORDER),
-                    *line_before,
-                    ("BACKGROUND", (0, 0), (-1, 0), SURFACE),
-                    ("TOPPADDING", (0, 0), (-1, -1), 8),
-                    ("BOTTOMPADDING", (0, 0), (-1, -1), 9),
-                    ("LEFTPADDING", (0, 0), (0, -1), 8),
-                    ("RIGHTPADDING", (0, 0), (0, -1), 8),
-                    ("LEFTPADDING", (1, 0), (1, -1), 8),
-                    ("RIGHTPADDING", (1, 0), (1, -1), 8),
-                ]
-            ),
         )
-    )
     return story
 
 
 def _insight(item: dict[str, Any], styles: dict[str, ParagraphStyle]) -> list[Any]:
+    rank = int(item["daily_rank"])
+    company_names = item.get("company_names") or {}
     header = Table(
         [
             [
-                Paragraph(f'#{int(item["rank"])}', styles["rank"]),
+                Paragraph(f"#{rank}", styles["rank"]),
                 [
                     Paragraph(
-                        f'<a name="insight-{int(item["rank"])}"/>{_markup(item.get("title"))}',
+                        f'<a name="insight-{rank}"/>{_markup(item.get("investment_headline"))}',
                         styles["title"],
                     ),
                 ],
@@ -937,26 +854,49 @@ def _insight(item: dict[str, Any], styles: dict[str, ParagraphStyle]) -> list[An
             spaceBefore=0,
             spaceAfter=5 * mm,
         ),
-        _opening_table(item, styles),
+        Paragraph("WHAT HAPPENED", styles["label"]),
+        Spacer(1, 2 * mm),
+        Paragraph(_markup(item.get("development_summary")), styles["body"]),
     ]
-    analysis = item.get("analysis") or {}
-    if "key_uncertainty" in analysis:
-        story.extend(_investment_sections(item, styles))
-    else:
-        story.extend(_engineering_sections(item, styles))
+    assessments = list(item.get("company_assessments") or [])
+    if assessments:
+        story.extend(_section_title("Company read-through", styles))
+        for index, assessment in enumerate(assessments):
+            if index:
+                story.extend(
+                    [
+                        Spacer(1, 5 * mm),
+                        HRFlowable(
+                            width="100%",
+                            thickness=0.35,
+                            color=BORDER,
+                            spaceBefore=0,
+                            spaceAfter=4 * mm,
+                        ),
+                    ]
+                )
+            story.extend(_mechanism_block(assessment, styles, company_names))
+    elif item.get("no_match_reason"):
+        story.extend(_section_title("No company read-through", styles))
+        story.append(Paragraph(_markup(item["no_match_reason"]), styles["body"]))
+    if item.get("prior_assumption"):
+        story.extend(_section_title("The belief this moves", styles))
+        story.append(Paragraph(_markup(item["prior_assumption"]), styles["body"]))
     story.append(PageBreak())
-    story.extend(_sources_section(item, styles))
+    story.extend(_agent_sources_section(item, styles))
     return story
 
 
 def build_report_pdf(payload: dict[str, Any]) -> bytes:
     """Render a complete audience-specific workbook as vector PDF bytes."""
-    if payload.get("content_kind") != "daily_editorial" or not payload.get("available"):
-        raise ReportUnavailable(str(payload.get("reason") or "Daily editorial report unavailable."))
+    if payload.get("content_kind") != "investment_agent" or not payload.get("available"):
+        raise ReportUnavailable(
+            str(payload.get("reason") or "Company-aware Investment report unavailable.")
+        )
     audience = str(payload.get("audience") or "investment")
     day = str(payload.get("date") or payload.get("requested_date") or "")
-    if audience not in {"investment", "ai_engineering"} or not day:
-        raise ReportUnavailable("Daily editorial report is missing its audience or date.")
+    if audience != "investment" or not day:
+        raise ReportUnavailable("Investment report is missing its audience or date.")
 
     from io import BytesIO
 

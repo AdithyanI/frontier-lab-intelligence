@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from io import BytesIO
-from pathlib import Path
 
 from fastapi.testclient import TestClient
 from pypdf import PdfReader
@@ -15,162 +14,101 @@ CLIENT = TestClient(app)
 DAY = "2026-07-17"
 
 
-def _payload(audience: str = "investment") -> dict:
-    analysis = (
-        {
-            "affected_entities": [
-                {
-                    "name": "NVIDIA",
-                    "scope": "portfolio",
-                    "impact": "uncertain",
-                    "mechanism": "Demand may rise, but deployment evidence is missing.",
-                }
-            ],
-            "key_uncertainty": "The release has no customer evidence.",
-            "watchpoints": [
-                "Named production deployments.",
-                "Matched cost per successful task.",
-            ],
-        }
-        if audience == "investment"
-        else {"decision_rule": "Adopt only if the fixed eval improves reliability by 10%."}
-    )
+def _item(rank: int) -> dict:
     return {
-        "schema_version": "daily-intelligence-read-v4",
-        "content_kind": "daily_editorial",
-        "available": True,
-        "reason": None,
-        "status": "kept",
-        "requested_date": DAY,
-        "date": DAY,
-        "audience": audience,
-        "portfolio_reference": (
-            {
-                "basis": "complete audited year-end portfolio",
-                "as_of": "2025-12-31",
-                "source_label": "Audited annual report",
-                "source_url": "https://example.com/portfolio.pdf",
-                "reader_note": "Portfolio mappings use the audited public portfolio.",
-            }
-            if audience == "investment"
-            else None
+        "daily_rank": rank,
+        "day": DAY,
+        "development_id": f"development-{rank}",
+        "investment_headline": f"Model escape strengthens independent controls {rank}",
+        "development_summary": (
+            "OpenAI reported that cyber-capable models escaped a constrained "
+            "evaluation environment and 昇腾950发布说明 remained unresolved."
         ),
-        "run": {
-            "run_id": "daily-brief-test",
-            "date": DAY,
-            "status": "complete",
-            "created_at": "2026-07-18T19:47:28+00:00",
-            "schema_version": "daily-intelligence-store-v4",
-            "draft_schema_version": "daily-intelligence-draft-v4",
-            "workspace": {"run_id": "workspace-test", "manifest_sha256": "a" * 64},
-            "source": {
-                "routing_run_id": "routing-test",
-                "cohort_sha256": "b" * 64,
-                "event_run_id": "event-test",
-                "feed_run_id": "feed-test",
-            },
-            "agent": {"skill_version": "fli-daily-intelligence-v4", "model": "codex", "notes": None},
-            "result_sha256": ("c" if audience == "investment" else "d") * 64,
-            "counts": {
-                "candidate_events": 8,
-                "candidate_pairs": 10,
-                "insights_all_audiences": 2,
-                "citations_all_audiences": 4,
-                "insights": 1,
-                "included_candidates": 1,
-                "not_selected_candidates": 4,
-            },
-        },
-        "items": [
+        "prior_assumption": (
+            "A reasonable prior is that agent escapes remain confined to test systems."
+        ),
+        "no_match_reason": None,
+        "company_names": {"NTSK": "Netskope", "PANW": "Palo Alto Networks"},
+        "company_assessments": [
             {
-                "insight_id": "insight-test",
-                "local_id": "local-test",
-                "audience": audience,
-                "rank": 1,
-                "rank_rationale": "Highest decision consequence with primary-source evidence.",
-                "day": DAY,
-                "title": "A cited result becomes a decision - not a dashboard",
-                "what_changed": "A first-party release reported a new result -> one week earlier than expected.",
-                "interpretation": "The result changes the next diligence or implementation decision.",
-                "next_step": "Run one fixed comparison and record the decision.",
-                "analysis": analysis,
-                "events": [
+                "mechanism_title": "Independent runtime containment and egress control",
+                "mechanism": "The escape turns unauthorized egress into a demonstrated risk.",
+                "main_uncertainty": "We do not know whether enterprises buy new controls.",
+                "next_check": "Netskope's disclosed count of paid AI-security customers.",
+                "splits": False,
+                "exposures": [
                     {
-                        "event_id": "event-one",
-                        "feed_rank": 7,
-                        "role": "primary",
-                        "reason": "Provides the exact first-party claim.",
-                    }
-                ],
-                "citations": [
-                    {
-                        "citation_id": "citation-event",
-                        "local_id": "event-source",
-                        "kind": "event",
-                        "url": "https://x.com/example/status/1",
-                        "title": "Original X post",
-                        "event_id": "event-one",
-                        "artifact_id": None,
-                        "published_at": DAY,
-                        "retrieved_at": None,
-                        "supports": "Provides the exact first-party claim.",
-                        "excerpt": None,
+                        "ticker": "NTSK",
+                        "affected_driver": "Paid AI-security module adoption",
+                        "direction": "positive",
+                        "materiality": "material",
+                        "size_basis": "ARR was $845 million",
+                        "impact": "Netskope sells inline enforcement for agent traffic.",
                     },
                     {
-                        "citation_id": "citation-one",
-                        "local_id": "artifact-one",
-                        "kind": "artifact",
-                        "url": "https://example.com/research",
-                        "title": "Primary research artifact",
-                        "event_id": "event-one",
-                        "artifact_id": "artifact-one",
-                        "published_at": DAY,
-                        "retrieved_at": None,
-                        "supports": "Defines the measurement and result.",
-                        "excerpt": "The result improved by ten percent.",
-                    },
-                    {
-                        "citation_id": "citation-event-two",
-                        "local_id": "event-source-two",
-                        "kind": "event",
-                        "url": "https://x.com/example/status/2",
-                        "title": "Original X continuation",
-                        "event_id": "event-one",
-                        "artifact_id": None,
-                        "published_at": DAY,
-                        "retrieved_at": None,
-                        "supports": "Qualifies the first-party claim.",
-                        "excerpt": None,
-                    },
-                    {
-                        "citation_id": "citation-two",
-                        "local_id": "context-two",
-                        "kind": "context",
-                        "url": "https://example.com/context",
-                        "title": "Portfolio context",
-                        "event_id": None,
-                        "artifact_id": None,
-                        "published_at": None,
-                        "retrieved_at": None,
-                        "supports": "Establishes the comparison baseline.",
-                        "excerpt": None,
-                    },
-                    {
-                        "citation_id": "citation-three",
-                        "local_id": "web-three",
-                        "kind": "web",
-                        "url": "https://example.com/launch",
-                        "title": "昇腾950发布说明",
-                        "event_id": None,
-                        "artifact_id": None,
-                        "published_at": None,
-                        "retrieved_at": "2026-07-18T19:35:21Z",
-                        "supports": "Confirms the release timing.",
-                        "excerpt": None,
+                        "ticker": "PANW",
+                        "affected_driver": "AI-security product attachment",
+                        "direction": "negative",
+                        "materiality": "unknown",
+                        "size_basis": None,
+                        "impact": "Palo Alto's coverage is broader but undisclosed.",
                     },
                 ],
             }
         ],
+        "rejected_after_memo": [
+            {"ticker": "RBRK", "reason": "Rubrik needs agent telemetry this lacks."}
+        ],
+        "memo_calls": [
+            {
+                "turn": 1,
+                "call_id": f"call-{rank}",
+                "arguments": {
+                    "ticker": "NTSK",
+                    "connection_type": "direct",
+                    "mechanism": "Inline controls cover unauthorized egress.",
+                    "affected_operating_driver": "Paid module adoption",
+                    "why_memo_is_needed": "Confirm Netskope's agent traffic controls map here.",
+                },
+            }
+        ],
+        "telemetry": {
+            "model": "gpt-5.6-sol",
+            "reasoning_effort": "xhigh",
+            "prompt_version": "investment-agent-v11",
+            "company_universe_count": 37,
+            "memo_count": 3,
+            "turn_count": 2,
+        },
+        "provenance": {
+            "primary_event_id": "event-one",
+            "original_post": {
+                "url": "https://x.com/example/status/1",
+                "author": "OpenAI",
+            },
+            "artifacts": [
+                {
+                    "artifact_id": "artifact-one",
+                    "title": "Primary research artifact",
+                    "url": "https://example.com/research",
+                }
+            ],
+        },
+    }
+
+
+def _payload() -> dict:
+    return {
+        "schema_version": "investment-agent-read-v6",
+        "content_kind": "investment_agent",
+        "available": True,
+        "reason": None,
+        "audience": "investment",
+        "status": "kept",
+        "date": DAY,
+        "requested_date": DAY,
+        "run": {"result_sha256": "a" * 64},
+        "items": [_item(rank) for rank in (1, 2)],
     }
 
 
@@ -183,77 +121,63 @@ def _pdf_links(pdf_bytes: bytes) -> set[str]:
     reader = PdfReader(BytesIO(pdf_bytes))
     links: set[str] = set()
     for page in reader.pages:
-        for annotation_ref in page.get("/Annots", []):
-            annotation = annotation_ref.get_object()
-            action = annotation.get("/A")
-            if action and action.get("/URI"):
-                links.add(str(action["/URI"]))
+        for annotation in page.get("/Annots") or []:
+            action = annotation.get_object().get("/A") or {}
+            uri = action.get("/URI")
+            if uri:
+                links.add(str(uri))
     return links
 
 
-def _pdf_internal_destinations(pdf_bytes: bytes) -> list[list[object]]:
-    reader = PdfReader(BytesIO(pdf_bytes))
-    return [
-        [
-            annotation_ref.get_object()["/Dest"]
-            for annotation_ref in page.get("/Annots", [])
-            if annotation_ref.get_object().get("/Dest")
-        ]
-        for page in reader.pages
-    ]
-
-
-@pytest.mark.parametrize(
-    ("audience", "expected", "unexpected"),
-    [
-        ("investment", "Company read-through", "Decision rule"),
-        ("ai_engineering", "DECISION RULE", "Company read-through"),
-    ],
-)
-def test_report_renders_complete_audience_workbook(audience, expected, unexpected):
-    pdf_bytes = pdf_report.build_report_pdf(_payload(audience))
-    reader = PdfReader(BytesIO(pdf_bytes))
+def test_report_renders_the_complete_investment_workbook():
+    pdf_bytes = pdf_report.build_report_pdf(_payload())
     text = _pdf_text(pdf_bytes)
 
     assert pdf_bytes.startswith(b"%PDF-")
-    assert len(reader.pages) == 3
     assert "DAILY" in text
     assert "INTELLIGENCE" in text
-    assert "Evidence and sources" in text
     assert "Today's brief" in text
-    assert "Click any title to jump to its analysis." in text
-    assert "SOURCE EVENTS" not in text
-    assert "RESEARCH SOURCES" not in text
-    assert "Complete run:" not in text
-    assert "READING NOTE" not in text
-    assert "WHY THIS RANK" not in text
-    assert "Highest decision consequence with primary-source evidence." not in text
-    assert "FEED #7" not in text
-    assert " / PRIMARY" not in text
-    assert "SOURCE LEDGER" not in text
-    assert "Insight role:" not in text
-    assert "No sources in this group." not in text
-    assert "FEED EVIDENCE" in text
-    assert "DOCUMENTS & CONTEXT" in text
-    assert [len(destinations) for destinations in _pdf_internal_destinations(pdf_bytes)] == [
-        1,
-        1,
-        1,
-    ]
-    assert expected in text
-    assert unexpected not in text
-    assert "Primary research artifact" in text
-    assert "Original X continuation" in text
-    assert "Portfolio context" in text
+    assert "WHAT HAPPENED" in text
+    assert "Company read-through" in text
+    assert "The belief this moves" in text
+    assert "Sources and audit trail" in text
     assert "昇腾950发布说明" in text
-    assert {
-        "https://frontier-lab-intelligence.adithyan.io/evidence/feed?date=2026-07-17&event_id=event-one",
-        "https://example.com/research",
-        "https://example.com/context",
-        "https://example.com/launch",
-    }.issubset(_pdf_links(pdf_bytes))
-    assert "https://x.com/example/status/1" not in _pdf_links(pdf_bytes)
-    assert "https://x.com/example/status/2" not in _pdf_links(pdf_bytes)
+    # Superseded editorial sections must not reappear.
+    assert "WHAT CHANGED" not in text
+    assert "DECISION RULE" not in text
+    assert "SOURCE LEDGER" not in text
+
+
+def test_report_shows_every_company_with_its_direction_and_evidence():
+    text = _pdf_text(pdf_report.build_report_pdf(_payload()))
+
+    assert "Netskope" in text
+    assert "NTSK" in text
+    assert "Palo Alto Networks" in text
+    assert "Potential positive" in text
+    assert "Potential negative" in text
+    assert "ARR was $845 million" in text
+    assert "UNPROVEN" in text
+    assert "WATCH" in text
+
+
+def test_report_shows_the_screening_funnel_and_rejections():
+    text = _pdf_text(pdf_report.build_report_pdf(_payload()))
+
+    assert "HOW THE AGENT GOT HERE" in text
+    assert "37 screened" in text
+    assert "3 memos opened" in text
+    assert "2 retained" in text
+    assert "1 rejected" in text
+    assert "OPENED AND REJECTED" in text
+    assert "Rubrik needs agent telemetry this lacks." in text
+
+
+def test_report_links_only_application_owned_sources():
+    links = _pdf_links(pdf_report.build_report_pdf(_payload()))
+
+    assert "https://example.com/research" in links
+    assert "https://x.com/example/status/1" in links
 
 
 def test_report_cache_is_content_addressed_and_atomic(tmp_path):
@@ -269,53 +193,13 @@ def test_report_cache_is_content_addressed_and_atomic(tmp_path):
     assert list(tmp_path.glob("*.tmp")) == []
 
 
-def test_investment_report_matches_ui_impact_labels_per_company():
-    payload = _payload()
-    payload["items"][0]["analysis"]["affected_entities"] = [
-        {
-            "name": "NVIDIA",
-            "scope": "portfolio",
-            "impact": "positive",
-            "mechanism": "Deployment demand could increase.",
-        },
-        {
-            "name": "Microsoft",
-            "scope": "portfolio",
-            "impact": "negative",
-            "mechanism": "Model pricing could face pressure.",
-        },
-        {
-            "name": "Meta",
-            "scope": "portfolio",
-            "impact": "mixed",
-            "mechanism": "Open models create both adoption and pricing effects.",
-        },
-        {
-            "name": "Snowflake",
-            "scope": "outside_portfolio",
-            "impact": "uncertain",
-            "mechanism": "The transmission path is not yet established.",
-        },
-    ]
-
-    text = _pdf_text(pdf_report.build_report_pdf(payload))
-
-    assert "PORTFOLIO COMPANIES" in text
-    assert "OUTSIDE THE DISCLOSED PORTFOLIO" in text
-    assert "Potential positive" in text
-    assert "Potential negative" in text
-    assert "Mixed" in text
-    assert "Direction unclear" in text
-    assert "DIRECTION UNCERTAIN" not in text
-
-
-def test_report_rejects_non_editorial_payload(tmp_path):
+def test_report_rejects_a_payload_from_outside_the_current_path(tmp_path):
     with pytest.raises(pdf_report.ReportUnavailable, match="unavailable"):
         pdf_report.get_or_create_report(
             {
                 "content_kind": "candidate_decisions",
                 "available": False,
-                "reason": "Daily editorial report unavailable.",
+                "reason": "Company-aware Investment report unavailable.",
             },
             cache_root=tmp_path,
         )
@@ -323,10 +207,7 @@ def test_report_rejects_non_editorial_payload(tmp_path):
 
 def test_report_api_downloads_and_revalidates_cached_pdf(tmp_path, monkeypatch):
     payload = _payload()
-    monkeypatch.setattr(
-        "fli.web.app.editorial_store.editorial_insights_payload",
-        lambda **_: payload,
-    )
+    monkeypatch.setattr("fli.web.app._investment_insights", lambda **_: payload)
     monkeypatch.setattr("fli.web.app.pdf_report.DEFAULT_CACHE_ROOT", tmp_path)
 
     first = CLIENT.get(f"/api/insights/report.pdf?audience=investment&date={DAY}")
@@ -338,9 +219,18 @@ def test_report_api_downloads_and_revalidates_cached_pdf(tmp_path, monkeypatch):
 
     assert first.status_code == 200
     assert first.headers["content-type"] == "application/pdf"
-    assert 'filename="fli-daily-brief-2026-07-17-investment.pdf"' in first.headers["content-disposition"]
+    assert (
+        'filename="fli-daily-brief-2026-07-17-investment.pdf"'
+        in first.headers["content-disposition"]
+    )
     assert first.headers["x-fli-pdf-cache"] == "miss"
     assert second.headers["x-fli-pdf-cache"] == "hit"
     assert second.headers["etag"] == first.headers["etag"]
     assert conditional.status_code == 304
     assert conditional.content == b""
+
+
+def test_report_api_refuses_an_audience_without_a_current_run():
+    response = CLIENT.get(f"/api/insights/report.pdf?audience=ai_engineering&date={DAY}")
+
+    assert response.status_code == 404
