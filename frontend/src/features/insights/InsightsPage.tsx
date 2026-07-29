@@ -1102,7 +1102,9 @@ function InvestmentAgentMechanism({
                 <p className="investment-agent-exposure-driver">
                   {decodeTextEntities(exposure.affected_driver)}
                 </p>
-                <p className="investment-agent-exposure-impact">{decodeTextEntities(exposure.impact)}</p>
+                <p className="investment-agent-exposure-impact">
+                  {decodeTextEntities(exposure.impact ?? exposure.note ?? '')}
+                </p>
               </div>
               <div className="investment-agent-exposure-verdict">
                 <span

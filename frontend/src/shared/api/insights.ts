@@ -224,8 +224,10 @@ export interface InvestmentAgentExposure {
   affected_driver: string
   direction: InvestmentAgentDirection
   materiality: InvestmentAgentMateriality
-  size_basis: string | null
-  impact: string
+  size_basis?: string | null
+  impact?: string
+  /** Superseded by `impact` in investment-agent-v11; kept so earlier runs still render. */
+  note?: string
 }
 
 export interface InvestmentAgentCompanyAssessment {
