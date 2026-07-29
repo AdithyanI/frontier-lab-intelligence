@@ -16,7 +16,7 @@ DEFAULT_DB = (
 )
 STORE_SCHEMA_VERSION = "investment-agent-store-v2"
 READ_SCHEMA_VERSION = "investment-agent-read-v8"
-CURRENT_PROMPT_VERSION = "investment-agent-v15"
+CURRENT_PROMPT_VERSION = "investment-agent-v16"
 TRACE_SCHEMA_VERSIONS = {"investment-agent-trace-v1"}
 STATUSES = {"kept", "suppressed", "all"}
 CONNECTION_FIELDS = {"mechanism", "companies"}

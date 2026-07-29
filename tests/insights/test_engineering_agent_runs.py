@@ -18,8 +18,8 @@ def _trace(
 ) -> dict:
     return {
         "schema_version": "engineering-agent-trace-v1",
-        "prompt_version": "engineering-agent-v2",
-        "prompt_cache_key": "fli:engineering-agent:v2",
+        "prompt_version": "engineering-agent-v3",
+        "prompt_cache_key": "fli:engineering-agent:v3",
         "date": day,
         "daily_rank": daily_rank,
         "development_id": development_id,

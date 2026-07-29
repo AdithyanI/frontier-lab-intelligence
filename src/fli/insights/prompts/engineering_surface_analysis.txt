@@ -105,6 +105,10 @@ Suppress when the development is only interesting. Specifically:
 - funding, valuation, hiring, or organizational news with no engineering
   consequence, however important it may be commercially;
 - benchmark scores with no method, conditions, or artifact behind them;
+- a claim whose technical substance exists only in an untranscribed video,
+  audio clip, image, or other unavailable attachment;
+- a teaser, headline, unsupported anecdote, or second-hand paraphrase with no
+  concrete technical facts or retrieved primary artifact in the packet;
 - generic best practice, opinion, or enthusiasm with no attributable development;
 - research so specialized that nothing transfers to a research-agent or data
   platform, even if it is excellent work.
@@ -116,6 +120,11 @@ trusting the feed if every item is presented as relevant.
 
 Being about AI is not a reason to surface. Most frontier-lab news does not
 change how a specific research platform is built.
+
+The presence of media is not itself grounds for suppression. Surface the
+Development when the written posts and retrieved artifacts independently
+contain enough technical substance to meet the bar. Never infer what unseen or
+untranscribed media probably contains.
 
 # Transfer discipline
 
