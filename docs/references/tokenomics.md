@@ -9,16 +9,17 @@ price guarantees.
 
 ## Current Development Routing
 
-The July 5–26 `audience-routing-v15` top-100 stores contain 2,141 completed
-Developments with zero unresolved failures: 774 both audiences, 278
-AI-Engineering-only, 116 Investment-only, and 973 neither. The deterministic
-evidence-readiness gate handled 433 weak or unavailable packets without an LLM
-call; the remaining judgments use `gpt-5.6-luna` at medium reasoning.
+The July 5–28 `audience-routing-v15` top-100 stores contain 2,339 completed
+Developments with zero unresolved failures: 167 both audiences, 92
+AI-Engineering-only, 46 Investment-only, and 2,034 neither. The deterministic
+evidence-readiness gate handled 1,717 packets without an LLM call: 1,472
+contained native media the system does not inspect, 153 were short unsupported
+text, and 92 had only unavailable linked evidence.
 
-The latest refresh reused all but 14 exact stored judgments. Those incremental
-calls cost $0.083892; complete stored run telemetry reports $9.988445. The
-refresh reused stored X and artifact evidence and made no provider collection
-calls.
+The remaining 622 `gpt-5.6-luna` medium calls reported 2,039,826 input tokens,
+2,032,543 cache-write tokens, 166,390 output tokens, zero cached-input hits,
+and $3.044634. The refresh reused stored X and artifact evidence and made no
+provider collection calls.
 
 ## Current Investment Agent
 
@@ -28,10 +29,10 @@ needed to test causal matches.
 
 | Published checkpoint | Developments | Input tokens | Cached tokens | Output tokens | Measured cost |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| July 5–28 top tens, v15 | 240 | 8,825,740 | 3,064,839 | 711,167 | $51.671934 |
+| July 5–28, up to ten per day, v15 | 186 | 4,809,068 | 1,218,283 | 298,619 | $27.521637 |
 
-All 24 visible daily cohorts use `investment-agent-v15`: 142 Developments were
-surfaced and 98 were suppressed.
+All 24 visible daily cohorts use `investment-agent-v15`: 64 Developments were
+surfaced and 122 were suppressed.
 
 The runner warms one request before bounded parallel fan-out. Every turn stores
 its request, response ID, tool calls, retry history, usage, and reported cost.
@@ -49,13 +50,13 @@ company-memo tool loop or Investment materiality gate.
 
 | Published checkpoint | Developments | Input tokens | Cached tokens | Output tokens | Measured cost |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| July 19–28 top tens, v2 | 99 | 556,224 | 0 | 66,772 | $4.784280 |
+| July 5–28, up to ten per day, v2 | 212 | 663,081 | 0 | 89,335 | $5.995455 |
 
-All ten visible daily cohorts use `engineering-agent-v2`: 39 Developments were
-surfaced and 60 were suppressed. July 22 contains nine rather than ten rows
-because the current store prevents one Development from being published on two
-different days. Engineering web projection is local and adds no model cost;
-PDF and delivery are intentionally Investment-only.
+All 24 visible daily cohorts use `engineering-agent-v2`: 27 Developments were
+surfaced and 185 were suppressed. A day remains below ten when fewer eligible
+positively routed Developments exist after canonical cross-day ownership.
+Engineering web projection is local and adds no model cost; PDF and delivery
+are intentionally Investment-only.
 
 ## What a Normal Refresh Pays For
 

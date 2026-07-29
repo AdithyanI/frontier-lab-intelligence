@@ -102,6 +102,41 @@ def test_import_publish_and_read_surface_linked_engineering_result(
     ]
 
 
+def test_fresh_input_with_same_result_can_replace_a_changed_rank(
+    tmp_path: Path,
+):
+    db_path = tmp_path / "engineering-agent.db"
+    first = _trace()
+    first_path = tmp_path / "first.json"
+    first_path.write_text(json.dumps(first), encoding="utf-8")
+    first_import = engineering_agent_runs.import_trace(
+        first_path, db_path=db_path
+    )
+
+    refreshed = _trace(daily_rank=2)
+    refreshed_path = tmp_path / "refreshed.json"
+    refreshed_path.write_text(json.dumps(refreshed), encoding="utf-8")
+    refreshed_import = engineering_agent_runs.import_trace(
+        refreshed_path, db_path=db_path
+    )
+
+    assert refreshed_import["run_id"] == first_import["run_id"]
+    engineering_agent_runs.publish_day(
+        day=DAY,
+        candidates=[
+            {"development_id": DEVELOPMENT_ID, "daily_rank": 2}
+        ],
+        selection_limit=1,
+        db_path=db_path,
+    )
+    payload = engineering_agent_runs.insights_payload(
+        day=DAY,
+        status="all",
+        db_path=db_path,
+    )
+    assert payload["items"][0]["daily_rank"] == 2
+
+
 def test_publication_hides_completed_rows_outside_selected_cohort(
     tmp_path: Path,
 ):

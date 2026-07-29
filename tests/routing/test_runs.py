@@ -838,6 +838,7 @@ def _refresh_summary(day: str) -> dict:
             "reported_cost_count": 1,
             "cache_eligible_requests": 1,
             "cache_hit_requests": 1,
+            "deterministic_unsupported_media_filtered": 1,
         },
     }
 
@@ -939,6 +940,7 @@ def test_refresh_replaces_old_runs_only_after_every_day_completes(
     assert result["counts"]["complete"] == 2
     assert result["counts"]["both"] == 2
     assert result["counts"]["cache_hit_requests"] == 2
+    assert result["counts"]["deterministic_unsupported_media_filtered"] == 2
     assert result["counts"]["reported_cost_usd"] == pytest.approx(0.02)
     assert result["packaging"] == {
         "total_duration_ms": 8.0,

@@ -180,7 +180,7 @@ def _warm_evidence_views(
                     params={
                         "date": day,
                         "lane": "all",
-                        "sort": "attention",
+                        "sort": "rank",
                         "routing": "relevant",
                         "q": "",
                         "event_id": "",

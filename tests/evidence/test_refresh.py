@@ -629,10 +629,13 @@ def test_optimize_stores_reports_materialized_indexes(tmp_path):
 
 def test_warm_evidence_views_warms_current_days_and_artifacts():
     requested: list[tuple[str, str | None]] = []
+    event_sorts: list[str | None] = []
 
     def handler(request: httpx.Request) -> httpx.Response:
         day = request.url.params.get("date")
         requested.append((request.url.path, day))
+        if request.url.path == "/api/events":
+            event_sorts.append(request.url.params.get("sort"))
         if request.url.path == "/api/events/dates":
             return httpx.Response(
                 200,
@@ -662,3 +665,4 @@ def test_warm_evidence_views_warms_current_days_and_artifacts():
         ("/api/events", "2026-07-06"),
         ("/api/artifacts/dates", None),
     ]
+    assert event_sorts == ["rank", "rank"]

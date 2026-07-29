@@ -1,6 +1,6 @@
 # Model Routing
 
-Last verified: 2026-07-28
+Last verified: 2026-07-29
 
 For the cross-stage cost summary and X-provider units, see
 [`tokenomics.md`](tokenomics.md).
@@ -20,7 +20,7 @@ not part of the daily path.
 | Boundary | Default model | Reasoning effort | Rationale |
 | --- | --- | --- | --- |
 | Structural entity kind | `gpt-5.6-luna` | `medium` | Existing evaluated classifier contract. |
-| Evidence audience routing | deterministic evidence gate, then `gpt-5.6-luna` | none, then `medium` | A narrow evidence-completeness gate suppresses only short unsupported packets and stores the exact reason without spending model tokens. All other packets reach the self-contained, recall-oriented router. Current checkpoint counts and spend live in [`docs/STATUS.md`](../STATUS.md) and [`tokenomics.md`](tokenomics.md). |
+| Evidence audience routing | deterministic evidence gate, then `gpt-5.6-luna` | none, then `medium` | The gate skips Developments containing native photo, video, GIF, audio, Spaces, or native-video evidence because the current packet builder does not inspect that media. It also completes short unsupported or unavailable packets without spending model tokens. Readable linked articles, blogs, PDFs, repositories, and X Articles remain eligible. All other packets reach the self-contained, recall-oriented router. Current checkpoint counts and spend live in [`docs/STATUS.md`](../STATUS.md) and [`tokenomics.md`](tokenomics.md). |
 | Company-aware Investment analysis | `gpt-5.6-sol` | `xhigh` | One Development is screened against the compact company universe, then the model opens only the full memos needed to test concrete causal paths. Sol/xhigh is the quality baseline while this boundary is calibrated. Exact run proof and spend belong in [`docs/STATUS.md`](../STATUS.md) and [`insight-refresh.md`](insight-refresh.md). |
 | Surface-linked AI Engineering analysis | `gpt-5.6-sol` | `high` | One Development is judged in a single call against the seven assumed Aion surfaces in [`aion-surfaces.json`](aion-surfaces.json). There is no tool loop: the surface map is small enough to send in full, so progressive disclosure buys nothing. The work is taste plus one sentence of technical writing, not retrieval or a multi-hop causal chain, so `high` is the calibration baseline rather than `xhigh`. Luna at this boundary is untested. |
 | Missing-bio identity research | `gpt-5.6-luna` | `high` | Multi-source grounded identity resolution needs more checking. |
@@ -36,10 +36,13 @@ That historical comparison remains relevant to the retired keep/drop boundary.
 For model-eligible packets, v15 keeps Luna/medium and the stable self-contained
 source, audience, and decision contract. It also requires the Investment hook
 to arise from the central Development rather than an attractive incidental
-fact. The pre-model rule is deliberately narrow: it applies only when the
-complete packet is one short root post and no supporting source survived packet
-construction. A remaining link is recorded as unavailable linked or media
-evidence; the rule does not claim to have understood that missing material.
+fact. The pre-model rule is deliberately deterministic. It skips a Development
+when its packet declares native media that the system cannot inspect yet, or
+when the complete packet is one short root post and no supporting source
+survived packet construction. A remaining unreadable link is recorded as
+unavailable evidence; the rule does not claim to have understood missing
+material. Readable linked documents remain eligible evidence and are not
+treated as native media.
 The current router is intentionally recall-oriented: a positive route means a
 Development merits downstream investigation, not that it is already
 publishable intelligence. Company mapping and the Investment Insight gate

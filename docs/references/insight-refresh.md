@@ -1,20 +1,21 @@
-# Investment Insight Refresh
+# Audience Insight Refresh
 
 Last verified: 2026-07-29
 
 ## Purpose
 
-One path produces current Insights: the company-aware Investment agent. It
-starts from Developments with a current positive Investment route, screens the
-37-company compact universe, opens only causally plausible company memos, and
-publishes one complete daily cohort.
+Two independent agents produce current Insights from the same frozen
+Development and audience-routing lineage.
+
+- Investment starts from a positive Investment route, screens the 37-company
+  compact universe, opens only causally plausible company memos, and returns
+  bet-linked read-throughs.
+- AI Engineering starts from a positive Engineering route and compares the
+  Development with the seven versioned Aion surfaces in one model call.
 
 This workflow does not collect X posts, rebuild Events or Developments, retrieve
 artifacts, or run audience routing. Those upstream stages must already be
 current.
-
-AI Engineering has no current Insight generator. Its API returns an explicit
-unavailable reason rather than older content.
 
 ## Inspect before spending
 
@@ -25,11 +26,19 @@ Read the live contract instead of assuming a prompt or schema version:
 .venv/bin/fli insights summary --json --no-input
 ```
 
-Resolve the exact Investment-routed cohort without model calls, trace writes,
-database writes, or publication:
+Resolve either exact routed cohort without model calls, trace writes, database
+writes, or publication:
 
 ```bash
 .venv/bin/fli insights run-investment-agent \
+  --through 2026-07-21 \
+  --days 3 \
+  --top-ranked 10 \
+  --dry-run \
+  --json \
+  --no-input
+
+.venv/bin/fli insights run-engineering-agent \
   --through 2026-07-21 \
   --days 3 \
   --top-ranked 10 \
@@ -52,6 +61,14 @@ The dry-run output is the spend boundary. Inspect `targets`, `prompt_version`,
   --workers 6 \
   --json \
   --no-input
+
+.venv/bin/fli insights run-engineering-agent \
+  --through 2026-07-21 \
+  --days 3 \
+  --top-ranked 10 \
+  --workers 6 \
+  --json \
+  --no-input
 ```
 
 The runner:
@@ -59,17 +76,18 @@ The runner:
 1. warms the stable prompt prefix with one Development;
 2. fans out the remaining targets with bounded parallelism;
 3. writes every request, response, tool call, response ID, retry, token count,
-   and reported cost under
-   `data/derived/insights/investment-agent-traces/<day>/`;
+   and reported cost under the audience's trace directory in
+   `data/derived/insights/`;
 4. validates and imports each completed result; and
 5. publishes a day only when every selected Development completes.
 
 Publication is atomic. A partial batch may store successful rows and traces,
 but it cannot replace the visible daily cohort.
 
-The v14 agent uses progressive disclosure. Its first turn receives the complete
-Development and compact standing-bet titles for all 37 companies. It may request
-zero to eight full company memos. The continuation then returns only:
+The v15 Investment agent uses progressive disclosure. Its first turn receives
+the complete Development and compact standing-bet titles for all 37 companies.
+It may request zero to eight full company memos. The continuation then returns
+only:
 
 ```text
 headline · what_changed · decision
@@ -88,8 +106,12 @@ established and the thesis deserves review now.
 
 A retry runs the requested targets again and writes new traces. It does not
 claim that completed model calls are free or automatically reused. Use
-`--rank N` only for focused diagnosis of one current Investment-routed daily
+`--rank N` only for focused diagnosis of one current audience-routed daily
 rank; a single-rank run does not publish the whole day.
+
+The Engineering agent has no memo tool loop. Its one call receives the complete
+Development and the complete seven-surface map, then returns `surface` with at
+most two decision-changing landings or `suppress` with one reason.
 
 ## Verify after the run
 
@@ -120,14 +142,12 @@ Check that:
 
 ## Current checkpoint
 
-The active contract is Investment agent v14 over `company-memos-v3`: 37
-companies, 176 binary standing bets, 127 upside and 49 downside. The complete
-July 21 Sol/xhigh v14 cohort is published: 10 candidates, seven surfaced,
-three suppressed, 21 retained bet references across 20 Development-company
-connections, and zero thresholds cleared. The run reported 446,739 input
-tokens, 158,255 cached input tokens, 42,009 output tokens, 34,981 reasoning
-tokens, and $2.781818. Historical v8/v9/v11/v13 rows remain auditable but
-cannot satisfy or render a current publication.
+The active Investment contract is v15 over `company-memos-v3`: 37 companies
+and 176 binary standing bets. The active Engineering contract is v2 over seven
+versioned Aion surfaces. One frozen July 5–28 lineage currently publishes 186
+Investment candidates (64 surfaced) and 212 Engineering candidates (27
+surfaced) across 24 complete daily cohorts per audience. Historical rows remain
+auditable but cannot satisfy or render a current publication.
 
 ## Failure handling
 

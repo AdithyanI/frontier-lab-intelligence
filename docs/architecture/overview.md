@@ -97,12 +97,15 @@ composition.
    independently authored source post, current substantive same-author
    continuations, and each retrieved shared artifact once. Third-party reaction text stays out of
    the semantic packet even though trusted authors, quoters, and reposters
-   still shape rank. Before any model call, one narrow evidence-readiness gate
-   completes a Development as not relevant when the entire packet is a single
-   X post with no more than 30 substantive words and no artifact, author
-   continuation, or independently authored corroboration. Its stored reason
-   distinguishes unsupported text from unavailable linked or media evidence;
-   the Development remains inspectable and consumes no model tokens. The Feed
+   still shape rank. Before any model call, one deterministic evidence-readiness
+   gate completes a Development as not relevant when it contains native photo,
+   video, GIF, audio, Spaces, or native-video evidence that the packet builder
+   does not inspect. Readable linked articles, blogs, PDFs, repositories, and X
+   Articles remain eligible. The same gate handles a single X post with no more
+   than 30 substantive words and no artifact, author continuation, or
+   independently authored corroboration, plus packets whose only linked
+   evidence was unavailable. Its stored reason names the exact condition; the
+   Development remains inspectable and consumes no model tokens. The Feed
    exposes the exact rendered packet through a
    read-only preview that never calls a model. New routing freezes admit only
    first-party X sources no more than seven days old; a current same-author
@@ -115,7 +118,7 @@ composition.
    current source Feed/Event IDs and full-day rank-input hash, and readers reject
    stale rank lineage.
 9. The company-aware Investment agent first selects only Developments with a
-   current, positive Investment route. “Top ten” means the ten highest daily
+   current, positive Investment route. “Top ten” means up to the ten highest daily
    ranks inside that Investment lane, not the first ten Developments in the
    union-positive Feed. A direct single-rank run fails closed when that rank is
    not Investment-routed. The agent then reads the complete Development and a
@@ -153,7 +156,7 @@ composition.
    408, 409, 429, 499, and 5xx failures receive at most three
    application-owned attempts. Every failed attempt and exact request is
    written to the trace before retry; permanent request errors fail
-   immediately. Sol/xhigh top-ten passes now cover July 5–26 as the persisted
+   immediately. Sol/xhigh top-ten passes now cover July 5–28 as the persisted
    calibration proof of this successor boundary.
 10. The 37 web-grounded company memos live in the single generated packet
    `docs/references/company-memos.json`; BIT Lens projects each company with its
@@ -165,7 +168,7 @@ composition.
    watchpoints, and source ids. `fli.insights.company_context` is the only
    runtime reader of that packet and validates every profile, holding, memo,
    bet id, and binary direction before it reaches the product.
-11. The AI Engineering agent independently selects the ten highest daily ranks
+11. The AI Engineering agent independently selects up to the ten highest daily ranks
    with a positive Engineering route. One Sol/high Responses call compares the
    complete Development packet with the seven versioned Aion surfaces in
    `docs/references/aion-surfaces.json`. A surfaced result names at most two
@@ -174,7 +177,7 @@ composition.
    tool, bet direction, or materiality gate. Exact request/response traces,
    prompt and surface-map hashes, usage, cost, and the validated final result
    are stored before an all-or-nothing v2 daily publication. Current top-ten
-   cohorts cover July 19–26.
+   cohorts cover July 5–28.
 12. The web and CLI expose the frozen evidence, decisions, provenance, and
    operational status without becoming alternate data owners. For a complete
    published Investment cohort, the web adapter can deterministically render the

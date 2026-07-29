@@ -534,6 +534,7 @@ def refresh_all_days(
         "reused_exact_count",
         "deterministic_short_text_filtered",
         "deterministic_unavailable_evidence_filtered",
+        "deterministic_unsupported_media_filtered",
         "deterministic_filtered",
     )
     counts = {

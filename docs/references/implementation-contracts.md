@@ -17,13 +17,14 @@ module, store, command, and tests.
 - Daily Development rank is deterministic and lexicographic. It is not a
   weighted importance score.
 - Audience routing returns independent Investment and AI Engineering
-  relevance judgments. AI Engineering has no current Insight generator.
-- The company-aware Investment agent is the only current Insight generator,
-  store, reader, PDF source, and delivery source. There is no legacy fallback.
+  relevance judgments. Each audience has one current Insight agent, store, and
+  reader with no legacy fallback.
+- The company-aware Investment agent is the only PDF and delivery source. The
+  AI Engineering agent has its own single-call, surface-linked read path.
 - Every LLM call uses the shared LiteLLM Responses boundary and records model,
   prompt, usage, cache, cost, and lineage telemetry.
-- Complete Investment cohorts publish atomically. Failed or partial batches do
-  not become the current reader state.
+- Complete Investment and AI Engineering cohorts publish atomically. Failed or
+  partial batches do not become the current reader state.
 - External delivery and case-study communication remain explicit human actions.
 
 ## Exact references
@@ -45,7 +46,7 @@ module, store, command, and tests.
 | BIT's public investment and operating context | [`bit-capital-public-context.md`](bit-capital-public-context.md) |
 | Investment company universe and memo packet | [`investment-company-universe.md`](investment-company-universe.md) |
 | Development-to-company judgment | [`investment-company-mapping.md`](investment-company-mapping.md) |
-| Investment Insight preview, run, trace, and publication | [`insight-refresh.md`](insight-refresh.md) |
+| Audience Insight preview, run, trace, and publication | [`insight-refresh.md`](insight-refresh.md) |
 | PDF, Slack, and email delivery | [`delivery.md`](delivery.md) |
 | Local data preservation and restore | [`data-lifecycle.md`](data-lifecycle.md) |
 | Measured provider and workflow cost | [`tokenomics.md`](tokenomics.md) |

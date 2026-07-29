@@ -94,7 +94,7 @@ CREATE TABLE IF NOT EXISTS investment_agent_day_publication_item (
 
 
 def _now() -> str:
-    return datetime.now(timezone.utc).isoformat(timespec="seconds")
+    return datetime.now(timezone.utc).isoformat(timespec="microseconds")
 
 
 def _canonical_json(value: Any) -> str:
@@ -236,6 +236,7 @@ def import_trace(
             "prompt_version": trace["prompt_version"],
             "model": trace["model"],
             "reasoning_effort": trace["reasoning_effort"],
+            "input_sha256": trace["input_sha256"],
             "result_sha256": result_sha256,
         }
     )
@@ -291,7 +292,7 @@ def import_trace(
     conn = connect(db_path)
     try:
         conn.execute(
-            """INSERT OR IGNORE INTO investment_agent_run (
+            """INSERT INTO investment_agent_run (
                    run_id, day, development_id, daily_rank, decision,
                    prompt_version, prompt_cache_key, model, reasoning_effort,
                    company_universe_count, company_cards_sha256,
@@ -312,15 +313,59 @@ def import_trace(
                    :reported_cost_usd, :result_sha256, :final_result_json,
                    :memo_calls_json, :citation_repairs_json, :trace_json,
                    :completed_at
-               )""",
+               )
+               ON CONFLICT (
+                   day, development_id, input_sha256, prompt_version, model,
+                   reasoning_effort, result_sha256
+               ) DO UPDATE SET
+                   daily_rank = excluded.daily_rank,
+                   company_universe_count = excluded.company_universe_count,
+                   company_cards_sha256 = excluded.company_cards_sha256,
+                   evidence_sha256 = excluded.evidence_sha256,
+                   memo_count = excluded.memo_count,
+                   assessed_company_count = excluded.assessed_company_count,
+                   rejected_company_count = excluded.rejected_company_count,
+                   turn_count = excluded.turn_count,
+                   input_tokens = excluded.input_tokens,
+                   cached_tokens = excluded.cached_tokens,
+                   output_tokens = excluded.output_tokens,
+                   reasoning_tokens = excluded.reasoning_tokens,
+                   reported_cost_usd = excluded.reported_cost_usd,
+                   memo_calls_json = excluded.memo_calls_json,
+                   citation_repairs_json = excluded.citation_repairs_json,
+                   trace_json = excluded.trace_json,
+                   completed_at = excluded.completed_at""",
             values,
         )
+        stored = conn.execute(
+            """SELECT run_id
+               FROM investment_agent_run
+               WHERE day = ?
+                 AND development_id = ?
+                 AND input_sha256 = ?
+                 AND prompt_version = ?
+                 AND model = ?
+                 AND reasoning_effort = ?
+                 AND result_sha256 = ?""",
+            (
+                values["day"],
+                values["development_id"],
+                values["input_sha256"],
+                values["prompt_version"],
+                values["model"],
+                values["reasoning_effort"],
+                values["result_sha256"],
+            ),
+        ).fetchone()
+        if stored is None:
+            raise RuntimeError("Investment run was not stored")
+        values["run_id"] = str(stored["run_id"])
         conn.commit()
     finally:
         conn.close()
     return {
         "schema_version": STORE_SCHEMA_VERSION,
-        "run_id": run_id,
+        "run_id": values["run_id"],
         "db": str(db_path),
         "day": values["day"],
         "development_id": values["development_id"],
