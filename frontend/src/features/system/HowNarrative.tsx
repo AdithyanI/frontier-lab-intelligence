@@ -547,9 +547,9 @@ export default function HowNarrative({
           <p>
             <Link
               className="how-beat-link"
-              to="/insights?audience=ai_engineering&status=kept&date=2026-07-17"
+              to="/insights?audience=ai_engineering&status=kept&date=2026-07-27"
             >
-              Read the 17 July engineering brief &rarr;
+              Read the 27 July engineering brief &rarr;
             </Link>
           </p>
         </article>

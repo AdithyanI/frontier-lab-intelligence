@@ -943,6 +943,7 @@ def run_range(
         (through_day - timedelta(days=offset)).isoformat()
         for offset in reversed(range(days))
     ]
+    replacement_days = set(requested_days)
     published_days = investment_agent_runs.published_development_days(
         db_path=db_path
     )
@@ -969,7 +970,11 @@ def run_range(
         for item in candidates:
             development_id = str(item["development_id"])
             owner_day = published_days.get(development_id)
-            if owner_day is not None and owner_day != day:
+            if (
+                owner_day is not None
+                and owner_day != day
+                and owner_day not in replacement_days
+            ):
                 continue
             if development_id in selected_development_ids:
                 continue

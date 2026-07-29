@@ -37,10 +37,9 @@ exact object, checksum, included data, and clean-checkout proof.
    network position, the strongest one-post public interaction total, and the
    limitations. These are ordered tiebreak layers, not a weighted score.
 3. **Scoring + validation (20%)** — change Feed Status to compare Relevant,
-   Not relevant, and Not evaluated Developments. Open `View reasons` to inspect the
-   independent AI Engineering and Investment judgments. Ranking is an
-   ordering aid; routing and final Investment selection are separate
-   decisions.
+   Not relevant, and Not evaluated Developments. Open `View reasons` to inspect
+   the independent AI Engineering and Investment judgments. Ranking is an
+   ordering aid; routing and final Investment selection are separate decisions.
 4. **Actionable delivery (15%)** — inspect both audience views in Insights.
    Investment connects each Development to exact company bets and memos; AI
    Engineering maps the same evidence to concrete Aion implementation

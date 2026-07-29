@@ -643,11 +643,16 @@ def run_days(
         (through_day - timedelta(days=offset)).isoformat()
         for offset in reversed(range(days))
     ]
+    replacement_days = set(requested_days)
+    published_days = engineering_agent_runs.published_development_days(
+        db_path=db_path
+    )
+    selected_development_ids: set[str] = set()
     targets: list[tuple[str, int, str]] = []
     for day in requested_days:
         candidates = _engineering_candidates(
             day=day,
-            limit=max(top_ranked, 200 if rank is not None else top_ranked),
+            limit=max(top_ranked, 200),
             api_base=api_base,
         )
         if rank is not None:
@@ -661,7 +666,23 @@ def run_days(
                     f"{day} daily rank {rank} is not a current AI "
                     "Engineering-routed Development."
                 )
-        for item in candidates[:top_ranked]:
+        eligible = []
+        for item in candidates:
+            development_id = str(item["development_id"])
+            owner_day = published_days.get(development_id)
+            if (
+                owner_day is not None
+                and owner_day != day
+                and owner_day not in replacement_days
+            ):
+                continue
+            if development_id in selected_development_ids:
+                continue
+            eligible.append(item)
+            selected_development_ids.add(development_id)
+            if len(eligible) == top_ranked:
+                break
+        for item in eligible:
             targets.append(
                 (day, int(item["daily_rank"]), str(item["development_id"]))
             )
@@ -782,25 +803,32 @@ def run_days(
     failures.sort(key=lambda item: (item["day"], item["daily_rank"]))
 
     publications: list[dict[str, Any]] = []
-    failed_days = {item["day"] for item in failures}
-    for day in requested_days:
-        day_results = [item for item in results if item["day"] == day]
-        if not day_results or day in failed_days:
-            continue
-        publications.append(
-            engineering_agent_runs.publish_day(
-                day=day,
-                candidates=[
-                    {
-                        "development_id": item["development_id"],
-                        "daily_rank": item["daily_rank"],
-                    }
-                    for item in day_results
-                ],
-                selection_limit=top_ranked if rank is None else 1,
+    if rank is None and not failures:
+        targets_by_day = {
+            day: [
+                {
+                    "development_id": development_id,
+                    "daily_rank": daily_rank,
+                }
+                for target_day, daily_rank, development_id in targets
+                if target_day == day
+            ]
+            for day in requested_days
+        }
+        publishable = [
+            {
+                "day": day,
+                "candidates": targets_by_day[day],
+                "selection_limit": top_ranked,
+            }
+            for day in requested_days
+            if targets_by_day[day]
+        ]
+        if publishable:
+            publications = engineering_agent_runs.publish_days(
+                publications=publishable,
                 db_path=db_path,
             )
-        )
 
     return {
         "schema_version": "engineering-agent-batch-v1",

@@ -183,3 +183,94 @@ def test_publication_rejects_cross_day_development_reuse(tmp_path: Path):
         item["day"]
         for item in engineering_agent_runs.dates_payload(db_path=db_path)["dates"]
     ] == [DAY]
+
+
+def test_multi_day_publication_can_atomically_move_development_ownership(
+    tmp_path: Path,
+):
+    db_path = tmp_path / "engineering-agent.db"
+    next_day = "2026-07-22"
+    other_development = "e" * 64
+    _import(tmp_path, _trace(), db_path=db_path)
+    _import(
+        tmp_path,
+        _trace(
+            day=next_day,
+            development_id=other_development,
+            daily_rank=2,
+        ),
+        db_path=db_path,
+    )
+    engineering_agent_runs.publish_days(
+        publications=[
+            {
+                "day": DAY,
+                "candidates": [
+                    {"development_id": DEVELOPMENT_ID, "daily_rank": 1}
+                ],
+                "selection_limit": 1,
+            },
+            {
+                "day": next_day,
+                "candidates": [
+                    {"development_id": other_development, "daily_rank": 2}
+                ],
+                "selection_limit": 1,
+            },
+        ],
+        db_path=db_path,
+    )
+
+    _import(
+        tmp_path,
+        _trace(
+            day=DAY,
+            development_id=other_development,
+            daily_rank=4,
+        ),
+        db_path=db_path,
+    )
+    _import(
+        tmp_path,
+        _trace(
+            day=next_day,
+            development_id=DEVELOPMENT_ID,
+            daily_rank=3,
+        ),
+        db_path=db_path,
+    )
+    engineering_agent_runs.publish_days(
+        publications=[
+            {
+                "day": DAY,
+                "candidates": [
+                    {"development_id": other_development, "daily_rank": 4}
+                ],
+                "selection_limit": 1,
+            },
+            {
+                "day": next_day,
+                "candidates": [
+                    {"development_id": DEVELOPMENT_ID, "daily_rank": 3}
+                ],
+                "selection_limit": 1,
+            },
+        ],
+        db_path=db_path,
+    )
+
+    conn = engineering_agent_runs.connect(db_path)
+    try:
+        assert [
+            tuple(row)
+            for row in conn.execute(
+                """SELECT day, development_id, daily_rank
+                   FROM engineering_agent_day_publication_item
+                   ORDER BY day"""
+            )
+        ] == [
+            (DAY, other_development, 4),
+            (next_day, DEVELOPMENT_ID, 3),
+        ]
+    finally:
+        conn.close()

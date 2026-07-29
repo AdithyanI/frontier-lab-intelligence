@@ -447,6 +447,50 @@ def test_run_range_skips_developments_published_on_another_day(
     ]
 
 
+def test_run_range_can_move_ownership_inside_the_replaced_day_set(
+    monkeypatch, tmp_path: Path
+):
+    moved = "a" * 64
+    candidates = {
+        "2026-07-18": [
+            {"daily_rank": 1, "development_id": "b" * 64}
+        ],
+        "2026-07-19": [{"daily_rank": 2, "development_id": moved}],
+    }
+    monkeypatch.setattr(
+        investment_agent,
+        "_investment_candidates",
+        lambda *, day, **_kwargs: candidates[day],
+    )
+    monkeypatch.setattr(
+        investment_agent.investment_agent_runs,
+        "published_development_days",
+        lambda **_kwargs: {moved: "2026-07-18"},
+    )
+
+    result = investment_agent.run_range(
+        through="2026-07-19",
+        days=2,
+        top_ranked=1,
+        dry_run=True,
+        trace_root=tmp_path / "traces",
+        db_path=tmp_path / "investment-agent.db",
+    )
+
+    assert result["targets"] == [
+        {
+            "day": "2026-07-18",
+            "daily_rank": 1,
+            "development_id": "b" * 64,
+        },
+        {
+            "day": "2026-07-19",
+            "daily_rank": 2,
+            "development_id": moved,
+        },
+    ]
+
+
 def test_trace_path_is_durable_unique_and_versioned(tmp_path: Path):
     first = investment_agent._trace_path(
         trace_root=tmp_path,
