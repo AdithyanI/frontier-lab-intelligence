@@ -644,7 +644,7 @@ export function AgentLoopFigure() {
     <svg
       viewBox="0 0 1080 540"
       role="img"
-      aria-label="The investment agent loop. The model first sees only a short card for each portfolio company, with no research memo. To open a memo it must call get_company_memo and name the company, the standing bet it thinks is firing, and the mechanism. Only then does the application open those memos and return them into the same conversation, where the model writes its cited output. It typically opens two or three, never all of them."
+      aria-label="The investment agent loop. The model first sees only a short card for each portfolio company, with no research memo. To open a memo it must call get_company_memo and name the company, the standing bet it thinks is firing, and the mechanism. Only then does the application open those memos and return them into the same conversation, where it reassesses and writes its cited output. It typically opens two or three, never all of them, and drops a company when the memo breaks the connection."
     >
       <defs>
         <marker id="loop-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
@@ -702,9 +702,9 @@ export function AgentLoopFigure() {
       <line x1="316" y1="464" x2="410" y2="464" stroke={BLUE_MID} strokeWidth="1.5" markerEnd="url(#loop-arrow)" />
 
       <rect x="418" y="418" width="632" height="92" fill="#fff" stroke={MUTED} strokeWidth="1.2" />
-      <text x="440" y="450" fontFamily={UI} fontSize="13.5" fontWeight="600" fill={INK}>Each memo it opened has to end somewhere</text>
-      <text x="440" y="476" fontFamily={UI} fontSize="12.5" fill={MUTED}>the company appears in the brief, or the agent writes down why not</text>
-      <text x="440" y="498" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.06em">OTHERWISE THE RUN FAILS</text>
+      <text x="440" y="450" fontFamily={UI} fontSize="13.5" fontWeight="600" fill={INK}>Then it reassesses from scratch</text>
+      <text x="440" y="476" fontFamily={UI} fontSize="12.5" fill={MUTED}>a company is kept only if the full memo still supports the connection</text>
+      <text x="440" y="498" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.06em">EVERY MEMO CALL STAYS IN THE TRACE, KEPT OR DROPPED</text>
     </svg>
   )
 }

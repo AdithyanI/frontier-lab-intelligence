@@ -356,10 +356,13 @@ export default function HowNarrative({
             round.
           </p>
           <p>
-            Every memo it opens must end in one of two places: the company
-            appears in the output, or the agent writes down why it was
-            rejected. Validation fails the run otherwise. Nothing quietly
-            disappears between the screen and the brief.
+            After the memos come back it reassesses from scratch. A company is
+            kept only when the full memo still supports the connection, and
+            dropped when the memo breaks it &mdash; roughly one opened memo in
+            ten ends that way. The drop is not argued in the brief, because
+            the tool call that opened it is preserved in the run trace: the
+            company, the bet, and the mechanism it proposed are all recorded
+            whether or not the company survives.
           </p>
           <p>
             The output is grouped by causal path, not by company. Each path
