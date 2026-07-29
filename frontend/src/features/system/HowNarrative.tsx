@@ -347,13 +347,13 @@ export default function HowNarrative({
             <AgentLoopFigure />
           </FigureFrame>
           <p>
-            That ordering is the whole design. Handing the model 37 research
-            memos would cost about six times more per run and let it write a
-            plausible story around whichever company it happened to notice.
-            Making it argue first, and only then opening the file, means the
-            memo is evidence tested against a claim rather than material to
-            build one from. In practice it opens one to three memos, and the
-            loop closes in a single round.
+            That ordering is the whole design. Hand the model every research
+            memo at once and it can write a plausible story around whichever
+            company it happens to notice. Making it argue first, and only then
+            opening the file, means the memo arrives as evidence tested
+            against a claim rather than as material to build one from. In
+            practice it opens two or three, and the loop closes in a single
+            round.
           </p>
           <p>
             Every memo it opens must end in one of two places: the company

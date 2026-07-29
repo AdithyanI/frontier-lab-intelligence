@@ -631,22 +631,20 @@ export function CollectionCostFigure() {
   )
 }
 
-/* Stage 5a: the agent loop. The model never receives 37 research memos. It
+/* Stage 5a: the agent loop. The model never receives every research memo. It
    screens compact cards, commits to a claim in the tool call, and only then
    does the application open the files it asked for. */
 export function AgentLoopFigure() {
   const args = [
-    { k: 'ticker', v: 'one of 37' },
-    { k: 'candidate_bet_id', v: 'a bet on that card' },
-    { k: 'connection_type', v: 'direct | indirect' },
+    { k: 'ticker', v: 'which company' },
+    { k: 'candidate_bet_id', v: 'which standing bet' },
     { k: 'mechanism', v: 'the causal path' },
-    { k: 'why_memo_is_needed', v: 'stated up front' },
   ]
   return (
     <svg
-      viewBox="0 0 1080 640"
+      viewBox="0 0 1080 540"
       role="img"
-      aria-label="The investment agent loop. On the first turn the model sees compact cards for all thirty-seven companies and the Development evidence, and it calls get_company_memo. The tool call requires it to name the ticker, the standing bet, the mechanism and why the memo is needed before the file opens. The application then fetches those memos in parallel and returns them into the same conversation, where the model writes the final cited output. In practice the model opens one to three memos and the loop closes in a single round."
+      aria-label="The investment agent loop. The model first sees only a short card for each portfolio company, with no research memo. To open a memo it must call get_company_memo and name the company, the standing bet it thinks is firing, and the mechanism. Only then does the application open those memos and return them into the same conversation, where the model writes its cited output. It typically opens two or three, never all of them."
     >
       <defs>
         <marker id="loop-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
@@ -657,65 +655,56 @@ export function AgentLoopFigure() {
       <text x="1050" y="34" textAnchor="end" fontFamily={MONO} fontSize="9.5" fill={MUTED} letterSpacing="0.06em">THE CLAIM COMES BEFORE THE FILE</text>
 
       {/* turn 1 */}
-      <text x="30" y="76" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.06em">TURN 1 · SCREEN</text>
-      <rect x="30" y="90" width="300" height="132" fill="#fff" stroke={MUTED} strokeWidth="1.2" />
-      <text x="52" y="120" fontFamily={UI} fontSize="14.5" fontWeight="600" fill={INK}>What the model sees</text>
-      <text x="52" y="146" fontFamily={UI} fontSize="12.5" fill={MUTED}>37 company cards · name + bets only</text>
-      <text x="52" y="168" fontFamily={UI} fontSize="12.5" fill={MUTED}>the Development and its evidence</text>
-      <text x="52" y="196" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.06em">~32K TOKENS · NO MEMO YET</text>
+      <text x="30" y="82" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.06em">FIRST IT SCREENS</text>
+      <rect x="30" y="96" width="286" height="120" fill="#fff" stroke={MUTED} strokeWidth="1.2" />
+      <text x="52" y="128" fontFamily={UI} fontSize="14.5" fontWeight="600" fill={INK}>A short card per company</text>
+      <text x="52" y="154" fontFamily={UI} fontSize="12.5" fill={MUTED}>name, and the bets already on file</text>
+      <text x="52" y="192" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.06em">NO RESEARCH MEMO YET</text>
 
-      <line x1="330" y1="156" x2="424" y2="156" stroke={BLUE_MID} strokeWidth="1.5" markerEnd="url(#loop-arrow)" />
+      <line x1="316" y1="156" x2="410" y2="156" stroke={BLUE_MID} strokeWidth="1.5" markerEnd="url(#loop-arrow)" />
 
       {/* the tool call */}
-      <rect x="432" y="90" width="330" height="132" fill={SAND} stroke={BLUE_MID} strokeWidth="1.2" />
-      <text x="454" y="120" fontFamily={MONO} fontSize="13" fontWeight="600" fill={INK}>get_company_memo()</text>
-      <text x="454" y="142" fontFamily={UI} fontSize="12" fill={MUTED}>the only tool it has</text>
-      <line x1="454" y1="156" x2="740" y2="156" stroke={MUTED} strokeWidth="1" opacity="0.3" />
-      {args.slice(0, 3).map((a, i) => (
+      <rect x="418" y="96" width="326" height="120" fill={SAND} stroke={BLUE_MID} strokeWidth="1.2" />
+      <text x="440" y="126" fontFamily={MONO} fontSize="13" fontWeight="600" fill={INK}>get_company_memo()</text>
+      <text x="440" y="146" fontFamily={UI} fontSize="12" fill={MUTED}>the only tool it has</text>
+      <line x1="440" y1="158" x2="722" y2="158" stroke={MUTED} strokeWidth="1" opacity="0.3" />
+      {args.map((a, i) => (
         <g key={a.k}>
-          <text x="454" y={178 + i * 17} fontFamily={MONO} fontSize="10" fill={BLUE_INK}>{a.k}</text>
-          <text x="740" y={178 + i * 17} textAnchor="end" fontFamily={MONO} fontSize="10" fill={MUTED}>{a.v}</text>
+          <text x="440" y={177 + i * 16} fontFamily={MONO} fontSize="10" fill={BLUE_INK}>{a.k}</text>
+          <text x="722" y={177 + i * 16} textAnchor="end" fontFamily={MONO} fontSize="10" fill={MUTED}>{a.v}</text>
         </g>
       ))}
 
-      <line x1="762" y1="156" x2="856" y2="156" stroke={BLUE_MID} strokeWidth="1.5" markerEnd="url(#loop-arrow)" />
+      <line x1="744" y1="156" x2="838" y2="156" stroke={BLUE_MID} strokeWidth="1.5" markerEnd="url(#loop-arrow)" />
 
-      <rect x="864" y="90" width="186" height="132" fill="#fff" stroke={MUTED} strokeWidth="1.2" />
-      <text x="886" y="120" fontFamily={UI} fontSize="14.5" fontWeight="600" fill={INK}>The application</text>
-      <text x="886" y="146" fontFamily={UI} fontSize="12.5" fill={MUTED}>opens those memos,</text>
-      <text x="886" y="166" fontFamily={UI} fontSize="12.5" fill={MUTED}>in parallel</text>
-      <text x="886" y="196" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.06em">~6K TOKENS EACH</text>
+      <rect x="846" y="96" width="204" height="120" fill="#fff" stroke={MUTED} strokeWidth="1.2" />
+      <text x="868" y="128" fontFamily={UI} fontSize="14.5" fontWeight="600" fill={INK}>Now the memos</text>
+      <text x="868" y="154" fontFamily={UI} fontSize="12.5" fill={MUTED}>open &mdash; only the ones</text>
+      <text x="868" y="174" fontFamily={UI} fontSize="12.5" fill={MUTED}>it argued for</text>
+      <text x="868" y="200" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.06em">USUALLY TWO OR THREE</text>
 
       {/* the gate */}
-      <rect x="432" y="248" width="330" height="72" fill="#fff" stroke={BLUE_MID} strokeWidth="1.2" strokeDasharray="5 4" />
-      <text x="454" y="276" fontFamily={UI} fontSize="13.5" fontWeight="600" fill={INK}>Every field is required</text>
-      <text x="454" y="300" fontFamily={UI} fontSize="12" fill={MUTED}>the model states its claim before the file opens</text>
-      <line x1="597" y1="222" x2="597" y2="246" stroke={BLUE_MID} strokeWidth="1.2" strokeDasharray="3 3" />
+      <line x1="581" y1="216" x2="581" y2="248" stroke={BLUE_MID} strokeWidth="1.2" strokeDasharray="3 3" />
+      <rect x="418" y="250" width="326" height="64" fill="#fff" stroke={BLUE_MID} strokeWidth="1.2" strokeDasharray="5 4" />
+      <text x="440" y="278" fontFamily={UI} fontSize="13.5" fontWeight="600" fill={INK}>Every field is required</text>
+      <text x="440" y="300" fontFamily={UI} fontSize="12" fill={MUTED}>it states the claim before the file opens</text>
 
       {/* return path */}
-      <path d="M957,222 L957,372 L200,372" fill="none" stroke={BLUE_MID} strokeWidth="1.5" strokeDasharray="5 4" markerEnd="url(#loop-arrow)" />
-      <text x="620" y="364" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.06em">RETURNED INTO THE SAME CONVERSATION</text>
+      <path d="M948,216 L948,366 L186,366" fill="none" stroke={BLUE_MID} strokeWidth="1.5" strokeDasharray="5 4" markerEnd="url(#loop-arrow)" />
+      <text x="600" y="358" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.06em">HANDED BACK INTO THE SAME CONVERSATION</text>
 
       {/* turn 2 */}
-      <text x="30" y="410" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.06em">TURN 2 · WRITE</text>
-      <rect x="30" y="424" width="300" height="110" fill={INK} />
-      <text x="52" y="456" fontFamily={UI} fontSize="14.5" fontWeight="600" fill="#fff">Now it has the full memos</text>
-      <text x="52" y="482" fontFamily={UI} fontSize="12.5" fill="#fff" opacity="0.78">only for the companies it argued for</text>
-      <text x="52" y="512" fontFamily={MONO} fontSize="9.5" fill="#fff" opacity="0.6" letterSpacing="0.06em">WRITES THE CITED OUTPUT</text>
+      <text x="30" y="404" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.06em">THEN IT WRITES</text>
+      <rect x="30" y="418" width="286" height="92" fill={INK} />
+      <text x="52" y="450" fontFamily={UI} fontSize="14.5" fontWeight="600" fill="#fff">With the memos in hand</text>
+      <text x="52" y="476" fontFamily={UI} fontSize="12.5" fill="#fff" opacity="0.78">it writes the cited output</text>
 
-      <line x1="330" y1="479" x2="424" y2="479" stroke={BLUE_MID} strokeWidth="1.5" markerEnd="url(#loop-arrow)" />
+      <line x1="316" y1="464" x2="410" y2="464" stroke={BLUE_MID} strokeWidth="1.5" markerEnd="url(#loop-arrow)" />
 
-      <rect x="432" y="424" width="618" height="110" fill="#fff" stroke={MUTED} strokeWidth="1.2" />
-      <text x="454" y="452" fontFamily={UI} fontSize="13.5" fontWeight="600" fill={INK}>Each memo it opened must end somewhere</text>
-      <text x="454" y="478" fontFamily={UI} fontSize="12.5" fill={MUTED}>the company appears in the output, or the agent writes down why not</text>
-      <text x="454" y="504" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.06em">VALIDATION FAILS THE RUN OTHERWISE</text>
-
-      {/* measured reality */}
-      <line x1="30" y1="566" x2="1050" y2="566" stroke={MUTED} strokeWidth="1" strokeDasharray="4 5" opacity="0.35" />
-      <text x="30" y="592" fontFamily={MONO} fontSize="9.5" fill={MUTED} letterSpacing="0.06em">BOUNDED</text>
-      <text x="30" y="614" fontFamily={UI} fontSize="12.5" fill={MUTED}>at most 4 turns, at most 8 memos; ticker and bet id are enums, so an invented one cannot be sent</text>
-      <text x="1050" y="592" textAnchor="end" fontFamily={MONO} fontSize="9.5" fill={MUTED} letterSpacing="0.06em">MEASURED OVER 142 RUNS</text>
-      <text x="1050" y="614" textAnchor="end" fontFamily={UI} fontSize="12.5" fill={INK}>140 of 142 closed in one round · 1 to 3 memos opened, never 37</text>
+      <rect x="418" y="418" width="632" height="92" fill="#fff" stroke={MUTED} strokeWidth="1.2" />
+      <text x="440" y="450" fontFamily={UI} fontSize="13.5" fontWeight="600" fill={INK}>Each memo it opened has to end somewhere</text>
+      <text x="440" y="476" fontFamily={UI} fontSize="12.5" fill={MUTED}>the company appears in the brief, or the agent writes down why not</text>
+      <text x="440" y="498" fontFamily={MONO} fontSize="9.5" fill={BLUE_INK} letterSpacing="0.06em">OTHERWISE THE RUN FAILS</text>
     </svg>
   )
 }
