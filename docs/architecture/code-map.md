@@ -62,8 +62,8 @@ routes in a generic `pages/` directory:
 | Area | Owner | What belongs there |
 | --- | --- | --- |
 | App composition | `frontend/src/app/` | Route composition and the shared audit-date provider only. |
-| System guide | `frontend/src/features/system/` | The `/how` shell composes an interactive story, a long-form narrative, and structured page content; the live checkpoint and shared System layout stay local to the same feature. |
-| Architecture | `frontend/src/features/architecture/` | The deeper technical diagrams and their local presentation logic. |
+| System guide | `frontend/src/features/system/` | The `/how` shell composes the interactive story, long-form narrative, page index, reviewer map, and closed technical appendix. There is no separate public System or Status workspace. |
+| Architecture figures | `frontend/src/features/architecture/` | Reusable technical figures embedded by `/how`; these do not own a public route. |
 | Evidence | `frontend/src/features/evidence/` | Feed, Artifact index, their workspace layout, and Evidence-only view state. |
 | Insights | `frontend/src/features/insights/` | Audience Insight inspection, decision-state UI, selected daily brief PDF download, and the explicit Slack/email delivery confirmation. |
 | BIT Lens | `frontend/src/features/bit-lens/` | Public BIT research brief plus the auditable company-context ledger. The index comes from the canonical Investment packet; the single generated `docs/references/company-memos.json` packet supplies 37 source-bearing company memos and their binary standing bets. |

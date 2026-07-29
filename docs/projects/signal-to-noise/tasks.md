@@ -232,6 +232,8 @@ suppression rate is already 35%.
 | done | Finding 1 — unmeasured self-demonstration class, six instances | parent | Progress Log |
 | done | Finding 2 — 41 of 139 surfaced Insights rest on one Event with no artifact | parent | [zero-artifact-insights.md](resources/zero-artifact-insights.md) |
 | done | Finding 3 — three Insights rest on unattributed claims | parent | Progress Log |
+| done | Finding 4 — false negatives; inconsistent bar inside `NVDA-B4` | parent | Progress Log |
+| done | Finding 5 — suppressed material corporate events (Meta/Anthropic, Etched, Kimi capacity) | parent | Progress Log |
 | todo | Continue auditing for further evidence-class defects before designing any rule | parent | |
 | todo | M1 — apply the Investment prompt edits and bump both version constants in lockstep | worker | |
 
@@ -278,6 +280,54 @@ suppression rate is already 35%.
 
 ## Progress Log
 
+- 2026-07-29: [DONE] **Finding 4 — the suppression side has false negatives, and
+  the bar is inconsistent within a single standing bet.** First audit of the 78
+  suppressed Investment candidates. The aggregate direction is correct and
+  should be said plainly in defence of the system: suppressed candidates are
+  materially thinner than surfaced ones (42.9% zero-artifact vs 29.5%, mean
+  0.82 artifacts vs 1.27). The gate is not random. The problem is at the item
+  level. `NVDA-B4` reads "IF frontier labs and hyperscalers optimize models for
+  TPUs, custom ASICs or competing GPUs ... THEN potential revenue-share loss
+  ... especially if custom silicon captures high-volume inference." Against that
+  one bet:
+  - **Surfaced** 2026-07-17 r20, "Reported Huawei SuperPoD sharpens NVIDIA's
+    competing-accelerator risk" — one Event, **zero artifacts**, and the
+    headline calls it *reported*, so it is second-hand.
+  - **Suppressed** 2026-07-23 r5, Etched raising **$300M at a $10.3B
+    valuation** to accelerate production of its inference clusters, plus an
+    80,000 sq ft, 10 MW production facility — one Event, zero artifacts,
+    first-party, specific, quantified. Suppression reason: "names no
+    public-company supplier, customer, component, or measurable operating
+    driver."
+  Identical evidence structure, same bet, opposite decision, and the better
+  specified item is the one that was killed. Etched builds transformer
+  inference ASICs, which is the literal subject of `NVDA-B4`; the bet also
+  already fired on a *portable inference server* (07-08 r12). This is the
+  sharpest defect found so far because the yardstick is the system's own
+  pre-registered bet rather than my judgement.
+- 2026-07-29: [DONE] **Finding 5 — three more suppressed items look like
+  material corporate events a fund would want.** All one Event, zero artifacts:
+  - 2026-07-18 r16 — NYT-sourced report that **Anthropic proposed a two-year
+    compute-as-a-service deal to Meta**, with Meta considering it. `META` is a
+    covered company and `META-B3` covers accelerator and custom-silicon cost.
+    Suppressed for lacking "deal structure, scale, and commitment" — a standard
+    under which no deal-talks story could ever surface, though funds trade on
+    exactly these.
+  - 2026-07-19 r2 — **Moonshot paused new Kimi K3 subscriptions** with GPUs near
+    capacity for 48 hours. Suppressed because no supplier was named, yet a
+    China-based lab hitting a compute ceiling speaks to `NVDA-B2` inference
+    demand and `NVDA-B5` export controls, both of which have fired elsewhere.
+  - 2026-07-24 r7 and 2026-07-21 r13 — Midjourney/Co-Star and World
+    Labs/SceniX acquisitions. Weaker, listed for completeness.
+  The common shape is that a **named, dated, first-party corporate action**
+  (financing, deal talks, capacity limit, acquisition) is being suppressed for
+  lacking a quantified operating driver, while unquantified *capability
+  commentary* surfaces. The evidence bar appears to be applied to the
+  read-through rather than to the underlying fact.
+- 2026-07-29: [DONE] Read all 78 suppression reasons. Prose quality is
+  consistent and legible throughout; `no_match_reason` is a genuine asset and
+  no instance was empty, generic, or self-contradictory. The defect is
+  calibration, not explanation.
 - 2026-07-29: [DONE] **Corrected an earlier overstatement.** The first pass
   reported that 29% of surfaced Insights "self-flag weak evidence", derived
   from a regex over `what_changed`. Reading all 55 matches showed the number is

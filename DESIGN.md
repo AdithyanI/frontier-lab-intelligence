@@ -348,16 +348,11 @@ Rules:
 - **Rank explanation:** the ordered evidence layers and deciding layer are
   visible only on demand from the Feed rank. Trust comes from inspectability
   without inventing a synthetic number (PRODUCT.md #3).
-- **System guide:** the default System view maps the original assignment to one
-  five-step path through the working product: choose, collect, rank, judge, and
-  publish. Each step links to its real proof surface. End with the exact audit
-  path and a clear split between implemented behavior and future work; do not
-  turn the page into a second dashboard or repeat volatile counts.
-- **System status:** a read-only, API-derived checkpoint view. Lead with data
-  currency, observation time, and the operator-run refresh model, then use one
-  ruled table for Registry, collection, Feed/Events, artifacts, routing, and
-  Insights. Separate "data through" from "last update" and never claim host,
-  database, or scheduler health that the current product APIs do not prove.
+- **How it works:** one five-step path through the working product: choose,
+  collect, rank, judge, and publish. A compact page index links to the visual
+  walkthrough, written explanation, examples, reviewer map, and a closed
+  appendix containing only the deployed stack, model boundaries, and Registry
+  intake figures. Do not create a parallel System or Status workspace.
 
 ## Motion
 

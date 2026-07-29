@@ -8,9 +8,9 @@ behavior and the intentionally bounded release.
 [Open Frontier Lab Intelligence](https://frontier-lab-intelligence.adithyan.io/).
 This is the primary reviewer experience and requires no local setup. The live
 [How it works](https://frontier-lab-intelligence.adithyan.io/how)
-view maps the assignment to a five-step inspection path. The
-[Architecture view](https://frontier-lab-intelligence.adithyan.io/system/architecture)
-provides the deeper technical map.
+view maps the assignment to a five-step inspection path. Its closed
+[technical appendix](https://frontier-lab-intelligence.adithyan.io/how#technical-appendix)
+keeps the three supporting engineering figures available when needed.
 
 ## Reproduce it locally
 

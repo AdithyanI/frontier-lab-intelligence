@@ -368,14 +368,17 @@ export default function HowNarrative({
         <article className="how-read-block how-read-block--wide" id="why-plumbing">
           <h4><span className="mono">6</span> The models and cost</h4>
           <p>
-            There are only 2 model steps in the daily path.
+            The daily path has one shared routing judgment, followed by a
+            separate agent for each audience.
           </p>
           <p>
-            Audience routing uses <code>gpt-5.4-mini</code>. One structured
-            call reads an Event and returns a separate decision for investment
-            and AI engineering. The company-aware Investment agent then uses{' '}
-            <code>gpt-5.6-sol</code> to screen the portfolio, pull the memos it
-            can justify, and write the read-through.
+            Audience routing uses <code>gpt-5.6-luna</code> at medium effort.
+            One structured call reads an Event and returns an independent
+            decision for investment and AI engineering. Investment then uses{' '}
+            <code>gpt-5.6-sol</code> at xhigh effort to screen the portfolio
+            and open only justified company memos. AI Engineering uses the same
+            model at high effort to map the Development to concrete technical
+            decisions.
           </p>
           <div className="how-cost-table" role="table" aria-label="Models and measured cost">
             <div className="how-cost-row how-cost-head" role="row">
@@ -385,20 +388,24 @@ export default function HowNarrative({
             </div>
             <div className="how-cost-row" role="row">
               <strong role="cell">Audience routing</strong>
-              <span role="cell" className="mono">gpt-5.4-mini · high</span>
-              <span role="cell">$0.00388 average per Event</span>
+              <span role="cell" className="mono">gpt-5.6-luna · medium</span>
+              <span role="cell">recorded per request</span>
             </div>
             <div className="how-cost-row" role="row">
               <strong role="cell">Investment agent</strong>
               <span role="cell" className="mono">gpt-5.6-sol · xhigh</span>
               <span role="cell">attached to each saved run</span>
             </div>
+            <div className="how-cost-row" role="row">
+              <strong role="cell">AI Engineering agent</strong>
+              <span role="cell" className="mono">gpt-5.6-sol · high</span>
+              <span role="cell">attached to each saved run</span>
+            </div>
           </div>
           <p className="how-cost-note">
-            This average comes from 99 new Event calls on 19 July. The
-            Investment agent averages about $0.31 per Insight over two model
-            turns; its exact request and response for every turn is written to
-            disk before the result is imported.
+            LiteLLM records the exact model, tokens, cache reuse, latency, and
+            cost for each request. The agent traces keep the complete request
+            and response before a result is imported.
           </p>
           <p>
             Audience-routing calls pass through LiteLLM. It handles retries
@@ -415,7 +422,8 @@ export default function HowNarrative({
           </FigureFrame>
           <p className="how-cost-note">
             This request used 2,732 tokens, took 4.385 seconds, and cost
-            $0.0033444. Other requests vary with the amount of evidence.
+            $0.0033444. It is a real historical request, not a current price
+            estimate; other requests vary with the model and evidence.
           </p>
           <p>
             <a className="how-beat-link" href="#technical-appendix">

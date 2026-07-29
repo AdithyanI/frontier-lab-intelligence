@@ -7,7 +7,7 @@ it for the BIT Capital AI Engineer case study.
 [Live app](https://frontier-lab-intelligence.adithyan.io/) ·
 [Video walkthrough](https://share.descript.com/view/LZkpHP29yub) ·
 [How it works](https://frontier-lab-intelligence.adithyan.io/how) ·
-[Technical architecture](https://frontier-lab-intelligence.adithyan.io/system/architecture)
+[Technical appendix](https://frontier-lab-intelligence.adithyan.io/how#technical-appendix)
 
 ## Review the project
 
@@ -19,10 +19,10 @@ it for the BIT Capital AI Engineer case study.
 3. Open [Insights](https://frontier-lab-intelligence.adithyan.io/insights) and
    follow any citation backwards through its Event, evidence, and source post.
 
-The live
-[Architecture view](https://frontier-lab-intelligence.adithyan.io/system/architecture)
-is the deeper engineering map: data model, account intake,
-evidence-to-insight pipeline, model boundaries, ranking, and recovery.
+The closed
+[technical appendix](https://frontier-lab-intelligence.adithyan.io/how#technical-appendix)
+keeps the deployed stack, current model boundaries, and auditable account
+intake figures available without adding another product section.
 
 ## System at a glance
 

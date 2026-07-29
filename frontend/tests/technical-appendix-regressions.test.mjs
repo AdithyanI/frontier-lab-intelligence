@@ -50,3 +50,11 @@ test('The appendix keeps only the three selected, current figures', () => {
   assert.match(figures, /Profile gate/)
   assert.match(figures, /Resolve identity/)
 })
+
+test('The written model explanation agrees with the appendix', () => {
+  assert.match(howNarrative, /gpt-5\.6-luna<\/code> at medium effort/)
+  assert.match(howNarrative, /gpt-5\.6-sol<\/code> at xhigh effort/)
+  assert.match(howNarrative, /same\s+model at high effort/)
+  assert.doesNotMatch(howNarrative, /gpt-5\.4-mini/)
+  assert.doesNotMatch(howNarrative, /only 2 model steps/)
+})
