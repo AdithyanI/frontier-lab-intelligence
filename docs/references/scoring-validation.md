@@ -114,4 +114,4 @@ current production ranking.
 - Editorial quality is validated separately: verbatim citation checking
   against frozen artifact text (hallucination control), forced per-Event
   dispositions with written reasons, and the human batch audit in
-  `daily-intelligence-batch-audit-2026-07-05-17.md`.
+  [`archive/daily-intelligence-batch-audit-2026-07-05-17.md`](archive/daily-intelligence-batch-audit-2026-07-05-17.md).

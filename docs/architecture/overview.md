@@ -8,9 +8,10 @@ before asking a model what it means. AI Engineering remains a routing decision,
 but it has no current Insight generator or product fallback.
 
 Use the [code and data map](code-map.md) to locate an owner, command, store, or
-test. Exact schemas, run telemetry, and historical implementation facts live in
-[implementation contracts](../references/implementation-contracts.md) and the
-other documents under `docs/references/`.
+test. The
+[implementation contract index](../references/implementation-contracts.md)
+routes exact schemas, run telemetry, and historical facts to their scoped
+documents under `docs/references/`.
 
 ## System Shape
 
@@ -246,7 +247,7 @@ builds the production SPA.
 
 - [Code and data ownership](code-map.md)
 - [Current system status](../STATUS.md)
-- [Implemented contracts and historical proof](../references/implementation-contracts.md)
+- [Implementation contract index](../references/implementation-contracts.md)
 - [Local data lifecycle](../references/data-lifecycle.md)
 - [Feed and Event contract](../references/signal-feed.md)
 - [Evidence refresh workflow](../references/evidence-refresh.md)

@@ -1,7 +1,7 @@
-# BIT Capital Editorial Context
+# BIT Capital public context
 
-This is the long-form research companion for the daily Investment Intelligence
-agent. The active machine-readable packet lives in the repo-local skill at
+This is the long-form public research companion for Investment analysis. The
+active machine-readable packet lives in the repo-local skill at
 `.agents/skills/fli-daily-intelligence/references/bit-investment-context.json`.
 That packet intentionally uses the complete audited 2025 portfolio as its
 working holdings baseline and preserves BIT's thesis, research process, source

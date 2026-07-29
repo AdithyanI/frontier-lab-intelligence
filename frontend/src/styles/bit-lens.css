@@ -645,6 +645,10 @@
   border-bottom: 1px solid var(--border);
 }
 
+.company-path-list > details:last-child {
+  border-bottom: 0;
+}
+
 .company-path-list > details > summary {
   display: grid;
   grid-template-columns: 22px minmax(0, 1fr) auto;
@@ -661,6 +665,73 @@
 
 .company-path-list > details > summary:hover h4 {
   color: var(--blue-ink);
+}
+
+.company-bet-watch {
+  margin: 0;
+  padding-left: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.company-path-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  white-space: nowrap;
+}
+
+.company-path-thesis {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 2px;
+  background: var(--surface);
+  color: var(--muted);
+}
+
+.company-path-thesis.is-supports {
+  background: #eef5f0;
+  color: var(--positive);
+}
+
+.company-path-thesis.is-challenges {
+  background: #f9eeee;
+  color: var(--negative);
+}
+
+.company-path-thesis.is-mixed {
+  background: var(--blue-wash);
+  color: var(--blue-ink);
+}
+
+.company-path-watch {
+  margin: 0;
+  padding-left: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.company-memo-thesis {
+  display: grid;
+  grid-template-columns: 116px minmax(0, 1fr);
+  gap: 18px;
+  align-items: baseline;
+  margin: 12px 0 0;
+  max-width: 88ch;
+  color: var(--ink-soft);
+  text-wrap: pretty;
+}
+
+.company-memo-thesis > .mono {
+  color: var(--muted);
+  font-size: 9px;
+  letter-spacing: 0.035em;
+  text-transform: uppercase;
 }
 
 .company-path-list h4 {

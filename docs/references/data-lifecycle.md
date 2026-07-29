@@ -10,13 +10,13 @@ reason to delete it.
 | --- | --- | --- |
 | Tracked product inputs/state | `data/fli.db`, `data/registry/`, `data/following/`, `data/digg/` | Versioned, reviewable, and retained in Git. |
 | Immutable raw evidence | `data/raw/x/`, `data/raw/artifacts/`, `data/raw/following/`, `data/raw/conference-sources/` | Ignored locally; preserve successful provider responses and content-addressed bodies to avoid paid or irreproducible refetches. |
-| Current derived state | `data/derived/signal-feed/`, `signal-events/`, `artifacts/`, `audience-routing/`, `insights/`, `daily-intelligence/`, current `following/` analysis | Ignored but required by the local product and audit surfaces. Rebuild only through the owning client. |
+| Current derived state | `data/derived/signal-feed/`, `signal-events/`, `artifacts/`, `audience-routing/`, `insights/investment-agent.db`, current Investment traces, and current `following/` analysis | Ignored but required by the local product and audit surfaces. Rebuild only through the owning client. |
 | Historical local archive | `data/archive/` | Ignored, non-runtime outputs retained for provenance or comparison. No production reader may scan this tree. |
 | Disposable scratch | `tmp/`, Python/test caches, SQLite zero-byte orphans | Remove freely when no process owns the file. Scratch must never become a runtime dependency. |
 
 ## Current Runtime Set
 
-Preserve these exact stores during the submission sprint:
+Preserve these exact stores during interview work:
 
 - `data/fli.db`
 - `data/raw/x/x-content.db`
@@ -26,15 +26,15 @@ Preserve these exact stores during the submission sprint:
 - `data/derived/signal-feed/feed.db`
 - `data/derived/signal-events/events.db`
 - `data/derived/artifacts/`
-- all 17 current v9 / `daily-rank-v2` top-100 directories under
+- the current published `daily-development-rank-v1` routing directories under
   `data/derived/audience-routing/`
-- `data/derived/insights/insights.db`
-- `data/derived/daily-intelligence/editorial.db` and its current validated workspaces
+- `data/derived/insights/investment-agent.db`
+- `data/derived/insights/investment-agent-traces/`
 - `data/derived/x-daily-collection.db`
 
-`data/derived/daily-intelligence/pdf-cache/` is deliberately absent from the
-preservation set. It is safe to delete because complete editorial rows
-deterministically rebuild every file.
+`data/derived/insights/pdf-cache/` is deliberately absent from the preservation
+set. It is safe to delete because a complete published Investment cohort
+deterministically rebuilds every file.
 
 `data/derived/web-event-cache/` is also disposable. It retains compressed exact
 Event-day projections and their compact date summary so process restarts do not
@@ -83,5 +83,6 @@ copied forward. Its verified `snapshot.db.zst` recovery cache remains local and
 has a checksum-verified durable object recorded in the tracked manifest. This
 preserves paid evidence without keeping another 2+ GB expanded database.
 
-The obsolete Insight v9/v6 database and zero-byte orphan databases were
-deleted. Current readers use only `data/derived/insights/insights.db`.
+Superseded editorial and daily-intelligence databases may remain as local
+historical files, but no current reader may discover them. Current readers use
+only `data/derived/insights/investment-agent.db`.

@@ -31,6 +31,17 @@ const thesisStatusCopy: Record<CompanyResearchMemo['memo']['investment_thesis_an
   no_public_view: 'No public BIT view',
 }
 
+const thesisEffectCopy: Partial<
+  Record<
+    CompanyResearchMemo['memo']['frontier_ai_transmission_paths'][number]['thesis_effect'],
+    string
+  >
+> = {
+  supports: 'Supports BIT',
+  challenges: 'Challenges BIT',
+  mixed: 'Tests BIT',
+}
+
 const sourceTypeCopy: Record<CompanyResearchMemo['memo']['source_ledger'][number]['source_type'], string> = {
   company_primary: 'Company',
   bit_primary: 'BIT Capital',
@@ -231,10 +242,6 @@ function CompanyDetail({ company }: { company: InvestmentCompany }) {
     <div className="company-detail company-research-memo">
       <section className="company-memo-intro">
         <div>
-          <p className="mono">
-            Investment context memo · researched {formatDay(provenance.research_date)} ·{' '}
-            {memo.source_ledger.length} sources
-          </p>
           <p className="company-memo-summary">
             {cleanMemoText(memo.business_and_economics.summary)}
             <MemoCitations
@@ -242,38 +249,32 @@ function CompanyDetail({ company }: { company: InvestmentCompany }) {
               sourceIndex={sourceIndex}
             />
           </p>
+          <p className="company-memo-thesis">
+            <span className="mono">{thesisStatusCopy[thesis.public_bit_view_status]}</span>
+            {thesis.attributable_public_thesis ? (
+              <span>
+                {cleanMemoText(thesis.attributable_public_thesis)}
+                <MemoCitations sources={thesis.sources} sourceIndex={sourceIndex} />
+              </span>
+            ) : (
+              <span className="muted">
+                No attributable public view. Portfolio ownership is not thesis evidence.
+              </span>
+            )}
+          </p>
         </div>
-      </section>
-
-      <section className="company-detail-section company-memo-shape">
-        <header className="company-memo-section-head">
-          <h3>What drives the numbers</h3>
-        </header>
-        <ul className="company-memo-inline-list">
-          {memo.business_and_economics.revenue_engines.map((engine) => (
-            <li key={engine.engine}>
-              <strong>{cleanMemoText(engine.engine)}</strong>
-              <span>{cleanMemoText(engine.who_pays)}</span>
-            </li>
-          ))}
-          {memo.operating_and_financial_drivers.map((driver) => (
-            <li key={driver.driver}>
-              <strong>{cleanMemoText(driver.driver)}</strong>
-            </li>
-          ))}
-        </ul>
       </section>
 
       <section className="company-detail-section company-ai-paths">
         <header className="company-memo-section-head">
           <div>
-            <h3>Where frontier AI can matter</h3>
+            <h3>Where frontier AI matters</h3>
           </div>
           <span>{memo.frontier_ai_transmission_paths.length} standing bets</span>
         </header>
         <div className="company-path-list">
-          {memo.frontier_ai_transmission_paths.map((path, index) => (
-            <details key={path.development} open={index === 0}>
+          {memo.frontier_ai_transmission_paths.map((path) => (
+            <details key={path.development}>
               <summary>
                 <span
                   className={`company-path-direction is-${path.direction}`}
@@ -282,8 +283,15 @@ function CompanyDetail({ company }: { company: InvestmentCompany }) {
                   {DIRECTION_MARK[path.direction] ?? '\u2194'}
                 </span>
                 <h4>{cleanMemoText(path.development)}</h4>
-                <span className="company-path-horizon mono">
-                  {formatTaxonomy(path.time_horizon)}
+                <span className="company-path-meta">
+                  {thesisEffectCopy[path.thesis_effect] && (
+                    <span className={`company-path-thesis is-${path.thesis_effect}`}>
+                      {thesisEffectCopy[path.thesis_effect]}
+                    </span>
+                  )}
+                  <span className="company-path-horizon mono">
+                    {formatTaxonomy(path.time_horizon)}
+                  </span>
                 </span>
               </summary>
               <dl className="company-causal-chain">
@@ -306,7 +314,11 @@ function CompanyDetail({ company }: { company: InvestmentCompany }) {
                 <div>
                   <dt>Watch</dt>
                   <dd>
-                    {path.watchpoints.map((watchpoint) => cleanMemoText(watchpoint)).join(' · ')}
+                    <ul className="company-bet-watch">
+                      {path.watchpoints.map((watchpoint) => (
+                        <li key={watchpoint}>{cleanMemoText(watchpoint)}</li>
+                      ))}
+                    </ul>
                     <MemoCitations sources={path.sources} sourceIndex={sourceIndex} />
                   </dd>
                 </div>
@@ -316,47 +328,9 @@ function CompanyDetail({ company }: { company: InvestmentCompany }) {
         </div>
       </section>
 
-      <section className="company-detail-section company-thesis-tests">
-        <header className="company-memo-section-head">
-          <h3>BIT view and the tests that matter</h3>
-          <span className="company-thesis-status">
-            {thesisStatusCopy[thesis.public_bit_view_status]}
-          </span>
-        </header>
-        {thesis.attributable_public_thesis ? (
-          <p className="company-thesis-copy">
-            {cleanMemoText(thesis.attributable_public_thesis)}
-            <MemoCitations sources={thesis.sources} sourceIndex={sourceIndex} />
-          </p>
-        ) : (
-          <p className="company-thesis-copy">
-            No attributable public BIT thesis was found. Portfolio ownership is
-            not treated as thesis evidence.
-          </p>
-        )}
-        <div className="company-thesis-columns">
-          <div>
-            <h4>What would support it</h4>
-            <ul>
-              {thesis.what_would_support_it.map((item) => (
-                <li key={item}>{cleanMemoText(item)}</li>
-              ))}
-            </ul>
-          </div>
-          <div>
-            <h4>What would challenge it</h4>
-            <ul>
-              {thesis.what_would_challenge_it.map((item) => (
-                <li key={item}>{cleanMemoText(item)}</li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </section>
-
       <section className="company-detail-section company-memo-sources">
         <details>
-          <summary>Source ledger and generation record · {memo.source_ledger.length} sources</summary>
+          <summary>Source ledger and generation record · {memo.source_ledger.length} sources · researched {formatDay(provenance.research_date)}</summary>
           <ol>
             {memo.source_ledger.map((source, index) => (
               <li key={source.url} id={`${company.ticker}-source-${index + 1}`}>

@@ -3,7 +3,7 @@
 Reviewed 19 July 2026. This is a historical evaluation record of the
 superseded editorial lane, not an executable contract or an active project
 tracker. That lane was deleted on 29 July when the product consolidated onto
-the company-aware Investment agent; see [`docs/STATUS.md`](../STATUS.md) and
+the company-aware Investment agent; see [`docs/STATUS.md`](../../STATUS.md) and
 the repo-local `fli-daily-intelligence` skill for the current path.
 
 ## Post-rerun conclusion
@@ -27,8 +27,8 @@ testable release or anecdote into an Aion experiment.
 The structural correction is complete. The current 16 July run uses the latest
 Investment semantics, contains five Investment Insights with six directional
 company mappings, and no longer attaches the audited portfolio report to each
-Insight. The final proof is editorially locked in
-[`submission-proof-selection-2026-07-19.md`](../projects/archive/daily-intelligence-quality/resources/submission-proof-selection-2026-07-19.md).
+Insight. The final proof was editorially locked in the submitted product; its
+selection history remains recoverable from the build log.
 Do not reopen a broad pruning cycle before submission. Cross-day novelty
 memory, historical web-publication metadata, and lower-ranked tail pruning are
 documented follow-up work rather than blockers to the curated proof.

@@ -10,22 +10,21 @@ For the cross-stage cost summary and X-provider units, see
 Use `gpt-5.6-luna` as the default efficient model for bounded structured
 classification and Registry evaluation. This is an accuracy-first default,
 not a rule that the cheapest model or lowest reasoning effort always wins.
-The daily brief path uses `gpt-5.6-luna` for audience routing and a persisted
-`gpt-5.6-sol` Codex task for final research, consolidation, selection, and
-writing. Terra per-Event outputs remain optional working annotations, not a
-required authoring stage. The web-grounded Registry relevance audit was a
-one-time non-mutating evaluation, not part of the daily path.
+The current daily path uses `gpt-5.6-luna` for audience routing and
+`gpt-5.6-sol` for company-aware Investment analysis. AI Engineering ends at
+routing; it has no current Insight generator or legacy fallback. Historical
+Terra annotations and persisted Codex editorial tasks are retired. The
+web-grounded Registry relevance audit was a one-time non-mutating evaluation,
+not part of the daily path.
 
 | Boundary | Default model | Reasoning effort | Rationale |
 | --- | --- | --- | --- |
 | Structural entity kind | `gpt-5.6-luna` | `medium` | Existing evaluated classifier contract. |
-| Evidence audience routing | deterministic evidence gate, then `gpt-5.6-luna` | none, then `medium` | The v15 contract first completes only a single-post Development with at most 30 substantive words and no artifact, author continuation, or independently authored corroboration. It stores the exact reason and spends no model tokens. All other packets reach the self-contained, recall-oriented router. The July 5–21 top-100 production pass completed 1,647 Developments with zero failures: 325 gated deterministically and 1,322 evaluated by Luna; 618 routed to both audiences, 200 Engineering-only, 88 Investment-only, and 741 neither, for $7.762206. |
-| Company-aware Investment analysis | `gpt-5.6-sol` | `xhigh` | One Development is screened against the complete compact company universe, then the model opens only the full memos needed to test concrete causal paths. Top-ten passes now cover July 19–21. The current read projection surfaces 15 of 30 Developments, suppresses 15, retains 41 company assessments, and records three after-memo rejections. The July 19–20 production run completed all 20 targets without failure, reused 272,384 cached input tokens, and reported $3.693917. Sol/xhigh is the quality baseline while this new boundary is calibrated. |
-| Per-Event working annotations | `gpt-5.6-terra` | `high` | A completed calibration pass produced separate audience notes with stable cache keys. The daily Codex agent may inspect them but must re-evaluate the frozen evidence; they are not final brief outputs. |
-| FLI daily-intelligence agent | `gpt-5.6-sol` | `xhigh` | The persisted Codex task researches the complete routed cohort, consolidates overlapping Events, selects the final set, and writes both audience briefs. |
+| Evidence audience routing | deterministic evidence gate, then `gpt-5.6-luna` | none, then `medium` | A narrow evidence-completeness gate suppresses only short unsupported packets and stores the exact reason without spending model tokens. All other packets reach the self-contained, recall-oriented router. Current checkpoint counts and spend live in [`docs/STATUS.md`](../STATUS.md) and [`tokenomics.md`](tokenomics.md). |
+| Company-aware Investment analysis | `gpt-5.6-sol` | `xhigh` | One Development is screened against the compact company universe, then the model opens only the full memos needed to test concrete causal paths. Sol/xhigh is the quality baseline while this boundary is calibrated. Exact run proof and spend belong in [`docs/STATUS.md`](../STATUS.md) and [`insight-refresh.md`](insight-refresh.md). |
 | Missing-bio identity research | `gpt-5.6-luna` | `high` | Multi-source grounded identity resolution needs more checking. |
 | Combined kind + Registry decision | `gpt-5.6-luna` | `high` | Independent structural and admission decisions with optional search. |
-| Registry relevance audit | `gpt-5.6-terra` | `high` | One-time required-web-search evaluation of the initial Registry. It is non-mutating and does not run during daily brief generation. |
+| Registry relevance audit | `gpt-5.6-terra` | `high` | One-time required-web-search evaluation of the initial Registry. It is non-mutating and does not run during daily evidence or Insight generation. |
 
 Do not lower reasoning effort merely to reduce spend. OpenAI recommends using
 the lowest effort that still meets the task, preserving the prior effort as a
@@ -40,19 +39,10 @@ fact. The pre-model rule is deliberately narrow: it applies only when the
 complete packet is one short root post and no supporting source survived packet
 construction. A remaining link is recorded as unavailable linked or media
 evidence; the rule does not claim to have understood that missing material.
-Across the current v15 July 5–21 top-100 window,
-906 of 1,647 Developments routed to at least one audience: 706 to Investment
-and 818 to AI Engineering. The 55.0% union pass rate is intentionally
-recall-oriented: a positive route means the Development merits downstream
-investigation, not that it is already publishable intelligence. Company
-mapping and the audience Insight gate remain responsible for rejecting
-speculative or immaterial leads.
-
-The frozen v15 pass completed 325 packets through the deterministic gate:
-122 short unsupported text posts and 203 short posts with unavailable linked
-or media evidence. Luna/medium evaluated the other 1,322 packets. The
-resumable run recovered five transient failures on one exact retry without
-repeating completed work.
+The current router is intentionally recall-oriented: a positive route means a
+Development merits downstream investigation, not that it is already
+publishable intelligence. Company mapping and the Investment Insight gate
+remain responsible for rejecting speculative or immaterial leads.
 
 The model string and reasoning effort are part of every run identity. Existing
 run databases and historical reports remain immutable evidence of the model

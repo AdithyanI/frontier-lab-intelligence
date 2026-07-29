@@ -249,78 +249,45 @@ Rules:
   catalogued-only rows do not imply that content was retrieved. Do not add
   summaries, cards, or additional filters until a cited-insight consumer proves
   the need.
-- **Audience Insights:** one URL-backed Investment / AI Engineering reader.
-  Investment remains the default. For a date with a complete imported daily
-  editorial run, `Kept` shows every selected Insight in agent-assigned priority
-  order. The left rail is `Brief rank`, not Feed rank; each supporting Event
-  retains its exact Feed rank and Event link inside provenance. Brief rank
-  is a quiet disclosure control: opening it shows the item-specific editorial
-  rationale and the shared qualitative ranking rubric without adding permanent
-  metadata to the reading surface. The flat
-  ruled row leads with title, `What changed`, and `Interpretation`. Investment
-  then separates `Portfolio impact` from the optional `Outside the disclosed
-  portfolio` mapping, gives every company a textual impact direction and one
-  causal mechanism, and ends with two watchpoints plus the next diligence step.
-  The web reader does not interrupt the brief with a page-level portfolio
-  caveat. Audited portfolio context remains in the data contract, and any
-  source cited by an Insight stays in its normal source ledger. Engineering
-  uses one flat `What to do next` section containing the bounded next step and
-  its measurable decision rule; it does not expose separate action,
-  system-surface, hypothesis, experiment-detail, or constraints labels. Sources
-  remain visible in the normal reading flow. Event provenance links only to the
-  exact Feed Event, which already owns the onward original-post link. The date
-  count is the number of final
-  imported Insights when that run exists. Candidate-level decisions remain an
-  audit fallback for unimported days and for explicit `Suppressed` / `All`
-  views; they are not the final daily product. Honest zero/thin imported runs
-  remain available and are never padded. The backend, not the SPA, selects the
-  newest complete run and returns a discriminated read contract. A 44px
-  hairline `Download PDF` action sits at the top-right of the page header and
-  follows the selected date and audience. It is enabled only for a complete
-  daily editorial run and exposes preparing, downloaded, and actionable error
-  states without shifting the header. A quieter 44px `Send brief` action sits
-  directly beside it. It opens one anchored flat panel—not a settings page—
-  with Slack and email choices, masked destination, audience/date/content-scope
-  summary, and an explicit final confirmation. Slack is labelled as all cited
-  Insights plus the PDF link; its message shows every title and complete
-  interpretation, then links onward. Email remains up to five
-  Insights plus the PDF attachment. The explicit confirmation sends directly
-  from the same-origin app without a second credential field. Loading,
-  unavailable, provider
-  error, sending, and sent states remain inside the same panel; provider
-  secrets and delivery metadata never enter the reading surface. The exported
-  A4 workbook uses the same
-  paper-white, ink, capital-blue, flat-rule language. Its reader-first opening
-  combines the report title, audience/date, and a ranked list of clickable
-  Insight titles; report hashes, source counts, run counts, and authoring notes
-  stay out of the opening. Rank rationale remains optional audit detail in the
-  web reader and is omitted from the fixed PDF reading path. Each title jumps
-  to one decision-analysis page,
-  followed by a linked source-ledger page containing every original post and
-  artifact/context citation; original-Feed titles use absolute canonical links
-  to their exact internal Feed Event, which owns the onward source-post link.
-  Feed rank and source-role codes remain dashboard audit metadata rather than
-  fixed source-ledger labels; the PDF presents the linked title and its
-  evidence role in reader language. Each imported Insight exposes one quiet
-  `Copy link` control beside its title. The copied URL retains the audience and
-  date, identifies the exact Insight, and scrolls to it after the asynchronous
-  brief loads. Switching the audience or date clears that item-level selection.
-  Repeated audience/date labels, source-page
-  kickers, duplicate role explanations, and empty source-group placeholders
-  stay out of the fixed reading path. A source group spans the page when it is
-  the only populated group. Investment company scope and direction collapse to
-  one section-level disclosure when every row shares the same state.
-  Every later-page header returns to the brief index. Serif display headings
-  and restrained capital-blue slash markers echo the case brief's editorial
-  rhythm without reproducing BIT branding, while flat rules and sans-serif body
-  copy keep the workbook native to the product.
-  Exact Feed Event links begin preloading on pointer intent, keyboard focus, or
-  touch so the audit destination can reuse the same in-flight request. A direct
-  Event URL shows one focused loading row rather than pretending to load a full
-  page of evidence.
-  PDF text stays vector/selectable. Times/Helvetica/Courier Base 14 are a
-  deliberate portable print analogue for the editorial display/UI/mono stack,
-  with an embedded mixed-script fallback for citation titles outside WinAnsi.
+- **Audience Insights:** one URL-backed company-aware Investment reader.
+  Investment is the only current Insight generator. The AI Engineering tab
+  remains visible because routing exists for that audience, but it shows an
+  explicit unavailable state instead of legacy content. Each date reads one
+  complete published cohort from the backend. `Kept`, `Suppressed`, and `All`
+  are views over that same current store; the SPA never combines old and new
+  schemas.
+
+  Each Development keeps its application-owned Feed rank and leads with the
+  agent-written investment headline, `What changed`, and `Portfolio
+  read-through`. Company read-throughs are collapsed by default. Their summary
+  exposes the company, ticker, direction, and concise impact. Expansion reveals
+  the causal mechanism, affected business driver, size basis, what remains
+  unproven, and what to check next. `How the agent got here` separately shows
+  the company screening and memo-opening decisions. It is audit detail, not
+  permanent reading chrome.
+
+  Sources are deterministic application links, not model-authored URLs. The
+  source disclosure links to the exact Feed Development, original post, each
+  available artifact, and company memo. It also exposes a quiet `Copy ID`
+  control for precise review. Honest zero/thin cohorts remain available and are
+  never padded.
+
+  A 44px hairline `Download PDF` action sits at the top-right of the page header
+  and follows the selected date and audience. It is enabled only for a complete
+  published Investment cohort and exposes preparing, downloaded, and
+  actionable error states without shifting the header. A quieter 44px `Send
+  brief` action sits directly beside it. It opens one anchored flat panel with
+  Slack and email choices, masked destination, audience/date/content-scope
+  summary, and an explicit final confirmation. Slack sends every cited Insight
+  plus the PDF link. Email sends up to five Insights plus the PDF attachment.
+  Provider secrets and delivery metadata never enter the reading surface.
+
+  The exported A4 workbook uses the same paper-white, ink, capital-blue,
+  flat-rule language. Its opening combines the report title, audience/date, and
+  a ranked list of clickable Insight titles. Each title jumps to one
+  decision-analysis page followed by a deterministic source ledger. PDF text
+  remains vector and selectable, with an embedded mixed-script fallback for
+  citation titles outside WinAnsi.
 - **BIT Lens:** two ruled views of one public client-context workspace. The
   **Research brief** remains a text-first public-research briefing without
   diagrams, dashboards, or collapsed holding detail. It preserves the full

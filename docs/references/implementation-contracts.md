@@ -42,6 +42,7 @@ module, store, command, and tests.
 | Ranking validation | [`scoring-validation.md`](scoring-validation.md) |
 | Audience model choice and reasoning policy | [`model-routing.md`](model-routing.md) |
 | Prompt caching and provider proof | [`prompt-caching.md`](prompt-caching.md) |
+| BIT's public investment and operating context | [`bit-capital-public-context.md`](bit-capital-public-context.md) |
 | Investment company universe and memo packet | [`investment-company-universe.md`](investment-company-universe.md) |
 | Development-to-company judgment | [`investment-company-mapping.md`](investment-company-mapping.md) |
 | Investment Insight preview, run, trace, and publication | [`insight-refresh.md`](insight-refresh.md) |

@@ -6,8 +6,9 @@ and cached PDF as the web reader. It does not create a separate report.
 
 ## Reader flow
 
-The `Send brief` action is available only when the selected date and audience
-have a complete editorial run and the chosen provider is configured.
+The `Send brief` action is available only when the selected date has a complete
+published Investment cohort and the chosen provider is configured. AI
+Engineering has no current deliverable cohort.
 
 1. The operator chooses Slack or email.
 2. The panel shows the masked destination, audience, date, and content scope.

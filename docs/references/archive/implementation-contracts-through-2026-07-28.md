@@ -8,8 +8,8 @@ and follow its scoped links instead.
 
 Detailed reference for implemented boundaries, historical proof, and exact
 operational behavior. Use the short
-[architecture overview](../architecture/overview.md) for system shape and the
-[code map](../architecture/code-map.md) for current ownership.
+[architecture overview](../../architecture/overview.md) for system shape and the
+[code map](../../architecture/code-map.md) for current ownership.
 
 Current system: the Registry, immutable trusted-following snapshot, X evidence
 store, exact Event projection, ranked Event view over the unranked Feed ledger,
@@ -24,8 +24,8 @@ first-party-only model view, one resumable SQLite run store, a machine-first
 operator CLI, and a live kept/suppressed UI projection. Explicit manual Daily
 Brief delivery is implemented for Slack and email; scheduling and unattended
 alerts remain deferred. Exact provider behavior, runtime configuration, proof,
-and limitations live in [the delivery reference](delivery.md). See
-[`docs/STATUS.md`](../STATUS.md) for the conceptual handoff and current
+and limitations live in [the delivery reference](../delivery.md). See
+[`docs/STATUS.md`](../../STATUS.md) for the conceptual handoff and current
 checkpoint counts; this document explains implementation shape rather than
 project status.
 
@@ -1233,8 +1233,8 @@ final score.
 ## Implementation Map and Current Work
 
 The implementation map changes more frequently than these system boundaries.
-Use [`code-map.md`](../architecture/code-map.md) for current package ownership, data stores,
+Use [`code-map.md`](../../architecture/code-map.md) for current package ownership, data stores,
 commands, dependency direction, and test locations. Use
-[`docs/STATUS.md`](../STATUS.md) for current proof, exact checkpoint claims, and
+[`docs/STATUS.md`](../../STATUS.md) for current proof, exact checkpoint claims, and
 the active critical path. Execution state belongs only in the active tracker(s)
 named there.

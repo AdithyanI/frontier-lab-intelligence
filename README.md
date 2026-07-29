@@ -1,8 +1,8 @@
 # Frontier Lab Intelligence
 
 Frontier Lab Intelligence turns public output from frontier AI labs and key
-people into a cited daily brief for investors and AI engineers. I built it for
-the BIT Capital AI Engineer case study.
+people into ranked evidence and company-aware investment intelligence. I built
+it for the BIT Capital AI Engineer case study.
 
 [Live app](https://frontier-lab-intelligence.adithyan.io/) ·
 [Video walkthrough](https://share.descript.com/view/LZkpHP29yub) ·
@@ -26,17 +26,27 @@ evidence-to-insight pipeline, model boundaries, ranking, and recovery.
 
 ## System at a glance
 
-The daily path stays inspectable before judgment. One structured routing call
-produces two independent audience judgments for each Event, with separate
-criteria, booleans, and reasons.
+The evidence stays inspectable before judgment:
 
-[![Evidence moves from the screened Registry through X output, exact Events, daily ranking, artifacts, and two independent audience judgments.](docs/references/presentation-assets/architecture/daily-evidence-pipeline.png)](https://frontier-lab-intelligence.adithyan.io/system/architecture#overview)
+```text
+Registry and trusted network
+  -> complete X evidence
+  -> exact structural Events
+  -> same-artifact, same-day Developments
+  -> transparent daily rank
+  -> independent audience routing
+  -> company-aware Investment analysis
+  -> web brief, PDF, and explicit delivery
+```
 
-Every positive candidate is then frozen into one dated workspace. A persisted
-Codex task researches the complete cohort, resolves duplication, writes both
-briefs, and passes a deterministic coverage and citation gate before import.
+The current Investment agent screens every routed Development against the full
+company universe. It opens detailed company memos only for plausible matches,
+records why a candidate was kept or rejected, and publishes a day only when the
+complete requested cohort succeeds.
 
-[![A dated workspace is handed to one persisted Codex task, which runs the FLI daily agent, passes a strict draft gate, and serves two daily briefs.](docs/references/presentation-assets/architecture/daily-brief-run.png)](https://frontier-lab-intelligence.adithyan.io/system/architecture#overview)
+AI Engineering still has an independent routing decision, but it has no current
+Insight generator. The product says this directly instead of showing output
+from a retired fallback.
 
 ## Run it locally
 
@@ -65,15 +75,14 @@ reason, and frozen run provenance.
   relationships inspectable.
 - Independent audience routing separates AI Engineering relevance from
   Investment relevance.
-- Daily editorial runs produce ranked, cited web briefs and deterministic PDF
-  reports.
+- Company-aware Investment runs produce ranked, cited web briefs and
+  deterministic PDF reports.
 - Real Slack and email delivery adapters have been validated. They remain
   operator actions rather than part of the passive reviewer walkthrough.
 
-The final five submission Insights and their selection rationale are recorded
-in the [submission proof selection](docs/projects/archive/daily-intelligence-quality/resources/submission-proof-selection-2026-07-19.md).
-The [reviewer guide](docs/references/reviewer-guide.md) maps the product to the
-case-study rubric.
+The final submission-era Insights remain visible in the product. The
+[reviewer guide](docs/references/reviewer-guide.md) maps the current proof to
+the case-study rubric.
 
 ## How the repository is organized
 
@@ -96,8 +105,9 @@ without becoming an empty demo.
 X is the implemented discovery source. Artifacts add papers, repositories,
 articles, documents, and videos when first-party evidence points to them. Event
 grouping follows exact provider relationships rather than semantic topic
-clustering. The release is a bounded case-study proof, not a production alert
-service.
+clustering. AI Engineering routing exists, but its current last-mile Insight
+generator is still unbuilt. The release is a bounded case-study proof, not a
+production alert service.
 
 Adithyan Ilangovan  
 [adi@aipodcast.ing](mailto:adi@aipodcast.ing)

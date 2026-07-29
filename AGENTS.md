@@ -17,11 +17,11 @@ It began as the BIT Capital AI Engineer case study.
 the preserved case prompt until Adi decides, then record the resolution in the
 relevant durable document.
 
-## Submission north star
+## Case-study north star
 
-Until the 20 July 2026 submission, optimize for a coherent, defensible, working
-case study that earns the next interview. Prefer a narrow end-to-end proof and
-3 to 5 excellent cited Insights over platform breadth.
+Optimize for a coherent, defensible, working case study and a clear interview
+explanation. Prefer a narrow end-to-end proof and 3 to 5 excellent cited
+Insights over platform breadth.
 
 ## Guardrails
 

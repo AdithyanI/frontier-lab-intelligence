@@ -176,32 +176,25 @@ Event/evidence/input reuse contract, records the source run on reused rows, and
 calls the model only for changed packets. This is the bounded one-day repair
 path; the normal historical-range path is `audience-routing refresh`.
 
-## Refresh audience Insights
+## Refresh Investment Insights
 
-After every requested routing database is complete and current, inspect the
-fresh all-positive Insight cohort without a model call:
+After every requested routing database is complete and current, follow
+[`insight-refresh.md`](insight-refresh.md). Preview the exact current
+Investment cohort without a model call:
 
 ```bash
-fli insights refresh \
+fli insights run-investment-agent \
   --through 2026-07-21 \
-  --days 17 \
-  --all-routed \
-  --audience all \
-  --model gpt-5.6-terra \
-  --reasoning-effort high \
+  --days 3 \
+  --top-ranked 10 \
   --dry-run --json --no-input
 ```
 
-Run the same command without `--dry-run` against the canonical Insight store.
-Validate the exact expected request count, zero pending/failed rows, SQLite
-integrity, prompt/schema/source lineage, cache telemetry, and cost. The store
-may hold multiple immutable routing lineages under the same current Insight
-contract. An exact prior Event/audience output is reused only when input,
-prompt, schema, model, and reasoning effort match; the successor row retains
-its current rank/routing provenance plus explicit reuse provenance. A changed
-semantic contract still requires a clean migration, not a compatibility read.
-The current v10/v7 checkpoint contains 1,474 completed audience decisions over
-965 unique Events from 17 `daily-rank-v2` routing runs.
+Remove `--dry-run` only when the paid run is intended. The company-aware runner
+writes exact traces, validates every result, and publishes each day only after
+its complete requested cohort succeeds. A retry currently reruns its requested
+targets; it does not claim automatic response reuse. AI Engineering has no
+current Insight generator or fallback.
 
 ## Output
 

@@ -52,7 +52,7 @@ SHA-256 matched the local archive.
 The release includes consistent SQLite backups for the current Feed and Event
 publication, the complete derived network ranking, the normalized follower
 edges used by the UI, cited artifact text, referenced audience-routing runs,
-candidate Insights, and final daily editorial runs.
+candidate Insights, and the published submission-era daily runs.
 
 It excludes:
 

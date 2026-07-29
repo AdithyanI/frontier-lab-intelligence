@@ -63,11 +63,11 @@ it looks. Argue against them in the tracker, not by silently deviating.
    changing the result.
 2. **Automatically done, human-correctable.** Every pipeline stage runs
    end-to-end without a human gate: the deterministic pipeline orders evidence;
-   models make audience judgments and editorial selections, always writing
-   down *why* with cited evidence and a reason. Humans audit the
-   finished artifact and override where wrong; overrides are stored as data —
-   the strongest evidence tier — and survive recomputation. No stage may
-   require manual per-item approval to produce output.
+   models make audience-routing and Investment-selection judgments, always
+   writing down *why* with cited evidence and a reason. Humans audit the
+   finished artifact and override where wrong; overrides are stored as data,
+   the strongest evidence tier, and survive recomputation. No stage may require
+   manual per-item approval to produce output.
 3. **Human judgment is the bootstrap, not the loop.** Hand-made choices enter
    the system once, as inspectable inputs — the seed lab list, the curation
    rubric given to the LLM, recorded overrides — and the machine runs with

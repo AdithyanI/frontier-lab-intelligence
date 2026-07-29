@@ -25,13 +25,13 @@ The product thesis is:
 > evidence grouping, transparent routing, and primary-source citations can
 > turn that activity into intelligence a human can trust.
 
-The case study was submitted on 2026-07-20. As of 2026-07-26, Adi has three
-working days before the Thursday follow-up interview and case discussion with
-BIT's AI team. The immediate endpoint is no longer submission: it is being able
-to explain and defend the working system, its design choices, trade-offs,
-limits, costs, agent-assisted build process, and what should be built next.
+The case study was submitted on 20 July 2026. The follow-up interview and case
+discussion with BIT's AI team is on Thursday, 30 July 2026. The immediate
+endpoint is being able to explain and defend the working system, its design
+choices, trade-offs, limits, costs, agent-assisted build process, and what
+should be built next.
 
-During this three-day window, prioritize interview evidence and explanation:
+Before the follow-up, prioritize interview evidence and explanation:
 stress-test the scoring and signal-to-noise choices, make token/API costs easy
 to retrieve, rehearse how the system was built, and verify that the surfaced
 brief is genuinely useful to a BIT analyst. Do not broaden the platform or
@@ -46,10 +46,9 @@ Registry
   -> same-artifact, same-day Developments
   -> transparent daily Development ranking
   -> independent AI Engineering + Investment routing
-  -> optional per-Event working annotations
-  -> daily agent research, consolidation, and ranked cited Insights
-  -> separate Investment + AI Engineering views
-  -> explicit Slack or email Daily Brief delivery
+  -> company-aware Investment screening and memo retrieval
+  -> atomic published Investment cohort
+  -> web brief, PDF, and explicit Slack or email delivery
 ```
 
 The stored-X and canonical-artifact evidence paths are implemented. Current
@@ -96,19 +95,24 @@ current databases or APIs before using them as present-tense product claims.
 ## The Most Important Unproven Claim
 
 The repository proves the end-to-end product and the final five submission
-Insights are locked. The remaining claim is communicative: whether an external
-reviewer can understand the product, reproduce the evidence-backed demo, and
-see the rubric coverage without reconstructing the development history.
+Insights are locked. The remaining product claim is whether the current
+company-aware Investment path consistently turns routed Developments into a
+small set of useful analyst read-throughs without inventing a company
+connection. The remaining interview claim is whether that boundary, its cost,
+and its limitations can be explained without reconstructing the full build
+history.
 
 ## Post-submission State
 
-The case study was submitted on 20 July 2026. The intelligence and
-reproduction boundaries remain frozen. The active priorities are:
+The case study was submitted on 20 July 2026. The submitted proof and
+reproduction snapshot remain frozen. The active priorities are:
 
 1. Keep the submitted links and public product stable.
-2. Preserve one coherent explanation of the five showcase Insights, measured
-   costs, limitations, and next steps.
-3. Prepare concise interview defenses for source scope, ranking validation,
+2. Audit the current company-aware Investment output without changing upstream
+   evidence or the locked submission proof.
+3. Preserve one coherent explanation of the showcase Insights, measured costs,
+   limitations, and next steps.
+4. Prepare concise interview defenses for source scope, ranking validation,
    top-100 recall, model choice, and the human-triggered delivery boundary.
 
 Any additional external message or alert delivery remains blocked without
@@ -143,27 +147,13 @@ the active v11 contract, then audit its false positives, suppressions, and
 cross-Development duplication. AI Engineering may later be built on the same
 path; it must not be restored from deleted editorial code.
 
-Repository housekeeping is complete and archived
-under [`docs/projects/archive/repo-housekeeping/`](projects/archive/repo-housekeeping/):
-all runtime domains have direct package ownership, the code/data map is the
-cold-start implementation index, local-data lifecycle is explicit, and fast
-checks prevent the former flat source layout from returning. The later
-attention-ranking redesign remains preserved as the historical Event-rank
-lineage; rejected formula experiments remain decision history only.
-
-The submission-critical daily-intelligence quality project is complete and
-archived under
-[`docs/projects/archive/daily-intelligence-quality/`](projects/archive/daily-intelligence-quality/).
-It shipped deterministic X chronology, artifact disclosure lineage, verified
-artifact excerpts, resumable Codex handoff, calibrated company direction,
-and compact agent inspection. Its original submission checkpoint ran through
-19 July; the later ranking migration produced exact-lineage runs
-through 21 July. The final five-Insight submission proof remains locked in its
-[`submission selection`](projects/archive/daily-intelligence-quality/resources/submission-proof-selection-2026-07-19.md).
-Busy-day tail selection and cross-day novelty remain disclosed limitations,
-not blockers to the curated proof. Post-submission work is limited to reviewer
-clarity, availability, and interview preparation, not another
-intelligence-generation or harness cycle.
+Completed reasoning is preserved in the sharded build log and the surviving
+trackers under [`docs/projects/archive/`](projects/archive/). Removed project
+paths are not active contracts. Use `scripts/build-log.py search` when a
+historical decision is not represented by a surviving tracker. The
+attention-ranking redesign remains the historical Event-rank lineage; current
+Investment work uses the company-aware path and does not restore the deleted
+editorial system.
 
 Interview work has now decomposed the final Investment step from a ranked
 Development to a defensible public-company transmission path. The compact
@@ -192,7 +182,7 @@ handoff.
 | Question | Source of truth |
 | --- | --- |
 | What is the external assignment? | [`references/case-prompt.md`](references/case-prompt.md) |
-| Which Insights are the locked submission proof? | [`projects/archive/daily-intelligence-quality/resources/submission-proof-selection-2026-07-19.md`](projects/archive/daily-intelligence-quality/resources/submission-proof-selection-2026-07-19.md) |
+| Which Insights demonstrate the case-study proof? | The published product and [`references/reviewer-guide.md`](references/reviewer-guide.md) |
 | What should be done next, exactly? | Keep the submitted reviewer path available and prepare the interview defenses listed in Post-submission State; start a new tracker only if Adi explicitly invokes `$project`. |
 | Which code/store/command/test owns a stage? | [`architecture/code-map.md`](architecture/code-map.md) |
 | How is the system implemented? | [`architecture/overview.md`](architecture/overview.md) |

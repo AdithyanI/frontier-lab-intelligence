@@ -30,23 +30,25 @@ exact object, checksum, included data, and clean-checkout proof.
    manual intake. The dated checkpoint totals and graph coverage live in
    `docs/STATUS.md`; the UI and `/api/registry` are the live read contract.
 2. **Signal-vs-noise (20%)** — start in Network Ranking, then open Feed. Each
-   row is one stable Event, not one raw post. Provider-declared relations form
-   exact structural Events; independent posts are never merged by topic. Open
-   the rank disclosure to inspect the complete-Event voter union, voter-network
-   position, source-author position, same-day public-interaction tiebreak, and
-   limitations. The four evidence layers are applied in order, not blended.
+   row is one same-day Development backed by one or more exact structural
+   Events. Provider-declared relations form Events; independent original posts
+   merge only when they disclose the same release-specific artifact. Open the
+   rank disclosure to inspect distinct trusted participants, their mean
+   network position, the strongest one-post public interaction total, and the
+   limitations. These are ordered tiebreak layers, not a weighted score.
 3. **Scoring + validation (20%)** — change Feed Status to compare Relevant,
    Not relevant, and Not evaluated Events. Open `View reasons` to inspect the
    independent AI Engineering and Investment judgments. Ranking is an
-   ordering aid; routing and final editorial selection are separate decisions.
-4. **Actionable delivery (15%)** — inspect both audience views in Insights.
-   Imported days show the newest complete, ranked, cited daily editorial run.
-   Each supporting source links back to the exact Feed Event; artifact
-   citations retain their frozen text provenance. Candidate-level Suppressed
-   and All views remain an audit fallback, not the final daily product. The
-   top-right actions download the selected audience PDF or show delivery
-   options. Slack and email are real operator actions. Inspect the delivery
-   flow, but do not confirm a send during passive review.
+   ordering aid; routing and final Investment selection are separate
+   decisions.
+4. **Actionable delivery (15%)** — inspect the Investment view in Insights.
+   Imported days show the newest complete published company-aware cohort.
+   Each source link opens the exact Feed Development; company links open the
+   complete memo used by the agent. Suppressed rows remain auditable. The
+   top-right actions download the selected PDF or show delivery options. Slack
+   and email are real operator actions. Inspect the delivery flow, but do not
+   confirm a send during passive review. AI Engineering is explicitly
+   unavailable rather than served from a retired fallback.
 5. **Ingestion (10%)** and **extraction (10%)** — inspect Artifacts for
    canonical source links disclosed by first-party Event evidence, retrieval
    state, normalized text snapshots, and the exact originating Event. X is the
@@ -88,6 +90,6 @@ exact object, checksum, included data, and clean-checkout proof.
   authentication, or publisher controls. Only inspectable evidence can support
   a shipped citation.
 - The final five submission Insights were human-adjudicated and locked. They
-  are a proof set, not an unbiased estimate of unattended editorial precision.
+  are a proof set, not an unbiased estimate of unattended Insight precision.
   Opening the application does not trigger Registry intake or delivery; both
   remain explicit operator actions.
