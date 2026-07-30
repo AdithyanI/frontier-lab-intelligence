@@ -131,6 +131,88 @@ def test_import_trace_preserves_company_connections_and_telemetry(
     assert payload["run"]["memo_rejected_count"] == 1
 
 
+def test_insight_reader_scopes_trace_rows_to_the_requested_day(
+    tmp_path: Path,
+    monkeypatch,
+):
+    trace_path = tmp_path / "trace.json"
+    trace_path.write_text(json.dumps(_trace()), encoding="utf-8")
+    db_path = tmp_path / "investment-agent.db"
+    investment_agent_runs.import_trace(trace_path, db_path=db_path)
+    investment_agent_runs.publish_day(
+        day=DAY,
+        candidates=[
+            {"development_id": DEVELOPMENT_ID, "daily_rank": 1}
+        ],
+        selection_limit=1,
+        db_path=db_path,
+    )
+
+    requested_days: list[str | None] = []
+    original = investment_agent_runs._latest_rows
+
+    def capture_requested_day(
+        conn,
+        *,
+        day: str | None = None,
+    ):
+        requested_days.append(day)
+        return original(conn, day=day)
+
+    monkeypatch.setattr(
+        investment_agent_runs,
+        "_latest_rows",
+        capture_requested_day,
+    )
+
+    payload = investment_agent_runs.insights_payload(
+        day=DAY,
+        status="kept",
+        db_path=db_path,
+    )
+
+    assert payload["available"] is True
+    assert requested_days == [DAY]
+
+
+def test_dates_cache_refreshes_after_publication_changes(tmp_path: Path):
+    db_path = tmp_path / "investment-agent.db"
+    first_path = tmp_path / "first.json"
+    first_path.write_text(json.dumps(_trace()), encoding="utf-8")
+    investment_agent_runs.import_trace(first_path, db_path=db_path)
+    investment_agent_runs.publish_day(
+        day=DAY,
+        candidates=[
+            {"development_id": DEVELOPMENT_ID, "daily_rank": 1}
+        ],
+        selection_limit=1,
+        db_path=db_path,
+    )
+
+    assert investment_agent_runs.dates_payload(db_path=db_path)["latest_date"] == DAY
+
+    next_day = "2026-07-22"
+    second = _trace()
+    second["date"] = next_day
+    second["development_id"] = "e" * 64
+    second["daily_rank"] = 2
+    second_path = tmp_path / "second.json"
+    second_path.write_text(json.dumps(second), encoding="utf-8")
+    investment_agent_runs.import_trace(second_path, db_path=db_path)
+    investment_agent_runs.publish_day(
+        day=next_day,
+        candidates=[
+            {"development_id": "e" * 64, "daily_rank": 2}
+        ],
+        selection_limit=1,
+        db_path=db_path,
+    )
+
+    refreshed = investment_agent_runs.dates_payload(db_path=db_path)
+    assert refreshed["latest_date"] == next_day
+    assert [row["day"] for row in refreshed["dates"]] == [DAY, next_day]
+
+
 def test_fresh_input_with_same_result_can_replace_a_changed_rank(
     tmp_path: Path,
 ):

@@ -590,6 +590,45 @@ def test_service_startup_warms_only_the_newest_visible_event_window(monkeypatch)
     assert warmed == days[-web_app_module.STARTUP_EVENT_WARM_DAYS:]
 
 
+def test_service_startup_primes_data_backed_navigation_views(monkeypatch):
+    warmed: list[tuple[object, ...]] = []
+    monkeypatch.setattr(
+        web_app_module.investment_agent_store,
+        "dates_payload",
+        lambda: {"latest_date": "2026-07-28"},
+    )
+    monkeypatch.setattr(
+        web_app_module.engineering_agent_store,
+        "dates_payload",
+        lambda: {"latest_date": "2026-07-27"},
+    )
+    monkeypatch.setattr(
+        web_app_module,
+        "_investment_insights",
+        lambda **kwargs: warmed.append(("investment", kwargs)),
+    )
+    monkeypatch.setattr(
+        web_app_module,
+        "_engineering_insights",
+        lambda **kwargs: warmed.append(("engineering", kwargs)),
+    )
+    monkeypatch.setattr(
+        web_app_module.rankings_store,
+        "rankings_payload",
+        lambda limit, state, query: warmed.append(
+            ("rankings", limit, state, query)
+        ),
+    )
+
+    web_app_module._warm_navigation_views()
+
+    assert warmed == [
+        ("investment", {"day": "2026-07-28", "status": "kept"}),
+        ("engineering", {"day": "2026-07-27", "status": "kept"}),
+        ("rankings", 300, "all", ""),
+    ]
+
+
 def test_developments_api_projects_completed_audience_routing_directly(
     tmp_path, monkeypatch
 ):

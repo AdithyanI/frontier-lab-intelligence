@@ -81,21 +81,30 @@ def _warm_recent_event_views() -> None:
         )
 
 
-def _warm_current_read_views() -> None:
-    """Prime Insight lineage and the newest Event pages in the background."""
-    _warm_recent_event_views()
+def _warm_navigation_views() -> None:
+    """Prime the data-backed landing views before the service reports ready."""
+    investment_dates = investment_agent_store.dates_payload()
+    investment_day = investment_dates.get("latest_date")
+    if investment_day:
+        _investment_insights(day=str(investment_day), status="kept")
+
+    engineering_dates = engineering_agent_store.dates_payload()
+    engineering_day = engineering_dates.get("latest_date")
+    if engineering_day:
+        _engineering_insights(day=str(engineering_day), status="kept")
+
+    rankings_store.rankings_payload(300, "all", "")
 
 
 @asynccontextmanager
 async def _lifespan(_: FastAPI):
-    # The always-on local production service starts at login. Warm the compact
-    # Insight lineage view first, then the newest Event window, without delaying
-    # health/static responses.
-    # Daily projections include routing state, whose publication can invalidate
-    # a day while leaving the narrower date-summary cache valid.
+    # The always-on local production service starts at login. Do not report it
+    # ready until the default Insights page and the cold Network ranking are
+    # primed; the larger recent Event window can continue in the background.
+    _warm_navigation_views()
     Thread(
-        target=_warm_current_read_views,
-        name="fli-read-view-warmup",
+        target=_warm_recent_event_views,
+        name="fli-event-read-view-warmup",
         daemon=True,
     ).start()
     yield
