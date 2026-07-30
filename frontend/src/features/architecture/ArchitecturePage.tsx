@@ -555,8 +555,24 @@ function StoreNode({
 
 export function StoreMap() {
   const H = 124
-  const ROW_A = 74
-  const ROW_B = 300
+  const FEED_H = 64
+  const FEED_Y = 58
+  const ROW_A = 150
+  const ROW_B = 376
+  const sources = [
+    {
+      x: 28,
+      w: 214,
+      label: 'raw/following/…/snapshot.db',
+      note: '2.8M follow edges · frozen',
+    },
+    {
+      x: 298,
+      w: 214,
+      label: 'raw/x/x-content.db',
+      note: '36k provider responses',
+    },
+  ]
   const topRow = [
     {
       x: 28,
@@ -620,13 +636,36 @@ export function StoreMap() {
   ]
   return (
     <svg
-      viewBox="0 0 1080 502"
+      viewBox="0 0 1080 600"
       role="img"
-      aria-label="How the stores connect. The Registry resolves an entity to its X channel. That handle selects posts in the Feed store. Posts group into Events by provider and post id. Events link to canonical Artifacts through the source post id. A Development is projected on read from Events plus Artifacts and has no database of its own. Routing decisions key on the event id, and both Insight stores key on the development id and day. No foreign key crosses a file boundary."
+      aria-label="How the stores connect. Two collected raw stores sit upstream: a frozen follow-graph snapshot that ranks Registry candidates, and the raw X evidence cache that supplies posts. The Registry resolves an entity to its X channel, and that handle selects posts in the Feed store. Posts group into Events by provider and post id. Events link to canonical Artifacts through the source post id. A Development is projected on read from Events plus Artifacts and has no database of its own. Routing decisions key on the event id, and both Insight stores key on the development id and day. No foreign key crosses a file boundary."
     >
       <ArrowDefs id="store-arrow" />
       <text x="28" y="34" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.08em">
         ONE SQLITE FILE PER STAGE · JOINED BY PLAIN KEYS, NOT FOREIGN KEYS
+      </text>
+
+      {/* collected once, never refetched */}
+      {sources.map((source) => (
+        <g key={source.label}>
+          <rect x={source.x} y={FEED_Y} width={source.w} height={FEED_H} fill={SAND} stroke={BLUE_MID} strokeWidth="1.2" />
+          <text x={source.x + 16} y={FEED_Y + 26} fontFamily={MONO} fontSize="9.5" fill={BLUE_INK}>
+            {source.label}
+          </text>
+          <text x={source.x + 16} y={FEED_Y + 48} fontFamily={UI} fontSize="11.5" fill={MUTED}>
+            {source.note}
+          </text>
+          <FlowArrow
+            x1={source.x + source.w / 2}
+            y1={FEED_Y + FEED_H}
+            x2={source.x + source.w / 2}
+            y2={ROW_A - 4}
+            marker="store-arrow"
+          />
+        </g>
+      ))}
+      <text x="536" y={FEED_Y + 40} fontFamily={MONO} fontSize="9.5" fill={MUTED} letterSpacing="0.08em">
+        COLLECTED ONCE · NEVER REFETCHED
       </text>
 
       {topRow.map((node) => (
@@ -645,14 +684,14 @@ export function StoreMap() {
 
       {/* Events and Artifacts both feed the projected Development */}
       <path
-        d="M675 198 V246 H163 V296"
+        d="M675 274 V322 H163 V372"
         fill="none"
         stroke={MUTED}
         strokeWidth="1.4"
         strokeDasharray="5 5"
         markerEnd="url(#store-arrow-muted)"
       />
-      <path d="M945 198 V246 H675" fill="none" stroke={MUTED} strokeWidth="1.4" strokeDasharray="5 5" />
+      <path d="M945 274 V322 H675" fill="none" stroke={MUTED} strokeWidth="1.4" strokeDasharray="5 5" />
 
       {bottomRow.map((node) => (
         <StoreNode key={node.file} y={ROW_B} h={H} {...node} />
@@ -668,9 +707,12 @@ export function StoreMap() {
         />
       ))}
 
-      <line x1="28" y1="462" x2="1052" y2="462" stroke={MUTED} strokeWidth="1" strokeDasharray="4 5" opacity="0.35" />
-      <text x="28" y="484" fontFamily={UI} fontSize="11.5" fill={MUTED}>
-        Every hop is a string key, so a REBUILD store can be deleted and regenerated from the one before it. Only the Registry, the raw X evidence behind it, and the model judgments have to be kept.
+      <line x1="28" y1="540" x2="1052" y2="540" stroke={MUTED} strokeWidth="1" strokeDasharray="4 5" opacity="0.35" />
+      <text x="28" y="566" fontFamily={UI} fontSize="12.5" fill={INK}>
+        Every hop is a string key, so a REBUILD store can be deleted and regenerated from the one before it.
+      </text>
+      <text x="28" y="588" fontFamily={UI} fontSize="11.5" fill={MUTED}>
+        Only the two collected raw stores, the curated Registry, and the model judgments have to be kept.
       </text>
     </svg>
   )
