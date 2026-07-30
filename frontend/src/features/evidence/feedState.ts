@@ -5,7 +5,7 @@ export type FeedRoutingFilter =
   | 'not_evaluated'
 
 export function initialFeedRoutingFilter(
-  _searchParams: URLSearchParams,
+  searchParams: URLSearchParams,
 ): FeedRoutingFilter {
-  return 'all'
+  return searchParams.get('event_id')?.trim() ? 'all' : 'relevant'
 }

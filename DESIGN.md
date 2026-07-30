@@ -175,7 +175,10 @@ Rules:
   out of this identity surface.
 - **Diagram canvas:** ink-ruled frame, inline SVG, mono caption bar on
   surface ground.
-- **Evidence Feed:** default to the grouping-first `All` / `Rank` view.
+- **Evidence Feed:** dated Feed links default to the grouping-first
+  `Relevant` / `Rank` view so the routed signal is the first reading surface.
+  Direct exact-Event links temporarily open `All` so their requested evidence
+  cannot be hidden by the default filter.
   `Relevant` is a derived display state—Engineering, Investment, or both—not
   a separate model judgment. It stays available for later routing inspection
   but never triggers downstream work.
@@ -203,7 +206,8 @@ Rules:
   segmented bars; each option remains one click away and routing counts stay
   visible inside the menu. Status begins with `All`, which removes the routing
   filter without inventing another evaluation state, followed by Relevant,
-  Not relevant, and Not evaluated. Search shares their 44px square hairline treatment
+  Not relevant, and Not evaluated. The initial dated view still selects
+  `Relevant`; menu order does not define the default. Search shares their 44px square hairline treatment
   but remains a separate left-aligned input; the Status/Sort controls
   anchor the right edge. They stack only on narrow screens. Each Development
   row names its display post, reports the number of source posts and
