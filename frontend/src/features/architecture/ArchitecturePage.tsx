@@ -412,7 +412,7 @@ function RecoveryTable() {
 
 /* ---- 4 · The data model ---- */
 
-function CurrentDataModel() {
+export function CurrentDataModel() {
   const channels = [
     { cx: 245, label: '@karpathy', plane: 'X', role: 'DAILY EVIDENCE', daily: true },
     { cx: 540, label: 'github.com/karpathy', plane: 'GitHub', role: 'IDENTITY LINK', daily: false },
@@ -671,6 +671,69 @@ export function StoreMap() {
       <line x1="28" y1="462" x2="1052" y2="462" stroke={MUTED} strokeWidth="1" strokeDasharray="4 5" opacity="0.35" />
       <text x="28" y="484" fontFamily={UI} fontSize="11.5" fill={MUTED}>
         Every hop is a string key, so a REBUILD store can be deleted and regenerated from the one before it. Only the Registry, the raw X evidence behind it, and the model judgments have to be kept.
+      </text>
+    </svg>
+  )
+}
+
+/* ---- 6 · Runs versus publications ---- */
+
+export function RunPublication() {
+  const attempts = [
+    { x: 250, label: 'run A', dim: true },
+    { x: 386, label: 'run B', dim: true },
+    { x: 522, label: 'run C', dim: false },
+    { x: 658, label: 'run D', dim: true },
+  ]
+  return (
+    <svg
+      viewBox="0 0 1080 396"
+      role="img"
+      aria-label="Runs versus publications. Every attempt is written to a run table and kept forever. A small publication table maps one day to the single run that is live, so re-running a day never overwrites history and a half-finished run is never visible. The Investment store holds 698 runs while only 186 results are published across 24 days."
+    >
+      <ArrowDefs id="pub-arrow" />
+      <text x="28" y="34" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.08em">
+        EVERY ATTEMPT IS KEPT · ONE POINTER DECIDES WHAT IS LIVE
+      </text>
+
+      <text x="28" y="86" fontFamily={MONO} fontSize="9.5" fill={MUTED} letterSpacing="0.08em">*_RUN</text>
+      <text x="28" y="112" fontFamily={UI} fontSize="15" fontWeight="600" fill={INK}>Every attempt</text>
+      <text x="28" y="134" fontFamily={UI} fontSize="11.5" fill={MUTED}>append-only</text>
+
+      {attempts.map((attempt) => (
+        <g key={attempt.label} opacity={attempt.dim ? 0.4 : 1}>
+          <rect
+            x={attempt.x}
+            y={72}
+            width={116}
+            height={72}
+            fill="#fff"
+            stroke={attempt.dim ? MUTED : BLUE_MID}
+            strokeWidth={attempt.dim ? 1 : 1.6}
+          />
+          <text x={attempt.x + 58} y={114} textAnchor="middle" fontFamily={MONO} fontSize="12" fill={attempt.dim ? MUTED : BLUE_INK}>
+            {attempt.label}
+          </text>
+        </g>
+      ))}
+      <text x="812" y="114" fontFamily={UI} fontSize="12" fill={MUTED}>kept for audit</text>
+
+      {/* only one run is selected */}
+      <path d="M580 144 V196" fill="none" stroke={BLUE_MID} strokeWidth="1.6" markerEnd="url(#pub-arrow)" />
+
+      <rect x={250} y={200} width={604} height={82} fill={INK} />
+      <text x={274} y={230} fontFamily={MONO} fontSize="9.5" fill={BLUE} letterSpacing="0.08em">*_DAY_PUBLICATION</text>
+      <text x={274} y={262} fontFamily={UI} fontSize="16" fontWeight="600" fill="#fff">day → the one run that is live</text>
+
+      <text x="28" y="230" fontFamily={MONO} fontSize="9.5" fill={MUTED} letterSpacing="0.08em">POINTER</text>
+      <text x="28" y="256" fontFamily={UI} fontSize="15" fontWeight="600" fill={INK}>What the API reads</text>
+
+      <line x1="28" y1="322" x2="1052" y2="322" stroke={MUTED} strokeWidth="1" strokeDasharray="4 5" opacity="0.35" />
+      <text x="28" y="348" fontFamily={UI} fontSize="12.5" fill={INK}>
+        The Investment store holds 698 runs, but only 186 results are published across 24 days.
+      </text>
+      <text x="28" y="372" fontFamily={UI} fontSize="11.5" fill={MUTED}>
+        A day is swapped in one transaction, so re-running never overwrites history and a half-finished run is never visible.
       </text>
     </svg>
   )

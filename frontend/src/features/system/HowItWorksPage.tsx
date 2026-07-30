@@ -5,7 +5,9 @@ import HowNarrative from './HowNarrative'
 import HowStory from './HowStory'
 import {
   AccountIntake,
+  CurrentDataModel,
   ModelTable,
+  RunPublication,
   StoreMap,
   SystemOverview,
 } from '../architecture/ArchitecturePage'
@@ -172,7 +174,7 @@ export default function HowItWorks() {
             <span className="how-beat-kicker mono">Appendix</span>
             <strong>Technical figures</strong>
           </span>
-          <span className="mono">4 figures</span>
+          <span className="mono">6 figures</span>
         </summary>
         <div className="how-technical-appendix-body">
           <section aria-labelledby="appendix-stack-title">
@@ -197,6 +199,30 @@ export default function HowItWorks() {
               </p>
             </header>
             <div className="arch-canvas"><StoreMap /></div>
+          </section>
+
+          <section aria-labelledby="appendix-runs-title">
+            <header>
+              <h3 id="appendix-runs-title">How a re-run becomes the live day</h3>
+              <p>
+                Every attempt is kept forever in a run table. A small
+                publication table points each day at the one run that is live,
+                which is why re-running a day is safe.
+              </p>
+            </header>
+            <div className="arch-canvas"><RunPublication /></div>
+          </section>
+
+          <section aria-labelledby="appendix-identity-title">
+            <header>
+              <h3 id="appendix-identity-title">One identity, many channels</h3>
+              <p>
+                Inside the Registry, one real person or organization can own
+                several channels. X is the only one that supplies scheduled
+                daily evidence; the rest exist to resolve identity.
+              </p>
+            </header>
+            <div className="arch-canvas"><CurrentDataModel /></div>
           </section>
 
           <section aria-labelledby="appendix-models-title">

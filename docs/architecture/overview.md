@@ -184,7 +184,9 @@ composition.
    same audience/date projection as a linked A4 PDF. The content-addressed
    derived cache is an acceleration layer, not another report or Insight store.
    The AI Engineering reader links surface landings into the Aion map and has
-   no PDF or delivery action.
+   no PDF or delivery action. The always-on service primes the default audience
+   projection and Network ranking before reporting ready; the larger recent
+   Evidence window warms in the background.
 13. An operator may explicitly deliver that same complete Investment
    audience/date brief.
    Slack presents every surfaced Insight with its `What changed` text and
