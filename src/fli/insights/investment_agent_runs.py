@@ -7,6 +7,7 @@ import hashlib
 import json
 from pathlib import Path
 import sqlite3
+from threading import Lock
 from typing import Any
 
 
@@ -26,6 +27,11 @@ COMPANY_FIELDS = {
     "threshold_met",
     "impact",
 }
+_DATES_CACHE_LOCK = Lock()
+_DATES_CACHE: dict[
+    tuple[str, int, int, int, int],
+    dict[str, Any],
+] = {}
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS investment_agent_meta (
@@ -581,16 +587,41 @@ def _open_readonly(path: Path) -> sqlite3.Connection | None:
     return conn
 
 
-def _latest_rows(conn: sqlite3.Connection) -> list[sqlite3.Row]:
+def _db_version(path: Path) -> tuple[str, int, int, int, int]:
+    try:
+        stat = path.stat()
+        main_mtime, main_size = stat.st_mtime_ns, stat.st_size
+    except FileNotFoundError:
+        main_mtime, main_size = 0, 0
+    wal = Path(f"{path}-wal")
+    try:
+        wal_stat = wal.stat()
+        wal_mtime, wal_size = wal_stat.st_mtime_ns, wal_stat.st_size
+    except FileNotFoundError:
+        wal_mtime, wal_size = 0, 0
+    return str(path.resolve()), main_mtime, main_size, wal_mtime, wal_size
+
+
+def _latest_rows(
+    conn: sqlite3.Connection,
+    *,
+    day: str | None = None,
+) -> list[sqlite3.Row]:
+    day_clause = " AND run.day = ?" if day is not None else ""
+    params = (
+        (CURRENT_PROMPT_VERSION, day)
+        if day is not None
+        else (CURRENT_PROMPT_VERSION,)
+    )
     return conn.execute(
-        """WITH current AS (
+        f"""WITH current AS (
                SELECT run.*,
                       ROW_NUMBER() OVER (
                           PARTITION BY day, development_id
                           ORDER BY completed_at DESC, run_id DESC
                       ) AS recency_order
                FROM investment_agent_run AS run
-               WHERE run.prompt_version = ?
+               WHERE run.prompt_version = ?{day_clause}
            ),
            canonical_publication AS (
                SELECT publication.*,
@@ -609,15 +640,58 @@ def _latest_rows(conn: sqlite3.Connection) -> list[sqlite3.Row]:
            WHERE current.recency_order = 1
              AND publication.publication_order = 1
            ORDER BY current.day, current.daily_rank, current.development_id""",
+        params,
+    ).fetchall()
+
+
+def _date_rows(conn: sqlite3.Connection) -> list[sqlite3.Row]:
+    """Compact published-day summary without loading stored trace blobs."""
+    return conn.execute(
+        """WITH canonical_publication AS (
+               SELECT publication.day,
+                      publication.development_id,
+                      publication.daily_rank
+               FROM investment_agent_day_publication_item AS publication
+               WHERE NOT EXISTS (
+                   SELECT 1
+                   FROM investment_agent_day_publication_item AS earlier
+                   WHERE earlier.development_id = publication.development_id
+                     AND (
+                         earlier.day < publication.day
+                         OR (
+                             earlier.day = publication.day
+                             AND earlier.daily_rank < publication.daily_rank
+                         )
+                     )
+               )
+           ),
+           current AS (
+               SELECT publication.day,
+                      (
+                          SELECT run.decision
+                          FROM investment_agent_run AS run
+                          WHERE run.day = publication.day
+                            AND run.development_id = publication.development_id
+                            AND run.daily_rank = publication.daily_rank
+                            AND run.prompt_version = ?
+                          ORDER BY run.completed_at DESC, run.run_id DESC
+                          LIMIT 1
+                      ) AS decision
+               FROM canonical_publication AS publication
+           )
+           SELECT day,
+                  COUNT(decision) AS development_count,
+                  SUM(decision = 'surface') AS surfaced_development_count,
+                  SUM(decision = 'suppress') AS suppressed_development_count
+           FROM current
+           WHERE decision IS NOT NULL
+           GROUP BY day
+           ORDER BY day""",
         (CURRENT_PROMPT_VERSION,),
     ).fetchall()
 
 
-def dates_payload(
-    *,
-    db_path: Path | None = None,
-) -> dict[str, Any]:
-    db_path = db_path or DEFAULT_DB
+def _dates_payload_uncached(db_path: Path) -> dict[str, Any]:
     conn = _open_readonly(db_path)
     if conn is None:
         return {
@@ -627,36 +701,46 @@ def dates_payload(
             "dates": [],
         }
     try:
-        rows = _latest_rows(conn)
+        rows = _date_rows(conn)
     finally:
         conn.close()
-    dates: dict[str, dict[str, Any]] = {}
-    for row in rows:
-        day = str(row["day"])
-        value = dates.setdefault(
-            day,
-            {
-                "day": day,
-                "content_kind": "investment_agent",
-                "item_count": 0,
-                "development_count": 0,
-                "surfaced_development_count": 0,
-                "suppressed_development_count": 0,
-            },
-        )
-        value["development_count"] += 1
-        if str(row["decision"]) == "surface":
-            value["item_count"] += 1
-            value["surfaced_development_count"] += 1
-        else:
-            value["suppressed_development_count"] += 1
-    ordered = [dates[day] for day in sorted(dates)]
+    ordered = [
+        {
+            "day": str(row["day"]),
+            "content_kind": "investment_agent",
+            "item_count": int(row["surfaced_development_count"]),
+            "development_count": int(row["development_count"]),
+            "surfaced_development_count": int(
+                row["surfaced_development_count"]
+            ),
+            "suppressed_development_count": int(
+                row["suppressed_development_count"]
+            ),
+        }
+        for row in rows
+    ]
     return {
         "available": bool(ordered),
         "reason": None if ordered else "No company-aware Investment run is complete.",
         "latest_date": ordered[-1]["day"] if ordered else None,
         "dates": ordered,
     }
+
+
+def dates_payload(
+    *,
+    db_path: Path | None = None,
+) -> dict[str, Any]:
+    db_path = db_path or DEFAULT_DB
+    version = _db_version(db_path)
+    with _DATES_CACHE_LOCK:
+        cached = _DATES_CACHE.get(version)
+        if cached is not None:
+            return cached
+        payload = _dates_payload_uncached(db_path)
+        _DATES_CACHE.clear()
+        _DATES_CACHE[version] = payload
+        return payload
 
 
 def insights_payload(
@@ -683,7 +767,17 @@ def insights_payload(
             "items": [],
         }
     try:
-        current = _latest_rows(conn)
+        selected_day = day
+        if selected_day is None:
+            date_rows = _date_rows(conn)
+            selected_day = (
+                str(date_rows[-1]["day"]) if date_rows else None
+            )
+        current = (
+            _latest_rows(conn, day=selected_day)
+            if selected_day is not None
+            else []
+        )
         publications = {
             str(row["day"]): dict(row)
             for row in conn.execute(
@@ -692,7 +786,6 @@ def insights_payload(
         }
     finally:
         conn.close()
-    selected_day = day or max((str(row["day"]) for row in current), default=None)
     day_rows = [row for row in current if str(row["day"]) == selected_day]
     wanted_decision = {
         "kept": "surface",

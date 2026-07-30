@@ -6,6 +6,7 @@ import HowStory from './HowStory'
 import {
   AccountIntake,
   ModelTable,
+  StoreMap,
   SystemOverview,
 } from '../architecture/ArchitecturePage'
 import {
@@ -171,7 +172,7 @@ export default function HowItWorks() {
             <span className="how-beat-kicker mono">Appendix</span>
             <strong>Technical figures</strong>
           </span>
-          <span className="mono">3 figures</span>
+          <span className="mono">4 figures</span>
         </summary>
         <div className="how-technical-appendix-body">
           <section aria-labelledby="appendix-stack-title">
@@ -184,6 +185,18 @@ export default function HowItWorks() {
               </p>
             </header>
             <div className="arch-canvas"><SystemOverview /></div>
+          </section>
+
+          <section aria-labelledby="appendix-stores-title">
+            <header>
+              <h3 id="appendix-stores-title">How the stores connect</h3>
+              <p>
+                There is no single database. Each stage owns one SQLite file,
+                and each one joins to the next by a plain key rather than a
+                foreign key.
+              </p>
+            </header>
+            <div className="arch-canvas"><StoreMap /></div>
           </section>
 
           <section aria-labelledby="appendix-models-title">

@@ -502,6 +502,180 @@ function CurrentDataModel() {
   )
 }
 
+/* ---- 5 · How the stores connect ---- */
+
+function StoreNode({
+  x,
+  y,
+  w,
+  h = 124,
+  tier,
+  title,
+  file,
+  join,
+  projected = false,
+}: {
+  x: number
+  y: number
+  w: number
+  h?: number
+  tier: string
+  title: string
+  file: string
+  join: string
+  projected?: boolean
+}) {
+  return (
+    <g>
+      <rect
+        x={x}
+        y={y}
+        width={w}
+        height={h}
+        fill={projected ? SAND : '#fff'}
+        stroke={projected ? MUTED : BLUE_MID}
+        strokeWidth="1.2"
+        strokeDasharray={projected ? '5 5' : undefined}
+      />
+      <text x={x + 16} y={y + 27} fontFamily={MONO} fontSize="9.5" fill={projected ? MUTED : BLUE_INK} letterSpacing="0.08em">
+        {tier}
+      </text>
+      <text x={x + 16} y={y + 56} fontFamily={UI} fontSize="16" fontWeight="600" fill={INK}>
+        {title}
+      </text>
+      <text x={x + 16} y={y + 79} fontFamily={MONO} fontSize="9.5" fill={MUTED}>
+        {file}
+      </text>
+      <text x={x + 16} y={y + 106} fontFamily={MONO} fontSize="10" fill={projected ? MUTED : BLUE_MID}>
+        {join}
+      </text>
+    </g>
+  )
+}
+
+export function StoreMap() {
+  const H = 124
+  const ROW_A = 74
+  const ROW_B = 300
+  const topRow = [
+    {
+      x: 28,
+      w: 214,
+      tier: 'KEEP',
+      title: 'Registry',
+      file: 'data/fli.db',
+      join: 'entity → channel',
+    },
+    {
+      x: 298,
+      w: 214,
+      tier: 'REBUILD',
+      title: 'Posts',
+      file: 'signal-feed/feed.db',
+      join: '← author_handle',
+    },
+    {
+      x: 568,
+      w: 214,
+      tier: 'REBUILD',
+      title: 'Events',
+      file: 'signal-events/events.db',
+      join: '← provider + post_id',
+    },
+    {
+      x: 838,
+      w: 214,
+      tier: 'REBUILD',
+      title: 'Artifacts',
+      file: 'artifacts/artifacts.db',
+      join: '← source post id',
+    },
+  ]
+  const bottomRow = [
+    {
+      x: 28,
+      w: 270,
+      tier: 'NO DATABASE',
+      title: 'Development',
+      file: 'projected on read',
+      join: '← events + artifacts',
+      projected: true,
+    },
+    {
+      x: 378,
+      w: 270,
+      tier: 'REBUILD',
+      title: 'Routing decision',
+      file: 'audience-routing/<day>/routing.db',
+      join: '← event_id',
+    },
+    {
+      x: 728,
+      w: 324,
+      tier: 'KEEP',
+      title: 'Insights, both audiences',
+      file: 'insights/*-agent.db',
+      join: '← development_id + day',
+    },
+  ]
+  return (
+    <svg
+      viewBox="0 0 1080 502"
+      role="img"
+      aria-label="How the stores connect. The Registry resolves an entity to its X channel. That handle selects posts in the Feed store. Posts group into Events by provider and post id. Events link to canonical Artifacts through the source post id. A Development is projected on read from Events plus Artifacts and has no database of its own. Routing decisions key on the event id, and both Insight stores key on the development id and day. No foreign key crosses a file boundary."
+    >
+      <ArrowDefs id="store-arrow" />
+      <text x="28" y="34" fontFamily={MONO} fontSize="11" fill={BLUE_INK} letterSpacing="0.08em">
+        ONE SQLITE FILE PER STAGE · JOINED BY PLAIN KEYS, NOT FOREIGN KEYS
+      </text>
+
+      {topRow.map((node) => (
+        <StoreNode key={node.file} y={ROW_A} h={H} {...node} />
+      ))}
+      {topRow.slice(0, -1).map((node, index) => (
+        <FlowArrow
+          key={`top-${node.file}`}
+          x1={node.x + node.w}
+          y1={ROW_A + H / 2}
+          x2={topRow[index + 1].x - 4}
+          y2={ROW_A + H / 2}
+          marker="store-arrow"
+        />
+      ))}
+
+      {/* Events and Artifacts both feed the projected Development */}
+      <path
+        d="M675 198 V246 H163 V296"
+        fill="none"
+        stroke={MUTED}
+        strokeWidth="1.4"
+        strokeDasharray="5 5"
+        markerEnd="url(#store-arrow-muted)"
+      />
+      <path d="M945 198 V246 H675" fill="none" stroke={MUTED} strokeWidth="1.4" strokeDasharray="5 5" />
+
+      {bottomRow.map((node) => (
+        <StoreNode key={node.file} y={ROW_B} h={H} {...node} />
+      ))}
+      {bottomRow.slice(0, -1).map((node, index) => (
+        <FlowArrow
+          key={`bottom-${node.file}`}
+          x1={node.x + node.w}
+          y1={ROW_B + H / 2}
+          x2={bottomRow[index + 1].x - 4}
+          y2={ROW_B + H / 2}
+          marker="store-arrow"
+        />
+      ))}
+
+      <line x1="28" y1="462" x2="1052" y2="462" stroke={MUTED} strokeWidth="1" strokeDasharray="4 5" opacity="0.35" />
+      <text x="28" y="484" fontFamily={UI} fontSize="11.5" fill={MUTED}>
+        Every hop is a string key, so a REBUILD store can be deleted and regenerated from the one before it. Only the Registry, the raw X evidence behind it, and the model judgments have to be kept.
+      </text>
+    </svg>
+  )
+}
+
 export function AccountIntake() {
   const stages = [
     { x: 34, title: 'X handle', detail: 'one supplied account', tone: 'dark' as const },
