@@ -48,16 +48,16 @@ disables Registry intake.
 
 ## Configuration
 
-Canonical secret values live in Azure Key Vault. Local development maps those
+Canonical secret values live in the local `shared` scope. Local development maps those
 same values into the generated, ignored `.env` file through
-`scripts/local/secrets/keyvault_env_map.env` and
-`scripts/local/secrets/bootstrap_local_env_from_keyvault.sh`. Never put literal
+`scripts/local/secrets/secret_env_map.env` and
+`scripts/local/secrets/bootstrap_local_env.sh`. Never put literal
 secret values in tracked files.
 
 Required secret-backed variables:
 
 - `FLI_SLACK_WEBHOOK_URL` enables Slack delivery.
-- `ACS_SMTP_PASS` enables authenticated email delivery when a recipient exists.
+- The retired ACS password is intentionally absent, so email delivery is currently disabled.
 
 Optional non-secret settings:
 
@@ -72,9 +72,8 @@ Optional non-secret settings:
 - `ACS_SMTP_FROM_NAME`
 - `ACS_SMTP_REPLY_TO`
 
-Without overrides, email targets `adi@aipodcast.ing` through the shared Azure
-Communication Services SMTP defaults. The browser displays only the masked
-recipient.
+The legacy SMTP adapter remains inert without an explicitly configured password. The browser
+displays only the masked recipient.
 
 ## Proof and validation
 

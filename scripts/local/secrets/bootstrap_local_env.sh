@@ -5,17 +5,17 @@ export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:${PA
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../../.." && pwd)"
 GITHUB_ROOT="$(cd "${ROOT_DIR}/.." && pwd)"
-SHARED_SCRIPTS_ROOT="${KEYVAULT_SHARED_SCRIPTS_ROOT:-${GITHUB_ROOT}/scripts}"
-SHARED_SYNC_PY="${SHARED_SCRIPTS_ROOT}/sync/sync_keyvault_to_repo_env.py"
-MAPPING_FILE="${ROOT_DIR}/scripts/local/secrets/keyvault_env_map.env"
+SHARED_SCRIPTS_ROOT="${LOCAL_SECRET_SCRIPTS_ROOT:-${GITHUB_ROOT}/scripts}"
+SHARED_SYNC_PY="${SHARED_SCRIPTS_ROOT}/sync/materialize_repo_env.py"
+MAPPING_FILE="${ROOT_DIR}/scripts/local/secrets/secret_env_map.env"
 OUTPUT_FILE="${ROOT_DIR}/.env"
-VAULT_NAME="kv-shared-repos"
+SECRET_SCOPE="shared"
 PASS_THROUGH_ARGS=()
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
-    --vault-name)
-      VAULT_NAME="${2:-}"
+    --secret-scope)
+      SECRET_SCOPE="${2:-}"
       shift 2
       ;;
     --allow-missing|--replace)
@@ -23,7 +23,7 @@ while [[ $# -gt 0 ]]; do
       shift
       ;;
     -h|--help)
-      echo "Usage: $(basename "$0") [--vault-name NAME] [--allow-missing] [--replace]"
+      echo "Usage: $(basename "$0") [--secret-scope NAME] [--allow-missing] [--replace]"
       exit 0
       ;;
     *)
@@ -39,7 +39,7 @@ if [[ ! -f "$SHARED_SYNC_PY" ]]; then
 fi
 
 python3 "$SHARED_SYNC_PY" \
-  --vault-name "$VAULT_NAME" \
+  --secret-scope "$SECRET_SCOPE" \
   --mapping-file "$MAPPING_FILE" \
   --output-file "$OUTPUT_FILE" \
   --apply \
