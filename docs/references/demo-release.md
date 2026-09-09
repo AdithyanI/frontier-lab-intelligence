@@ -1,5 +1,7 @@
 # Local reviewer release
 
+> **Archive status — 2026-09-09:** The old demo snapshot has gone stale: its archive is missing from both storage providers, so a fresh checkout can no longer restore from that download. An existing local installation or a verified local archive may still work.
+
 The repository stays small while a clean checkout remains reproducible. Git
 owns the code, documentation, compact manifests, and `data/fli.db`. An
 immutable object-storage release owns the larger read models needed for local

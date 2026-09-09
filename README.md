@@ -11,6 +11,8 @@ it for the BIT Capital AI Engineer case study.
 
 ## Review the project
 
+> **Archive status — 2026-09-09:** The old demo snapshot has gone stale: its archive is missing from both storage providers, so a fresh checkout can no longer restore from that download. An existing local installation or a verified local archive may still work.
+
 1. Start with the [video walkthrough](https://share.descript.com/view/LZkpHP29yub).
    The system is interactive, so this is the quickest way to see the complete
    path working.
