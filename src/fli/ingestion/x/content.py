@@ -11,9 +11,10 @@ from pathlib import Path
 from typing import Any, Callable
 from urllib import parse
 
+from fli.paths import data_path
 from fli.ingestion import sources
 
-DEFAULT_DB_PATH = Path("data/raw/x/x-content.db")
+DEFAULT_DB_PATH = data_path("raw", "x", "x-content.db")
 DEFAULT_MAX_AGE = timedelta(hours=24)
 POST_SELECTION_CONTRACT = "recent-authored-posts-v1"
 

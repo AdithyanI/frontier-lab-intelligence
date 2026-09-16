@@ -17,6 +17,7 @@ from typing import Any, Callable
 
 import openai
 
+from fli.paths import data_path
 from fli import llm_responses
 from fli.insights import investment_agent_runs
 from fli.registry import classification as entity_kinds
@@ -25,7 +26,7 @@ from fli.registry import classification as entity_kinds
 REPO_ROOT = Path(__file__).resolve().parents[3]
 MEMO_PATH = REPO_ROOT / "docs" / "references" / "company-memos.json"
 DEFAULT_TRACE_ROOT = (
-    REPO_ROOT / "data" / "derived" / "insights" / "investment-agent-traces"
+    data_path("derived") / "insights" / "investment-agent-traces"
 )
 DEFAULT_API_BASE = "http://127.0.0.1:8797"
 DEFAULT_DATE = "2026-07-21"

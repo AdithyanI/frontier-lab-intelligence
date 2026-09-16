@@ -22,6 +22,7 @@ from typing import Any, Iterable
 from urllib.parse import urlsplit
 from urllib.request import Request, urlopen
 
+from fli.paths import data_path
 from fli.ingestion import sources
 from fli.network import snapshots as following_snapshots
 from fli.registry import channels
@@ -29,7 +30,7 @@ from fli.registry import store as registry
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_MANIFEST = REPO_ROOT / "data" / "registry" / "conference-sources.json"
-DEFAULT_RAW_ROOT = REPO_ROOT / "data" / "raw" / "conference-sources"
+DEFAULT_RAW_ROOT = data_path("raw") / "conference-sources"
 DEFAULT_PROFILE_CACHE = DEFAULT_RAW_ROOT / "x-profile-cache-v1"
 DEFAULT_DB = REPO_ROOT / "data" / "fli.db"
 USER_AGENT = "FrontierLabIntelligence/0.1 conference-source"

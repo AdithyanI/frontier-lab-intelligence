@@ -28,6 +28,7 @@ import trafilatura
 from lxml import etree, html as lxml_html
 from pypdf import PdfReader
 
+from fli.paths import data_path, reference, resolve_reference
 from fli.evidence.artifacts import store as artifacts
 from fli.evidence.artifacts import urls as artifact_urls
 
@@ -47,9 +48,9 @@ GOOGLE_DOCS_TEXT_EXPORT_EXTRACTOR = "google-docs-text-export-v1"
 GOOGLE_DOCS_TEXT_EXPORT_VERSION = "1"
 GOOGLE_DOCS_REPAIR_POLICY = "google-docs-public-text-v1"
 USER_AGENT = "frontier-lab-intelligence/0.1 artifact-fetch (+local research project)"
-RAW_ROOT = artifacts.REPO_ROOT / "data" / "raw" / "artifacts" / "body" / "sha256"
+RAW_ROOT = data_path("raw") / "artifacts" / "body" / "sha256"
 TEXT_ROOT = (
-    artifacts.REPO_ROOT / "data" / "derived" / "artifacts" / "text" / "sha256"
+    data_path("derived") / "artifacts" / "text" / "sha256"
 )
 HTML_LIMIT = 8 * 1024 * 1024
 PDF_LIMIT = 32 * 1024 * 1024
@@ -826,10 +827,7 @@ def _write_snapshot(root: Path, sha256: str, suffix: str, body: bytes) -> str:
             os.replace(handle.name, destination)
         finally:
             Path(handle.name).unlink(missing_ok=True)
-    try:
-        return str(destination.relative_to(artifacts.REPO_ROOT))
-    except ValueError:
-        return str(destination)
+    return reference(destination, repo_root=artifacts.REPO_ROOT)
 
 
 def _stratum(row: dict[str, Any]) -> str:
@@ -1495,7 +1493,7 @@ def _complete_run(
 
 def _snapshot_path(snapshot_ref: str) -> Path:
     path = Path(snapshot_ref)
-    return path if path.is_absolute() else artifacts.REPO_ROOT / path
+    return resolve_reference(path, repo_root=artifacts.REPO_ROOT)
 
 
 def revalidate_successful_fetches(

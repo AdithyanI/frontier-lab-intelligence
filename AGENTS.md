@@ -4,6 +4,13 @@ Frontier Lab Intelligence tracks frontier AI labs and key people, turns public
 output into scored and cited signal, and delivers audience-specific reports.
 It began as the BIT Capital AI Engineer case study.
 
+## Parked runtime
+
+Adi parked this project on 2026-09-16. Keep the code and external research data,
+but do not start the web service, enable production reconciliation, or run
+collection unless Adi asks to resume. The subdomain is reserved. Follow
+`docs/references/service-lifecycle.md` for storage, dependency setup, and restart.
+
 ## Start here
 
 1. Read `docs/references/case-prompt.md` for the external requirements.
@@ -56,8 +63,8 @@ Insights over platform breadth.
 
 ## UI preview
 
-- The always-on app serves the built SPA at `http://127.0.0.1:8797`. Do not
-  start a throwaway preview server on another port for screenshots.
+- After an authorized resume, the app serves the built SPA at
+  `http://127.0.0.1:8797`. Do not start a preview while this project is parked.
 - Build UI changes with `npm --prefix frontend run build`, then reload the
   always-on app.
 - Prefer the in-app Browser for collaborative inspection. Use `$agent-browser`

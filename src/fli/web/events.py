@@ -14,6 +14,7 @@ from pathlib import Path
 from threading import Lock
 from typing import Any
 
+from fli.paths import data_path
 from fli.evidence import events as signal_events
 from fli.evidence import feed as signal_feed
 from fli.routing import view as audience_routing_store
@@ -24,7 +25,7 @@ from fli.web import feed as feed_store
 DEFAULT_EVENTS_DB = signal_events.DEFAULT_EVENTS_DB
 DEFAULT_FEED_DB = signal_feed.DEFAULT_FEED_DB
 DEFAULT_EVENT_VIEW_CACHE_ROOT: Path | None = (
-    feed_store.REPO_ROOT / "data" / "derived" / "web-event-cache"
+    data_path("derived") / "web-event-cache"
 )
 
 FeedKey = tuple[str, str]

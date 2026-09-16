@@ -9,6 +9,7 @@ __pycache__/
 *.pyc
 data/raw/
 data/derived/
+data/storage.local.json
 data/archive/
 data/private/
 .DS_Store

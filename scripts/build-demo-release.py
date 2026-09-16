@@ -11,11 +11,14 @@ from pathlib import Path
 import shutil
 import sqlite3
 import subprocess
+import sys
 from typing import Any
 import zipfile
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO_ROOT / "src"))
+from fli.paths import reference, resolve_reference
 DEFAULT_RELEASE_ID = "fli-demo-2026-07-19"
 FOLLOWING_ID = "registry-following-2026-07-14-aie-worldsfair-v2"
 SCHEMA_VERSION = "fli-demo-release-v1"
@@ -134,13 +137,13 @@ def _release_following(source: Path, target: Path) -> None:
 def _routing_paths() -> list[Path]:
     paths: set[Path] = set()
     queries = (
-        (REPO_ROOT / "data/derived/insights/insights.db", "SELECT DISTINCT source_routing_db FROM insight_run"),
-        (REPO_ROOT / "data/derived/daily-intelligence/editorial.db", "SELECT DISTINCT source_routing_db FROM editorial_run"),
+        (resolve_reference("data/derived/insights/insights.db"), "SELECT DISTINCT source_routing_db FROM insight_run"),
+        (resolve_reference("data/derived/daily-intelligence/editorial.db"), "SELECT DISTINCT source_routing_db FROM editorial_run"),
     )
     for database, query in queries:
         conn = _connect_readonly(database)
         try:
-            paths.update(REPO_ROOT / str(row[0]) for row in conn.execute(query))
+            paths.update(resolve_reference(str(row[0])) for row in conn.execute(query))
         finally:
             conn.close()
     return sorted(paths)
@@ -181,10 +184,10 @@ def build(*, release_id: str, output: Path, manifest_output: Path, force: bool) 
     staging.mkdir(parents=True)
     output.unlink(missing_ok=True)
 
-    events_source = REPO_ROOT / "data/derived/signal-events/events.db"
+    events_source = resolve_reference("data/derived/signal-events/events.db")
     event_run_id, feed_run_id = _published_runs(events_source)
     _release_feed(
-        REPO_ROOT / "data/derived/signal-feed/feed.db",
+        resolve_reference("data/derived/signal-feed/feed.db"),
         staging / "data/derived/signal-feed/feed.db",
         feed_run_id,
     )
@@ -194,11 +197,11 @@ def build(*, release_id: str, output: Path, manifest_output: Path, force: bool) 
         event_run_id,
     )
     _release_analysis(
-        REPO_ROOT / f"data/derived/following/{FOLLOWING_ID}/analysis.db",
+        resolve_reference(f"data/derived/following/{FOLLOWING_ID}/analysis.db"),
         staging / f"data/derived/following/{FOLLOWING_ID}/analysis.db",
     )
     _release_following(
-        REPO_ROOT / f"data/raw/following/{FOLLOWING_ID}/snapshot.db",
+        resolve_reference(f"data/raw/following/{FOLLOWING_ID}/snapshot.db"),
         staging / f"data/raw/following/{FOLLOWING_ID}/snapshot.db",
     )
 
@@ -207,13 +210,19 @@ def build(*, release_id: str, output: Path, manifest_output: Path, force: bool) 
         "data/derived/insights/insights.db",
         "data/derived/daily-intelligence/editorial.db",
     ):
-        _backup(REPO_ROOT / relative, staging / relative)
+        _backup(resolve_reference(relative), staging / relative)
     shutil.copytree(
-        REPO_ROOT / "data/derived/artifacts/text",
+        resolve_reference("data/derived/artifacts/text"),
         staging / "data/derived/artifacts/text",
     )
     for source in _routing_paths():
-        relative = source.relative_to(REPO_ROOT)
+        relative = Path(reference(source))
+        if (
+            relative.is_absolute()
+            or ".." in relative.parts
+            or not relative.is_relative_to(Path("data/derived/audience-routing"))
+        ):
+            raise RuntimeError(f"Routing source is outside the configured routing store: {source}")
         _backup(source, staging / relative)
 
     install_roots = [

@@ -250,6 +250,11 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     try:
+        sys.path.insert(0, str(REPO_ROOT / "src"))
+        from fli.paths import storage_root
+
+        if storage_root(repo_root=REPO_ROOT) != (REPO_ROOT / "data").resolve():
+            raise RuntimeError("Use a clean checkout for the reviewer demo; this checkout owns external production data.")
         url = f"http://127.0.0.1:{args.port}"
         if not args.prepare_only and _already_serving(url):
             print(f"Frontier Lab Intelligence is already available at {url}")
@@ -274,7 +279,7 @@ def main(argv: list[str] | None = None) -> int:
             print("Reviewer demo is ready.")
             return 0
         return _serve(python, port=args.port, no_open=args.no_open)
-    except (RuntimeError, subprocess.CalledProcessError, zipfile.BadZipFile) as exc:
+    except (RuntimeError, ValueError, OSError, subprocess.CalledProcessError, zipfile.BadZipFile) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
 

@@ -14,10 +14,11 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
+from fli.paths import data_path
 from fli.network.rankings import DEFAULT_DERIVED_ROOT, OVERLAP_ALGORITHM
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-RAW_FOLLOWING_ROOT = REPO_ROOT / "data" / "raw" / "following"
+RAW_FOLLOWING_ROOT = data_path("raw") / "following"
 
 
 def _open_readonly(path: Path) -> sqlite3.Connection:

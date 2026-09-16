@@ -19,6 +19,8 @@ import tempfile
 from threading import get_ident
 from typing import Any
 
+from fli.paths import data_path
+
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import mm
@@ -59,7 +61,7 @@ from .pdf_report import (
 )
 
 REPORT_SCHEMA_VERSION = "engineering-agent-pdf-v3"
-DEFAULT_CACHE_ROOT = REPO_ROOT / "data" / "derived" / "insights" / "pdf-cache-engineering"
+DEFAULT_CACHE_ROOT = data_path("derived") / "insights" / "pdf-cache-engineering"
 
 
 def _display_day(day: str) -> str:

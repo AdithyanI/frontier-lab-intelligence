@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any, Iterable
 from urllib.parse import urlsplit
 
+from fli.paths import data_path
 from fli.evidence import events as signal_events
 from fli.evidence import feed as signal_feed
 from fli.evidence.artifacts import lineage as evidence_lineage
@@ -19,7 +20,7 @@ SCHEMA_VERSION = "artifact-store-v2"
 REVIEWED_SUPPLEMENT_CONTRACT = "artifact-reviewed-supplement-v1"
 PRIMARY_AUTHOR_SELECTION_POLICY = "feed-event-primary-author-thread-artifacts-v2"
 REPO_ROOT = Path(__file__).resolve().parents[4]
-DEFAULT_DB = REPO_ROOT / "data" / "derived" / "artifacts" / "artifacts.db"
+DEFAULT_DB = data_path("derived") / "artifacts" / "artifacts.db"
 
 SCHEMA = f"""
 CREATE TABLE IF NOT EXISTS artifact_import_run (

@@ -6,6 +6,7 @@ from pathlib import Path
 import sqlite3
 from typing import Any
 
+from fli.paths import data_path, resolve_reference
 from fli.evidence.artifacts import store as artifacts
 from fli.web import developments as development_store
 
@@ -127,13 +128,12 @@ def artifact_text_payload(
         }
 
     root = Path(repo_root or DEFAULT_REPO_ROOT).resolve()
-    snapshot_ref = Path(str(row["text_snapshot_ref"]))
-    snapshot_path = (
-        snapshot_ref.resolve()
-        if snapshot_ref.is_absolute()
-        else (root / snapshot_ref).resolve()
-    )
-    if not snapshot_path.is_relative_to(root) or not snapshot_path.is_file():
+    text_root = data_path("derived", "artifacts", "text", repo_root=root).resolve()
+    try:
+        snapshot_path = resolve_reference(str(row["text_snapshot_ref"]), repo_root=root)
+    except ValueError:
+        snapshot_path = root  # Rejected by the same containment check below.
+    if not snapshot_path.is_relative_to(text_root) or not snapshot_path.is_file():
         return {
             "available": False,
             "reason": "The artifact text snapshot is missing or invalid.",

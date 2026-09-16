@@ -1,7 +1,14 @@
 # Data
 
 Use [`docs/references/data-lifecycle.md`](../docs/references/data-lifecycle.md)
-before moving or deleting local data. The short rule is:
+before moving or deleting local data.
+
+Paths here are logical. On the Mac mini, `raw/`, `derived/`, and `archive/`
+resolve through `fli.paths` to the configured `DobbyProduction` data root;
+tracked inputs stay in this directory. See the linked lifecycle reference for
+`data/storage.local.json`, startup volume guards, and migration recovery.
+
+The short rule is:
 
 - tracked files directly under `data/`, `registry/`, `following/`, and `digg/`
   are compact product state or manifests;

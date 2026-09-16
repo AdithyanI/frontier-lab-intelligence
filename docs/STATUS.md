@@ -1,6 +1,16 @@
 # System Status
 
-Last verified: 2026-07-29
+Runtime status verified: 2026-09-16. Product evidence below dates to 2026-07-29.
+
+## Current operating state: parked
+
+Adi requested preserving the project without running it. The web LaunchAgent is
+unloaded and removed, and production reconciliation remains disabled. The code,
+research databases, and reserved subdomain remain available for a later resume.
+Bulk raw/derived/archive data lives on `DobbyProduction`; the internal duplicates
+were removed. Disposable dependencies, caches, and local service logs were cleaned.
+Use [service lifecycle](references/service-lifecycle.md) to resume deliberately;
+do not interpret the historical interview plan below as an active task.
 
 This is the conceptual handoff for Frontier Lab Intelligence. Read it before
 planning across projects or changing the system direction. It explains what
@@ -170,8 +180,9 @@ false-positive and miss analysis, not more architecture.
 
 The public product at
 [`frontier-lab-intelligence.adithyan.io`](https://frontier-lab-intelligence.adithyan.io/)
-is the primary reviewer experience. Cloudflare Tunnel routes the hostname to
-this repository's always-on service at `127.0.0.1:8797`. The reproduction layer
+was the primary reviewer experience. The hostname and Cloudflare route remain
+reserved, but its origin service at `127.0.0.1:8797` is parked as of 2026-09-16.
+The reproduction layer
 is also complete: `./demo.command` restores an immutable 357 MB snapshot into a
 clean checkout, verifies its SHA-256, and serves the frozen data read-only. The
 exact local contract is recorded in

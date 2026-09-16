@@ -1,4 +1,8 @@
+import json
+import shutil
+
 from fastapi.testclient import TestClient
+import pytest
 
 from fli.evidence.artifacts import store as artifacts
 from fli.web import artifact_library as artifact_store
@@ -286,6 +290,85 @@ def test_artifact_text_api_is_honest_when_snapshot_is_unavailable(
     assert response.json()["detail"] == (
         "No readable text snapshot exists for this artifact."
     )
+
+
+def _relocated_artifact_fixture(tmp_path, monkeypatch):
+    repo_root = tmp_path / "checkout"
+    external = tmp_path / "production"
+    external.mkdir()
+    local_db = repo_root / "data" / "derived" / "artifacts" / "artifacts.db"
+    _artifact_fixture(local_db)
+    logical = "data/derived/artifacts/text/snapshot.txt"
+    snapshot = repo_root / logical
+    snapshot.parent.mkdir(parents=True)
+    snapshot.write_text("Preserved artifact evidence.\n")
+    conn = artifacts.connect(local_db)
+    conn.execute(
+        "UPDATE artifact_fetch SET text_snapshot_ref = ? WHERE fetch_id = 'fetch'",
+        (logical,),
+    )
+    conn.commit()
+    conn.close()
+    shutil.move(str(repo_root / "data" / "derived"), str(external / "derived"))
+    (repo_root / "data" / "storage.local.json").write_text(
+        json.dumps({"version": 1, "data_root": str(external)})
+    )
+    db = external / "derived" / "artifacts" / "artifacts.db"
+    monkeypatch.delenv("FLI_STORAGE_CONFIG", raising=False)
+    monkeypatch.setattr(artifact_store, "DEFAULT_ARTIFACT_DB", db)
+    monkeypatch.setattr(artifact_store, "DEFAULT_REPO_ROOT", repo_root)
+    return repo_root, external, db, logical
+
+
+def test_artifact_text_survives_moving_storage_without_rewriting_database(
+    tmp_path, monkeypatch
+):
+    repo_root, external, db, logical = _relocated_artifact_fixture(
+        tmp_path, monkeypatch
+    )
+    before = db.read_bytes()
+
+    response = client.get("/api/artifacts/older/text")
+
+    assert response.status_code == 200
+    assert response.text == "Preserved artifact evidence.\n"
+    assert db.read_bytes() == before
+    assert not (repo_root / "data" / "derived").exists()
+    assert (external / "derived" / "artifacts" / "text" / "snapshot.txt").is_file()
+
+
+@pytest.mark.parametrize("escape", ["traversal", "symlink", "absolute"])
+def test_artifact_text_rejects_references_outside_configured_text_root(
+    tmp_path, monkeypatch, escape
+):
+    repo_root, external, db, logical = _relocated_artifact_fixture(
+        tmp_path, monkeypatch
+    )
+    # Another file in the configured data root is still outside the text boundary.
+    outside = external / "derived" / "private.txt"
+    outside.write_text("This must never be served.")
+    if escape == "traversal":
+        snapshot_ref = "data/derived/artifacts/text/../../private.txt"
+    elif escape == "symlink":
+        snapshot = external / "derived" / "artifacts" / "text" / "snapshot.txt"
+        snapshot.unlink()
+        snapshot.symlink_to(outside)
+        snapshot_ref = logical
+    else:
+        snapshot_ref = str(outside)
+    conn = artifacts.connect(db)
+    conn.execute(
+        "UPDATE artifact_fetch SET text_snapshot_ref = ? WHERE fetch_id = 'fetch'",
+        (snapshot_ref,),
+    )
+    conn.commit()
+    conn.close()
+
+    response = client.get("/api/artifacts/older/text")
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "The artifact text snapshot is missing or invalid."
+    assert "This must never be served." not in response.text
 
 
 def test_artifact_dates_are_source_dates_with_distinct_counts(tmp_path, monkeypatch):

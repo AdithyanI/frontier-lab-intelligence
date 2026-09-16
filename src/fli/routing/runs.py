@@ -15,6 +15,7 @@ from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
+from fli.paths import data_path, reference, resolve_reference
 from fli.evidence import feed as signal_feed
 from fli.evidence.artifacts import store as artifacts
 from fli.registry import classification as entity_kinds
@@ -24,7 +25,7 @@ from fli.scoring import development_attention
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-DEFAULT_RUN_ROOT = REPO_ROOT / "data" / "derived" / "audience-routing"
+DEFAULT_RUN_ROOT = data_path("derived") / "audience-routing"
 DEFAULT_ARTIFACT_DB = artifacts.DEFAULT_DB
 DEFAULT_TOP_RANKED = 10
 DEFAULT_REFRESH_TOP_RANKED = 100
@@ -132,10 +133,7 @@ def _sha256(value: str) -> str:
 
 
 def _display_path(path: Path) -> str:
-    try:
-        return path.resolve().relative_to(REPO_ROOT).as_posix()
-    except ValueError:
-        return str(path.resolve())
+    return reference(path, repo_root=REPO_ROOT)
 
 
 def default_run_db(run_id: str) -> Path:
@@ -808,7 +806,7 @@ def _artifact_sources(
         if artifact_id in seen_artifact_ids:
             continue
         seen_artifact_ids.add(artifact_id)
-        snapshot = REPO_ROOT / str(row["text_snapshot_ref"])
+        snapshot = resolve_reference(str(row["text_snapshot_ref"]), repo_root=REPO_ROOT)
         if not snapshot.is_file():
             raise FileNotFoundError(snapshot)
         text = snapshot.read_text()

@@ -18,6 +18,7 @@ from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any, Iterable
 
+from fli.paths import data_path
 from fli.evidence import feed as signal_feed
 
 
@@ -25,7 +26,7 @@ SCHEMA_VERSION = "signal-events-v6"
 CLUSTERING_CONTRACT = "exact-structural-v10-root-owned-reactions"
 REPO_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_FEED_DB = signal_feed.DEFAULT_FEED_DB
-DEFAULT_EVENTS_DB = REPO_ROOT / "data" / "derived" / "signal-events" / "events.db"
+DEFAULT_EVENTS_DB = data_path("derived") / "signal-events" / "events.db"
 
 SCHEMA = f"""
 CREATE TABLE IF NOT EXISTS event_run (

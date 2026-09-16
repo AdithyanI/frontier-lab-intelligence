@@ -23,6 +23,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from fli.paths import data_path
 from fli.ingestion import sources
 from fli.network import provenance
 
@@ -35,7 +36,7 @@ DEFAULT_ENDPOINT = "/twitter/user/followings"
 REPO_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_PRODUCT_DB = REPO_ROOT / "data" / "fli.db"
 DEFAULT_COHORT_DIR = REPO_ROOT / "data" / "following" / "cohorts"
-DEFAULT_SNAPSHOT_ROOT = REPO_ROOT / "data" / "raw" / "following"
+DEFAULT_SNAPSHOT_ROOT = data_path("raw") / "following"
 PROFILE_CREDITS = 18
 MINIMUM_REQUEST_CREDITS = 15
 

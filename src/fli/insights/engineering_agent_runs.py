@@ -9,10 +9,11 @@ from pathlib import Path
 import sqlite3
 from typing import Any
 
+from fli.paths import data_path
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_DB = (
-    REPO_ROOT / "data" / "derived" / "insights" / "engineering-agent.db"
+    data_path("derived") / "insights" / "engineering-agent.db"
 )
 SURFACE_PATH = REPO_ROOT / "docs" / "references" / "aion-surfaces.json"
 STORE_SCHEMA_VERSION = "engineering-agent-store-v1"

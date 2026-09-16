@@ -18,14 +18,15 @@ from email.utils import parsedate_to_datetime
 from pathlib import Path
 from typing import Any, Iterable
 
+from fli.paths import data_path
 from fli.ingestion.x import content as x_content
 
 
 SCHEMA_VERSION = "signal-feed-v10"
 SELECTION_CONTRACT = "complete-calendar-days-v9-embedded-root-threads"
 REPO_ROOT = Path(__file__).resolve().parents[3]
-DEFAULT_SOURCE_DB = REPO_ROOT / "data" / "raw" / "x" / "x-content.db"
-DEFAULT_FEED_DB = REPO_ROOT / "data" / "derived" / "signal-feed" / "feed.db"
+DEFAULT_SOURCE_DB = data_path("raw") / "x" / "x-content.db"
+DEFAULT_FEED_DB = data_path("derived") / "signal-feed" / "feed.db"
 
 SCHEMA = f"""
 CREATE TABLE IF NOT EXISTS feed_run (

@@ -26,6 +26,7 @@ from typing import Any
 
 import numpy as np
 
+from fli.paths import data_path
 from fli.network import provenance
 from fli.network import snapshots as following_snapshots
 
@@ -37,7 +38,7 @@ PAGERANK_ALGORITHM = "personalized-pagerank-v1"
 PERSONALIZATION_SCHEMA_VERSION = "following-personalization-v1"
 REPO_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_REGISTRY_DB = REPO_ROOT / "data" / "fli.db"
-DEFAULT_DERIVED_ROOT = REPO_ROOT / "data" / "derived" / "following"
+DEFAULT_DERIVED_ROOT = data_path("derived") / "following"
 DEFAULT_PERSONALIZATION = (
     REPO_ROOT
     / "data"

@@ -23,13 +23,14 @@ from pathlib import Path
 from typing import Any
 from urllib import parse
 
+from fli.paths import data_path
 from fli import store
 from fli.ingestion import sources
 from fli.ingestion.x import content as x_content
 from fli.registry import channels
 
 
-DEFAULT_MANIFEST_PATH = Path("data/derived/x-daily-collection.db")
+DEFAULT_MANIFEST_PATH = data_path("derived", "x-daily-collection.db")
 COLLECTION_CONTRACT = "registry-x-date-complete-v2-authored-replies"
 CLI_SCHEMA_VERSION = "1.0"
 

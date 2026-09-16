@@ -10,10 +10,11 @@ import sqlite3
 from threading import Lock
 from typing import Any
 
+from fli.paths import data_path
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_DB = (
-    REPO_ROOT / "data" / "derived" / "insights" / "investment-agent.db"
+    data_path("derived") / "insights" / "investment-agent.db"
 )
 STORE_SCHEMA_VERSION = "investment-agent-store-v2"
 READ_SCHEMA_VERSION = "investment-agent-read-v8"

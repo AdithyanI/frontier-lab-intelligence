@@ -7,12 +7,13 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
+from fli.paths import data_path
 from fli.routing import model
 from fli.scoring import development_attention
 
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
-DEFAULT_ROUTING_ROOT = REPO_ROOT / "data" / "derived" / "audience-routing"
+DEFAULT_ROUTING_ROOT = data_path("derived") / "audience-routing"
 
 
 def _open_readonly(path: Path) -> sqlite3.Connection:

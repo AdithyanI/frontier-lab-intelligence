@@ -22,6 +22,7 @@ from typing import Any, Callable
 
 import openai
 
+from fli.paths import data_path
 from fli import llm_responses
 from fli.insights import engineering_agent_runs
 from fli.registry import classification as entity_kinds
@@ -30,7 +31,7 @@ from fli.registry import classification as entity_kinds
 REPO_ROOT = Path(__file__).resolve().parents[3]
 SURFACE_PATH = engineering_agent_runs.SURFACE_PATH
 DEFAULT_TRACE_ROOT = (
-    REPO_ROOT / "data" / "derived" / "insights" / "engineering-agent-traces"
+    data_path("derived") / "insights" / "engineering-agent-traces"
 )
 DEFAULT_API_BASE = "http://127.0.0.1:8797"
 DEFAULT_DATE = "2026-07-21"

@@ -17,6 +17,8 @@ from typing import Any
 from urllib.parse import urlencode
 from xml.sax.saxutils import escape
 
+from fli.paths import data_path
+
 from reportlab.lib.colors import HexColor
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT
 from reportlab.lib.pagesizes import A4
@@ -41,7 +43,7 @@ from reportlab.platypus import (
 REPORT_SCHEMA_VERSION = "investment-agent-pdf-v15"
 REPO_ROOT = Path(__file__).resolve().parents[3]
 COMPANY_MEMO_PATH = REPO_ROOT / "docs" / "references" / "company-memos.json"
-DEFAULT_CACHE_ROOT = REPO_ROOT / "data" / "derived" / "insights" / "pdf-cache"
+DEFAULT_CACHE_ROOT = data_path("derived") / "insights" / "pdf-cache"
 PUBLIC_APP_URL = "https://frontier-lab-intelligence.adithyan.io"
 
 PAPER = HexColor("#FFFFFF")

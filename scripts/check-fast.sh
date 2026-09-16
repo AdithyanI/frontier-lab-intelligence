@@ -1,6 +1,37 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+REQUIRE_RUNTIME=0
+case "${1:-}" in
+  "") ;;
+  --require-runtime) REQUIRE_RUNTIME=1; shift ;;
+  *) echo "Usage: scripts/check-fast.sh [--require-runtime]" >&2; exit 2 ;;
+esac
+if [ "$#" -ne 0 ]; then
+  echo "Usage: scripts/check-fast.sh [--require-runtime]" >&2
+  exit 2
+fi
+
+PYTHON_RUNTIME=0
+if [ -e .venv ] || [ -L .venv ]; then
+  if [ ! -x .venv/bin/python ]; then
+    echo "Existing .venv is incomplete; repair it using docs/references/service-lifecycle.md." >&2
+    exit 1
+  fi
+  PYTHON=.venv/bin/python
+  PYTHON_RUNTIME=1
+else
+  PYTHON=python3
+fi
+if [ "$REQUIRE_RUNTIME" -eq 1 ] && { [ "$PYTHON_RUNTIME" -eq 0 ] || [ ! -d frontend/node_modules ]; }; then
+  echo "Full runtime checks require .venv and frontend/node_modules. Restore dependencies using docs/references/service-lifecycle.md." >&2
+  exit 1
+fi
+
+# Check source without installing the package or recreating bytecode caches.
+export PYTHONPATH="${PWD}/src${PYTHONPATH:+:${PYTHONPATH}}"
+export PYTHONDONTWRITEBYTECODE=1
+
 test -f AGENTS.md
 test -f PRODUCT.md
 test -f DESIGN.md
@@ -24,7 +55,7 @@ for domain in ingestion registry network evidence routing scoring insights deliv
 done
 unexpected_root_modules=$(find src/fli -maxdepth 1 -type f -name '*.py' \
   ! -name '__init__.py' ! -name 'cli.py' ! -name 'llm_responses.py' \
-  ! -name 'store.py' -print)
+  ! -name 'store.py' ! -name 'paths.py' -print)
 if [ -n "$unexpected_root_modules" ]; then
   echo "Domain modules must live in a package, not directly under src/fli:"
   echo "$unexpected_root_modules"
@@ -67,12 +98,6 @@ if [ -n "$versioned_active_prompts" ]; then
 fi
 
 
-if [ -x .venv/bin/python ]; then
-  PYTHON=.venv/bin/python
-else
-  PYTHON=python
-fi
-
 # Build-log history is sharded and machine-maintained. Validate every shard,
 # render the complete reviewer artifact, and stage it only when it changed.
 "$PYTHON" scripts/build-log.py --plain validate
@@ -86,30 +111,47 @@ if find src tests -type f -name '*.py' 2>/dev/null | grep -q .; then
     echo "Python files exist but pyproject.toml is missing; add pyproject or document a different validation path."
     exit 1
   fi
-  "$PYTHON" -m compileall src tests
-  if "$PYTHON" -m pytest --version >/dev/null 2>&1; then
-    "$PYTHON" -m pytest -q
+  "$PYTHON" - <<'PY'
+from pathlib import Path
+
+count = 0
+for root in (Path("src"), Path("tests"), Path("scripts")):
+    for path in root.rglob("*.py"):
+        compile(path.read_bytes(), str(path), "exec")
+        count += 1
+print(f"Python syntax: OK ({count} files; no bytecode written)")
+PY
+  if [ "$PYTHON_RUNTIME" -eq 1 ]; then
+    "$PYTHON" -m pytest -q -p no:cacheprovider
   else
-    echo "pytest not installed; compile-only validation passed."
+    echo "SKIP Python runtime tests: .venv is absent in this parked/clean checkout."
   fi
 fi
 
 # A local Artifact Store is optional in clean clones. When present, prove that
 # every live observation still resolves to the primary X account's raw post or
 # one of that account's replies in the same conversation.
-artifact_db="data/derived/artifacts/artifacts.db"
-if [ -f "$artifact_db" ]; then
-  "$PYTHON" -m fli.cli artifacts audit-lineage \
-    --db "$artifact_db" \
-    --no-input >/dev/null
+if [ "$PYTHON_RUNTIME" -eq 1 ]; then
+  artifact_db="$("$PYTHON" -c 'from fli.paths import data_path; print(data_path("derived", "artifacts", "artifacts.db"))')"
+  if [ -f "$artifact_db" ]; then
+    "$PYTHON" -m fli.cli artifacts audit-lineage \
+      --db "$artifact_db" \
+      --no-input >/dev/null
+  fi
+else
+  echo "SKIP live Artifact Store lineage audit: .venv is absent; preserved data is not opened."
 fi
 
 if [ -f frontend/package.json ]; then
   npm --prefix frontend run test --if-present
-  npm --prefix frontend run lint
-  npm --prefix frontend run build
-  if ! git diff --quiet -- src/fli/web/dist 2>/dev/null; then
-    git add src/fli/web/dist
+  if [ -d frontend/node_modules ]; then
+    npm --prefix frontend run lint
+    npm --prefix frontend run build
+    if ! git diff --quiet -- src/fli/web/dist 2>/dev/null; then
+      git add src/fli/web/dist
+    fi
+  else
+    echo "SKIP frontend lint/build: frontend/node_modules is absent in this parked/clean checkout."
   fi
 fi
 

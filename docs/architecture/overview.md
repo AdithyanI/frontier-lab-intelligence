@@ -66,6 +66,13 @@ product state belongs in `fli.store`; operational probes belong in
 `fli.diagnostics`. The root-level modules remain limited to shared runtime and
 composition.
 
+`fli.paths` separates logical data references from physical storage. Tracked
+inputs stay in the checkout; raw evidence, derived state, and archives use one
+configured data root. The Mac mini keeps that root on the UUID-verified
+`DobbyProduction` volume. CLI and web adapters share the same resolution, and
+artifact references retain their original logical identities after relocation.
+See [data lifecycle](../references/data-lifecycle.md) for configuration and recovery.
+
 ## Main Flow
 
 1. The Registry defines the tracked identities and their source channels.
