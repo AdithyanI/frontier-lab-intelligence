@@ -1,6 +1,6 @@
 interface:
   display_name: "FLI Daily Intelligence"
-  short_description: "Run and audit one day of company-aware Investment Insights"
-  default_prompt: "Use $fli-daily-intelligence to run, validate, and audit the Investment brief for a specific date."
+  short_description: "Run and audit dated Investment or Engineering briefs."
+  default_prompt: "Use $fli-daily-intelligence to inspect or run the requested dated audience brief using current code contracts and the repo parked/resume boundary."
 policy:
   allow_implicit_invocation: false

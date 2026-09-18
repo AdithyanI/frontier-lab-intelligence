@@ -1,8 +1,9 @@
 # Code and Data Map
 
-This is the cold-start map for implementation work. Read it after
-[`docs/STATUS.md`](../STATUS.md), then use [`overview.md`](overview.md) for the
-system boundaries relevant to the task.
+Use this map to locate ownership when the package layout is not enough.
+[`overview.md`](overview.md) explains boundaries; [`docs/STATUS.md`](../STATUS.md)
+tracks conceptual proof. The runtime is parked; command examples below require
+the authorization and setup in [`service-lifecycle.md`](../references/service-lifecycle.md).
 
 ## Pipeline
 
@@ -43,8 +44,8 @@ the Event read model moves out of `web`, not through new aliases.
 | Artifacts | `fli.evidence.artifacts.store`, `.fetch`, and `.cli` | Catalog/provenance persistence, retrieval/extraction, and the machine command adapter are separate boundaries. |
 | Daily Development rank | `fli.scoring.development_attention` | Versioned lexicographic Development ordering. Production uses `daily-development-rank-v1`; the earlier exact-Event `daily-rank-v2` remains historical lineage only. |
 | Audience routing | `fli.routing` | Independent Engineering/Investment relevance decisions, durable runs, audit view, and active prompt. |
-| Insights | `fli.insights` | Two audience paths. **Investment:** `investment_agent` runs the cache-first company-aware loop and writes complete request/response traces; `investment_agent_runs` validates, stores, and projects them. The v15 loop decides `surface \| suppress` before prose, screens memo bet titles for all 37 companies, opens only plausible full memos, and emits `ticker + bet_id + threshold_met + impact` beneath one shared causal mechanism. Direction is never model output: `company_context` validates and resolves the cited bet's memo-owned `upside \| downside` value from the generated v3 corpus. Multi-day publication is one atomic transaction, so a complete refresh can move canonical Development ownership without exposing a partial cohort. **AI Engineering:** `engineering_agent` makes one call per Development against the seven assumed Aion surfaces in `docs/references/aion-surfaces.json` and emits `decision + headline + what_changed + lands[{surface_id, why}]`; `engineering_agent_runs` owns the sibling store and read projection. It has no tool loop, no memo corpus, and no materiality gate — for an engineer, whether to act is the sentence itself. Both read projections expose kept and suppressed decisions with the model's reason. `pdf_report` renders one published Investment cohort; `cli` is the machine adapter for both. Investment company selection follows `docs/references/investment-company-mapping.md`. |
-| Delivery | `fli.delivery.daily_brief` | Manual compact Slack formatting with company directions, email top-five formatting with the canonical cached PDF, provider adapters, and a same-origin confirmation guard. It does not own Insight data or scheduling. |
+| Insights | `fli.insights` | Audience-specific generators, result validation, exact traces, cohort publication, and read projections. `company_context` owns Investment memo/bet interpretation; `pdf_report` and `pdf_report_engineering` render the canonical audience projections. See the Insight refresh contract for execution. |
+| Delivery | `fli.delivery.daily_brief` | Explicit Slack/email delivery of canonical audience briefs and derived PDFs. It owns formatting/provider adapters, not Insight data or scheduling. |
 | Web | `fli.web.app`, `fli.web.feed`, `fli.web.events`, `fli.web.developments`, `fli.web.artifact_library` | HTTP composition and read projections only. `/api/events` preserves exact Event inspection; `/api/developments` is the ranked Feed read model; `/api/developments/analysis-packet` renders the exact read-only routing input without a model call. Built SPA assets live in `fli.web.dist`; editable UI source is `frontend/`. |
 | Root client | `fli.cli` | Thin subcommand router only; domain behavior belongs to the owning area. |
 | Demo release | `demo.command`, `scripts/demo.py`, `scripts/build-demo-release.py` | Verified snapshot restore, read-only launch, and operator-only release construction. The release contract is `data/demo-release.json`. |
@@ -65,7 +66,7 @@ routes in a generic `pages/` directory:
 | System guide | `frontend/src/features/system/` | The `/how` shell composes the interactive story, long-form narrative, page index, reviewer map, and closed technical appendix. There is no separate public System or Status workspace. |
 | Architecture figures | `frontend/src/features/architecture/` | Reusable technical figures embedded by `/how`; these do not own a public route. |
 | Evidence | `frontend/src/features/evidence/` | Feed, Artifact index, their workspace layout, and Evidence-only view state. |
-| Insights | `frontend/src/features/insights/` | Audience Insight inspection, decision-state UI, selected daily brief PDF download, and the explicit Slack/email delivery confirmation. |
+| Insights | `fli.insights` | Audience-specific generators, result validation, exact traces, cohort publication, and read projections. `company_context` owns Investment memo/bet interpretation; `pdf_report` and `pdf_report_engineering` render the canonical audience projections. See the Insight refresh contract for execution. |
 | BIT Lens | `frontend/src/features/bit-lens/` | Public BIT research brief plus the auditable company-context ledger. The index comes from the canonical Investment packet; the single generated `docs/references/company-memos.json` packet supplies 37 source-bearing company memos and their binary standing bets. |
 | Network | `frontend/src/features/network/` | Registry, Ranking, Add Profile, their workspace layout, and the shared entity detail surface. |
 | Shared UI | `frontend/src/shared/` | Cross-feature API contracts, date state, text normalization, and genuinely reused components. |
@@ -89,7 +90,7 @@ do not recreate generic `pages/` or `components/` buckets.
 | Development read model | No independent writer | Feed, routing, artifact UI | Deterministic projection over exact Events plus accepted canonical artifacts. Full day views are cached in process; the compact date/count summary is also persisted as a disposable exact-view cache so restarts do not rebuild every day before rendering navigation. There is deliberately no separate Development database. |
 | `data/derived/audience-routing/*/routing.db` | `fli audience-routing` | Feed, Insights, rank evaluation | Immutable per-day runs. Current-compatible runs bind their source Feed/Event publication and full-day Development rank-input SHA. |
 | `data/derived/insights/investment-agent-traces/<day>/*.json` | `fli insights run-investment-agent` | Investment import, operator audit | Durable exact request/response envelopes for every model turn, plus response IDs, retryable and terminal request failures, memo calls and packets, usage, cost, and the validated final result. |
-| `data/derived/insights/investment-agent.db` | `fli insights run-investment-agent` / `import-investment-trace` | Investment Insights API/UI | Durable company-aware successor runs. Each row binds the Development, prompt/model identity, compact-universe and evidence hashes, exact memo calls, token/cache/cost telemetry, and validated result. A per-day publication records the complete current Investment-routed cohort and rejects cross-day reuse of a Development ID. Publication and readers require the current prompt version, so historical rows remain auditable but cannot satisfy the v14 product boundary. The web date strip uses a compact metadata-only projection cached against the database/WAL version, while an exact-day brief reads trace blobs only for that requested publication. |
+| `data/derived/insights/investment-agent.db` | Investment runner/import | Investment API/UI/PDF | Durable validated runs and complete current-version cohort publication; exact evidence, memo, prompt, model and cost lineage stays attached. |
 | `data/derived/insights/engineering-agent-traces/<day>/*.json` | `fli insights run-engineering-agent` | Engineering import, operator audit | Durable exact request/response envelope for the single model call, plus response ID, retryable and terminal request failures, the surface map hash, usage, cost, and the validated final result. |
 | `data/derived/insights/engineering-agent.db` | `fli insights run-engineering-agent` / `import-engineering-trace` | AI Engineering Insights API/UI | Durable surface-linked runs. Each row binds the Development, prompt/model identity, surface-map and evidence hashes, token/cache/cost telemetry, and validated result. A per-day publication records the complete current AI Engineering-routed cohort under the same all-or-nothing and cross-day uniqueness contracts as Investment. |
 | `data/derived/insights/pdf-cache/` | `GET /api/insights/report.pdf` | Daily Insight PDF downloads | Rebuildable content-addressed PDFs keyed by report schema, read schema, date, audience, and published-cohort result hash; atomic writes make concurrent first requests safe. |
@@ -124,8 +125,8 @@ removing or archiving local data.
 - Inspect one exact future routing input without running the model:
   `/api/developments/analysis-packet?date=YYYY-MM-DD&development_id=...` or
   `Preview what audience analysis reads` inside the expanded Feed Development.
-- Run the product: `fli web` or the always-on service at
-  `http://127.0.0.1:8797`
+- After resume, run the product with `fli web` or its service at
+  `http://127.0.0.1:8797` (only after resume)
 - Open the hosted product:
   `https://frontier-lab-intelligence.adithyan.io/`
 - Restore and run the frozen reviewer release: `./demo.command`
@@ -143,7 +144,7 @@ All repeated LLM work uses the shared LiteLLM path and the exact contracts in
 - Run focused tests while editing, then `bash scripts/check-fast.sh` before
   handoff.
 - Build UI changes with `npm --prefix frontend run build`; the output under
-  `src/fli/web/dist/` is intentionally tracked and served by the always-on app.
+  `src/fli/web/dist/` is intentionally tracked and served by the app when resumed.
 
 ## Where Exact Details Live
 

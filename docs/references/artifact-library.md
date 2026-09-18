@@ -217,7 +217,7 @@ raw source snapshot, URL owner, observation, and disclosure.
 
 ## Operator inspection surface
 
-The always-on app exposes the catalog at `/evidence/artifacts`, backed by read-only
+When resumed, the app exposes the catalog at `/evidence/artifacts`, backed by read-only
 `/api/artifacts/dates` and `/api/artifacts` projections. Its shared Feed-style
 seven-date navigator filters by the UTC publication day of the X source
 observation, never by retrieval time. Date counts are distinct canonical
@@ -267,8 +267,9 @@ Feed Events: 2,911 accepted occurrences, 161 exclusions, 1,739 source
 observations/disclosures, and 1,566 final canonical artifacts after redirect
 convergence. The frozen 30-artifact cohort produced 19 clean-text successes,
 four explicit terminal failures, and seven exhausted retryable failures. All 19
-successful texts were manually usable. See
-`docs/projects/archive/canonical-artifact-library/resources/fetch-cohort-audit-2026-07-14.md`.
+successful texts were manually usable according to that historical audit. Its
+standalone cohort receipt is not retained in this checkout; these counts are
+historical evidence, not a new validation result.
 
 The first Reader fallback proof recovered all three ordinary public-page
 failures in that cohort: the OpenAI GPT-5.6, GPT-Live, and ambitious-work

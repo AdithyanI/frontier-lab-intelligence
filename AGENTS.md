@@ -1,80 +1,41 @@
-# Frontier Lab Intelligence agent guide
+# Frontier Lab Intelligence
 
-Frontier Lab Intelligence tracks frontier AI labs and key people, turns public
-output into scored and cited signal, and delivers audience-specific reports.
-It began as the BIT Capital AI Engineer case study.
+Tracks frontier AI labs and people, preserves public evidence, and produces
+separate Investment and AI Engineering Insights. The case-study intent is a
+coherent, defensible end-to-end demonstration, not platform breadth.
 
 ## Parked runtime
 
-Adi parked this project on 2026-09-16. Keep the code and external research data,
-but do not start the web service, enable production reconciliation, or run
-collection unless Adi asks to resume. The subdomain is reserved. Follow
-`docs/references/service-lifecycle.md` for storage, dependency setup, and restart.
+Adi parked this project on 2026-09-16. Preserve code and research data. Do not
+start services, collection, generation, delivery, or production reconciliation
+without an explicit resume request. Storage and restart boundaries are in
+`docs/references/service-lifecycle.md`; the reserved hostname is intentionally idle.
 
-## Start here
+## Grounding
 
-1. Read `docs/references/case-prompt.md` for the external requirements.
-2. Read `docs/STATUS.md` for proven, active, missing, and deferred work.
-3. Read `docs/architecture/code-map.md` for code, store, command, and test ownership.
-4. Read only the relevant part of `docs/architecture/overview.md`.
-5. Use `PRODUCT.md` and `DESIGN.md` when changing product or UI behavior.
-6. Read an active tracker only when Adi explicitly invoked `$project`.
+- For case-study requirements, use `docs/references/case-prompt.md`.
+- For conceptual status and remaining proof, use `docs/STATUS.md`.
+- For implementation ownership, use `docs/architecture/code-map.md`; system
+  boundaries are in `docs/architecture/overview.md`.
+- Product/UI changes use `PRODUCT.md` and `DESIGN.md`. The UI is desktop-first.
+- Daily briefs and reruns use `$fli-daily-intelligence`; review uses `$fli-review`.
+- Project tracking is opt-in: use `$project` only when Adi explicitly invokes it.
 
-`README.md` is the public human landing page. If chat and docs conflict, follow
-the preserved case prompt until Adi decides, then record the resolution in the
-relevant durable document.
+## Boundaries and validation
 
-## Case-study north star
-
-Optimize for a coherent, defensible, working case study and a clear interview
-explanation. Prefer a narrow end-to-end proof and 3 to 5 excellent cited
-Insights over platform breadth.
-
-## Guardrails
-
-- Do not submit, publish, publicly push, upload, or contact BIT, Lars, Marc, or
-  Vlad without Adi's explicit approval in the current session. Prepare the
-  artifact, message, validation, limitations, and prompt check first.
-- Keep Dobby and person-memory architecture out of this repository.
-- Put scratch under `tmp/`. Put durable facts, decisions, provenance, and spend
-  in the relevant repository document.
-- Do not commit `data/raw/`, `data/derived/`, secrets, or private inputs. The
-  public reviewer snapshot contract lives in `docs/references/demo-release.md`.
-- Treat cost as telemetry, not a reason to lower in-scope quality, unless Adi
-  sets an explicit cap.
-
-## Implementation contracts
-
-- Work data first: fetch raw evidence, inspect it, then model it. Preserve the
-  schema and provenance invariants documented for the owning stage.
-- Follow `docs/architecture/code-map.md` for ownership and
-  `docs/references/data-lifecycle.md` before moving or deleting data.
-- Route every LLM call through the shared LiteLLM endpoint. Exact model,
-  metadata, cost, and reasoning rules live in
-  `docs/references/model-routing.md`; prompt-cache rules, live proof, and
-  troubleshooting live in `docs/references/prompt-caching.md`.
-- Use the build log only for the material decisions and milestones defined in
-  `docs/references/build-log.md`. Routine work does not get an entry.
-- Update `docs/architecture/overview.md` when a pipeline, schema, source class,
-  or module boundary changes.
-- Update `docs/STATUS.md` only when conceptual status, the critical path, or a
-  proven/planned boundary changes.
-- Run `scripts/check-fast.sh` before handoff, or report why it was skipped.
-
-## UI preview
-
-- After an authorized resume, the app serves the built SPA at
-  `http://127.0.0.1:8797`. Do not start a preview while this project is parked.
-- Build UI changes with `npm --prefix frontend run build`, then reload the
-  always-on app.
-- Prefer the in-app Browser for collaborative inspection. Use `$agent-browser`
-  for repeatable automation or as a fallback. Keep captures under `tmp/` unless
-  they are requested durable presentation assets.
-- The product is desktop-first until Adi requests mobile work.
-
-## Skill routing
-
-- Repository harness, docs, or guardrail review: `$agent-native-repo-playbook`.
-- Daily brief generation, review, or reruns: `$fli-daily-intelligence`.
-- UI review or frontend polish: `$impeccable`.
-- Project tracking is opt-in. Use `$project` only when Adi explicitly invokes it.
+- Preserve raw evidence, schemas, and provenance. Read
+  `docs/references/data-lifecycle.md` before moving or deleting data. Do not
+  commit `data/raw/`, `data/derived/`, secrets, or private inputs.
+- Model calls go through shared LiteLLM. Routing and cost contracts are in
+  `docs/references/model-routing.md`; cache diagnostics in
+  `docs/references/prompt-caching.md`.
+  Cost is telemetry unless Adi sets a cap; parked status still forbids generation.
+- Submission, public sharing/uploads, or contacting case-study stakeholders
+  needs explicit authorization. Prepare the artifact and validation first.
+  Local publication of generated cohorts is distinct from external delivery.
+- Keep Dobby/person-memory architecture out of this project.
+- Record only material decisions/milestones in the build log under
+  `docs/references/build-log.md`. Update conceptual status when its boundary changes.
+- Run `scripts/check-fast.sh` before handoff. Its dependency-free parked mode
+  does not start services or open preserved research data. Runtime work after
+  an authorized resume uses `--require-runtime` and appropriate product proof.
