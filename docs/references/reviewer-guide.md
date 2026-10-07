@@ -45,7 +45,7 @@ exact object, checksum, included data, and clean-checkout proof.
    Engineering maps the same evidence to concrete Aion implementation
    surfaces. Suppressed rows and their reasons remain auditable in both views.
    The top-right PDF and delivery actions are intentionally Investment-only.
-   Slack and email are real operator actions; inspect the flow, but do not
+   Slack delivery is a real operator action; inspect the flow, but do not
    confirm a send during passive review.
 5. **Ingestion (10%)** and **extraction (10%)** — inspect Artifacts for
    canonical source links disclosed by first-party Event evidence, retrieval
@@ -66,7 +66,7 @@ exact object, checksum, included data, and clean-checkout proof.
 - `docs/references/registry-evaluation.md` — exact evaluator modules, commands,
   storage boundaries, resumability, artifact checksums, and invariants.
 - `docs/architecture/overview.md` — current system shape and implemented schema.
-- `docs/references/delivery.md` — exact Slack/email behavior, configuration,
+- `docs/references/delivery.md` — exact Slack behavior, configuration,
   proof, and limitations.
 - `docs/references/demo-release.md` — immutable snapshot, checksum, exclusions,
   read-only boundary, and reproduction proof.

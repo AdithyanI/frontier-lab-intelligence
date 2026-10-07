@@ -47,7 +47,7 @@ module, store, command, and tests.
 | Investment company universe and memo packet | [`investment-company-universe.md`](investment-company-universe.md) |
 | Development-to-company judgment | [`investment-company-mapping.md`](investment-company-mapping.md) |
 | Audience Insight preview, run, trace, and publication | [`insight-refresh.md`](insight-refresh.md) |
-| PDF, Slack, and email delivery | [`delivery.md`](delivery.md) |
+| PDF export and Slack delivery | [`delivery.md`](delivery.md) |
 | Local data preservation and restore | [`data-lifecycle.md`](data-lifecycle.md) |
 | Measured provider and workflow cost | [`tokenomics.md`](tokenomics.md) |
 | Reviewer snapshot and read-only boundary | [`demo-release.md`](demo-release.md) |

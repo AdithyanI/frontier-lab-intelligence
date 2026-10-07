@@ -423,18 +423,14 @@ function DailyBriefDelivery({
                     disabled={!channel.available}
                     key={channel.channel}
                   >
-                    <span className="insight-delivery-option-mark" aria-hidden="true">
-                      {channel.channel === 'slack' ? '#' : '@'}
-                    </span>
+                    <span className="insight-delivery-option-mark" aria-hidden="true">#</span>
                     <span>
                       <strong>{channel.label}</strong>
                       <small>{channel.destination}</small>
                     </span>
                     <em>
                       {channel.configured
-                        ? channel.channel === 'slack'
-                          ? `All ${status.total_insight_count} Insights + brief link`
-                          : `Top ${status.top_insight_count} + PDF attachment`
+                        ? `All ${status.total_insight_count} Insights + brief link`
                         : 'Not configured'}
                     </em>
                   </button>
@@ -445,17 +441,10 @@ function DailyBriefDelivery({
 
           {(state === 'confirm' || state === 'sending') && status && selectedStatus && (
             <div className="insight-delivery-confirm">
-              {selected === 'slack' ? (
-                <p>
-                  Send all {status.total_insight_count} Insights, with what changed and {audience === 'investment' ? 'the company directions' : 'the engineering surfaces'}, to <strong>{selectedStatus.destination}</strong>.
-                  The message will link to the full brief.
-                </p>
-              ) : (
-                <p>
-                  Send the top {status.top_insight_count} cited Insights to <strong>{selectedStatus.destination}</strong>.
-                  The complete PDF will be attached.
-                </p>
-              )}
+              <p>
+                Send all {status.total_insight_count} Insights, with what changed and {audience === 'investment' ? 'the company directions' : 'the engineering surfaces'}, to <strong>{selectedStatus.destination}</strong>.
+                The message will link to the full brief.
+              </p>
               <dl>
                 <div><dt>Audience</dt><dd>{AUDIENCE_COPY[audience].label}</dd></div>
                 <div><dt>Date</dt><dd>{displayInsightDay(day)}</dd></div>
@@ -464,7 +453,7 @@ function DailyBriefDelivery({
               <div className="insight-delivery-confirm-actions">
                 <button type="button" onClick={() => { setState('choose'); setError('') }} disabled={state === 'sending'}>Back</button>
                 <button type="button" className="is-primary" onClick={send} disabled={state === 'sending'}>
-                  {state === 'sending' ? 'Sending…' : selected === 'slack' ? 'Send to Slack' : 'Send email'}
+                  {state === 'sending' ? 'Sending…' : 'Send to Slack'}
                 </button>
               </div>
             </div>
@@ -473,17 +462,10 @@ function DailyBriefDelivery({
           {state === 'sent' && result && (
             <div className="insight-delivery-message insight-delivery-message--success" role="status">
               <span aria-hidden="true">✓</span>
-              {result.channel === 'slack' ? (
-                <p>
-                  <strong>Slack notification sent.</strong>
-                  {result.insight_count} Insights and a link to the full brief were sent to {result.destination}.
-                </p>
-              ) : (
-                <p>
-                  <strong>Email sent.</strong>
-                  {result.insight_count} Insights and the attached PDF were sent to {result.destination}.
-                </p>
-              )}
+              <p>
+                <strong>Slack notification sent.</strong>
+                {result.insight_count} Insights and a link to the full brief were sent to {result.destination}.
+              </p>
               <button type="button" onClick={close}>Done</button>
             </div>
           )}

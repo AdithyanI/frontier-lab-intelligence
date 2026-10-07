@@ -3,7 +3,7 @@ import type { FeedDate } from './evidence'
 export type InsightAudience = 'investment' | 'ai_engineering'
 export type InsightDecision = 'surface' | 'suppress'
 export type InsightStatus = 'kept' | 'suppressed' | 'all'
-export type BriefDeliveryChannel = 'slack' | 'email'
+export type BriefDeliveryChannel = 'slack'
 
 export interface BriefDeliveryChannelStatus {
   channel: BriefDeliveryChannel
@@ -11,7 +11,6 @@ export interface BriefDeliveryChannelStatus {
   configured: boolean
   available: boolean
   destination: string
-  pdf_delivery: 'none' | 'attachment'
 }
 
 export interface BriefDeliveryStatus {
@@ -21,7 +20,6 @@ export interface BriefDeliveryStatus {
   audience: InsightAudience
   date: string | null
   total_insight_count: number
-  top_insight_count: number
   channels: BriefDeliveryChannelStatus[]
 }
 
@@ -33,9 +31,6 @@ export interface BriefDeliveryResult {
   audience: InsightAudience
   date: string
   insight_count: number
-  pdf_delivery: 'none' | 'attachment'
-  pdf_filename: string | null
-  report_version: string | null
   delivery_id: string
   provider_id: string
   sent_at: string

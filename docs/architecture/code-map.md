@@ -23,7 +23,7 @@ flowchart TD
     U --> G["AI Engineering agent<br/>surface-linked Insights"]
     I --> W["Web and CLI adapters"]
     G --> W
-    I --> D["Manual Slack/email delivery"]
+    I --> D["Manual Slack delivery"]
 ```
 
 Dependency direction is left-to-right. Domain code must not import `fli.web`.
@@ -45,7 +45,7 @@ the Event read model moves out of `web`, not through new aliases.
 | Daily Development rank | `fli.scoring.development_attention` | Versioned lexicographic Development ordering. Production uses `daily-development-rank-v1`; the earlier exact-Event `daily-rank-v2` remains historical lineage only. |
 | Audience routing | `fli.routing` | Independent Engineering/Investment relevance decisions, durable runs, audit view, and active prompt. |
 | Insights | `fli.insights` | Audience-specific generators, result validation, exact traces, cohort publication, and read projections. `company_context` owns Investment memo/bet interpretation; `pdf_report` and `pdf_report_engineering` render the canonical audience projections. See the Insight refresh contract for execution. |
-| Delivery | `fli.delivery.daily_brief` | Explicit Slack/email delivery of canonical audience briefs and derived PDFs. It owns formatting/provider adapters, not Insight data or scheduling. |
+| Delivery | `fli.delivery.daily_brief` | Explicit Slack delivery of canonical audience briefs. It owns Slack formatting and transport, not Insight data, PDF export, or scheduling. |
 | Web | `fli.web.app`, `fli.web.feed`, `fli.web.events`, `fli.web.developments`, `fli.web.artifact_library` | HTTP composition and read projections only. `/api/events` preserves exact Event inspection; `/api/developments` is the ranked Feed read model; `/api/developments/analysis-packet` renders the exact read-only routing input without a model call. Built SPA assets live in `fli.web.dist`; editable UI source is `frontend/`. |
 | Root client | `fli.cli` | Thin subcommand router only; domain behavior belongs to the owning area. |
 | Demo release | `demo.command`, `scripts/demo.py`, `scripts/build-demo-release.py` | Verified snapshot restore, read-only launch, and operator-only release construction. The release contract is `data/demo-release.json`. |

@@ -59,7 +59,7 @@ on DobbyData is also retained.
    The retained tunnel route should work once the origin is ready. Its Access
    policy currently allows public access; decide whether that still fits the
    requested resume. Restoring the web service does not authorize collection,
-   model calls, Slack/email delivery, or enabling production reconciliation.
+   model calls, Slack delivery, or enabling production reconciliation.
 
 ## Park again
 

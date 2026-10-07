@@ -158,5 +158,5 @@ auditable but cannot satisfy or render a current publication.
 - A target that still fails leaves its day unpublished.
 - Never infer success from stored rows alone; the publication and live API are
   the reader boundary.
-- Never send Slack or email output without Adi's explicit approval in the
+- Never send Slack output without Adi's explicit approval in the
   current session.

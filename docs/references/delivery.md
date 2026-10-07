@@ -1,17 +1,16 @@
 # Daily Brief delivery
 
-Frontier Lab Intelligence can manually send any complete Investment brief from
-the Insights page. Delivery reuses the same canonical brief as the web reader.
-Email also reuses the cached PDF; Slack does not create or link one.
+Frontier Lab Intelligence can manually send any complete Investment or AI
+Engineering brief to Slack from the Insights page. Delivery reuses the same
+canonical brief as the web reader and does not create or link a PDF.
 
 ## Reader flow
 
 The `Send brief` action is available only when the selected date has a complete
-published Investment cohort and the chosen provider is configured. AI
-Engineering has no current deliverable cohort.
+published cohort and the Slack webhook is configured.
 
-1. The operator chooses Slack or email.
-2. The panel shows the masked destination, audience, date, and content scope.
+1. The operator chooses Slack.
+2. The panel shows the destination label, audience, date, and content scope.
 3. A separate confirmation performs the real provider action.
 4. Success or provider failure remains visible in the same panel.
 
@@ -20,10 +19,6 @@ from one, independent of Feed rank. Each item includes its headline, complete
 `What changed` text, and the memo-owned upside or downside direction for every
 connected company. The message ends with one link to the full web brief; Slack
 does not generate or link a PDF.
-
-Email sends up to five ranked Insights with their interpretations, next steps,
-and exact Feed Event links. The complete audience PDF is attached. The body
-also links to the web brief and downloadable PDF.
 
 ## Runtime boundary
 
@@ -54,37 +49,26 @@ same values into the generated, ignored `.env` file through
 `scripts/local/secrets/bootstrap_local_env.sh`. Never put literal
 secret values in tracked files.
 
-Required secret-backed variables:
+Required secret-backed variable:
 
 - `FLI_SLACK_WEBHOOK_URL` enables Slack delivery.
-- The retired ACS password is intentionally absent, so email delivery is currently disabled.
 
 Optional non-secret settings:
 
 - `FLI_DELIVERY_SLACK_LABEL`
-- `FLI_DELIVERY_EMAIL_TO`
-- `FLI_DELIVERY_EMAIL_LABEL`
 - `FLI_DELIVERY_TIMEOUT_SECONDS`
-- `ACS_SMTP_HOST`
-- `ACS_SMTP_PORT`
-- `ACS_SMTP_USER`
-- `ACS_SMTP_FROM_EMAIL`
-- `ACS_SMTP_FROM_NAME`
-- `ACS_SMTP_REPLY_TO`
 
-The legacy SMTP adapter remains inert without an explicitly configured password. The browser
-displays only the masked recipient.
+Email delivery is not part of the current runtime. The API accepts only
+`channel: "slack"`.
 
 ## Proof and validation
 
-On 19 July 2026, Adi confirmed real Slack webhook delivery and real email
-delivery with the generated PDF attached. Automated coverage in
-`tests/delivery/test_daily_brief.py` verifies:
+On 19 July 2026, Adi confirmed real Slack webhook delivery. Automated coverage
+in `tests/delivery/test_daily_brief.py` verifies:
 
 - complete Slack content across a six-Insight fixture;
 - Slack section-size limits and secret redaction;
-- email top-five selection and PDF attachment;
-- configured and unavailable channel status;
+- Slack-only channel status and rejection of the retired email channel;
 - same-origin acceptance and cross-site rejection.
 
 Run `scripts/check-fast.sh` for the complete repository gate. A read-only

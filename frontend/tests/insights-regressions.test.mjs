@@ -238,9 +238,9 @@ test('Insights exposes a production PDF download for the complete selected daily
   assert.doesNotMatch(appStyles, /\.insight-report-button \{[^}]*box-shadow:/)
 })
 
-test('Insights exposes guarded manual Slack and email delivery beside the PDF action', () => {
-  assert.match(apiSource, /export type BriefDeliveryChannel = 'slack' \| 'email'/)
-  assert.match(apiSource, /pdf_delivery: 'none' \| 'attachment'/)
+test('Insights exposes guarded manual Slack delivery beside the PDF action', () => {
+  assert.match(apiSource, /export type BriefDeliveryChannel = 'slack'/)
+  assert.doesNotMatch(apiSource, /attachment/)
   assert.match(insightSource, /function DailyBriefDelivery/)
   assert.match(insightSource, /\/api\/insights\/delivery\?audience=/)
   assert.match(insightSource, /fetch\('\/api\/insights\/delivery'/)
@@ -254,7 +254,7 @@ test('Insights exposes guarded manual Slack and email delivery beside the PDF ac
   assert.doesNotMatch(insightSource, /fli-delivery-access-key/)
   assert.match(insightSource, /Confirm delivery/)
   assert.match(insightSource, /Send to Slack/)
-  assert.match(insightSource, /Send email/)
+  assert.doesNotMatch(insightSource, /Send email/)
   assert.doesNotMatch(insightSource, /hooks\.slack\.com/)
   assert.match(appStyles, /\.insight-brief-actions \{[^}]*display: flex;/)
   assert.match(appStyles, /\.insight-delivery-button \{[^}]*min-height: 44px;/)

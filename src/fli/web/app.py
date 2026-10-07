@@ -22,7 +22,7 @@ Endpoints:
 - /api/insights/dates            successor audience Insight dates
 - /api/insights                  successor audience Insights
 - /api/insights/report.pdf       cached daily editorial PDF workbook
-- /api/insights/delivery         manual Slack/email Daily Brief delivery
+- /api/insights/delivery         manual Slack Daily Brief delivery
 """
 
 from contextlib import asynccontextmanager
@@ -140,7 +140,7 @@ class RegistryIntakeRequest(BaseModel):
 class DailyBriefDeliveryRequest(BaseModel):
     audience: Literal["investment", "ai_engineering"]
     date: calendar_date
-    channel: Literal["slack", "email"]
+    channel: Literal["slack"]
 
 
 def _require_same_origin_delivery(request: Request) -> None:
